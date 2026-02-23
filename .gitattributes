@@ -1,0 +1,8 @@
+# UTF-8 编码，统一换行符
+* text=auto eol=lf
+*.gd text charset=utf-8
+*.tscn text charset=utf-8
+*.tres text charset=utf-8
+*.cfg text charset=utf-8
+*.md text charset=utf-8
+*.txt text charset=utf-8
