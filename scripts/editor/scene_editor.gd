@@ -8,6 +8,7 @@ const GRID_WIDTH := 80
 const GRID_HEIGHT := 60
 const CELL_SIZE := 20
 
+const ROOM_INFO_JSON_PATH := "datas/room_info.json"
 const TILE_COLORS := {
 	FloorTileType.Type.EMPTY: Color(0.15, 0.15, 0.2),
 	FloorTileType.Type.WALL: Color(0.4, 0.4, 0.45),
@@ -46,14 +47,24 @@ var _tool_buttons: Array[Button] = []
 var _room_panel: PanelContainer
 var _room_name_edit: LineEdit
 var _room_type_option: OptionButton
-var _room_res_option: OptionButton
-var _room_res_total_spin: SpinBox
+var _room_clean_option: OptionButton
+var _room_pre_clean_edit: LineEdit  ## 清理前文本
+var _room_desc_edit: TextEdit  ## 房间描述（支持多行）
+var _room_resources_container: VBoxContainer  ## 资源列表，每行：类型下拉 + 储量数字 + 删除
+var _room_res_add_btn: Button
 var _room_base_image_edit: LineEdit  ## 底图路径，只读展示
 var _room_base_image_btn: Button    ## 选择底图按钮
 var _room_base_image_dialog: FileDialog
 var _btn_delete_room: Button
+var _btn_import_template: Button
+var _import_template_panel: PanelContainer  ## 从 room_info.json 导入模板的弹窗
+var _import_template_list: ItemList  ## 模板房间列表（编号+名称）
+var _import_template_data: Array = []  ## 从 JSON 加载的模板房间列表
 var _main_toolbar: HBoxContainer
 var _room_list_panel: PanelContainer
+var _room_list_toggle_btn: Button
+var _room_list_dropdown_visible: bool = true
+var _room_list_scroll: ScrollContainer
 var _room_list_container: VBoxContainer
 var _skip_room_name_callback: bool = false  ## 程序化设置 LineEdit 时跳过 text_changed，避免覆盖
 var _base_image_cache: Dictionary = {}  ## path -> Texture2D，避免每帧重复加载
@@ -226,22 +237,29 @@ func _setup_ui() -> void:
 	_ui_panel.set_offset(Side.SIDE_LEFT, 10)
 	_ui_panel.set_offset(Side.SIDE_TOP, 10)
 	
-	# 房间列表（右上角，房间层级显示）
+	# 房间列表（右上角，房间层级显示，可折叠下拉+滚轮滚动）
 	_room_list_panel = PanelContainer.new()
 	_room_list_panel.name = "RoomListPanel"
 	_room_list_panel.visible = false
 	var room_list_vbox: VBoxContainer = VBoxContainer.new()
-	var room_list_title: Label = Label.new()
-	room_list_title.text = "房间列表"
-	room_list_vbox.add_child(room_list_title)
+	_room_list_toggle_btn = Button.new()
+	_room_list_toggle_btn.text = "房间列表 ▼"
+	_room_list_toggle_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_room_list_toggle_btn.pressed.connect(_on_room_list_toggle_pressed)
+	room_list_vbox.add_child(_room_list_toggle_btn)
+	_room_list_scroll = ScrollContainer.new()
+	_room_list_scroll.custom_minimum_size = Vector2(140, 120)
 	_room_list_container = VBoxContainer.new()
 	_room_list_container.name = "RoomListItems"
-	room_list_vbox.add_child(_room_list_container)
+	_room_list_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_room_list_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_room_list_scroll.add_child(_room_list_container)
+	room_list_vbox.add_child(_room_list_scroll)
 	_room_list_panel.add_child(room_list_vbox)
 	_room_list_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_room_list_panel.set_offset(Side.SIDE_RIGHT, -10)
 	_room_list_panel.set_offset(Side.SIDE_TOP, 10)
-	_room_list_panel.set_offset(Side.SIDE_LEFT, -160)
+	_room_list_panel.set_offset(Side.SIDE_LEFT, -170)
 	_room_list_panel.set_offset(Side.SIDE_BOTTOM, 10)
 	_ui_layer.add_child(_room_list_panel)
 	
@@ -277,6 +295,9 @@ func _setup_ui() -> void:
 	_open_map_panel.offset_right = 110
 	_open_map_panel.offset_bottom = 180
 	_ui_layer.add_child(_open_map_panel)
+	
+	# 导入模板弹窗
+	_build_import_template_panel()
 	
 	# 框选尺寸提示（跟随鼠标右侧）
 	_box_size_label = Label.new()
@@ -319,33 +340,57 @@ func _build_room_edit_panel() -> PanelContainer:
 	lbl_type.text = "类型："
 	type_row.add_child(lbl_type)
 	_room_type_option = OptionButton.new()
-	for i in range(9):
+	for i in range(10):
 		_room_type_option.add_item(RoomInfo.get_room_type_name(i), i)
 	_room_type_option.item_selected.connect(_on_room_type_selected)
 	type_row.add_child(_room_type_option)
 	vbox.add_child(type_row)
 	
-	var res_row: HBoxContainer = HBoxContainer.new()
+	var clean_row: HBoxContainer = HBoxContainer.new()
+	var lbl_clean: Label = Label.new()
+	lbl_clean.text = "清理状态："
+	clean_row.add_child(lbl_clean)
+	_room_clean_option = OptionButton.new()
+	for i in range(2):
+		_room_clean_option.add_item(RoomInfo.get_clean_status_name(i), i)
+	_room_clean_option.item_selected.connect(_on_room_clean_selected)
+	clean_row.add_child(_room_clean_option)
+	vbox.add_child(clean_row)
+	
+	var pre_clean_row: HBoxContainer = HBoxContainer.new()
+	var lbl_pre_clean: Label = Label.new()
+	lbl_pre_clean.text = "清理前文本："
+	pre_clean_row.add_child(lbl_pre_clean)
+	_room_pre_clean_edit = LineEdit.new()
+	_room_pre_clean_edit.placeholder_text = "默认清理前文本"
+	_room_pre_clean_edit.custom_minimum_size.x = 160
+	_room_pre_clean_edit.text_changed.connect(_on_room_pre_clean_changed)
+	pre_clean_row.add_child(_room_pre_clean_edit)
+	vbox.add_child(pre_clean_row)
+	
+	var desc_row: HBoxContainer = HBoxContainer.new()
+	var lbl_desc: Label = Label.new()
+	lbl_desc.text = "描述："
+	desc_row.add_child(lbl_desc)
+	_room_desc_edit = TextEdit.new()
+	_room_desc_edit.placeholder_text = "房间背景描述"
+	_room_desc_edit.custom_minimum_size = Vector2(160, 60)
+	_room_desc_edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
+	_room_desc_edit.text_changed.connect(_on_room_desc_changed)
+	desc_row.add_child(_room_desc_edit)
+	vbox.add_child(desc_row)
+	
+	var res_label_row: HBoxContainer = HBoxContainer.new()
 	var lbl_res: Label = Label.new()
 	lbl_res.text = "资源："
-	res_row.add_child(lbl_res)
-	_room_res_option = OptionButton.new()
-	for i in range(7):
-		_room_res_option.add_item(RoomInfo.get_resource_type_name(i), i)
-	_room_res_option.item_selected.connect(_on_room_res_selected)
-	res_row.add_child(_room_res_option)
-	vbox.add_child(res_row)
-	
-	var total_row: HBoxContainer = HBoxContainer.new()
-	var lbl_total: Label = Label.new()
-	lbl_total.text = "总量："
-	total_row.add_child(lbl_total)
-	_room_res_total_spin = SpinBox.new()
-	_room_res_total_spin.min_value = 0
-	_room_res_total_spin.max_value = 999999
-	_room_res_total_spin.value_changed.connect(_on_room_res_total_changed)
-	total_row.add_child(_room_res_total_spin)
-	vbox.add_child(total_row)
+	res_label_row.add_child(lbl_res)
+	_room_res_add_btn = Button.new()
+	_room_res_add_btn.text = "添加"
+	_room_res_add_btn.pressed.connect(_on_room_res_add_pressed)
+	res_label_row.add_child(_room_res_add_btn)
+	vbox.add_child(res_label_row)
+	_room_resources_container = VBoxContainer.new()
+	vbox.add_child(_room_resources_container)
 	
 	# 底图
 	var base_row: HBoxContainer = HBoxContainer.new()
@@ -367,6 +412,13 @@ func _build_room_edit_panel() -> PanelContainer:
 	base_row.add_child(btn_clear_base)
 	vbox.add_child(base_row)
 	
+	var import_row: HBoxContainer = HBoxContainer.new()
+	_btn_import_template = Button.new()
+	_btn_import_template.text = "从模板导入"
+	_btn_import_template.pressed.connect(_on_import_template_pressed)
+	import_row.add_child(_btn_import_template)
+	vbox.add_child(import_row)
+	
 	var delete_row: HBoxContainer = HBoxContainer.new()
 	_btn_delete_room = Button.new()
 	_btn_delete_room.text = "删除房间"
@@ -386,6 +438,101 @@ func _build_room_edit_panel() -> PanelContainer:
 	return panel
 
 
+func _build_import_template_panel() -> void:
+	_import_template_panel = PanelContainer.new()
+	_import_template_panel.name = "ImportTemplatePanel"
+	_import_template_panel.visible = false
+	var vbox: VBoxContainer = VBoxContainer.new()
+	var lbl: Label = Label.new()
+	lbl.text = "选择要导入的房间模板（编号 + 名称）"
+	vbox.add_child(lbl)
+	_import_template_list = ItemList.new()
+	_import_template_list.custom_minimum_size = Vector2(220, 280)
+	_import_template_list.item_selected.connect(_on_import_template_item_selected)
+	vbox.add_child(_import_template_list)
+	var btn_row: HBoxContainer = HBoxContainer.new()
+	var btn_import: Button = Button.new()
+	btn_import.text = "导入"
+	btn_import.pressed.connect(_on_import_template_confirm_pressed)
+	btn_row.add_child(btn_import)
+	var btn_cancel: Button = Button.new()
+	btn_cancel.text = "取消"
+	btn_cancel.pressed.connect(func() -> void: _import_template_panel.visible = false)
+	btn_row.add_child(btn_cancel)
+	vbox.add_child(btn_row)
+	_import_template_panel.add_child(vbox)
+	_import_template_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_import_template_panel.offset_left = -120
+	_import_template_panel.offset_top = -160
+	_import_template_panel.offset_right = 120
+	_import_template_panel.offset_bottom = 160
+	_ui_layer.add_child(_import_template_panel)
+
+
+func _on_import_template_pressed() -> void:
+	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
+		push_error("请先选中一个房间")
+		return
+	var project_path: String = ProjectSettings.globalize_path("res://")
+	var json_path: String = project_path.path_join(ROOM_INFO_JSON_PATH)
+	var file: FileAccess = FileAccess.open(json_path, FileAccess.READ)
+	if not file:
+		push_error("无法打开 room_info.json: ", json_path)
+		return
+	var json_str: String = file.get_as_text()
+	file.close()
+	var parsed: Variant = JSON.parse_string(json_str)
+	if not (parsed is Dictionary):
+		push_error("room_info.json 格式错误")
+		return
+	var rooms_arr: Array = (parsed as Dictionary).get("rooms", []) as Array
+	_import_template_data.clear()
+	_import_template_list.clear()
+	for r in rooms_arr:
+		if r is Dictionary:
+			_import_template_data.append(r)
+			var rid: String = str(r.get("id", ""))
+			var rname: String = str(r.get("room_name", ""))
+			_import_template_list.add_item("%s  %s" % [rid, rname])
+	_import_template_panel.visible = true
+	_import_template_list.deselect_all()
+
+
+func _on_import_template_item_selected(_index: int) -> void:
+	pass  # 选择在确认时读取
+
+
+func _on_import_template_confirm_pressed() -> void:
+	var sel: PackedInt32Array = _import_template_list.get_selected_items()
+	if sel.size() == 0:
+		return
+	var template_idx: int = sel[0]
+	if template_idx < 0 or template_idx >= _import_template_data.size():
+		return
+	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
+		return
+	var t: Dictionary = _import_template_data[template_idx] as Dictionary
+	var room: RoomInfo = _rooms[_selected_room_index]
+	room.json_room_id = str(t.get("id", ""))
+	room.room_name = str(t.get("room_name", ""))
+	room.room_type = int(t.get("room_type_id", RoomInfo.RoomType.EMPTY_ROOM))
+	room.clean_status = int(t.get("clean_status", RoomInfo.CleanStatus.UNCLEANED))
+	room.pre_clean_text = str(t.get("pre_clean_text", "默认清理前文本"))
+	room.base_image_path = str(t.get("base_image_path", ""))
+	room.desc = str(t.get("desc", ""))
+	room.resources.clear()
+	for res in (t.get("resources", []) as Array):
+		if res is Dictionary:
+			room.resources.append({
+				"resource_type": int(res.get("resource_type", RoomInfo.ResourceType.NONE)),
+				"resource_amount": int(res.get("resource_amount", 0))
+			})
+	_import_template_panel.visible = false
+	_refresh_room_panel()
+	queue_redraw()
+	print("已导入模板: ", room.room_name)
+
+
 func _on_room_name_changed(_new_text: String) -> void:
 	if _skip_room_name_callback:
 		return
@@ -399,14 +546,96 @@ func _on_room_type_selected(index: int) -> void:
 		_rooms[_selected_room_index].room_type = index
 
 
-func _on_room_res_selected(index: int) -> void:
+func _on_room_clean_selected(index: int) -> void:
 	if _selected_room_index >= 0 and _selected_room_index < _rooms.size():
-		_rooms[_selected_room_index].resource_type = index
+		_rooms[_selected_room_index].clean_status = index
 
 
-func _on_room_res_total_changed(_value: float) -> void:
+func _on_room_pre_clean_changed(_new_text: String) -> void:
 	if _selected_room_index >= 0 and _selected_room_index < _rooms.size():
-		_rooms[_selected_room_index].resource_total = int(_room_res_total_spin.value)
+		_rooms[_selected_room_index].pre_clean_text = _room_pre_clean_edit.text
+
+
+func _on_room_desc_changed() -> void:
+	if _selected_room_index >= 0 and _selected_room_index < _rooms.size():
+		_rooms[_selected_room_index].desc = _room_desc_edit.text
+
+
+func _on_room_res_add_pressed() -> void:
+	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
+		return
+	var room: RoomInfo = _rooms[_selected_room_index]
+	room.resources.append({"resource_type": RoomInfo.ResourceType.NONE, "resource_amount": 0})
+	_refresh_room_resources_ui()
+
+
+func _on_room_res_type_changed(res_idx: int, type_idx: int) -> void:
+	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
+		return
+	var room: RoomInfo = _rooms[_selected_room_index]
+	if res_idx >= 0 and res_idx < room.resources.size():
+		if room.resources[res_idx] is Dictionary:
+			room.resources[res_idx]["resource_type"] = type_idx
+
+
+func _on_room_res_amount_changed(res_idx: int, value: float) -> void:
+	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
+		return
+	var room: RoomInfo = _rooms[_selected_room_index]
+	if res_idx >= 0 and res_idx < room.resources.size():
+		if room.resources[res_idx] is Dictionary:
+			room.resources[res_idx]["resource_amount"] = int(value)
+
+
+func _on_room_res_remove_pressed(res_idx: int) -> void:
+	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
+		return
+	var room: RoomInfo = _rooms[_selected_room_index]
+	if res_idx >= 0 and res_idx < room.resources.size():
+		room.resources.remove_at(res_idx)
+		_refresh_room_resources_ui()
+
+
+func _refresh_room_resources_ui() -> void:
+	for c in _room_resources_container.get_children():
+		c.queue_free()
+	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
+		return
+	var room: RoomInfo = _rooms[_selected_room_index]
+	for i in room.resources.size():
+		var r: Variant = room.resources[i]
+		if not (r is Dictionary):
+			continue
+		var row: HBoxContainer = HBoxContainer.new()
+		var opt: OptionButton = OptionButton.new()
+		for j in range(7):
+			opt.add_item(RoomInfo.get_resource_type_name(j), j)
+		opt.selected = int(r.get("resource_type", RoomInfo.ResourceType.NONE))
+		opt.item_selected.connect(_make_res_type_cb(i))
+		row.add_child(opt)
+		var spin: SpinBox = SpinBox.new()
+		spin.min_value = 0
+		spin.max_value = 999999
+		spin.value = int(r.get("resource_amount", 0))
+		spin.value_changed.connect(_make_res_amount_cb(i))
+		row.add_child(spin)
+		var btn_rm: Button = Button.new()
+		btn_rm.text = "删除"
+		btn_rm.pressed.connect(_make_res_remove_cb(i))
+		row.add_child(btn_rm)
+		_room_resources_container.add_child(row)
+
+
+func _make_res_type_cb(idx: int) -> Callable:
+	return func(sel: int) -> void: _on_room_res_type_changed(idx, sel)
+
+
+func _make_res_amount_cb(idx: int) -> Callable:
+	return func(v: float) -> void: _on_room_res_amount_changed(idx, v)
+
+
+func _make_res_remove_cb(idx: int) -> Callable:
+	return func() -> void: _on_room_res_remove_pressed(idx)
 
 
 func _on_delete_room_pressed() -> void:
@@ -451,25 +680,36 @@ func _refresh_room_panel() -> void:
 		_skip_room_name_callback = false
 		_room_name_edit.editable = false
 		_room_type_option.disabled = true
-		_room_res_option.disabled = true
-		_room_res_total_spin.editable = false
+		_room_clean_option.disabled = true
+		_room_pre_clean_edit.editable = false
+		_room_pre_clean_edit.text = ""
+		_room_desc_edit.editable = false
+		_room_desc_edit.text = ""
+		_room_res_add_btn.disabled = true
+		_btn_import_template.disabled = true
 		_room_base_image_btn.disabled = true
 		_room_base_image_edit.text = ""
 		_btn_delete_room.disabled = true
+		_refresh_room_resources_ui()
 		return
 	var room: RoomInfo = _rooms[_selected_room_index]
 	_room_name_edit.editable = true
 	_room_type_option.disabled = false
-	_room_res_option.disabled = false
-	_room_res_total_spin.editable = true
+	_room_clean_option.disabled = false
+	_room_pre_clean_edit.editable = true
+	_room_desc_edit.editable = true
+	_room_res_add_btn.disabled = false
+	_btn_import_template.disabled = false
 	_room_base_image_btn.disabled = false
 	_btn_delete_room.disabled = false
 	_skip_room_name_callback = true
 	_room_name_edit.text = room.room_name
 	_skip_room_name_callback = false
 	_room_type_option.selected = room.room_type
-	_room_res_option.selected = room.resource_type
-	_room_res_total_spin.value = room.resource_total
+	_room_clean_option.selected = room.clean_status
+	_room_pre_clean_edit.text = room.pre_clean_text
+	_room_desc_edit.text = room.desc
+	_refresh_room_resources_ui()
 	_room_base_image_edit.text = room.base_image_path.get_file() if room.base_image_path else ""
 
 
@@ -579,6 +819,12 @@ func _update_all_buttons() -> void:
 		_tool_buttons[i].button_pressed = (_paint_tool == tools[i])
 
 
+func _on_room_list_toggle_pressed() -> void:
+	_room_list_dropdown_visible = not _room_list_dropdown_visible
+	_room_list_scroll.visible = _room_list_dropdown_visible
+	_room_list_toggle_btn.text = "房间列表 ▼" if _room_list_dropdown_visible else "房间列表 ▶"
+
+
 func _refresh_room_list() -> void:
 	for child in _room_list_container.get_children():
 		child.queue_free()
@@ -612,6 +858,8 @@ func _update_room_panel_visibility() -> void:
 	_room_panel.visible = (_edit_level == FloorTileType.EditLevel.ROOM)
 	_room_list_panel.visible = (_edit_level == FloorTileType.EditLevel.ROOM)
 	if _edit_level == FloorTileType.EditLevel.ROOM:
+		_room_list_scroll.visible = _room_list_dropdown_visible
+		_room_list_toggle_btn.text = "房间列表 ▼" if _room_list_dropdown_visible else "房间列表 ▶"
 		_refresh_room_list()
 	# 一级编辑显示绘制工具，二级编辑隐藏
 	var show_floor_tools: bool = (_edit_level == FloorTileType.EditLevel.FLOOR)
@@ -889,8 +1137,9 @@ func _try_create_room(start: Vector2i, end: Vector2i) -> void:
 	room.room_name = "未命名房间"
 	room.rect = Rect2i(x_min, y_min, w, h)
 	room.room_type = RoomInfo.RoomType.EMPTY_ROOM
-	room.resource_type = RoomInfo.ResourceType.NONE
-	room.resource_total = 0
+	room.clean_status = RoomInfo.CleanStatus.UNCLEANED
+	room.pre_clean_text = "默认清理前文本"
+	room.resources = []
 	_rooms.append(room)
 	for gx in range(x_min, x_max + 1):
 		for gy in range(y_min, y_max + 1):
@@ -1015,6 +1264,22 @@ func _draw() -> void:
 		var pw: float = r.size.x * CELL_SIZE
 		var ph: float = r.size.y * CELL_SIZE
 		draw_rect(Rect2(px - 2, py - 2, pw + 4, ph + 4), border_color, false)
+	
+	# 房间名称（底板/房间编辑层级下在左上角显示，半透明黑底）
+	if _edit_level == FloorTileType.EditLevel.FLOOR or _edit_level == FloorTileType.EditLevel.ROOM:
+		var _room_label_font: Font = ThemeDB.fallback_font
+		var _room_label_font_size: int = 12
+		var _room_label_padding: int = 2
+		for room in _rooms:
+			var name_text: String = room.room_name if room.room_name else "未命名"
+			if name_text.is_empty():
+				name_text = "未命名"
+			var txt_size: Vector2 = _room_label_font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, _room_label_font_size)
+			var rx: float = room.rect.position.x * CELL_SIZE
+			var ry: float = room.rect.position.y * CELL_SIZE
+			var bg_rect: Rect2 = Rect2(rx + _room_label_padding, ry + _room_label_padding, txt_size.x + _room_label_padding * 2, txt_size.y + _room_label_padding * 2)
+			draw_rect(bg_rect, Color(0, 0, 0, 0.6))
+			draw_string(_room_label_font, Vector2(rx + _room_label_padding * 2, ry + _room_label_padding + _room_label_font.get_ascent(_room_label_font_size)), name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, _room_label_font_size)
 	
 	# 框选预览
 	if (_select_mode == FloorTileType.SelectMode.BOX or _select_mode == FloorTileType.SelectMode.FLOOR_SELECT) and _is_drawing:
@@ -1191,8 +1456,65 @@ func _save_scene() -> void:
 		file.store_string(json)
 		file.close()
 		print("地图已保存: ", path, " (", map_name, ")")
+		_sync_rooms_to_json()
 	else:
 		push_error("保存失败: ", path)
+
+
+func _sync_rooms_to_json() -> void:
+	var project_path: String = ProjectSettings.globalize_path("res://")
+	var json_path: String = project_path.path_join(ROOM_INFO_JSON_PATH)
+	var json_data: Dictionary
+	var json_rooms: Array
+	if FileAccess.file_exists(json_path):
+		var f: FileAccess = FileAccess.open(json_path, FileAccess.READ)
+		if not f:
+			push_error("无法读取 room_info.json")
+			return
+		var parsed: Variant = JSON.parse_string(f.get_as_text())
+		f.close()
+		if parsed is Dictionary:
+			json_data = parsed as Dictionary
+			json_rooms = (json_data.get("rooms", []) as Array).duplicate()
+		else:
+			json_data = {"source": "场景编辑器同步", "rooms": []}
+			json_rooms = []
+	else:
+		json_data = {"source": "场景编辑器同步", "rooms": []}
+		json_rooms = []
+	var max_num: int = 0
+	for r in json_rooms:
+		if r is Dictionary:
+			var rid: String = str(r.get("id", ""))
+			if rid.begins_with("ROOM_"):
+				var num: int = int(rid.substr(5))
+				if num > max_num:
+					max_num = num
+	var next_num: int = max_num + 1
+	for room in _rooms:
+		if room.json_room_id.is_empty():
+			room.json_room_id = "ROOM_%03d" % next_num
+			next_num += 1
+			json_rooms.append(room.to_json_room_dict(room.json_room_id))
+		else:
+			var found: int = -1
+			for i in json_rooms.size():
+				if json_rooms[i] is Dictionary and str((json_rooms[i] as Dictionary).get("id", "")) == room.json_room_id:
+					found = i
+					break
+			var entry: Dictionary = room.to_json_room_dict(room.json_room_id)
+			if found >= 0:
+				json_rooms[found] = entry
+			else:
+				json_rooms.append(entry)
+	json_data["rooms"] = json_rooms
+	var out: FileAccess = FileAccess.open(json_path, FileAccess.WRITE)
+	if out:
+		out.store_string(JSON.stringify(json_data))
+		out.close()
+		print("房间信息已同步至 room_info.json")
+	else:
+		push_error("无法写入 room_info.json: ", json_path)
 
 
 func _on_open_map_pressed() -> void:

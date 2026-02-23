@@ -88,7 +88,9 @@
 - [x] 房间点击选择：单选模式下点击房间进行选择
 - [x] 删除房间：选中房间后点击「删除房间」按钮可删除该房间
 - [x] 快捷房间尺寸：5×3、10×3、5×7 按钮，按下鼠标后固定尺寸框随鼠标移动，松开创建（遵守有效性校验）
-- [x] 房间信息编辑：名称、类型、资源类型、资源总量
-- [x] RoomInfo 结构体：id、room_name、rect(size)、room_type、resource_type、resource_total、base_image_path
+- [x] 房间信息编辑：名称、类型、清理状态、资源列表（可添加/删除条目，每条目含资源类型、资源储量）
+- [x] RoomInfo 结构体：id、room_name、rect(size)、room_type、clean_status、resources[]、base_image_path
 - [x] 房间数据保存/加载
+- [x] 从 room_info.json 导入模板：选中房间后可选择模板填充房间信息
+- [x] 地图与 JSON 双向同步：保存地图时，房间信息同步至 room_info.json；从模板导入的房间在编辑后保存也会更新 JSON
 - [x] 房间底图：可为房间配置底图，从工程内选择图像（res://），仅显示一张、左上角对齐、不拉伸，超出房间范围裁剪；项目使用最近邻过滤以保持像素图清晰

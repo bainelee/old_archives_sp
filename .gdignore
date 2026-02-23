@@ -1,0 +1,2 @@
+# datas 文件夹：存放数据文件（JSON 等），不作为 Godot 资源导入
+datas/
