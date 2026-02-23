@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dokg3atwis8wy"]
+
+[ext_resource type="Script" uid="uid://bq72s8vvkf0ue" path="res://scripts/editor/scene_editor.gd" id="1_scene_editor"]
+
+[node name="SceneEditor" type="Node2D" unique_id=1453009719]
+script = ExtResource("1_scene_editor")
