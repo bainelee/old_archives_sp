@@ -33,6 +33,7 @@ var rect: Rect2i = Rect2i(0, 0, 0, 0)  ## 房间在网格中的范围 (x, y, w, 
 var room_type: int = RoomType.EMPTY_ROOM
 var resource_type: int = ResourceType.NONE
 var resource_total: int = 0
+var base_image_path: String = ""  ## 底图路径，相对于 res://，例如 res://assets/tiles/floor/xxx.png
 
 
 func get_size() -> Vector2i:
@@ -76,6 +77,7 @@ func to_dict() -> Dictionary:
 		"room_type": room_type,
 		"resource_type": resource_type,
 		"resource_total": resource_total,
+		"base_image_path": base_image_path,
 	}
 
 
@@ -92,4 +94,5 @@ static func from_dict(d: Dictionary) -> RoomInfo:
 	info.room_type = int(d.get("room_type", RoomType.EMPTY_ROOM))
 	info.resource_type = int(d.get("resource_type", ResourceType.NONE))
 	info.resource_total = int(d.get("resource_total", 0))
+	info.base_image_path = str(d.get("base_image_path", ""))
 	return info
