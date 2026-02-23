@@ -1,0 +1,41 @@
+---
+description: Git 提交时避免中文乱码
+alwaysApply: true
+---
+
+# Git 提交中文编码
+
+在 Windows + PowerShell 下，`git commit -m "中文"` 会因编码问题产生乱码。
+
+## 正确做法
+
+当提交信息包含中文或其它非 ASCII 字符时，必须使用 **文件方式** 提交：
+
+1. 将提交信息写入 UTF-8 编码的临时文件（如 `.git-commit-msg`）
+2. 使用 `git commit -F .git-commit-msg` 代替 `git commit -m "..."`
+
+示例：
+```
+# 错误（会乱码）
+git commit -m "feat: 场景编辑器"
+
+# 正确
+echo "feat: 场景编辑器" | Out-File -Encoding utf8 .git-commit-msg
+git commit -F .git-commit-msg
+```
+
+或使用 PowerShell：
+```powershell
+Set-Content -Path .git-commit-msg -Value "feat: 场景编辑器" -Encoding UTF8
+git commit -F .git-commit-msg
+```
+
+## 用户手动提交可选设置
+
+在 PowerShell 配置（`$PROFILE`）中加入：
+```powershell
+$OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+```
+
+或启用 Windows 系统 UTF-8：**设置 → 时间和语言 → 语言和区域 → 管理语言设置 → 更改系统区域设置 → 勾选「Beta: 使用 Unicode UTF-8 提供全球语言支持」**（需重启）
