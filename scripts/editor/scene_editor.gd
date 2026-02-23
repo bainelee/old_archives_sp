@@ -72,6 +72,7 @@ var _current_map_slot: int = -1  ## 当前地图槽位 0-4，-1 表示未保存
 var _map_name_edit: LineEdit
 var _open_map_panel: PanelContainer
 var _open_map_slot_buttons: Array[Button] = []
+var _save_confirm_panel: PanelContainer  ## 保存确认弹窗：保存当前/保存为新/取消
 
 const SAVE_KEY_GRID := "grid_width"
 const SAVE_KEY_GRID_H := "grid_height"
@@ -164,6 +165,11 @@ func _setup_ui() -> void:
 	_select_buttons.append(btn_box)
 	_select_buttons.append(btn_floor_select)
 	_main_toolbar.add_child(btn_single)
+	_btn_delete_room = Button.new()
+	_btn_delete_room.text = "删除房间"
+	_btn_delete_room.pressed.connect(_on_delete_room_pressed)
+	_btn_delete_room.visible = false
+	_main_toolbar.add_child(_btn_delete_room)
 	_main_toolbar.add_child(btn_box)
 	_main_toolbar.add_child(btn_floor_select)
 	_quick_room_buttons.clear()
@@ -214,11 +220,12 @@ func _setup_ui() -> void:
 	name_row.add_child(_map_name_edit)
 	vbox.add_child(name_row)
 	
-	# 网格对齐开关
+	# 网格对齐开关（已隐藏，自适应标尺已足够）
 	_grid_snap_check = CheckBox.new()
 	_grid_snap_check.name = "GridSnapCheck"
 	_grid_snap_check.text = "网格对齐"
 	_grid_snap_check.toggled.connect(_on_grid_snap_toggled)
+	_grid_snap_check.visible = false
 	vbox.add_child(_grid_snap_check)
 	
 	# 保存、打开
@@ -298,6 +305,8 @@ func _setup_ui() -> void:
 	
 	# 导入模板弹窗
 	_build_import_template_panel()
+	# 保存确认弹窗
+	_build_save_confirm_panel()
 	
 	# 框选尺寸提示（跟随鼠标右侧）
 	_box_size_label = Label.new()
@@ -323,6 +332,13 @@ func _build_room_edit_panel() -> PanelContainer:
 	var lbl: Label = Label.new()
 	lbl.text = "房间信息（选中房间后可编辑）"
 	vbox.add_child(lbl)
+	
+	var import_row: HBoxContainer = HBoxContainer.new()
+	_btn_import_template = Button.new()
+	_btn_import_template.text = "从模板导入"
+	_btn_import_template.pressed.connect(_on_import_template_pressed)
+	import_row.add_child(_btn_import_template)
+	vbox.add_child(import_row)
 	
 	var name_row: HBoxContainer = HBoxContainer.new()
 	var lbl_name: Label = Label.new()
@@ -374,7 +390,7 @@ func _build_room_edit_panel() -> PanelContainer:
 	desc_row.add_child(lbl_desc)
 	_room_desc_edit = TextEdit.new()
 	_room_desc_edit.placeholder_text = "房间背景描述"
-	_room_desc_edit.custom_minimum_size = Vector2(160, 60)
+	_room_desc_edit.custom_minimum_size = Vector2(200, 100)
 	_room_desc_edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 	_room_desc_edit.text_changed.connect(_on_room_desc_changed)
 	desc_row.add_child(_room_desc_edit)
@@ -411,20 +427,6 @@ func _build_room_edit_panel() -> PanelContainer:
 	btn_clear_base.pressed.connect(_on_base_image_clear_pressed)
 	base_row.add_child(btn_clear_base)
 	vbox.add_child(base_row)
-	
-	var import_row: HBoxContainer = HBoxContainer.new()
-	_btn_import_template = Button.new()
-	_btn_import_template.text = "从模板导入"
-	_btn_import_template.pressed.connect(_on_import_template_pressed)
-	import_row.add_child(_btn_import_template)
-	vbox.add_child(import_row)
-	
-	var delete_row: HBoxContainer = HBoxContainer.new()
-	_btn_delete_room = Button.new()
-	_btn_delete_room.text = "删除房间"
-	_btn_delete_room.pressed.connect(_on_delete_room_pressed)
-	delete_row.add_child(_btn_delete_room)
-	vbox.add_child(delete_row)
 	
 	# 底图文件选择对话框
 	_room_base_image_dialog = FileDialog.new()
@@ -467,6 +469,35 @@ func _build_import_template_panel() -> void:
 	_import_template_panel.offset_right = 120
 	_import_template_panel.offset_bottom = 160
 	_ui_layer.add_child(_import_template_panel)
+
+
+func _build_save_confirm_panel() -> void:
+	_save_confirm_panel = PanelContainer.new()
+	_save_confirm_panel.name = "SaveConfirmPanel"
+	_save_confirm_panel.visible = false
+	var vbox: VBoxContainer = VBoxContainer.new()
+	var lbl: Label = Label.new()
+	lbl.text = "保存地图"
+	vbox.add_child(lbl)
+	var btn_save_current: Button = Button.new()
+	btn_save_current.text = "保存当前地图"
+	btn_save_current.pressed.connect(_on_save_confirm_save_current)
+	vbox.add_child(btn_save_current)
+	var btn_save_new: Button = Button.new()
+	btn_save_new.text = "保存为新地图"
+	btn_save_new.pressed.connect(_on_save_confirm_save_new)
+	vbox.add_child(btn_save_new)
+	var btn_cancel: Button = Button.new()
+	btn_cancel.text = "取消"
+	btn_cancel.pressed.connect(func() -> void: _save_confirm_panel.visible = false)
+	vbox.add_child(btn_cancel)
+	_save_confirm_panel.add_child(vbox)
+	_save_confirm_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_save_confirm_panel.offset_left = -80
+	_save_confirm_panel.offset_top = -90
+	_save_confirm_panel.offset_right = 80
+	_save_confirm_panel.offset_bottom = 90
+	_ui_layer.add_child(_save_confirm_panel)
 
 
 func _on_import_template_pressed() -> void:
@@ -689,7 +720,7 @@ func _refresh_room_panel() -> void:
 		_btn_import_template.disabled = true
 		_room_base_image_btn.disabled = true
 		_room_base_image_edit.text = ""
-		_btn_delete_room.disabled = true
+		_btn_delete_room.visible = false
 		_refresh_room_resources_ui()
 		return
 	var room: RoomInfo = _rooms[_selected_room_index]
@@ -701,7 +732,7 @@ func _refresh_room_panel() -> void:
 	_room_res_add_btn.disabled = false
 	_btn_import_template.disabled = false
 	_room_base_image_btn.disabled = false
-	_btn_delete_room.disabled = false
+	_btn_delete_room.visible = true
 	_skip_room_name_callback = true
 	_room_name_edit.text = room.room_name
 	_skip_room_name_callback = false
@@ -857,6 +888,7 @@ func _focus_camera_on_room(room_index: int) -> void:
 func _update_room_panel_visibility() -> void:
 	_room_panel.visible = (_edit_level == FloorTileType.EditLevel.ROOM)
 	_room_list_panel.visible = (_edit_level == FloorTileType.EditLevel.ROOM)
+	_btn_delete_room.visible = (_edit_level == FloorTileType.EditLevel.ROOM and _selected_room_index >= 0)
 	if _edit_level == FloorTileType.EditLevel.ROOM:
 		_room_list_scroll.visible = _room_list_dropdown_visible
 		_room_list_toggle_btn.text = "房间列表 ▼" if _room_list_dropdown_visible else "房间列表 ▶"
@@ -1421,13 +1453,32 @@ func _refresh_open_map_panel() -> void:
 
 
 func _on_save_pressed() -> void:
-	_save_scene()
+	_save_confirm_panel.visible = true
 
 
-func _save_scene() -> void:
+func _on_save_confirm_save_current() -> void:
+	_save_confirm_panel.visible = false
 	var slot: int = _current_map_slot
 	if slot < 0:
 		slot = 0
+	_do_save_to_slot(slot)
+
+
+func _on_save_confirm_save_new() -> void:
+	var empty_slot: int = -1
+	for i in MAP_SLOTS:
+		if not FileAccess.file_exists(_get_slot_path(i)):
+			empty_slot = i
+			break
+	if empty_slot < 0:
+		_save_confirm_panel.visible = false
+		OS.alert("没有空槽位，无法保存为新地图。请先删除或覆盖已有地图。", "保存失败")
+		return
+	_save_confirm_panel.visible = false
+	_do_save_to_slot(empty_slot)
+
+
+func _do_save_to_slot(slot: int) -> void:
 	_current_map_slot = slot
 	var map_name: String = _map_name_edit.text.strip_edges()
 	if map_name.is_empty():
@@ -1510,7 +1561,7 @@ func _sync_rooms_to_json() -> void:
 	json_data["rooms"] = json_rooms
 	var out: FileAccess = FileAccess.open(json_path, FileAccess.WRITE)
 	if out:
-		out.store_string(JSON.stringify(json_data))
+		out.store_string(JSON.stringify(json_data, "  ", false))
 		out.close()
 		print("房间信息已同步至 room_info.json")
 	else:

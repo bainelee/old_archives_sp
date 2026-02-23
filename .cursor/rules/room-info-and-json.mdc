@@ -1,0 +1,40 @@
+---
+description: RoomInfo 结构、room_info.json 格式与同步逻辑
+globs:
+  - "scripts/editor/*.gd"
+  - "datas/room_info.json"
+alwaysApply: false
+---
+
+# 房间信息与 room_info.json 规范
+
+修改房间相关逻辑或 `room_info.json` 时须遵守。
+
+## RoomInfo（`room_info.gd`）
+
+- **地图用**：`to_dict()` → `rect_x/y/w/h`、`id`、`json_room_id`、`desc`
+- **JSON 用**：`to_json_room_dict(id)` → `size`、`room_type` 名称、`room_type_id`
+- **json_room_id**：空表示新建；首次保存分配 `ROOM_%03d`；导入模板时直接写入
+
+## room_info.json
+
+- **路径**：`datas/room_info.json`，UTF-8
+- **结构**：`{ "source": "...", "rooms": [ {...}, ... ] }`
+- **房间 id**：`ROOM_001` 格式，三位数字
+- **输出**：`JSON.stringify(data, "  ", false)` 保持 pretty-print
+
+## 同步逻辑（`_sync_rooms_to_json`）
+
+- 仅在地图保存成功时调用
+- `json_room_id` 空 → 分配新 id 并追加
+- `json_room_id` 非空 → 按 id 查找并覆盖，不存在则追加
+
+## 约束
+
+- room_info.json 为共享模板库，多槽位会覆盖同一 id
+- 地图 → JSON 自动同步；JSON → 地图仅通过「从模板导入」
+- 底图仅支持 `res://`，用 `FileDialog.ACCESS_RESOURCES`
+
+## 参考
+
+- 详细说明：`docs/design/02-room-info-and-json-sync.md`

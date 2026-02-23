@@ -1,0 +1,35 @@
+---
+description: 场景编辑器结构、网格系统、层级与保存流程规范
+globs: scripts/editor/scene_editor.gd
+alwaysApply: false
+---
+
+# 场景编辑器规范
+
+开发/修改 `scene_editor.gd` 时须遵守以下约定。
+
+## 网格与层级
+
+- **网格**：80×60，每格 `CELL_SIZE` (20px)
+- **底板类型**：EMPTY / WALL / ROOM_FLOOR
+- **编辑层级**：`FloorTileType.EditLevel.FLOOR`（底板）与 `FloorTileType.EditLevel.ROOM`（房间）
+- **房间**：仅在房间底板 (`ROOM_FLOOR`) 上创建；快捷尺寸 5×3、10×3、5×7
+
+## 地图保存
+
+- **路径**：`user://maps/slot_N.json`，N=0..4
+- **当前槽位**：`_current_map_slot`，-1 表示未保存
+- **保存流程**：点击「保存地图」→ 弹窗选择「保存当前地图」「保存为新地图」「取消」
+  - 保存当前：写入 `_current_map_slot`（-1 时用 0）
+  - 保存为新：写入第一个空槽位，无空槽位时 `OS.alert` 提示
+
+## 房间编辑 UI
+
+- 面板：`_build_room_edit_panel()`，含名称/类型/清理状态/清理前文本/描述/资源/底图/从模板导入
+- 「删除房间」在主工具栏中「选择房间」右侧，仅选中房间时显示
+- 「从模板导入」位于「房间信息」标签正下方
+
+## 参考
+
+- 设计文档：`docs/design/01-scene-editor.md`
+- 房间与 JSON：`docs/design/02-room-info-and-json-sync.md`
