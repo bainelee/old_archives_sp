@@ -24,11 +24,20 @@ echo "feat: 场景编辑器" | Out-File -Encoding utf8 .git-commit-msg
 git commit -F .git-commit-msg
 ```
 
-或使用 PowerShell：
+或使用 PowerShell（注意：`Set-Content -Encoding UTF8` 可能写入 BOM，某些环境下仍会乱码）：
 ```powershell
 Set-Content -Path .git-commit-msg -Value "feat: 场景编辑器" -Encoding UTF8
 git commit -F .git-commit-msg
 ```
+
+**更可靠：无 BOM 的 UTF-8**（Agent 或脚本自动提交时推荐）：
+```powershell
+$utf8 = [System.Text.UTF8Encoding]::new($false)
+[System.IO.File]::WriteAllText(".git-commit-msg", "feat: 场景编辑器", $utf8)
+git commit -F .git-commit-msg
+```
+
+或用编辑器直接创建 `.git-commit-msg` 文件（UTF-8 无 BOM），再执行 `git commit -F .git-commit-msg`。
 
 ## 用户手动提交可选设置
 
