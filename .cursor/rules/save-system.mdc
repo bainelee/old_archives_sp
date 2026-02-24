@@ -1,0 +1,21 @@
+---
+description: 存档系统规范，清空存档时仅操作游戏存档
+globs: ["scripts/core/save_manager.gd", "scripts/ui/start_menu.gd", "docs/design/07-save-system.md"]
+alwaysApply: false
+---
+
+# 存档系统规范
+
+## 职责分离（不可违反）
+
+- **游戏存档**：`user://saves/`，玩家进度
+- **地图编辑器**：`user://maps/`，项目级地图资源
+
+## 清空存档规则（强制）
+
+**无论用户是否明确说明，只要提到「清空存档」「删除存档」「清除存档」等：**
+
+- **仅**清空 `user://saves/` 下的游戏存档（slot_0~4.json、autosave.json）
+- **绝对禁止**操作 `user://maps/` 下的地图编辑器存档
+
+实现方式：调用 `SaveManager.clear_all_game_saves()` 或删除 `user://saves/` 目录下文件。

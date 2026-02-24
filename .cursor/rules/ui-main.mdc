@@ -38,9 +38,9 @@ alwaysApply: false
 ## UIMain 数据
 
 - 通过属性或 `set_resources(factors, currency, personnel)` 注入
-- 因子：cognition, computation, will, permission
+- 因子：cognition, computation, willpower, permission
 - 货币：info, truth
-- 人员：researcher, labor, eroded（被侵蚀无法工作的研究员）, investigator
+- 人员：researcher, eroded（被侵蚀无法工作的研究员）, investigator
 
 ## 参考
 

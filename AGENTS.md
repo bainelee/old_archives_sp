@@ -3,9 +3,11 @@
 Godot 4.6 项目：场景编辑器 + 2D 基地建设游戏。
 
 - **核心目录**：`scripts/editor/`、`scripts/game/`、`scripts/ui/`、`datas/`、`docs/design/`
-- **核心文件**：`map_editor.gd`、`room_info.gd`、`room_info.json`、`ui_main.gd`、`time_panel.gd`、`shelter_erosion_panel.gd`
+- **核心文件**：`map_editor.gd`、`room_info.gd`、`room_info.json`、`save_manager.gd`、`ui_main.gd`、`time_panel.gd`、`shelter_erosion_panel.gd`
+- **存档规则**：清空存档 = 仅 `user://saves/`，绝不动 `user://maps/`（见 `.cursor/rules/save-system.mdc`）
 - **规范**：`.cursor/rules/`（按 globs 加载，编辑相关文件时自动匹配）
   - Godot 通用：`godot-gdscript.mdc`（.gd）、`godot-scenes-performance.mdc`（.tscn/.gd）
+- **术语对照**：[docs/settings/00-project-keywords.md](docs/settings/00-project-keywords.md)
 - **详情**：[docs/design/00-project-overview.md](docs/design/00-project-overview.md)
 
 # Memorix — Automatic Memory Rules

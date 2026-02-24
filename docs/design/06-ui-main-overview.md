@@ -20,7 +20,7 @@
 |------|------|------|
 | 左侧 | 因子 + 货币 | 认知/计算/意志/权限；信息/真相 |
 | 中间 | TimePanel | 时间控制与显示，通过 Spacer 居中 |
-| 右侧 | 人员 + ShelterErosionPanel | 研究员/劳动力/调查员；庇护与侵蚀面板 |
+| 右侧 | 人员 + ShelterErosionPanel | 研究员（劳动力暂未使用）、调查员；庇护与侵蚀面板 |
 
 ### 1.3 视觉规范
 
@@ -84,9 +84,9 @@
 
 通过属性或 `set_resources()` 注入：
 
-- **因子**：cognition_amount, computation_amount, will_amount, permission_amount
+- **因子**：cognition_amount, computation_amount, will_amount, permission_amount（对应 factors.cognition/computation/willpower/permission）
 - **货币**：info_amount, truth_amount
-- **人员**：researcher_count, labor_count, investigator_count
+- **人员**：researcher_count, eroded_count, investigator_count
 
 ### 3.2 Autoload 依赖
 

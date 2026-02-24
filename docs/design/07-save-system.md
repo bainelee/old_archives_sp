@@ -22,7 +22,7 @@
 |--------|------|------|
 | GameTime | `_total_game_hours`, `is_flowing`, `speed_multiplier` | 游戏时间与倍速 |
 | ErosionCore | `raw_mystery_erosion`, `shelter_bonus`，未来 3 个月侵蚀预测 | 侵蚀等级（部分由时间推导）；预测由 `get_forecast_segments` 生成 |
-| UIMain / 游戏逻辑 | 四种因子、信息/真相、研究员/劳动力/被侵蚀/调查员 | 当前为 UI mock，无数据源 |
+| UIMain / 游戏逻辑 | 四种因子、信息/真相、研究员/劳动力（暂未使用）/被侵蚀/调查员 | 当前为 UI mock，无数据源 |
 
 ### 1.3 设计目标
 
@@ -63,15 +63,17 @@
                              │
 ┌────────────────────────────▼────────────────────────────────────────┐
 │  存储层（FileAccess + JSON）                                           │
-│  - user://saves/slot_N.json（建议）或 user://maps/slot_N.json（兼容）  │
+│  - user://saves/slot_N.json（游戏存档，与 maps 完全分离）                │
+│  - user://maps/slot_0.json（地图编辑器起始地图，新游戏读取）              │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 2.2 与场景编辑器的关系
 
-- **场景编辑器**：只写入「地图数据」；保存时可选择是否写入 `user://maps/` 或由游戏层统一管理。
-- **游戏存档**：包含完整游戏状态，其中 `map` 部分与场景编辑器的地图格式兼容。
-- **兼容策略**：读取时若发现仅有 `tiles`/`rooms` 而无 `time` 等字段，视为旧版地图，采用默认值补齐后加载。
+- **场景编辑器**：保存地图到 `user://maps/`，为项目级地图资源，与游戏存档无直接关系。
+- **游戏存档**：仅读写 `user://saves/`，存储完整游戏状态；`map` 部分与场景编辑器格式兼容。
+- **新游戏初始化**：使用地图编辑器编号第一张（`user://maps/slot_0.json`）作为起始场景，叠加 game_base 默认值后写入选定存档槽位。
+- **明确分离**：游戏存档与地图编辑器存档完全独立；地图是引擎/项目信息，存档是玩家进度。
 
 ---
 
@@ -83,7 +85,7 @@
 {
   "version": 1,
   "map_name": "档案馆正厅",
-  "saved_at_game_hour": 72.5,
+  "saved_at_game_hour": 72,
   "map": {
     "grid_width": 80,
     "grid_height": 60,
@@ -93,7 +95,7 @@
     "next_room_id": 10
   },
   "time": {
-    "total_game_hours": 72.5,
+    "total_game_hours": 72,
     "is_flowing": true,
     "speed_multiplier": 2.0
   },
@@ -112,13 +114,13 @@
 
 ### 3.2 必存数据清单
 
-存档必须保存以下游戏状态：
+存档必须保存以下游戏状态。字段中英对照见 [00-project-keywords](../settings/00-project-keywords.md)。
 
 | 类别 | 字段 | 说明 |
 |------|------|------|
 | **四种因子** | `cognition`, `computation`, `willpower`, `permission` | 认知、计算、意志、权限的当前数量 |
 | **货币** | `info`, `truth` | 拥有的信息、真相的数量 |
-| **人员** | `researcher`, `labor`, `eroded`, `investigator` | 研究员人数、劳动力数量、被侵蚀的人数、调查员数量 |
+| **人员** | `researcher`, `labor`, `eroded`, `investigator` | 研究员人数、劳动力（暂未使用）、被侵蚀的人数、调查员数量 |
 | **侵蚀预测** | `erosion.forecast` | 未来三个月的侵蚀情况（约 90 段，每段对应一天） |
 
 ### 3.3 字段说明
@@ -127,10 +129,10 @@
 |------|------|------|------|
 | `version` | int | 是 | 存档格式版本，用于迁移 |
 | `map_name` | string | 是 | 存档显示名称 |
-| `saved_at_game_hour` | float | 否 | 保存时的游戏时间，用于预览 |
+| `saved_at_game_hour` | int | 否 | 保存时的游戏时间（小时数），用于预览 |
 | `map` | object | 是 | 与 `MapEditorMapIO` 格式兼容 |
-| `time` | object | 否 | 缺省则从 0 开始、1x、流动 |
-| `resources` | object | 否 | 缺省则全 0；需含 factors / currency / personnel |
+| `time` | object | 否 | 缺省则从 0 开始、1x、流动；`total_game_hours` 为 int（小时） |
+| `resources` | object | 否 | 缺省时从 `datas/game_base.json` 读取开局值；需含 factors / currency / personnel |
 | `erosion` | object | 否 | 缺省则由 ErosionCore 按时间推导 |
 | `erosion.forecast` | array | 否 | 未来 3 个月侵蚀预测，每元素 `{"value": int}`；缺省则按 `total_game_hours` 重新生成 |
 
@@ -141,7 +143,24 @@
 - **顺序**：从保存时刻起，第 1 天、第 2 天、…、第 90 天
 - **生成**：保存时调用 `ErosionCore.get_forecast_segments(90, GameTime.get_total_hours())`；加载时若有 `forecast` 则直接使用，否则按恢复后的 `total_game_hours` 重新生成
 
-### 3.5 版本与迁移
+### 3.5 数据类型约定
+
+所有存档内的数值采用**整数**存储，避免浮点误差与跨平台不一致。
+
+| 类别 | 字段 | 类型 | 说明 |
+|------|------|------|------|
+| **四种因子** | `cognition`, `computation`, `willpower`, `permission` | int | ≥ 0 |
+| **货币** | `info`, `truth` | int | ≥ 0 |
+| **人员** | `researcher`, `labor`, `eroded`, `investigator` | int | ≥ 0 |
+| **时间** | `total_game_hours`, `saved_at_game_hour` | int | 游戏内小时数，最小单位为 1 小时；不含小数 |
+| **时间倍速** | `speed_multiplier` | float | 1.0 / 2.0 / 6.0 / 96.0 等，用于运行时 |
+| **侵蚀** | `raw_mystery_erosion`, `shelter_bonus`, `forecast[].value` | int | 侵蚀等级为整数 |
+
+**时间记录规则**：游戏内时间的最小单位为 1 小时，所有与时间相关的计数（如 `total_game_hours`、`saved_at_game_hour`）均为整数小时数。
+
+---
+
+### 3.6 版本与迁移
 
 | version | 说明 | 迁移策略 |
 |---------|------|----------|
@@ -202,27 +221,27 @@
 
 ## 6. 路径与槽位策略
 
-### 6.1 建议路径
+### 6.1 路径与职责分离
 
 | 用途 | 路径 | 说明 |
 |------|------|------|
-| 游戏存档 | `user://saves/slot_0.json` ~ `slot_4.json` | 完整游戏状态 |
+| 游戏存档 | `user://saves/slot_0.json` ~ `slot_4.json` | 玩家进度，完整游戏状态 |
 | 自动存档 | `user://saves/autosave.json` | 可选，不占槽位 |
-| 兼容旧地图 | `user://maps/slot_N.json` | 首次加载时检测并迁移 |
+| 地图编辑器 | `user://maps/slot_N.json` | 项目级地图资源，与存档无关 |
+| 新游戏起始地图 | `user://maps/slot_0.json` | 游戏初始化时读取编号第一张地图 |
 
 ### 6.2 槽位数量
 
-- 沿用 5 个槽位（slot 0~4），与场景编辑器一致
-- 可选：扩展为 8 或 10 个，由配置决定
+- 游戏存档：5 个槽位（slot 0~4）
+- 地图编辑器：5 个槽位（slot 0~4），槽位号独立，与存档无对应关系
 
-### 6.3 迁移旧地图
+### 6.3 新游戏初始化
 
-若存在 `user://maps/slot_N.json` 且 `user://saves/slot_N.json` 不存在：
-
-1. 读取地图 JSON
-2. 补全 time/resources/erosion 默认值
-3. 写入 `user://saves/slot_N.json`
-4. 可选：保留或删除 `user://maps/` 中对应文件
+1. 玩家选择存档槽位
+2. 读取 `user://maps/slot_0.json` 作为起始地图（若不存在则空白）
+3. 叠加 game_base 默认资源/时间
+4. 写入 `user://saves/slot_N.json`
+5. 进入游戏加载该存档
 
 ---
 
@@ -241,8 +260,8 @@
 
 ### 7.3 主菜单入口
 
-- 「继续」：加载上次使用的槽位（需额外存储 `user://saves/last_slot`）
-- 「新游戏」：清空状态，加载 slot_0 地图（或默认空白图）
+- 「继续」：加载第一个有存档的槽位（或上次槽位，需 `user://saves/last_slot`）
+- 「新游戏」：选择存档槽位 → 以 maps/slot_0 为起始地图创建新存档 → 进入游戏
 - 「加载存档」：打开存档选择界面
 
 ---
@@ -251,6 +270,7 @@
 
 | 文件 | 职责 |
 |------|------|
+| `datas/game_base.json` | 游戏基础数据：开局资源/人员/时间默认值，供新游戏及存档缺省补齐 |
 | `scripts/core/save_manager.gd` | SaveManager Autoload：保存/加载、元数据、迁移 |
 | `scripts/core/game_state.gd` | GameState 数据结构、序列化/反序列化 |
 | `scripts/game/game_main.gd` | 扩展：提供状态收集接口，接收加载结果 |

@@ -10,7 +10,6 @@ extends CanvasLayer
 @onready var _label_info: Label = $TopBar/Content/HBox/Currency/Info/Value
 @onready var _label_truth: Label = $TopBar/Content/HBox/Currency/Truth/Value
 @onready var _label_researcher: Label = $TopBar/Content/HBox/Personnel/Researcher/Value
-@onready var _label_labor: Label = $TopBar/Content/HBox/Personnel/Labor/Value
 @onready var _label_eroded: Label = $TopBar/Content/HBox/Personnel/Eroded/Value
 @onready var _label_investigator: Label = $TopBar/Content/HBox/Personnel/Investigator/Value
 
@@ -47,10 +46,6 @@ var researcher_count: int = 0:
 	set(v):
 		researcher_count = v
 		_update_label(_label_researcher, v)
-var labor_count: int = 0:
-	set(v):
-		labor_count = v
-		_update_label(_label_labor, v)
 ## 被侵蚀的研究员数量（无法工作）
 var eroded_count: int = 0:
 	set(v):
@@ -79,7 +74,6 @@ func _refresh_all() -> void:
 	_update_label(_label_info, info_amount)
 	_update_label(_label_truth, truth_amount)
 	_update_label(_label_researcher, researcher_count)
-	_update_label(_label_labor, labor_count)
 	_update_label(_label_eroded, eroded_count)
 	_update_label(_label_investigator, investigator_count)
 
@@ -88,11 +82,29 @@ func _refresh_all() -> void:
 func set_resources(factors: Dictionary, currency: Dictionary, personnel: Dictionary) -> void:
 	cognition_amount = factors.get("cognition", 0)
 	computation_amount = factors.get("computation", 0)
-	will_amount = factors.get("will", 0)
+	will_amount = factors.get("willpower", 0)
 	permission_amount = factors.get("permission", 0)
 	info_amount = currency.get("info", 0)
 	truth_amount = currency.get("truth", 0)
 	researcher_count = personnel.get("researcher", 0)
-	labor_count = personnel.get("labor", 0)
 	eroded_count = personnel.get("eroded", 0)
 	investigator_count = personnel.get("investigator", 0)
+
+
+## 获取当前资源数据（供存档保存调用）
+func get_resources() -> Dictionary:
+	return {
+		"factors": {
+			"cognition": cognition_amount,
+			"computation": computation_amount,
+			"willpower": will_amount,
+			"permission": permission_amount,
+		},
+		"currency": {"info": info_amount, "truth": truth_amount},
+		"personnel": {
+			"researcher": researcher_count,
+			"labor": 0,
+			"eroded": eroded_count,
+			"investigator": investigator_count,
+		},
+	}

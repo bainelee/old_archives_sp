@@ -1,0 +1,45 @@
+{
+  "description": "游戏基础数据，用于新游戏开局及存档缺省值。所有数值为整数。",
+  "_fields_comment": {
+    "factors": {
+      "cognition": "认知",
+      "computation": "计算",
+      "willpower": "意志",
+      "permission": "权限"
+    },
+    "currency": {
+      "info": "信息",
+      "truth": "真相"
+    },
+    "personnel": {
+      "researcher": "研究员",
+      "labor": "劳动力（暂未使用）",
+      "eroded": "被侵蚀",
+      "investigator": "调查员"
+    },
+    "initial_time": {
+      "total_game_hours": "游戏内小时数"
+    }
+  },
+  "initial_resources": {
+    "factors": {
+      "cognition": 500,
+      "computation": 0,
+      "willpower": 400,
+      "permission": 400
+    },
+    "currency": {
+      "info": 500,
+      "truth": 0
+    },
+    "personnel": {
+      "researcher": 10,
+      "labor": 0,
+      "eroded": 0,
+      "investigator": 0
+    }
+  },
+  "initial_time": {
+    "total_game_hours": 0
+  }
+}

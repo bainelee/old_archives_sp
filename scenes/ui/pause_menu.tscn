@@ -1,0 +1,220 @@
+[gd_scene load_steps=3 format=3 uid="uid://pause_menu_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_pause_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.1, 0.15, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.35, 0.45, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 24.0
+content_margin_top = 24.0
+content_margin_right = 24.0
+content_margin_bottom = 24.0
+
+[node name="PauseMenu" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_pause_menu")
+
+[node name="Panel" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Overlay" type="ColorRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuPanel" type="PanelContainer" parent="Panel/Center"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Center/MenuPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Panel/Center/MenuPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.75, 1)
+theme_override_font_sizes/font_size = 24
+text = "暂停"
+horizontal_alignment = 1
+
+[node name="BtnResume" type="Button" parent="Panel/Center/MenuPanel/VBox"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "返回游戏"
+
+[node name="BtnSave" type="Button" parent="Panel/Center/MenuPanel/VBox"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "保存游戏"
+
+[node name="BtnLoad" type="Button" parent="Panel/Center/MenuPanel/VBox"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "载入游戏"
+
+[node name="BtnSettings" type="Button" parent="Panel/Center/MenuPanel/VBox"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "设置"
+
+[node name="BtnQuit" type="Button" parent="Panel/Center/MenuPanel/VBox"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "退出游戏"
+
+[node name="SlotPanel" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Overlay" type="ColorRect" parent="SlotPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="Center" type="CenterContainer" parent="SlotPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="SlotPanel/Center"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="SlotPanel/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="SlotPanel/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.75, 1)
+theme_override_font_sizes/font_size = 20
+text = "选择存档槽位"
+horizontal_alignment = 1
+
+[node name="Slot0Row" type="HBoxContainer" parent="SlotPanel/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Slot0" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot0Row"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "槽位 1 - 空"
+
+[node name="BtnDelete0" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot0Row"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "删除"
+
+[node name="Slot1Row" type="HBoxContainer" parent="SlotPanel/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Slot1" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot1Row"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "槽位 2 - 空"
+
+[node name="BtnDelete1" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot1Row"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "删除"
+
+[node name="Slot2Row" type="HBoxContainer" parent="SlotPanel/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Slot2" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot2Row"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "槽位 3 - 空"
+
+[node name="BtnDelete2" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot2Row"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "删除"
+
+[node name="Slot3Row" type="HBoxContainer" parent="SlotPanel/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Slot3" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot3Row"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "槽位 4 - 空"
+
+[node name="BtnDelete3" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot3Row"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "删除"
+
+[node name="Slot4Row" type="HBoxContainer" parent="SlotPanel/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Slot4" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot4Row"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "槽位 5 - 空"
+
+[node name="BtnDelete4" type="Button" parent="SlotPanel/Center/Panel/VBox/Slot4Row"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "删除"
+
+[node name="DeleteConfirmDialog" type="ConfirmationDialog" parent="SlotPanel"]
+title = "确认删除"
+dialog_text = "确定要删除该槽位的存档吗？"
+initial_position = 2
+
+[node name="BtnSlotCancel" type="Button" parent="SlotPanel/Center/Panel/VBox"]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "取消"

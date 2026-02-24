@@ -6,11 +6,11 @@ extends RefCounted
 ## 房间类型（对应名词解释）
 enum RoomType {
 	LIBRARY,       ## 图书室
-	LAB,           ## 实验室
+	LAB,           ## 机房（研究区→计算因子）
 	CLASSROOM,     ## 教学室
 	ARCHIVE,       ## 资料库
 	ARCHIVE_CORE,  ## 档案馆核心
-	SERVER_ROOM,   ## 机房
+	SERVER_ROOM,   ## 实验室（造物区→权限因子）
 	REASONING,     ## 推理室
 	OFFICE_SITE,   ## 事务所遗址
 	DORMITORY,     ## 宿舍
@@ -73,11 +73,11 @@ func to_json_room_dict(json_id: String) -> Dictionary:
 static func get_room_type_name(t: int) -> String:
 	match t:
 		RoomType.LIBRARY: return "图书室"
-		RoomType.LAB: return "实验室"
+		RoomType.LAB: return "机房"
 		RoomType.CLASSROOM: return "教学室"
 		RoomType.ARCHIVE: return "资料库"
 		RoomType.ARCHIVE_CORE: return "档案馆核心"
-		RoomType.SERVER_ROOM: return "机房"
+		RoomType.SERVER_ROOM: return "实验室"
 		RoomType.REASONING: return "推理室"
 		RoomType.OFFICE_SITE: return "事务所遗址"
 		RoomType.DORMITORY: return "宿舍"

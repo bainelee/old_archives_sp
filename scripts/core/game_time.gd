@@ -56,6 +56,12 @@ func get_total_hours() -> float:
 	return _total_game_hours
 
 
+## 设置游戏时间（供存档加载恢复）
+func set_total_hours(hours: float) -> void:
+	_total_game_hours = maxf(0.0, hours)
+	time_updated.emit()
+
+
 ## 获取各时间单位
 func get_hour() -> int:
 	return int(floorf(_total_game_hours)) % GAME_HOURS_PER_DAY
@@ -65,8 +71,16 @@ func get_day() -> int:
 	return int(floorf(_total_game_hours / GAME_HOURS_PER_DAY)) % GAME_DAYS_PER_MONTH
 
 
+## 获取本周第几日（1～7），每周重置
+func get_day_in_week() -> int:
+	var total_days: int = int(floorf(_total_game_hours / GAME_HOURS_PER_DAY))
+	return (total_days % GAME_DAYS_PER_WEEK) + 1
+
+
+## 获取周数（累计总量，1 起始，为 UI 最高级单位；无月年后周数递增不重置）
 func get_week() -> int:
-	return int(floorf(_total_game_hours / (GAME_HOURS_PER_DAY * GAME_DAYS_PER_WEEK))) % 4
+	var total_days: float = _total_game_hours / float(GAME_HOURS_PER_DAY * GAME_DAYS_PER_WEEK)
+	return int(floorf(total_days)) + 1  # 1 起始
 
 
 func get_month() -> int:
@@ -77,12 +91,12 @@ func get_year() -> int:
 	return int(floorf(_total_game_hours / (GAME_HOURS_PER_DAY * GAME_DAYS_PER_MONTH * GAME_MONTHS_PER_YEAR)))
 
 
-## 格式化为可读字符串，例如 "14时 第5天 第2周"
+## 格式化为可读字符串：12时，7日，35周（日为本周第几日 1～7 每周重置；周为累计）
 func format_time() -> String:
 	var h: int = get_hour()
-	var d: int = get_day()
-	var w: int = get_week()
-	return "%d时 第%d天 第%d周" % [h, d + 1, w + 1]
+	var d: int = get_day_in_week()  # 1～7，本周第几日
+	var w: int = get_week()  # 累计周数，1 起始
+	return "%d时，%d日，%d周" % [h, d, w]
 
 
 ## 简短格式，与 format_time 相同：xx时 第XX天 第XX周
