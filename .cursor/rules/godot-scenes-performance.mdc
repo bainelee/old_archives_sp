@@ -1,0 +1,41 @@
+---
+description: Godot 4.6 场景组织、资源管理、性能优化与 TileMap 规范
+globs:
+  - "**/*.tscn"
+  - "**/*.gd"
+alwaysApply: false
+---
+
+# Godot 4.6 场景与性能规范
+
+编辑 `.tscn` 场景或涉及资源、性能、TileMap 的脚本时须遵守以下约定。
+
+## Scene Organization
+
+- Keep scene tree depth minimal for better performance
+- Use scene inheritance for reusable components
+- Implement proper scene cleanup on queue_free()
+- Use SubViewport nodes carefully due to performance impact
+- Provide step-by-step instructions to create Godot scene(s) instead of providing scene source code
+
+## Resource Management
+
+- Implement proper resource cleanup in `_exit_tree()`
+- Use preload() for essential resources, load() for optional ones
+- Consider PackedByteArray storage impact on backwards compatibility
+- Implement resource unloading for unused assets
+
+## Performance Best Practices
+
+- Use node groups judiciously for managing collections, and prefer direct node references for frequent, specific access to individual nodes
+- Implement object pooling for frequently spawned objects
+- Use physics layers to optimize collision detection
+- Prefer packed arrays (PackedVector2Array, etc.) over regular arrays
+
+## TileMap Implementation
+
+- TileMap node is deprecated - use multiple TileMapLayer nodes instead
+- Convert existing TileMaps using the TileMap bottom panel toolbox option "Extract TileMap layers"
+- Access TileMap layers through TileMapLayer nodes
+- Update navigation code to use TileMapLayer.get_navigation_map()
+- Store layer-specific properties on individual TileMapLayer nodes

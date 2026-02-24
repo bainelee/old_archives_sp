@@ -205,6 +205,6 @@
 | 文件 | 说明 |
 |------|------|
 | `scripts/editor/room_info.gd` | RoomInfo 定义，to_dict / from_dict / to_json_room_dict |
-| `scripts/editor/scene_editor.gd` | 编辑器主逻辑，房间 UI、导入、同步 |
+| `scripts/editor/map_editor.gd` | 编辑器主逻辑，房间 UI、导入、同步 |
 | `datas/room_info.json` | 房间模板数据 |
 | `datas/README.md` | datas 目录说明 |

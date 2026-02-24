@@ -1,7 +1,7 @@
-class_name SceneEditorToolbarBuilder
+class_name MapEditorToolbarBuilder
 extends RefCounted
 
-## 场景编辑器工具栏与按钮构建 - 编辑层级、选择模式、绘制工具、房间快捷尺寸
+## 地图编辑器工具栏与按钮构建 - 编辑层级、选择模式、绘制工具、房间快捷尺寸
 ## 将按钮创建与 _update_all_buttons 与主类解耦
 
 static func make_level_button(editor: Node, text: String, level: int) -> Button:

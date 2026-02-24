@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var _label_truth: Label = $TopBar/Content/HBox/Currency/Truth/Value
 @onready var _label_researcher: Label = $TopBar/Content/HBox/Personnel/Researcher/Value
 @onready var _label_labor: Label = $TopBar/Content/HBox/Personnel/Labor/Value
+@onready var _label_eroded: Label = $TopBar/Content/HBox/Personnel/Eroded/Value
 @onready var _label_investigator: Label = $TopBar/Content/HBox/Personnel/Investigator/Value
 
 ## 资源-因子
@@ -50,6 +51,11 @@ var labor_count: int = 0:
 	set(v):
 		labor_count = v
 		_update_label(_label_labor, v)
+## 被侵蚀的研究员数量（无法工作）
+var eroded_count: int = 0:
+	set(v):
+		eroded_count = v
+		_update_label(_label_eroded, v)
 var investigator_count: int = 0:
 	set(v):
 		investigator_count = v
@@ -74,6 +80,7 @@ func _refresh_all() -> void:
 	_update_label(_label_truth, truth_amount)
 	_update_label(_label_researcher, researcher_count)
 	_update_label(_label_labor, labor_count)
+	_update_label(_label_eroded, eroded_count)
 	_update_label(_label_investigator, investigator_count)
 
 
@@ -87,4 +94,5 @@ func set_resources(factors: Dictionary, currency: Dictionary, personnel: Diction
 	truth_amount = currency.get("truth", 0)
 	researcher_count = personnel.get("researcher", 0)
 	labor_count = personnel.get("labor", 0)
+	eroded_count = personnel.get("eroded", 0)
 	investigator_count = personnel.get("investigator", 0)

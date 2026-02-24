@@ -1,7 +1,7 @@
 extends Node2D
-class_name SceneEditor
+class_name MapEditor
 
-## 场景编辑器 - 网格与底板编辑
+## 地图编辑器 - 网格与底板编辑
 ## 网格: 80×60, 每格 20px（向上向下各扩 10 高度）
 
 const GRID_WIDTH := 80
@@ -77,7 +77,7 @@ var _save_confirm_panel: PanelContainer  ## 保存确认弹窗：保存当前/�
 func _ready() -> void:
 	# 像素图不模糊：使用最近邻过滤
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	SceneEditorMapIO.migrate_old_map_to_slot0()
+	MapEditorMapIO.migrate_old_map_to_slot0()
 	_setup_grid()
 	_setup_camera()
 	_setup_ui()
@@ -114,7 +114,7 @@ func _setup_ui() -> void:
 	
 	# 标尺网格（先添加，位于底层）
 	_ruler_overlay = Control.new()
-	_ruler_overlay.set_script(load("res://scripts/editor/scene_editor_ruler.gd") as GDScript)
+	_ruler_overlay.set_script(load("res://scripts/editor/map_editor_ruler.gd") as GDScript)
 	_ruler_overlay.name = "RulerOverlay"
 	_ui_layer.add_child(_ruler_overlay)
 	if _ruler_overlay.has_method("setup"):
@@ -133,8 +133,8 @@ func _setup_ui() -> void:
 	lbl_level.text = "编辑层级："
 	level_bar.add_child(lbl_level)
 	_level_buttons.clear()
-	var btn_floor: Button = SceneEditorToolbarBuilder.make_level_button(self, "底板", FloorTileType.EditLevel.FLOOR)
-	var btn_room: Button = SceneEditorToolbarBuilder.make_level_button(self, "房间", FloorTileType.EditLevel.ROOM)
+	var btn_floor: Button = MapEditorToolbarBuilder.make_level_button(self, "底板", FloorTileType.EditLevel.FLOOR)
+	var btn_room: Button = MapEditorToolbarBuilder.make_level_button(self, "房间", FloorTileType.EditLevel.ROOM)
 	_level_buttons.append(btn_floor)
 	_level_buttons.append(btn_room)
 	level_bar.add_child(btn_floor)
@@ -148,9 +148,9 @@ func _setup_ui() -> void:
 	
 	# 单选、框选、选择（互斥）
 	_select_buttons.clear()
-	var btn_single: Button = SceneEditorToolbarBuilder.make_select_button(self, "单选", FloorTileType.SelectMode.SINGLE)
-	var btn_box: Button = SceneEditorToolbarBuilder.make_select_button(self, "框选", FloorTileType.SelectMode.BOX)
-	var btn_floor_select: Button = SceneEditorToolbarBuilder.make_select_button(self, "选择", FloorTileType.SelectMode.FLOOR_SELECT)
+	var btn_single: Button = MapEditorToolbarBuilder.make_select_button(self, "单选", FloorTileType.SelectMode.SINGLE)
+	var btn_box: Button = MapEditorToolbarBuilder.make_select_button(self, "框选", FloorTileType.SelectMode.BOX)
+	var btn_floor_select: Button = MapEditorToolbarBuilder.make_select_button(self, "选择", FloorTileType.SelectMode.FLOOR_SELECT)
 	_select_buttons.append(btn_single)
 	_select_buttons.append(btn_box)
 	_select_buttons.append(btn_floor_select)
@@ -164,7 +164,7 @@ func _setup_ui() -> void:
 	_main_toolbar.add_child(btn_floor_select)
 	_quick_room_buttons.clear()
 	for sz in [Vector2i(5, 3), Vector2i(10, 3), Vector2i(5, 7)]:
-		var qbtn: Button = SceneEditorToolbarBuilder.make_quick_room_button(self, sz.x, sz.y, _quick_room_buttons)
+		var qbtn: Button = MapEditorToolbarBuilder.make_quick_room_button(self, sz.x, sz.y, _quick_room_buttons)
 		_quick_room_buttons.append(qbtn)
 		_main_toolbar.add_child(qbtn)
 	var toolbar_sep: Control = HSeparator.new()
@@ -180,10 +180,10 @@ func _setup_ui() -> void:
 	
 	# 工具：空、墙壁、房间底板、橡皮擦（一级编辑时使用）
 	_tool_buttons.clear()
-	var btn_empty: Button = SceneEditorToolbarBuilder.make_tool_button(self, "空", FloorTileType.PaintTool.EMPTY)
-	var btn_wall: Button = SceneEditorToolbarBuilder.make_tool_button(self, "墙壁", FloorTileType.PaintTool.WALL)
-	var btn_room_floor: Button = SceneEditorToolbarBuilder.make_tool_button(self, "房间底板", FloorTileType.PaintTool.ROOM_FLOOR)
-	var btn_eraser: Button = SceneEditorToolbarBuilder.make_tool_button(self, "橡皮擦", FloorTileType.PaintTool.ERASER)
+	var btn_empty: Button = MapEditorToolbarBuilder.make_tool_button(self, "空", FloorTileType.PaintTool.EMPTY)
+	var btn_wall: Button = MapEditorToolbarBuilder.make_tool_button(self, "墙壁", FloorTileType.PaintTool.WALL)
+	var btn_room_floor: Button = MapEditorToolbarBuilder.make_tool_button(self, "房间底板", FloorTileType.PaintTool.ROOM_FLOOR)
+	var btn_eraser: Button = MapEditorToolbarBuilder.make_tool_button(self, "橡皮擦", FloorTileType.PaintTool.ERASER)
 	_tool_buttons.append(btn_empty)
 	_tool_buttons.append(btn_wall)
 	_tool_buttons.append(btn_room_floor)
@@ -194,7 +194,7 @@ func _setup_ui() -> void:
 	_main_toolbar.add_child(btn_eraser)
 	
 	# 房间编辑面板（二级编辑时显示）
-	_room_panel = SceneEditorRoomUIBuilder.build_room_edit_panel(self)
+	_room_panel = MapEditorRoomUIBuilder.build_room_edit_panel(self)
 	_room_panel.visible = false
 	vbox.add_child(_room_panel)
 	_ui_layer.add_child(_room_base_image_dialog)
@@ -239,7 +239,7 @@ func _setup_ui() -> void:
 	_ui_panel.set_offset(Side.SIDE_TOP, 10)
 	
 	# 房间列表（右上角，房间层级显示，可折叠下拉+滚轮滚动）
-	SceneEditorRoomUIBuilder.build_room_list_panel(self, _ui_layer)
+	MapEditorRoomUIBuilder.build_room_list_panel(self, _ui_layer)
 	
 	# 打开地图面板
 	_open_map_panel = PanelContainer.new()
@@ -250,7 +250,7 @@ func _setup_ui() -> void:
 	open_title.text = "选择地图"
 	open_vbox.add_child(open_title)
 	_open_map_slot_buttons.clear()
-	for i in SceneEditorMapIO.MAP_SLOTS:
+	for i in MapEditorMapIO.MAP_SLOTS:
 		var btn: Button = Button.new()
 		btn.custom_minimum_size.x = 200
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -275,9 +275,9 @@ func _setup_ui() -> void:
 	_ui_layer.add_child(_open_map_panel)
 	
 	# 导入模板弹窗
-	SceneEditorRoomUIBuilder.build_import_template_panel(self, _ui_layer)
+	MapEditorRoomUIBuilder.build_import_template_panel(self, _ui_layer)
 	# 保存确认弹窗
-	SceneEditorRoomUIBuilder.build_save_confirm_panel(self, _ui_layer)
+	MapEditorRoomUIBuilder.build_save_confirm_panel(self, _ui_layer)
 	
 	# 框选尺寸提示（跟随鼠标右侧）
 	_box_size_label = Label.new()
@@ -298,7 +298,7 @@ func _on_import_template_pressed() -> void:
 	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
 		push_error("请先选中一个房间")
 		return
-	var rooms_arr: Variant = SceneEditorRoomUIBuilder.load_room_templates()
+	var rooms_arr: Variant = MapEditorRoomUIBuilder.load_room_templates()
 	if rooms_arr == null:
 		push_error("无法打开 room_info.json 或格式错误")
 		return
@@ -413,7 +413,7 @@ func _on_room_res_remove_pressed(res_idx: int) -> void:
 
 
 func _refresh_room_resources_ui() -> void:
-	SceneEditorRoomUIBuilder.refresh_room_resources_ui(self)
+	MapEditorRoomUIBuilder.refresh_room_resources_ui(self)
 
 
 func _on_delete_room_pressed() -> void:
@@ -452,11 +452,11 @@ func _on_base_image_selected(path: String) -> void:
 
 
 func _refresh_room_panel() -> void:
-	SceneEditorRoomUIBuilder.refresh_room_panel(self)
+	MapEditorRoomUIBuilder.refresh_room_panel(self)
 
 
 func _update_all_buttons() -> void:
-	SceneEditorToolbarBuilder.update_all_buttons(self)
+	MapEditorToolbarBuilder.update_all_buttons(self)
 
 
 func _on_room_list_toggle_pressed() -> void:
@@ -466,15 +466,15 @@ func _on_room_list_toggle_pressed() -> void:
 
 
 func _refresh_room_list() -> void:
-	SceneEditorRoomUIBuilder.refresh_room_list(self)
+	MapEditorRoomUIBuilder.refresh_room_list(self)
 
 
 func _focus_camera_on_room(room_index: int) -> void:
-	SceneEditorRoomUIBuilder.focus_camera_on_room(self, room_index)
+	MapEditorRoomUIBuilder.focus_camera_on_room(self, room_index)
 
 
 func _update_room_panel_visibility() -> void:
-	SceneEditorRoomUIBuilder.update_room_panel_visibility(self)
+	MapEditorRoomUIBuilder.update_room_panel_visibility(self)
 
 
 func _input(event: InputEvent) -> void:
@@ -496,19 +496,19 @@ func _input(event: InputEvent) -> void:
 
 
 func _is_point_in_floor_selection(p: Vector2i) -> bool:
-	return SceneEditorGridHelper.is_point_in_floor_selection(self, p)
+	return MapEditorGridHelper.is_point_in_floor_selection(self, p)
 
 
 func _set_floor_selection(start: Vector2i, end: Vector2i) -> void:
-	SceneEditorGridHelper.set_floor_selection(self, start, end)
+	MapEditorGridHelper.set_floor_selection(self, start, end)
 
 
 func _apply_floor_move(release_grid: Vector2i) -> void:
-	SceneEditorGridHelper.apply_floor_move(self, release_grid)
+	MapEditorGridHelper.apply_floor_move(self, release_grid)
 
 
 func _clear_floor_selection() -> void:
-	SceneEditorGridHelper.clear_floor_selection(self)
+	MapEditorGridHelper.clear_floor_selection(self)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -530,16 +530,16 @@ func _unhandled_input(event: InputEvent) -> void:
 						return
 				else:
 					if _floor_move_dragging:
-						SceneEditorGridHelper.apply_floor_move(self, grid)
+						MapEditorGridHelper.apply_floor_move(self, grid)
 						_floor_move_dragging = false
 						get_viewport().set_input_as_handled()
 						return
 			if _select_mode == FloorTileType.SelectMode.SINGLE:
 				if mb.pressed:
 					if _edit_level == FloorTileType.EditLevel.FLOOR:
-						SceneEditorGridHelper.apply_paint_at_mouse(self)
+						MapEditorGridHelper.apply_paint_at_mouse(self)
 					else:
-						SceneEditorGridHelper.try_select_room_at_mouse(self)
+						MapEditorGridHelper.try_select_room_at_mouse(self)
 			else:
 				if mb.pressed:
 					_box_start = _get_mouse_grid() if _quick_room_size == Vector2i.ZERO else Vector2i(-1, -1)
@@ -549,18 +549,18 @@ func _unhandled_input(event: InputEvent) -> void:
 						if _quick_room_size != Vector2i.ZERO and _edit_level == FloorTileType.EditLevel.ROOM:
 							var start: Vector2i = _get_mouse_grid()
 							var end: Vector2i = start + _quick_room_size - Vector2i(1, 1)
-							if SceneEditorGridHelper.is_room_box_valid(self, start, end):
-								SceneEditorGridHelper.try_create_room(self, start, end)
+							if MapEditorGridHelper.is_room_box_valid(self, start, end):
+								MapEditorGridHelper.try_create_room(self, start, end)
 							_refresh_room_list()
 						elif _box_start.x >= 0:
 							if _edit_level == FloorTileType.EditLevel.FLOOR:
 								if _select_mode == FloorTileType.SelectMode.FLOOR_SELECT:
-									SceneEditorGridHelper.set_floor_selection(self, _box_start, _get_mouse_grid())
+									MapEditorGridHelper.set_floor_selection(self, _box_start, _get_mouse_grid())
 								else:
-									SceneEditorGridHelper.fill_box(self, _box_start, _get_mouse_grid())
+									MapEditorGridHelper.fill_box(self, _box_start, _get_mouse_grid())
 							elif _edit_level == FloorTileType.EditLevel.ROOM:
-								if SceneEditorGridHelper.is_room_box_valid(self, _box_start, _get_mouse_grid()):
-									SceneEditorGridHelper.try_create_room(self, _box_start, _get_mouse_grid())
+								if MapEditorGridHelper.is_room_box_valid(self, _box_start, _get_mouse_grid()):
+									MapEditorGridHelper.try_create_room(self, _box_start, _get_mouse_grid())
 								_refresh_room_list()
 					_box_start = Vector2i(-1, -1)
 					_is_drawing = false
@@ -625,7 +625,7 @@ func _get_mouse_grid() -> Vector2i:
 
 
 func _is_room_box_valid(start: Vector2i, end: Vector2i) -> bool:
-	return SceneEditorGridHelper.is_room_box_valid(self, start, end)
+	return MapEditorGridHelper.is_room_box_valid(self, start, end)
 
 
 func _rebuild_room_ids() -> void:
@@ -650,7 +650,7 @@ func _set_tile(gx: int, gy: int, type: int) -> void:
 
 
 func _draw() -> void:
-	SceneEditorDrawHelper.draw_all(self, self)
+	MapEditorDrawHelper.draw_all(self, self)
 
 
 func _on_floor_move_toggled(pressed: bool) -> void:
@@ -675,8 +675,8 @@ func _snap_camera_to_grid() -> void:
 
 
 func _refresh_open_map_panel() -> void:
-	for i in SceneEditorMapIO.MAP_SLOTS:
-		var name_str: String = SceneEditorMapIO.get_slot_map_name(i)
+	for i in MapEditorMapIO.MAP_SLOTS:
+		var name_str: String = MapEditorMapIO.get_slot_map_name(i)
 		var btn: Button = _open_map_slot_buttons[i]
 		if name_str.is_empty():
 			btn.text = "槽位 %d: (空)" % (i + 1)
@@ -698,8 +698,8 @@ func _on_save_confirm_save_current() -> void:
 
 func _on_save_confirm_save_new() -> void:
 	var empty_slot: int = -1
-	for i in SceneEditorMapIO.MAP_SLOTS:
-		if not FileAccess.file_exists(SceneEditorMapIO.get_slot_path(i)):
+	for i in MapEditorMapIO.MAP_SLOTS:
+		if not FileAccess.file_exists(MapEditorMapIO.get_slot_path(i)):
 			empty_slot = i
 			break
 	if empty_slot < 0:
@@ -715,9 +715,9 @@ func _do_save_to_slot(slot: int) -> void:
 	var map_name: String = _map_name_edit.text.strip_edges()
 	if map_name.is_empty():
 		map_name = "未命名地图"
-	var ok: bool = SceneEditorMapIO.save_to_slot(slot, GRID_WIDTH, GRID_HEIGHT, CELL_SIZE, _tiles, _rooms, map_name, _next_room_id)
+	var ok: bool = MapEditorMapIO.save_to_slot(slot, GRID_WIDTH, GRID_HEIGHT, CELL_SIZE, _tiles, _rooms, map_name, _next_room_id)
 	if ok:
-		SceneEditorMapIO.sync_rooms_to_json(_rooms)
+		MapEditorMapIO.sync_rooms_to_json(_rooms)
 
 
 func _on_open_map_pressed() -> void:
@@ -726,32 +726,32 @@ func _on_open_map_pressed() -> void:
 
 
 func _on_enter_game_pressed() -> void:
-	## 进入游戏主场景；游戏展示槽位 1 的地图，进入后场景编辑器无法唤出
+	## 进入游戏主场景；游戏展示槽位 1 的地图，进入后地图编辑器无法唤出
 	get_tree().change_scene_to_file("res://scenes/game/game_main.tscn")
 
 
 func _load_map_from_slot(slot: int) -> void:
-	var result: Variant = SceneEditorMapIO.load_from_slot(slot)
+	var result: Variant = MapEditorMapIO.load_from_slot(slot)
 	if result == null:
 		print("槽位 ", slot + 1, " 为空")
 		return
-	var path: String = SceneEditorMapIO.get_slot_path(slot)
+	var path: String = MapEditorMapIO.get_slot_path(slot)
 	if result is Dictionary:
 		var d: Dictionary = result as Dictionary
-		var map_name: String = str(d.get(SceneEditorMapIO.SAVE_KEY_MAP_NAME, ""))
+		var map_name: String = str(d.get(MapEditorMapIO.SAVE_KEY_MAP_NAME, ""))
 		_map_name_edit.text = map_name
 		for x in GRID_WIDTH:
 			for y in GRID_HEIGHT:
 				_tiles[x][y] = FloorTileType.Type.EMPTY
 				_room_ids[x][y] = -1
-		var tiles_data: Array = d.get(SceneEditorMapIO.SAVE_KEY_TILES, []) as Array
+		var tiles_data: Array = d.get(MapEditorMapIO.SAVE_KEY_TILES, []) as Array
 		for x in min(tiles_data.size(), GRID_WIDTH):
 			var col: Variant = tiles_data[x]
 			if col is Array:
 				for y in min(col.size(), GRID_HEIGHT):
 					_tiles[x][y] = int(col[y])
 		_rooms.clear()
-		var rooms_data: Array = d.get(SceneEditorMapIO.SAVE_KEY_ROOMS, []) as Array
+		var rooms_data: Array = d.get(MapEditorMapIO.SAVE_KEY_ROOMS, []) as Array
 		for room_dict in rooms_data:
 			if room_dict is Dictionary:
 				_rooms.append(RoomInfo.from_dict(room_dict as Dictionary))

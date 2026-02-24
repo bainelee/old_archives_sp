@@ -88,12 +88,12 @@ datas/room_info.json ──导入──►  _rooms（从模板导入）
 
 | 文件 | 职责 |
 |------|------|
-| `scripts/editor/scene_editor.gd` | 场景编辑主逻辑、UI、保存/加载、JSON 同步 |
+| `scripts/editor/map_editor.gd` | 地图编辑主逻辑、UI、保存/加载、JSON 同步 |
 | `scripts/editor/room_info.gd` | RoomInfo 定义、枚举、序列化 |
 | `scripts/editor/floor_tile_type.gd` | 底板类型、编辑层级、选择模式 |
-| `scripts/editor/scene_editor_ruler.gd` | 标尺/网格坐标显示 |
+| `scripts/editor/map_editor_ruler.gd` | 标尺/网格坐标显示 |
 | `datas/room_info.json` | 房间模板（约 30+ 房间） |
-| `.cursor/rules/` | 场景编辑器、房间信息、Git 提交编码规范 |
+| `.cursor/rules/` | 地图编辑器、房间信息、Git 提交编码规范 |
 
 ---
 
@@ -130,7 +130,7 @@ datas/room_info.json ──导入──►  _rooms（从模板导入）
 
 ## 相关文档
 
-- [01 - 场景编辑器](01-scene-editor.md)
+- [01 - 地图编辑器](01-map-editor.md)
 - [02 - 房间信息与 room_info.json 同步](02-room-info-and-json-sync.md)
 - [05 - 庇护/侵蚀 UI](05-shelter-erosion-ui.md)
 - [06 - 主 UI 设计概览](06-ui-main-overview.md)

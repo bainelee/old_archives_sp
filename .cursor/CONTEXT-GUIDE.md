@@ -8,7 +8,7 @@
 
 ```
 任务：[具体要做什么]
-相关：[scene_editor.gd / room_info.json / ...]
+相关：[map_editor.gd / room_info.json / ...]
 规则：.cursor/rules 中有场景编辑器和房间信息规范
 ```
 

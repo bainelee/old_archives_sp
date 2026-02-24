@@ -1,15 +1,15 @@
 ---
-description: 场景编辑器结构、网格系统、层级与保存流程规范
+description: 地图编辑器结构、网格系统、层级与保存流程规范
 globs:
-  - "scripts/editor/scene_editor*.gd"
+  - "scripts/editor/map_editor*.gd"
 alwaysApply: false
 ---
 
-# 场景编辑器规范
+# 地图编辑器规范
 
-开发/修改 `scene_editor*.gd` 及相关模块时须遵守以下约定。
+开发/修改 `map_editor*.gd` 及相关模块时须遵守以下约定。
 
-**模块拆分**：主逻辑在 `scene_editor.gd`；地图 I/O 在 `scene_editor_map_io.gd`；绘制在 `scene_editor_draw.gd`；房间 UI 在 `scene_editor_room_ui.gd`；网格交互在 `scene_editor_grid.gd`；工具栏在 `scene_editor_toolbar.gd`。
+**模块拆分**：主逻辑在 `map_editor.gd`；地图 I/O 在 `map_editor_map_io.gd`；绘制在 `map_editor_draw.gd`；房间 UI 在 `map_editor_room_ui.gd`；网格交互在 `map_editor_grid.gd`；工具栏在 `map_editor_toolbar.gd`。
 
 ## 网格与层级
 
@@ -28,11 +28,11 @@ alwaysApply: false
 
 ## 房间编辑 UI
 
-- 面板：由 SceneEditorRoomUIBuilder.build_room_edit_panel 构建，含名称/类型/清理状态/清理前文本/描述/资源/底图/从模板导入
+- 面板：由 MapEditorRoomUIBuilder.build_room_edit_panel 构建，含名称/类型/清理状态/清理前文本/描述/资源/底图/从模板导入
 - 「删除房间」在主工具栏中「选择房间」右侧，仅选中房间时显示
 - 「从模板导入」位于「房间信息」标签正下方
 
 ## 参考
 
-- 设计文档：`docs/design/01-scene-editor.md`
+- 设计文档：`docs/design/01-map-editor.md`
 - 房间与 JSON：`docs/design/02-room-info-and-json-sync.md`

@@ -1,7 +1,7 @@
-class_name SceneEditorDrawHelper
+class_name MapEditorDrawHelper
 extends RefCounted
 
-## 场景编辑器绘制逻辑 - 网格、底板、房间、框选预览
+## 地图编辑器绘制逻辑 - 网格、底板、房间、框选预览
 ## 接收 CanvasItem 与编辑器引用，将绘制逻辑与主类解耦
 
 const TILE_COLORS := {

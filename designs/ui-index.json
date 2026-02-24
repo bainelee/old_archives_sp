@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "project": "old-archives-sp",
+  "components": [
+    {
+      "id": "ui_main_topbar",
+      "name": "主 UI TopBar",
+      "sources": ["scenes/ui/ui_main.tscn", "docs/design/06-ui-main-overview.md"],
+      "elements": [
+        {"path": "TopBar/Content/HBox/Factors/Cognition/Name", "type": "Label", "text": "认知因子", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Factors/Cognition/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
+        {"path": "TopBar/Content/HBox/Factors/Computation/Name", "type": "Label", "text": "计算因子", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Factors/Computation/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
+        {"path": "TopBar/Content/HBox/Factors/Will/Name", "type": "Label", "text": "意志因子", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Factors/Will/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
+        {"path": "TopBar/Content/HBox/Factors/Permission/Name", "type": "Label", "text": "权限因子", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Factors/Permission/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
+        {"path": "TopBar/Content/HBox/Currency/Info/Name", "type": "Label", "text": "信息", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Currency/Info/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
+        {"path": "TopBar/Content/HBox/Currency/Truth/Name", "type": "Label", "text": "真相", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Currency/Truth/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
+        {"path": "TopBar/Content/HBox/Personnel/Researcher/Name", "type": "Label", "text": "研究员", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Personnel/Researcher/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
+        {"path": "TopBar/Content/HBox/Personnel/Labor/Name", "type": "Label", "text": "劳动力", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Personnel/Labor/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
+        {"path": "TopBar/Content/HBox/Personnel/Investigator/Name", "type": "Label", "text": "调查员", "fill": "#b3c0daff", "fontSize": 12},
+        {"path": "TopBar/Content/HBox/Personnel/Investigator/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14}
+      ],
+      "layout": {
+        "orientation": "horizontal",
+        "height": 48,
+        "bgColor": "#1e1e2eeb",
+        "cornerRadius": 4,
+        "gap": 32
+      }
+    },
+    {
+      "id": "time_panel",
+      "name": "时间面板 TimePanel",
+      "sources": ["scenes/ui/time_panel.tscn", "docs/design/04-time-system.md"],
+      "elements": [
+        {"path": "TimePanel/PlayPauseButton", "type": "Button", "text": "⏸", "fill": "#e6e6d9ff", "fontSize": 14},
+        {"path": "TimePanel/Speed1xButton", "type": "Button", "text": "1x", "fill": "#e6e6d9ff", "fontSize": 12},
+        {"path": "TimePanel/Speed2xButton", "type": "Button", "text": "2x", "fill": "#e6e6d9ff", "fontSize": 12},
+        {"path": "TimePanel/Speed6xButton", "type": "Button", "text": "6x", "fill": "#e6e6d9ff", "fontSize": 12},
+        {"path": "TimePanel/Speed96xButton", "type": "Button", "text": "96x", "fill": "#e6e6d9ff", "fontSize": 12},
+        {"path": "TimePanel/TimeLabel", "type": "Label", "text": "1月 1日 00时", "fill": "#b3c0daff", "fontSize": 13}
+      ],
+      "layout": {
+        "orientation": "horizontal",
+        "height": 28,
+        "gap": 12
+      }
+    },
+    {
+      "id": "shelter_erosion_panel",
+      "name": "庇护/侵蚀面板 ShelterErosionPanel",
+      "sources": ["scenes/ui/shelter_erosion_panel.tscn", "docs/design/05-shelter-erosion-ui.md"],
+      "elements": [
+        {"path": "Left/LeftVBox/Title", "type": "Label", "text": "庇护 · 侵蚀", "fill": "#99a6bfff", "fontSize": 11},
+        {"path": "Left/LeftVBox/ErosionLabel", "type": "Label", "text": "薄弱", "fill": "#e6d9bfff", "fontSize": 14},
+        {"path": "Left/LeftVBox/ErosionSourcePopup/Margin/SourceLabel", "type": "Label", "text": "当前：0 轻度侵蚀\n-2 来自显性侵蚀\n+2 来自文明的庇佑", "fill": "#d9e0ebff", "fontSize": 24},
+        {"path": "Right/BarMargin/CycleBarPopup/Margin/CycleBarLabel", "type": "Label", "text": "距离现在24天 显性侵蚀 -2", "fill": "#d9e0ebff", "fontSize": 24}
+      ],
+      "layout": {
+        "orientation": "horizontal",
+        "minWidth": 280,
+        "gap": 12
+      }
+    }
+  ]
+}

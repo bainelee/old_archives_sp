@@ -1,7 +1,7 @@
-class_name SceneEditorGridHelper
+class_name MapEditorGridHelper
 extends RefCounted
 
-## 场景编辑器网格、底板、房间交互逻辑 - 绘制、框选、房间创建
+## 地图编辑器网格、底板、房间交互逻辑 - 绘制、框选、房间创建
 ## 与输入处理解耦，接收 editor 引用操作状态
 
 static func get_tile_type_from_tool(editor: Node) -> int:

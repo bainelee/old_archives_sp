@@ -1,5 +1,5 @@
 extends Control
-class_name SceneEditorRuler
+class_name MapEditorRuler
 
 ## 标尺网格 - 显示网格坐标，固定于屏幕左侧和顶部
 

@@ -187,6 +187,21 @@ theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
+[node name="Eroded" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Eroded"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "被侵蚀"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Eroded"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
 [node name="Investigator" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel"]
 layout_mode = 2
 theme_override_constants/separation = 4

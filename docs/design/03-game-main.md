@@ -34,4 +34,4 @@
 ## 相关文档
 
 - [00 - 项目概览](00-project-overview.md)
-- [01 - 场景编辑器](01-scene-editor.md)（地图编辑与保存）
+- [01 - 地图编辑器](01-map-editor.md)（地图编辑与保存）

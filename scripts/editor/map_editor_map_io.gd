@@ -1,7 +1,7 @@
-class_name SceneEditorMapIO
+class_name MapEditorMapIO
 extends RefCounted
 
-## 场景编辑器地图保存/加载与 room_info.json 同步
+## 地图编辑器地图保存/加载与 room_info.json 同步
 ## 纯 I/O 逻辑，与 UI 解耦
 
 const SAVE_KEY_GRID := "grid_width"
@@ -123,10 +123,10 @@ static func sync_rooms_to_json(rooms: Array) -> bool:
 			json_data = parsed as Dictionary
 			json_rooms = (json_data.get("rooms", []) as Array).duplicate()
 		else:
-			json_data = {"source": "场景编辑器同步", "rooms": []}
+			json_data = {"source": "地图编辑器同步", "rooms": []}
 			json_rooms = []
 	else:
-		json_data = {"source": "场景编辑器同步", "rooms": []}
+		json_data = {"source": "地图编辑器同步", "rooms": []}
 		json_rooms = []
 	var max_num: int = 0
 	for r in json_rooms:
