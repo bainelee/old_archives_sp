@@ -1,0 +1,211 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3xk7m2vq8nrp"]
+
+[ext_resource type="Script" path="res://scripts/ui/ui_main.gd" id="1_ui_main"]
+[ext_resource type="PackedScene" uid="uid://dnym5k2x8qrwh" path="res://scenes/ui/time_panel.tscn" id="2_time_panel"]
+[ext_resource type="PackedScene" uid="uid://cxshelter_erosion01" path="res://scenes/ui/shelter_erosion_panel.tscn" id="3_shelter_erosion"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
+bg_color = Color(0.12, 0.12, 0.18, 0.92)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="UIMain" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_ui_main")
+
+[node name="TopBar" type="PanelContainer" parent="."]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 48.0
+offset_left = 0.0
+offset_right = 0.0
+offset_top = 0.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+
+[node name="Content" type="MarginContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="TopBar/Content"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="Factors" type="HBoxContainer" parent="TopBar/Content/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Cognition" type="HBoxContainer" parent="TopBar/Content/HBox/Factors"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Cognition"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "认知因子"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Cognition"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="Computation" type="HBoxContainer" parent="TopBar/Content/HBox/Factors"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Computation"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "计算因子"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Computation"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="Will" type="HBoxContainer" parent="TopBar/Content/HBox/Factors"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Will"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "意志因子"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Will"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="Permission" type="HBoxContainer" parent="TopBar/Content/HBox/Factors"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Permission"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "权限因子"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Permission"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="VSep1" type="VSeparator" parent="TopBar/Content/HBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(2, 0)
+
+[node name="Currency" type="HBoxContainer" parent="TopBar/Content/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Info" type="HBoxContainer" parent="TopBar/Content/HBox/Currency"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Currency/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "信息"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Currency/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="Truth" type="HBoxContainer" parent="TopBar/Content/HBox/Currency"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Currency/Truth"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "真相"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Currency/Truth"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="SpacerLeft" type="Control" parent="TopBar/Content/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TimePanel" parent="TopBar/Content/HBox" instance=ExtResource("2_time_panel")]
+layout_mode = 2
+
+[node name="SpacerRight" type="Control" parent="TopBar/Content/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VSep2" type="VSeparator" parent="TopBar/Content/HBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(2, 0)
+
+[node name="Personnel" type="HBoxContainer" parent="TopBar/Content/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Researcher" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Researcher"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "研究员"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Researcher"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="Labor" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Labor"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "劳动力"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Labor"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="Investigator" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Investigator"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "调查员"
+
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Investigator"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="VSep3" type="VSeparator" parent="TopBar/Content/HBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(2, 0)
+
+[node name="ShelterErosionPanel" parent="TopBar/Content/HBox" instance=ExtResource("3_shelter_erosion")]
+layout_mode = 2
+custom_minimum_size = Vector2(280, 0)

@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://dv76sutm3e6vc"]
+
+[ext_resource type="Script" uid="uid://brdemd7q8w6jf" path="res://scripts/game/game_main.gd" id="1_game_main"]
+[ext_resource type="Texture2D" uid="uid://d26ielqcpqjqs" path="res://assets/sprites/backgrounds/bg_test_0.png" id="2_bg"]
+[ext_resource type="PackedScene" uid="uid://b3xk7m2vq8nrp" path="res://scenes/ui/ui_main.tscn" id="3_ui_main"]
+
+[node name="GameMain" type="Node2D" unique_id=857920342]
+script = ExtResource("1_game_main")
+
+[node name="UIMain" parent="." unique_id=2043499112 instance=ExtResource("3_ui_main")]
+
+[node name="Background" type="Sprite2D" parent="." unique_id=1151208090]
+z_index = -100
+position = Vector2(800, 600)
+scale = Vector2(3.125, 2.34375)
+texture = ExtResource("2_bg")

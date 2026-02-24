@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://dnym5k2x8qrwh"]
+
+[ext_resource type="Script" path="res://scripts/ui/time_panel.gd" id="1_time_panel"]
+[ext_resource type="Script" path="res://scripts/ui/time_indicator.gd" id="2_time_indicator"]
+
+[node name="TimePanel" type="HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+script = ExtResource("1_time_panel")
+
+[node name="TimeIndicator" type="Control" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(28, 28)
+script = ExtResource("2_time_indicator")
+
+[node name="PlayPauseButton" type="Button" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 28)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "⏸"
+
+[node name="Speed1xButton" type="Button" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(36, 28)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 12
+text = "1x"
+
+[node name="Speed2xButton" type="Button" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(36, 28)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 12
+toggle_mode = true
+text = "2x"
+
+[node name="Speed6xButton" type="Button" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(36, 28)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 12
+toggle_mode = true
+text = "6x"
+
+[node name="Speed96xButton" type="Button" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(40, 28)
+theme_override_colors/font_color = Color(0.9, 0.9, 0.85, 1)
+theme_override_font_sizes/font_size = 12
+toggle_mode = true
+text = "96x"
+
+[node name="TimeLabel" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "1月 1日 00时"

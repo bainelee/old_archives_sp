@@ -11,10 +11,24 @@ config_version=5
 [application]
 
 config/name="Old Archives"
-run/main_scene="res://scenes/editor/scene_editor.tscn"
-config/name_localized={"zh_CN": "旧日档案馆"}
+config/name_localized={
+"zh_CN": "旧日档案馆"
+}
+run/main_scene="res://scenes/game/game_main.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[autoload]
+
+GameTime="*res://scripts/core/game_time.gd"
+ErosionCore="*res://scripts/core/erosion_core.gd"
 
 [physics]
 
@@ -23,4 +37,3 @@ config/icon="res://icon.svg"
 [rendering]
 
 rendering_device/driver.windows="d3d12"
-textures/canvas_textures/default_texture_filter=1
