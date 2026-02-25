@@ -369,6 +369,15 @@ func _draw() -> void:
 		if tex == null:
 			continue
 		_draw_single_base_image(tex, room.rect)
+	# 未清理房间遮罩：40% 透明度黑色
+	for room in _rooms:
+		if room.clean_status != RoomInfo.CleanStatus.UNCLEANED:
+			continue
+		var px: float = room.rect.position.x * CELL_SIZE
+		var py: float = room.rect.position.y * CELL_SIZE
+		var pw: float = room.rect.size.x * CELL_SIZE
+		var ph: float = room.rect.size.y * CELL_SIZE
+		draw_rect(Rect2(px, py, pw, ph), Color(0, 0, 0, 0.4), true)
 	# 房间边框：悬停亮起、选中常亮
 	for i in _rooms.size():
 		var room: RoomInfo = _rooms[i]
