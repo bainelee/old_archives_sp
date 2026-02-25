@@ -45,9 +45,29 @@ var pre_clean_text: String = "默认清理前文本"  ## 清理前文本
 var json_room_id: String = ""  ## 关联的 JSON 模板 id（如 ROOM_001），空表示编辑器新建未同步
 var desc: String = ""  ## 房间描述（与 room_info.json 的 desc 对应）
 
+## 清理花费（可选，空则用默认公式：10 认知/格，2 小时/格）
+var cleanup_cost: Dictionary = {}  ## {"cognition": 100, ...}
+var cleanup_time_hours: float = -1.0  ## -1 表示用默认公式
+
 
 func get_size() -> Vector2i:
 	return Vector2i(rect.size.x, rect.size.y)
+
+
+## 获取清理此房间所需资源（未配置则默认：10 认知因子/格）
+func get_cleanup_cost() -> Dictionary:
+	if not cleanup_cost.is_empty():
+		return cleanup_cost.duplicate()
+	var area: int = rect.size.x * rect.size.y
+	return {"cognition": area * 10}
+
+
+## 获取清理此房间所需时间（小时，未配置则默认：2 小时/格）
+func get_cleanup_time_hours() -> float:
+	if cleanup_time_hours > 0:
+		return cleanup_time_hours
+	var area: int = rect.size.x * rect.size.y
+	return float(area * 2)
 
 
 ## 转为 room_info.json 中的房间条目格式
@@ -123,6 +143,8 @@ func to_dict() -> Dictionary:
 		"pre_clean_text": pre_clean_text,
 		"json_room_id": json_room_id,
 		"desc": desc,
+		"cleanup_cost": cleanup_cost,
+		"cleanup_time_hours": cleanup_time_hours,
 	}
 
 
@@ -156,4 +178,8 @@ static func from_dict(d: Dictionary) -> RoomInfo:
 	info.pre_clean_text = str(d.get("pre_clean_text", "默认清理前文本"))
 	info.json_room_id = str(d.get("json_room_id", ""))
 	info.desc = str(d.get("desc", ""))
+	if d.has("cleanup_cost") and d.get("cleanup_cost") is Dictionary:
+		info.cleanup_cost = (d.get("cleanup_cost") as Dictionary).duplicate()
+	if d.has("cleanup_time_hours"):
+		info.cleanup_time_hours = float(d.get("cleanup_time_hours", -1))
 	return info

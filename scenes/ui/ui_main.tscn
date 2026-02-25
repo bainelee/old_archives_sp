@@ -1,9 +1,28 @@
-[gd_scene load_steps=3 format=3 uid="uid://b3xk7m2vq8nrp"]
+[gd_scene load_steps=6 format=3 uid="uid://b3xk7m2vq8nrp"]
 
 [ext_resource type="Script" path="res://scripts/ui/ui_main.gd" id="1_ui_main"]
 [ext_resource type="PackedScene" uid="uid://dnym5k2x8qrwh" path="res://scenes/ui/time_panel.tscn" id="2_time_panel"]
 [ext_resource type="PackedScene" uid="uid://cxshelter_erosion01" path="res://scenes/ui/shelter_erosion_panel.tscn" id="3_shelter_erosion"]
 [ext_resource type="PackedScene" uid="uid://calamity_bar_001" path="res://scenes/ui/calamity_bar.tscn" id="4_calamity_bar"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bottom_btn"]
+bg_color = Color(0.18, 0.15, 0.2, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bottom_btn_hover"]
+bg_color = Color(0.18, 0.15, 0.2, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.65, 0.9, 0.95)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
 bg_color = Color(0.12, 0.12, 0.18, 0.92)
@@ -212,3 +231,47 @@ layout_mode = 2
 custom_minimum_size = Vector2(280, 0)
 
 [node name="CalamityBar" parent="." instance=ExtResource("4_calamity_bar")]
+
+[node name="BottomRightBar" type="HBoxContainer" parent="."]
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -426.0
+offset_top = -150.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+theme_override_constants/separation = 8
+
+[node name="BtnCleanup" type="Button" parent="BottomRightBar"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "清理"
+
+[node name="BtnBuild" type="Button" parent="BottomRightBar"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "建设"
+
+[node name="BtnRenovate" type="Button" parent="BottomRightBar"]
+custom_minimum_size = Vector2(130, 130)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 16
+text = "改造"

@@ -1,0 +1,40 @@
+[gd_scene load_steps=4 format=3 uid="uid://cleanup_overlay_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/cleanup_overlay.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://cleanup_hover_panel_01" path="res://scenes/ui/cleanup_hover_panel.tscn" id="2_hover"]
+[ext_resource type="Script" path="res://scripts/ui/cleanup_progress_ring.gd" id="3_progress"]
+
+[node name="CleanupOverlay" type="CanvasLayer"]
+layer = 11
+script = ExtResource("1_script")
+
+[node name="CleanupHoverPanel" parent="." instance=ExtResource("2_hover")]
+
+[node name="ProgressRingsContainer" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 0.0
+offset_bottom = 0.0
+mouse_filter = 2
+
+[node name="ConfirmContainer" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 80.0
+offset_bottom = 80.0
+
+[node name="ConfirmButton" type="Button" parent="ConfirmContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 28
+text = "✓"
+
+[node name="ProgressRing" type="Control" parent="ConfirmContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("3_progress")

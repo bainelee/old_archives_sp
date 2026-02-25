@@ -62,7 +62,7 @@ func _ready() -> void:
 
 ## 从 personnel 字典初始化（researcher 总数，eroded 数量）
 ## 加载存档时由 GameMain 调用
-func initialize_from_personnel(personnel: Dictionary, total_game_hours: float = 0.0) -> void:
+func initialize_from_personnel(personnel: Dictionary, _total_game_hours: float = 0.0) -> void:
 	var total: int = int(personnel.get("researcher", 0))
 	var eroded: int = int(personnel.get("eroded", 0))
 	eroded = mini(eroded, total)

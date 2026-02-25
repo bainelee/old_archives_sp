@@ -3,6 +3,8 @@ extends CanvasLayer
 ## 显示：资源-因子、资源-货币、人员 三类数据
 ## 可挂载至任意主场景，数据通过属性或 Autoload 注入
 
+signal cleanup_button_pressed
+
 @onready var _label_cognition: Label = $TopBar/Content/HBox/Factors/Cognition/Value
 @onready var _label_computation: Label = $TopBar/Content/HBox/Factors/Computation/Value
 @onready var _label_will: Label = $TopBar/Content/HBox/Factors/Will/Value
@@ -59,6 +61,13 @@ var investigator_count: int = 0:
 
 func _ready() -> void:
 	_refresh_all()
+	var btn: Button = get_node_or_null("BottomRightBar/BtnCleanup")
+	if btn:
+		btn.pressed.connect(_on_cleanup_button_pressed)
+
+
+func _on_cleanup_button_pressed() -> void:
+	cleanup_button_pressed.emit()
 
 
 func _update_label(lbl: Label, value: int) -> void:
