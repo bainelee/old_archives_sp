@@ -1,12 +1,105 @@
-[gd_scene load_steps=4 format=3 uid="uid://cleanup_overlay_01"]
+[gd_scene load_steps=5 format=3 uid="uid://cleanup_overlay_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/cleanup_overlay.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://cleanup_hover_panel_01" path="res://scenes/ui/cleanup_hover_panel.tscn" id="2_hover"]
 [ext_resource type="Script" path="res://scripts/ui/cleanup_progress_ring.gd" id="3_progress"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dim"]
+bg_color = Color(0, 0, 0, 0.3)
+draw_center = true
+
 [node name="CleanupOverlay" type="CanvasLayer"]
 layer = 11
 script = ExtResource("1_script")
+
+[node name="DimOverlay" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dim")
+
+[node name="BlockedUIOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BlockTopBar" type="Control" parent="BlockedUIOverlay"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 48.0
+offset_left = 0.0
+offset_right = 0.0
+offset_top = 0.0
+grow_horizontal = 2
+mouse_filter = 1
+
+[node name="BlockCalamityBar" type="Control" parent="BlockedUIOverlay"]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -160.0
+offset_right = 80.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="BlockBuildRenovate" type="Control" parent="BlockedUIOverlay"]
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -426.0
+offset_top = -150.0
+offset_right = -150.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 1
+
+[node name="HintPanel" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 56.0
+offset_right = 120.0
+offset_bottom = 100.0
+grow_horizontal = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="Title" type="Label" parent="HintPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 18
+text = "选择需要清理的房间"
+horizontal_alignment = 1
+
+[node name="Sub" type="Label" parent="HintPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "右键取消"
+horizontal_alignment = 1
 
 [node name="CleanupHoverPanel" parent="." instance=ExtResource("2_hover")]
 

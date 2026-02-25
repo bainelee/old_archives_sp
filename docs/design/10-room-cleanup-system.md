@@ -79,13 +79,14 @@ NONE（恢复时间）
 - 可建设区域（尺寸，如 5×3）
 - 资源储量（房间产出资源列表）
 - 清理花费（资源类型与数量）
+- 研究员占用（本房间需占用人数 + 当前可用人数）
 - 清理时间（游戏内小时）
 - **资源不足时**：底部显示「当前资源不足」，且左键点击无效
 
 ### 3.3 确认与资源不足
 
-- 左键点击未清理房间：资源足够 → 进入 CONFIRMING，房间中心显示 ✓ 按钮
-- 资源不足：点击无效，悬停时显示「当前资源不足」
+- 左键点击未清理房间：资源足够（信息 + 可用研究员）→ 进入 CONFIRMING，房间中心显示 ✓ 按钮
+- 资源不足（信息或研究员不足）：点击无效，悬停时显示「当前资源不足」
 - 点击 ✓：消耗资源，房间加入清理队列，进度环显示于房间中心
 
 ### 3.4 退出方式
@@ -121,6 +122,11 @@ var _cleanup_rooms_in_progress: Dictionary = {}  # room_index -> {"elapsed": flo
 - 暂停时 `GameTime.is_flowing == false`，不推进
 - 每房间完成后：`room.clean_status = CLEANED`，从 `_cleanup_rooms_in_progress` 移除
 
+### 4.4 研究员占用
+
+- 清理进行中：研究员被**临时占用**，清理结束后返还
+- TopBar 人员区显示「未侵蚀/总数」；悬停研究员区可查看详细占用（总数、被侵蚀、清理中、建设中、房间工作、空闲）
+
 ---
 
 ## 5. 清理花费与时间
@@ -129,15 +135,22 @@ var _cleanup_rooms_in_progress: Dictionary = {}  # room_index -> {"elapsed": flo
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| cleanup_cost | Dictionary | 可选，如 `{"cognition": 150}` |
+| cleanup_cost | Dictionary | 可选，如 `{"info": 20}` |
 | cleanup_time_hours | float | 可选，-1 表示用默认公式 |
 
-### 5.2 默认公式（未配置时）
+| 方法 | 说明 |
+|------|------|
+| get_cleanup_researcher_count() | 清理需占用研究员数（3～5 单位 2 人，6～7 单位 3 人） |
+
+### 5.2 默认公式（未配置时，见 08-game-values 4.1）
 
 | 项目 | 公式 |
 |------|------|
-| 花费 | 10 认知因子 / 格（`area = rect.size.x × rect.size.y`） |
-| 时间 | 2 游戏小时 / 格 |
+| 信息消耗 | 3～5 单位 20 信息；6～7 单位 40 信息 |
+| 研究员占用 | 3～5 单位 2 人；6～7 单位 3 人 |
+| 时间 | 3～5 单位 3 小时；6～7 单位 5 小时 |
+
+房间单位：`ceil(面积/5)`，面积 = `rect.size.x × rect.size.y`
 
 ### 5.3 支持的资源键
 
@@ -147,6 +160,12 @@ var _cleanup_rooms_in_progress: Dictionary = {}  # room_index -> {"elapsed": flo
 ### 5.4 持久化
 
 `cleanup_cost`、`cleanup_time_hours` 写入 `to_dict()` / 从 `from_dict()` 读取，兼容旧存档（缺省时使用默认公式）。
+
+### 5.5 清理完成与资源授予
+
+- 清理进度达到 100% 时：`room.clean_status = CLEANED`，房间 `resources` 授予玩家
+- 授予逻辑：`_grant_room_resources_to_player()` 将 `room.resources` 中各 ResourceType 累加至 UIMain 对应属性
+- 消耗/授予后均调用 `_sync_resources_to_topbar()` 刷新 TopBar 显示
 
 ---
 
@@ -206,7 +225,11 @@ var _cleanup_rooms_in_progress: Dictionary = {}  # room_index -> {"elapsed": flo
 
 ## 8. 输入与 GUI 分离
 
-全部鼠标逻辑统一在 `_input` 中处理（参考 00cfade），通过 `_is_click_over_ui_buttons()` 排除需交给 GUI 的区域（TopBar、BottomRightBar、CalamityBar、ConfirmContainer），仅对游戏世界点击进行房间选择/确认；中键平移和鼠标移动也在 `_input` 中。
+全部鼠标逻辑统一在 `_input` 中处理（参考 00cfade），通过 `_is_click_over_ui_buttons()` 排除需交给 GUI 的区域，仅对游戏世界点击进行房间选择/确认；中键平移和鼠标移动也在 `_input` 中。
+
+**需排除的区域**：TopBar、BottomRightBar、CalamityBar、ConfirmContainer、CheatShelterPanel/Panel（debug 庇护等级）
+
+**清理模式**：`_is_click_over_cleanup_allowed_ui()` 允许点击 BtnCleanup、ConfirmContainer、CheatShelterPanel；其余 UI 点击被拦截。
 
 ---
 

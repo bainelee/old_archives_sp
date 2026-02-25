@@ -2,6 +2,9 @@ extends CanvasLayer
 ## 清理模式 UI 覆盖层 - 悬停面板、确认按钮、多房间进度环
 ## 由 GameMain 驱动，根据清理状态显示/隐藏
 
+@onready var _dim_overlay: Control = $DimOverlay
+@onready var _blocked_ui_overlay: Control = $BlockedUIOverlay
+@onready var _hint_panel: Control = $HintPanel
 @onready var _hover_panel: PanelContainer = $CleanupHoverPanel
 @onready var _confirm_container: Control = $ConfirmContainer
 @onready var _confirm_button: Button = $ConfirmContainer/ConfirmButton
@@ -39,9 +42,9 @@ func get_hover_panel() -> PanelContainer:
 	return _hover_panel
 
 
-func show_hover_for_room(room: RoomInfo, player_resources: Dictionary, can_afford: bool) -> void:
+func show_hover_for_room(room: RoomInfo, player_resources: Dictionary, can_afford: bool, researchers_needed: int = 0, researchers_available: int = 0) -> void:
 	if _hover_panel.has_method("show_for_room"):
-		_hover_panel.show_for_room(room, player_resources, can_afford)
+		_hover_panel.show_for_room(room, player_resources, can_afford, researchers_needed, researchers_available)
 
 
 func hide_hover() -> void:
@@ -64,6 +67,25 @@ func show_confirm_at(screen_pos: Vector2) -> void:
 
 func hide_confirm() -> void:
 	_confirm_container.visible = false
+
+
+func show_cleanup_selecting_ui() -> void:
+	## 显示 30% 黑遮罩、提示文案、禁用其余 UI 的覆盖层
+	if _dim_overlay:
+		_dim_overlay.visible = true
+	if _blocked_ui_overlay:
+		_blocked_ui_overlay.visible = true
+	if _hint_panel:
+		_hint_panel.visible = true
+
+
+func hide_cleanup_selecting_ui() -> void:
+	if _dim_overlay:
+		_dim_overlay.visible = false
+	if _blocked_ui_overlay:
+		_blocked_ui_overlay.visible = false
+	if _hint_panel:
+		_hint_panel.visible = false
 
 
 func show_progress_at(screen_pos: Vector2, ratio: float) -> void:

@@ -66,7 +66,19 @@
 
 **弹出层**：需 reparent 到 CanvasLayer 顶层（z_index=100），避免被 TopBar 裁剪；隐藏延迟 0.15 秒。
 
-### 2.3 ErosionCycleBar
+### 2.3 ResearcherHoverPanel（研究员详情悬停）
+
+| 项目 | 说明 |
+|------|------|
+| 场景 | `scenes/ui/researcher_hover_panel.tscn` |
+| 脚本 | `scripts/ui/researcher_hover_panel.gd` |
+| 触发 | 鼠标悬停 TopBar 的「研究员：空闲/总数」区域 |
+| 定位 | 鼠标左侧，垂直居中 |
+| 内容 | 研究员总数、被侵蚀、清理中、建设中、房间内工作、空闲 |
+
+**数据源**：UIMain 的 researcher_count、eroded_count、researchers_in_cleanup、researchers_in_construction、researchers_working_in_rooms
+
+### 2.4 ErosionCycleBar
 
 | 项目 | 说明 |
 |------|------|
@@ -86,7 +98,10 @@
 
 - **因子**：cognition_amount, computation_amount, will_amount, permission_amount（对应 factors.cognition/computation/willpower/permission）
 - **货币**：info_amount, truth_amount
-- **人员**：researcher_count（显示为 未侵蚀/总数，如 8/10）、eroded_count（供 PersonnelErosionCore）、investigator_count
+- **人员**：researcher_count、eroded_count、investigator_count
+- **研究员占用**：researchers_in_cleanup（清理中）、researchers_in_construction（建设中，预留）、researchers_working_in_rooms（房间工作，预留）
+
+**研究员显示**：TopBar 显示「空闲/总数」（空闲 = 总数 − 被侵蚀 − 清理中 − 建设中 − 房间工作）
 
 ### 3.2 Autoload 依赖
 
@@ -111,6 +126,7 @@
 - 弹出层移出父容器后需 reparent 到 CanvasLayer 顶层
 - 使用短延迟（约 0.15s）隐藏，避免闪烁
 - 位置限制在视口内：`clampi(x, 4, vp_size.x - ps.x - 4)`
+- 鼠标跟随型（如 ResearcherHoverPanel、CleanupHoverPanel）：`_process` 中按 `get_mouse_position()` 更新 `position`，定位在鼠标左侧
 
 ### 4.3 颜色规范（侵蚀）
 
@@ -135,6 +151,7 @@
 | `scripts/ui/time_indicator.gd` | 时间流逝图元 |
 | `scenes/ui/shelter_erosion_panel.tscn` | 庇护/侵蚀面板 |
 | `scripts/ui/shelter_erosion_panel.gd` | 侵蚀显示与弹出 |
+| `scripts/ui/researcher_hover_panel.gd` | 研究员详情悬停 |
 | `scripts/ui/erosion_cycle_bar.gd` | 侵蚀周期长条 |
 | `scripts/core/game_time.gd` | 时间系统 |
 | `scripts/core/erosion_core.gd` | 侵蚀数据源 |

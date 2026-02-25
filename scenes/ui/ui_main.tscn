@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://b3xk7m2vq8nrp"]
+[gd_scene load_steps=7 format=3 uid="uid://b3xk7m2vq8nrp"]
 
 [ext_resource type="Script" path="res://scripts/ui/ui_main.gd" id="1_ui_main"]
 [ext_resource type="PackedScene" uid="uid://dnym5k2x8qrwh" path="res://scenes/ui/time_panel.tscn" id="2_time_panel"]
-[ext_resource type="PackedScene" uid="uid://cxshelter_erosion01" path="res://scenes/ui/shelter_erosion_panel.tscn" id="3_shelter_erosion"]
+[ext_resource type="PackedScene" uid="uid://b71gsf1lhvmn8" path="res://scenes/ui/shelter_erosion_panel.tscn" id="3_shelter_erosion"]
 [ext_resource type="PackedScene" uid="uid://calamity_bar_001" path="res://scenes/ui/calamity_bar.tscn" id="4_calamity_bar"]
+[ext_resource type="PackedScene" uid="uid://researcher_hover_panel_01" path="res://scenes/ui/researcher_hover_panel.tscn" id="5_researcher_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bottom_btn"]
 bg_color = Color(0.18, 0.15, 0.2, 0.9)
@@ -231,6 +232,8 @@ layout_mode = 2
 custom_minimum_size = Vector2(280, 0)
 
 [node name="CalamityBar" parent="." instance=ExtResource("4_calamity_bar")]
+
+[node name="ResearcherHoverPanel" parent="." instance=ExtResource("5_researcher_panel")]
 
 [node name="BottomRightBar" type="HBoxContainer" parent="."]
 layout_mode = 3

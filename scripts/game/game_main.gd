@@ -216,8 +216,9 @@ func _process(delta: float) -> void:
 			if room.clean_status == RoomInfo.CleanStatus.UNCLEANED and not _is_room_cleaning(_hovered_room_index):
 				var resources: Dictionary = _get_player_resources()
 				var can_afford: bool = _can_afford_cleanup(room, resources)
+				var researchers_available: int = maxi(0, int(resources.get("researcher", 0)) - int(resources.get("eroded", 0)) - _get_cleanup_researchers_occupied())
 				if overlay.has_method("show_hover_for_room"):
-					overlay.show_hover_for_room(room, resources, can_afford)
+					overlay.show_hover_for_room(room, resources, can_afford, room.get_cleanup_researcher_count(), researchers_available)
 			else:
 				overlay.hide_hover()
 		else:
@@ -238,6 +239,7 @@ func _process(delta: float) -> void:
 		var ratio: float = clampf(elapsed / total, 0.0, 1.0)
 		if ratio >= 1.0:
 			_rooms[room_idx].clean_status = RoomInfo.CleanStatus.CLEANED
+			_grant_room_resources_to_player(_rooms[room_idx])
 			to_remove.append(room_idx)
 	if to_remove.size() > 0:
 		for idx in to_remove:
@@ -252,6 +254,7 @@ func _process(delta: float) -> void:
 		overlay.update_progress_rooms(progress_data)
 	if _cleanup_rooms_in_progress.is_empty():
 		_get_cleanup_overlay().hide_progress()
+	_sync_cleanup_researchers_to_ui()
 	queue_redraw()
 
 
@@ -452,6 +455,12 @@ func _enter_cleanup_selecting_mode() -> void:
 	_clear_room_selection()
 	_get_cleanup_overlay().hide_hover()
 	_get_cleanup_overlay().hide_confirm()
+	var overlay: Node = _get_cleanup_overlay()
+	if overlay.has_method("show_cleanup_selecting_ui"):
+		overlay.show_cleanup_selecting_ui()
+	var ui: Node = get_node_or_null("UIMain")
+	if ui and ui.has_method("set_cleanup_blocking"):
+		ui.set_cleanup_blocking(true)
 	queue_redraw()
 
 
@@ -460,15 +469,30 @@ func _exit_cleanup_mode() -> void:
 	_cleanup_confirm_room_index = -1
 	if _cleanup_rooms_in_progress.is_empty():
 		_get_cleanup_overlay().hide_progress()
+	var overlay: Node = _get_cleanup_overlay()
+	if overlay.has_method("hide_cleanup_selecting_ui"):
+		overlay.hide_cleanup_selecting_ui()
+	var ui: Node = get_node_or_null("UIMain")
+	if ui and ui.has_method("set_cleanup_blocking"):
+		ui.set_cleanup_blocking(false)
 	if GameTime and _time_was_flowing_before_cleanup:
 		GameTime.is_flowing = true
-	_get_cleanup_overlay().hide_hover()
-	_get_cleanup_overlay().hide_confirm()
+	overlay.hide_hover()
+	overlay.hide_confirm()
 	queue_redraw()
 
 
 func _get_cleanup_overlay() -> Node:
 	return get_node_or_null("CleanupOverlay")
+
+
+func _get_cleanup_researchers_occupied() -> int:
+	## 当前所有正在清理的房间占用的研究员总数
+	var total: int = 0
+	for room_idx in _cleanup_rooms_in_progress:
+		if room_idx >= 0 and room_idx < _rooms.size():
+			total += _rooms[room_idx].get_cleanup_researcher_count()
+	return total
 
 
 func _can_afford_cleanup(room: RoomInfo, resources: Dictionary) -> bool:
@@ -477,6 +501,11 @@ func _can_afford_cleanup(room: RoomInfo, resources: Dictionary) -> bool:
 		var have: int = int(resources.get(key, 0))
 		if have < int(cost.get(key, 0)):
 			return false
+	var researcher_total: int = int(resources.get("researcher", 0))
+	var researcher_eroded: int = int(resources.get("eroded", 0))
+	var researcher_available: int = maxi(0, researcher_total - researcher_eroded - _get_cleanup_researchers_occupied())
+	if researcher_available < room.get_cleanup_researcher_count():
+		return false
 	return true
 
 
@@ -499,6 +528,51 @@ func _consume_cleanup_cost(room: RoomInfo) -> void:
 			ui.info_amount = maxi(0, ui.info_amount - amt)
 		elif key == "truth":
 			ui.truth_amount = maxi(0, ui.truth_amount - amt)
+	_sync_resources_to_topbar()
+
+
+func _grant_room_resources_to_player(room: RoomInfo) -> void:
+	## 房间清理完成后，将房间资源储量授予玩家并同步至 TopBar
+	var ui: Node = get_node_or_null("UIMain")
+	if not ui:
+		return
+	for r in room.resources:
+		if not (r is Dictionary):
+			continue
+		var rt: int = int(r.get("resource_type", RoomInfo.ResourceType.NONE))
+		var amt: int = int(r.get("resource_amount", 0))
+		if rt == RoomInfo.ResourceType.NONE or amt <= 0:
+			continue
+		match rt:
+			RoomInfo.ResourceType.COGNITION:
+				ui.cognition_amount = ui.cognition_amount + amt
+			RoomInfo.ResourceType.COMPUTATION:
+				ui.computation_amount = ui.computation_amount + amt
+			RoomInfo.ResourceType.WILL:
+				ui.will_amount = ui.will_amount + amt
+			RoomInfo.ResourceType.PERMISSION:
+				ui.permission_amount = ui.permission_amount + amt
+			RoomInfo.ResourceType.INFO:
+				ui.info_amount = ui.info_amount + amt
+			RoomInfo.ResourceType.TRUTH:
+				ui.truth_amount = ui.truth_amount + amt
+	_sync_resources_to_topbar()
+
+
+func _sync_resources_to_topbar() -> void:
+	## 强制将 UIMain 当前资源数值刷新到 TopBar 显示（确保消耗/获得后显示一致）
+	var ui: Node = get_node_or_null("UIMain")
+	if not ui or not ui.has_method("refresh_display"):
+		return
+	ui.refresh_display()
+
+
+func _sync_cleanup_researchers_to_ui() -> void:
+	## 将清理占用研究员数同步至 UIMain，用于 TopBar 显示
+	var ui: Node = get_node_or_null("UIMain")
+	if not ui or ui.get("researchers_in_cleanup") == null:
+		return
+	ui.researchers_in_cleanup = _get_cleanup_researchers_occupied()
 
 
 func _on_cleanup_confirm_pressed() -> void:
@@ -516,12 +590,8 @@ func _on_cleanup_confirm_pressed() -> void:
 		"total": room.get_cleanup_time_hours()
 	}
 	_cleanup_confirm_room_index = -1
-	_cleanup_mode = CleanupMode.SELECTING
-	# 恢复时间以便进度推进，保持选择模式以便选择其他房间
-	if GameTime and _time_was_flowing_before_cleanup:
-		GameTime.is_flowing = true
-	_get_cleanup_overlay().hide_confirm()
-	_get_cleanup_overlay().hide_hover()
+	# 确认后立刻退出清理选择状态，恢复时间与正常游戏
+	_exit_cleanup_mode()
 
 
 func _get_player_resources() -> Dictionary:
@@ -532,6 +602,9 @@ func _get_player_resources() -> Dictionary:
 	var out: Dictionary = {}
 	out.merge(res.get("factors", {}))
 	out.merge(res.get("currency", {}))
+	var personnel: Dictionary = res.get("personnel", {})
+	out["researcher"] = personnel.get("researcher", 0)
+	out["eroded"] = personnel.get("eroded", 0)
 	return out
 
 
@@ -605,10 +678,29 @@ func _draw() -> void:
 				draw_rect(border_rect, Color(0.4, 0.75, 1, 0.85), false)
 
 
+func _is_click_over_cleanup_allowed_ui(mouse_pos: Vector2) -> bool:
+	## 清理选择模式下仍可点击的区域（清理按钮、确认按钮、debug 庇护面板）
+	var btn: Control = get_node_or_null("UIMain/BottomRightBar/BtnCleanup") as Control
+	if btn and btn.get_global_rect().has_point(mouse_pos):
+		return true
+	var cheat_panel: Control = get_node_or_null("CheatShelterPanel/Panel") as Control
+	if cheat_panel and cheat_panel.get_global_rect().has_point(mouse_pos):
+		return true
+	var overlay: Node = _get_cleanup_overlay()
+	if overlay:
+		var confirm_ctrl: Control = overlay.get_node_or_null("ConfirmContainer") as Control
+		if confirm_ctrl and confirm_ctrl.visible and confirm_ctrl.get_global_rect().has_point(mouse_pos):
+			return true
+	return false
+
+
 func _is_click_over_ui_buttons(mouse_pos: Vector2) -> bool:
 	## 点击是否在需要交给 GUI 的区域（不拦截，让 GUI 处理）
 	var top_bar: Control = get_node_or_null("UIMain/TopBar") as Control
 	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
+		return true
+	var cheat_panel: Control = get_node_or_null("CheatShelterPanel/Panel") as Control
+	if cheat_panel and cheat_panel.get_global_rect().has_point(mouse_pos):
 		return true
 	var bar: Control = get_node_or_null("UIMain/BottomRightBar") as Control
 	if bar and bar.get_global_rect().has_point(mouse_pos):
@@ -642,11 +734,18 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed and not _is_panning:
 			var mouse_pos: Vector2 = get_viewport().get_mouse_position()
-			var over_ui: bool = _is_click_over_ui_buttons(mouse_pos)
+			var in_cleanup: bool = _cleanup_mode == CleanupMode.SELECTING or _cleanup_mode == CleanupMode.CONFIRMING
+			if in_cleanup:
+				if _is_click_over_cleanup_allowed_ui(mouse_pos):
+					return  # 仅清理、确认按钮可点击
+				if _is_click_over_ui_buttons(mouse_pos):
+					get_viewport().set_input_as_handled()
+					return  # 拦截其余 UI（时间、庇护等级等）
+			else:
+				if _is_click_over_ui_buttons(mouse_pos):
+					return  # 正常模式：交给 GUI 处理
 			if DEBUG_CLEANUP_INPUT:
-				print("[Cleanup] 左键点击 pos=%s over_ui=%s mode=%s" % [mouse_pos, over_ui, _cleanup_mode])
-			if over_ui:
-				return  # 点在 UI 按钮上，交给 GUI 处理
+				print("[Cleanup] 左键点击 pos=%s mode=%s" % [mouse_pos, _cleanup_mode])
 			var grid: Vector2i = _get_mouse_grid()
 			var rid: int = _get_room_at_grid(grid.x, grid.y)
 			if DEBUG_CLEANUP_INPUT:

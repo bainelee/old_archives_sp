@@ -6,6 +6,7 @@ extends PanelContainer
 @onready var _label_build_area: Label = $Margin/VBox/BuildArea
 @onready var _label_resources: Label = $Margin/VBox/Resources
 @onready var _label_cost: Label = $Margin/VBox/Cost
+@onready var _label_researcher: Label = $Margin/VBox/Researcher
 @onready var _label_time: Label = $Margin/VBox/Time
 @onready var _label_insufficient: Label = $Margin/VBox/Insufficient
 
@@ -19,7 +20,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
-func show_for_room(room: RoomInfo, _player_resources: Dictionary, can_afford: bool) -> void:
+func show_for_room(room: RoomInfo, player_resources: Dictionary, can_afford: bool, researchers_needed: int = 0, researchers_available: int = 0) -> void:
 	if room == null:
 		hide_panel()
 		return
@@ -27,7 +28,11 @@ func show_for_room(room: RoomInfo, _player_resources: Dictionary, can_afford: bo
 	_label_build_area.text = "可建设区域：%d×%d" % [room.rect.size.x, room.rect.size.y]
 	_label_resources.text = _format_room_resources(room.resources)
 	var cost: Dictionary = room.get_cleanup_cost()
-	_label_cost.text = "清理花费：%s" % _format_cost(cost)
+	_label_cost.text = "清理花费：%s" % _format_cost_with_have(cost, player_resources)
+	if _label_researcher:
+		var needed: int = researchers_needed if researchers_needed > 0 else room.get_cleanup_researcher_count()
+		_label_researcher.text = "研究员占用：%d 人（可用 %d）" % [needed, researchers_available]
+		_label_researcher.visible = true
 	_label_time.text = "清理时间：%.0f 小时" % room.get_cleanup_time_hours()
 	_label_insufficient.visible = not can_afford
 	_label_insufficient.text = "当前资源不足"
@@ -63,6 +68,28 @@ func _format_cost(cost: Dictionary) -> String:
 		var amt: int = int(cost.get(key, 0))
 		if amt > 0:
 			parts.append("%s %d" % [key_names.get(key, key), amt])
+	return ", ".join(parts) if parts.size() > 0 else "无"
+
+
+func _format_cost_with_have(cost: Dictionary, player_resources: Dictionary) -> String:
+	## 显示消耗并附带玩家拥有量，如「信息 20 (拥有 500)」
+	if cost.is_empty():
+		return "无"
+	var parts: PackedStringArray = []
+	var key_names: Dictionary = {
+		"cognition": "认知因子",
+		"computation": "计算因子",
+		"willpower": "意志因子",
+		"permission": "权限因子",
+		"info": "信息",
+		"truth": "真相",
+	}
+	for key in cost:
+		var amt: int = int(cost.get(key, 0))
+		if amt > 0:
+			var have: int = int(player_resources.get(key, 0))
+			var name_str: String = key_names.get(key, key)
+			parts.append("%s %d (拥有 %d)" % [name_str, amt, have])
 	return ", ".join(parts) if parts.size() > 0 else "无"
 
 

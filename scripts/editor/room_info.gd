@@ -45,8 +45,8 @@ var pre_clean_text: String = "默认清理前文本"  ## 清理前文本
 var json_room_id: String = ""  ## 关联的 JSON 模板 id（如 ROOM_001），空表示编辑器新建未同步
 var desc: String = ""  ## 房间描述（与 room_info.json 的 desc 对应）
 
-## 清理花费（可选，空则用默认公式：10 认知/格，2 小时/格）
-var cleanup_cost: Dictionary = {}  ## {"cognition": 100, ...}
+## 清理花费（可选，空则按 08-game-values 4.1 默认公式）
+var cleanup_cost: Dictionary = {}  ## {"info": 20, ...}
 var cleanup_time_hours: float = -1.0  ## -1 表示用默认公式
 
 
@@ -54,20 +54,44 @@ func get_size() -> Vector2i:
 	return Vector2i(rect.size.x, rect.size.y)
 
 
-## 获取清理此房间所需资源（未配置则默认：10 认知因子/格）
+## 房间单位数（5 格 = 1 单位，如 5×3=15 格 = 3 单位）
+func _get_room_units() -> int:
+	var area: int = rect.size.x * rect.size.y
+	return maxi(1, int(ceil(float(area) / 5.0)))
+
+
+## 获取清理此房间所需资源（未配置则按 08-game-values 4.1）
+## 3 单位：20 信息；6～7 单位：40 信息
 func get_cleanup_cost() -> Dictionary:
 	if not cleanup_cost.is_empty():
 		return cleanup_cost.duplicate()
-	var area: int = rect.size.x * rect.size.y
-	return {"cognition": area * 10}
+	var units: int = _get_room_units()
+	if units <= 5:
+		return {"info": 20}
+	else:
+		return {"info": 40}
 
 
-## 获取清理此房间所需时间（小时，未配置则默认：2 小时/格）
+## 获取清理此房间需占用的研究员数量（08-game-values 4.1）
+## 3～5 单位：2 人；6～7 单位：3 人
+func get_cleanup_researcher_count() -> int:
+	var units: int = _get_room_units()
+	if units <= 5:
+		return 2
+	else:
+		return 3
+
+
+## 获取清理此房间所需时间（小时，未配置则按 08-game-values 4.1）
+## 3 单位：3 小时；6～7 单位：5 小时
 func get_cleanup_time_hours() -> float:
 	if cleanup_time_hours > 0:
 		return cleanup_time_hours
-	var area: int = rect.size.x * rect.size.y
-	return float(area * 2)
+	var units: int = _get_room_units()
+	if units <= 5:
+		return 3.0
+	else:
+		return 5.0
 
 
 ## 转为 room_info.json 中的房间条目格式

@@ -14,6 +14,8 @@ signal cleanup_button_pressed
 @onready var _label_researcher: Label = $TopBar/Content/HBox/Personnel/Researcher/Value
 @onready var _label_eroded: Label = $TopBar/Content/HBox/Personnel/Eroded/Value
 @onready var _label_investigator: Label = $TopBar/Content/HBox/Personnel/Investigator/Value
+@onready var _researcher_hover_area: Control = $TopBar/Content/HBox/Personnel/Researcher
+@onready var _researcher_hover_panel: PanelContainer = $ResearcherHoverPanel
 
 ## 资源-因子
 var cognition_amount: int = 0:
@@ -53,6 +55,24 @@ var eroded_count: int = 0:
 		eroded_count = v
 		_update_researcher_display()
 		_update_label(_label_eroded, v)
+## 清理中临时占用的研究员数（由 GameMain 同步，清理结束后返还）
+var researchers_in_cleanup: int = 0:
+	set(v):
+		researchers_in_cleanup = v
+		_update_researcher_display()
+		_update_researcher_hover_if_visible()
+## 建设中占用的研究员数（预留，暂为 0）
+var researchers_in_construction: int = 0:
+	set(v):
+		researchers_in_construction = v
+		_update_researcher_display()
+		_update_researcher_hover_if_visible()
+## 房间内工作的研究员数（预留，暂为 0）
+var researchers_working_in_rooms: int = 0:
+	set(v):
+		researchers_working_in_rooms = v
+		_update_researcher_display()
+		_update_researcher_hover_if_visible()
 var investigator_count: int = 0:
 	set(v):
 		investigator_count = v
@@ -64,10 +84,89 @@ func _ready() -> void:
 	var btn: Button = get_node_or_null("BottomRightBar/BtnCleanup")
 	if btn:
 		btn.pressed.connect(_on_cleanup_button_pressed)
+	if _researcher_hover_area:
+		_researcher_hover_area.mouse_filter = Control.MOUSE_FILTER_STOP
+		_researcher_hover_area.mouse_entered.connect(_on_researcher_hover_entered)
+		_researcher_hover_area.mouse_exited.connect(_on_researcher_hover_exited)
 
 
 func _on_cleanup_button_pressed() -> void:
 	cleanup_button_pressed.emit()
+
+
+func _on_researcher_hover_entered() -> void:
+	if _researcher_hover_panel and _researcher_hover_panel.has_method("show_panel"):
+		_researcher_hover_panel.show_panel(
+			researcher_count,
+			eroded_count,
+			researchers_in_cleanup,
+			researchers_in_construction,
+			researchers_working_in_rooms
+		)
+
+
+func _on_researcher_hover_exited() -> void:
+	if _researcher_hover_panel and _researcher_hover_panel.has_method("hide_panel"):
+		_researcher_hover_panel.hide_panel()
+
+
+func _process(_delta: float) -> void:
+	if _researcher_hover_panel and _researcher_hover_panel.visible and _researcher_hover_panel.has_method("update_position"):
+		var viewport: Viewport = get_viewport()
+		if viewport:
+			_researcher_hover_panel.update_position(viewport.get_mouse_position(), viewport.get_visible_rect().size)
+
+
+func _update_researcher_hover_if_visible() -> void:
+	if _researcher_hover_panel and _researcher_hover_panel.visible and _researcher_hover_panel.has_method("show_panel"):
+		_researcher_hover_panel.show_panel(
+			researcher_count,
+			eroded_count,
+			researchers_in_cleanup,
+			researchers_in_construction,
+			researchers_working_in_rooms
+		)
+
+
+## 清理选择模式下禁用其余 UI 的悬停与点击
+func set_cleanup_blocking(blocked: bool) -> void:
+	if blocked and _researcher_hover_panel and _researcher_hover_panel.has_method("hide_panel"):
+		_researcher_hover_panel.hide_panel()
+	_set_buttons_blocked($TopBar, blocked)
+	_set_buttons_blocked($CalamityBar, blocked)
+	_set_control_mouse_filter($TopBar, blocked)
+	_set_control_mouse_filter($CalamityBar, blocked)
+	var build_btn: Button = get_node_or_null("BottomRightBar/BtnBuild") as Button
+	if build_btn:
+		build_btn.disabled = blocked
+	var renovate_btn: Button = get_node_or_null("BottomRightBar/BtnRenovate") as Button
+	if renovate_btn:
+		renovate_btn.disabled = blocked
+
+
+func _set_buttons_blocked(node: Node, blocked: bool) -> void:
+	if node is BaseButton:
+		(node as BaseButton).disabled = blocked
+	for c in node.get_children():
+		_set_buttons_blocked(c, blocked)
+
+
+func _set_control_mouse_filter(node: Node, ignore: bool) -> void:
+	## 设为 IGNORE 时，该 Control 及其子节点不参与鼠标检测，悬停效果不触发
+	if node is Control:
+		var ctrl: Control = node as Control
+		if ignore:
+			ctrl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		else:
+			# 恢复：Button 需 STOP 以接收点击，Label 用 IGNORE，容器用 PASS
+			if node is BaseButton:
+				ctrl.mouse_filter = Control.MOUSE_FILTER_STOP
+			elif node is Label:
+				ctrl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			else:
+				ctrl.mouse_filter = Control.MOUSE_FILTER_PASS
+	for c in node.get_children():
+		_set_control_mouse_filter(c, ignore)
 
 
 func _update_label(lbl: Label, value: int) -> void:
@@ -77,8 +176,8 @@ func _update_label(lbl: Label, value: int) -> void:
 
 func _update_researcher_display() -> void:
 	if _label_researcher:
-		var healthy: int = maxi(0, researcher_count - eroded_count)
-		_label_researcher.text = "%d/%d" % [healthy, researcher_count]
+		var idle: int = maxi(0, researcher_count - eroded_count - researchers_in_cleanup - researchers_in_construction - researchers_working_in_rooms)
+		_label_researcher.text = "%d/%d" % [idle, researcher_count]
 
 
 func _refresh_all() -> void:
@@ -91,6 +190,11 @@ func _refresh_all() -> void:
 	_update_researcher_display()
 	_update_label(_label_eroded, eroded_count)
 	_update_label(_label_investigator, investigator_count)
+
+
+## 强制刷新 TopBar 显示（消耗/获得资源后调用，确保数值与 UI 一致）
+func refresh_display() -> void:
+	_refresh_all()
 
 
 ## 便捷：一次性更新所有数据（供游戏状态层调用）
