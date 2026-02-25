@@ -47,7 +47,8 @@ signal erosion_changed(new_value: int)
 
 func _recompute_current() -> void:
 	var new_val := raw_mystery_erosion + shelter_bonus
-	new_val = clampi(new_val, EROSION_LYCAON, EROSION_LATENT)
+	## 仅限制下限为最差侵蚀；上限不限制，以支持庇护叠加至妥善/完美（2~4、≥5）
+	new_val = maxi(new_val, EROSION_LYCAON)
 	if current_erosion != new_val:
 		current_erosion = new_val
 		erosion_changed.emit(new_val)

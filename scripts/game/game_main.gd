@@ -22,6 +22,7 @@ const KEY_VERSION := "version"
 const KEY_MAP_NAME := "map_name"
 const KEY_SAVED_AT_GAME_HOUR := "saved_at_game_hour"
 const KEY_EROSION := "erosion"
+const KEY_PERSONNEL_EROSION := "personnel_erosion"
 const DEFAULT_SLOT := 0
 
 var _tiles: Array[Array] = []
@@ -31,6 +32,17 @@ var _base_image_cache: Dictionary = {}
 var _camera: Camera2D
 var _is_panning := false
 var _pan_start := Vector2.ZERO
+
+## 房间选择系统
+var _hovered_room_index := -1
+var _selected_room_index := -1
+
+## 镜头聚焦缓动：目标房间索引，Tween 进行中时有效
+var _focus_room_index := -1
+var _focus_tween: Tween = null
+const FOCUS_DURATION := 0.5
+const FOCUS_CENTER_ZONE_SIZE := 150
+const FOCUS_CELL_SCREEN_SIZE := 50.0  ## 聚焦时每格在屏幕上显示为 50px，zoom = FOCUS_CELL_SCREEN_SIZE / CELL_SIZE
 
 
 func _ready() -> void:
@@ -42,6 +54,7 @@ func _ready() -> void:
 		SaveManager.pending_load_slot = -1
 	_load_from_slot(slot)
 	_setup_camera()
+	call_deferred("_ensure_cognition_provider_registered")
 	queue_redraw()
 
 
@@ -101,7 +114,10 @@ func collect_game_state() -> Dictionary:
 	var ui: Node = get_node_or_null("UIMain")
 	if ui and ui.has_method("get_resources"):
 		resources = ui.get_resources()
-	return {
+	# 人员数据以 PersonnelErosionCore 为准（侵蚀系统为权威来源）
+	if PersonnelErosionCore:
+		resources["personnel"] = PersonnelErosionCore.get_personnel()
+	var state: Dictionary = {
 		KEY_VERSION: 1,
 		KEY_MAP_NAME: map_name,
 		KEY_SAVED_AT_GAME_HOUR: total_hours,
@@ -114,6 +130,9 @@ func collect_game_state() -> Dictionary:
 		KEY_RESOURCES: resources,
 		KEY_EROSION: {},
 	}
+	if PersonnelErosionCore:
+		state[KEY_PERSONNEL_EROSION] = PersonnelErosionCore.to_save_dict()
+	return state
 
 
 func _apply_map(d: Dictionary) -> void:
@@ -158,8 +177,50 @@ func _apply_resources(d: Dictionary) -> void:
 	var factors: Dictionary = r.get("factors", {}) as Dictionary
 	var currency: Dictionary = r.get("currency", {}) as Dictionary
 	var personnel: Dictionary = r.get("personnel", {}) as Dictionary
+	var total_hours: float = 0.0
+	var time_data: Variant = d.get(KEY_TIME, null)
+	if time_data is Dictionary:
+		total_hours = float((time_data as Dictionary).get("total_game_hours", 0))
+	if PersonnelErosionCore:
+		var per_data: Variant = d.get(KEY_PERSONNEL_EROSION, null)
+		if per_data is Dictionary and (per_data as Dictionary).has("researchers"):
+			PersonnelErosionCore.load_from_save_dict(per_data as Dictionary, personnel)
+		else:
+			PersonnelErosionCore.initialize_from_personnel(personnel, total_hours)
+		PersonnelErosionCore.sync_last_tick()
+		personnel = PersonnelErosionCore.get_personnel()
 	var ui: Node = get_node_or_null("UIMain")
 	if ui and ui.has_method("set_resources"):
+		ui.set_resources(factors, currency, personnel)
+	if PersonnelErosionCore and ui:
+		_register_cognition_provider(ui)
+		if not PersonnelErosionCore.personnel_updated.is_connected(_on_personnel_updated):
+			PersonnelErosionCore.personnel_updated.connect(_on_personnel_updated)
+
+
+func _ensure_cognition_provider_registered() -> void:
+	var ui: Node = get_node_or_null("UIMain")
+	if ui and PersonnelErosionCore:
+		_register_cognition_provider(ui)
+
+
+func _register_cognition_provider(ui: Node) -> void:
+	if not PersonnelErosionCore:
+		return
+	if ui.get("cognition_amount") != null:
+		PersonnelErosionCore.register_cognition_provider(
+			func() -> int: return int(ui.get("cognition_amount")),
+			func(amt: int) -> void: ui.set("cognition_amount", maxi(0, amt))
+		)
+
+
+func _on_personnel_updated() -> void:
+	var ui: Node = get_node_or_null("UIMain")
+	if ui and ui.has_method("set_resources") and PersonnelErosionCore:
+		var res: Dictionary = ui.get_resources() if ui.has_method("get_resources") else {}
+		var factors: Dictionary = res.get("factors", {})
+		var currency: Dictionary = res.get("currency", {})
+		var personnel: Dictionary = PersonnelErosionCore.get_personnel()
 		ui.set_resources(factors, currency, personnel)
 
 
@@ -181,6 +242,93 @@ func _get_base_image_texture(path: String) -> Texture2D:
 	if tex:
 		_base_image_cache[path] = tex
 	return tex
+
+
+func _get_mouse_grid() -> Vector2i:
+	var viewport: Viewport = get_viewport()
+	var mouse_pos: Vector2 = viewport.get_mouse_position()
+	var world: Vector2 = viewport.get_canvas_transform().affine_inverse() * mouse_pos
+	var gx: int = int(world.x / CELL_SIZE)
+	var gy: int = int(world.y / CELL_SIZE)
+	return Vector2i(clampi(gx, 0, GRID_WIDTH - 1), clampi(gy, 0, GRID_HEIGHT - 1))
+
+
+func _get_room_at_grid(gx: int, gy: int) -> int:
+	for i in _rooms.size():
+		var room: RoomInfo = _rooms[i]
+		if room.rect.has_point(Vector2i(gx, gy)):
+			return i
+	return -1
+
+
+func _focus_camera_on_room(room_index: int) -> void:
+	if room_index < 0 or room_index >= _rooms.size() or not _camera:
+		return
+	if _focus_tween and _focus_tween.is_valid():
+		_focus_tween.kill()
+	var room: RoomInfo = _rooms[room_index]
+	var target_pos: Vector2 = Vector2(
+		(room.rect.position.x + room.rect.size.x / 2.0) * CELL_SIZE,
+		(room.rect.position.y + room.rect.size.y / 2.0) * CELL_SIZE
+	)
+	var target_zoom: Vector2 = Vector2(FOCUS_CELL_SCREEN_SIZE / float(CELL_SIZE), FOCUS_CELL_SCREEN_SIZE / float(CELL_SIZE))
+	_focus_room_index = room_index
+	_focus_tween = create_tween()
+	_focus_tween.set_ease(Tween.EASE_OUT)
+	_focus_tween.set_trans(Tween.TRANS_QUAD)
+	_focus_tween.set_parallel(true)
+	_focus_tween.tween_property(_camera, "position", target_pos, FOCUS_DURATION)
+	_focus_tween.tween_property(_camera, "zoom", target_zoom, FOCUS_DURATION)
+	_focus_tween.tween_callback(_on_focus_tween_finished)
+
+
+func _on_focus_tween_finished() -> void:
+	_focus_tween = null
+	_focus_room_index = -1
+	if _camera:
+		_camera.position.x = roundf(_camera.position.x)
+		_camera.position.y = roundf(_camera.position.y)
+
+
+func _is_room_in_center_zone(room_index: int) -> bool:
+	if room_index < 0 or room_index >= _rooms.size() or not _camera:
+		return false
+	var room: RoomInfo = _rooms[room_index]
+	var vp_size: Vector2 = get_viewport().get_visible_rect().size
+	var half_zone: int = FOCUS_CENTER_ZONE_SIZE / 2
+	var center_zone: Rect2 = Rect2(
+		vp_size / 2 - Vector2(half_zone, half_zone),
+		Vector2(FOCUS_CENTER_ZONE_SIZE, FOCUS_CENTER_ZONE_SIZE)
+	)
+	var world_rect: Rect2 = Rect2(
+		Vector2(room.rect.position) * float(CELL_SIZE),
+		Vector2(room.rect.size) * float(CELL_SIZE)
+	)
+	var xform: Transform2D = get_viewport().get_canvas_transform()
+	var p0: Vector2 = xform * world_rect.position
+	var p1: Vector2 = xform * world_rect.end
+	var screen_min := Vector2(minf(p0.x, p1.x), minf(p0.y, p1.y))
+	var screen_max := Vector2(maxf(p0.x, p1.x), maxf(p0.y, p1.y))
+	var screen_rect := Rect2(screen_min, screen_max - screen_min)
+	return screen_rect.intersects(center_zone)
+
+
+func _clear_room_selection() -> void:
+	_selected_room_index = -1
+	_hide_room_detail()
+	queue_redraw()
+
+
+func _show_room_detail(room: RoomInfo) -> void:
+	var panel: Node = get_node_or_null("RoomDetailPanel")
+	if panel and panel.has_method("show_room"):
+		panel.show_room(room)
+
+
+func _hide_room_detail() -> void:
+	var panel: Node = get_node_or_null("RoomDetailPanel")
+	if panel and panel.has_method("hide_panel"):
+		panel.hide_panel()
 
 
 func _draw_single_base_image(tex: Texture2D, room_rect: Rect2i) -> void:
@@ -221,6 +369,19 @@ func _draw() -> void:
 		if tex == null:
 			continue
 		_draw_single_base_image(tex, room.rect)
+	# 房间边框：悬停亮起、选中常亮
+	for i in _rooms.size():
+		var room: RoomInfo = _rooms[i]
+		var r: Rect2i = room.rect
+		var px: float = r.position.x * CELL_SIZE
+		var py: float = r.position.y * CELL_SIZE
+		var pw: float = r.size.x * CELL_SIZE
+		var ph: float = r.size.y * CELL_SIZE
+		var border_rect: Rect2 = Rect2(px - 2, py - 2, pw + 4, ph + 4)
+		if i == _selected_room_index:
+			draw_rect(border_rect, Color(1, 0.85, 0.3, 0.95), false)
+		elif i == _hovered_room_index:
+			draw_rect(border_rect, Color(0.4, 0.75, 1, 0.85), false)
 
 
 func _input(event: InputEvent) -> void:
@@ -231,18 +392,39 @@ func _input(event: InputEvent) -> void:
 			_is_panning = mb.pressed
 			if _is_panning:
 				_pan_start = get_viewport().get_mouse_position()
+				# 拖动镜头时清除房间选中
+				_clear_room_selection()
 			get_viewport().set_input_as_handled()
+		elif mb.button_index == MOUSE_BUTTON_LEFT and not _is_panning:
+			if mb.pressed:
+				var grid: Vector2i = _get_mouse_grid()
+				var rid: int = _get_room_at_grid(grid.x, grid.y)
+				_selected_room_index = rid
+				if rid >= 0:
+					_focus_camera_on_room(rid)
+					_show_room_detail(_rooms[rid])
+				else:
+					_hide_room_detail()
+				queue_redraw()
+				get_viewport().set_input_as_handled()
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_UP:
 			_camera.zoom *= 1.1
 			get_viewport().set_input_as_handled()
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			_camera.zoom /= 1.1
 			get_viewport().set_input_as_handled()
-	if event is InputEventMouseMotion and _is_panning and _camera:
-		var delta: Vector2 = get_viewport().get_mouse_position() - _pan_start
-		_pan_start = get_viewport().get_mouse_position()
-		_camera.position -= delta / _camera.zoom
-		# 取整摄像机位置，避免像素画因亚像素渲染产生模糊
-		_camera.position.x = roundf(_camera.position.x)
-		_camera.position.y = roundf(_camera.position.y)
-		get_viewport().set_input_as_handled()
+	if event is InputEventMouseMotion:
+		if _is_panning and _camera:
+			var delta: Vector2 = get_viewport().get_mouse_position() - _pan_start
+			_pan_start = get_viewport().get_mouse_position()
+			_camera.position -= delta / _camera.zoom
+			# 取整摄像机位置，避免像素画因亚像素渲染产生模糊
+			_camera.position.x = roundf(_camera.position.x)
+			_camera.position.y = roundf(_camera.position.y)
+			get_viewport().set_input_as_handled()
+		else:
+			var grid: Vector2i = _get_mouse_grid()
+			var new_hover: int = _get_room_at_grid(grid.x, grid.y)
+			if new_hover != _hovered_room_index:
+				_hovered_room_index = new_hover
+				queue_redraw()

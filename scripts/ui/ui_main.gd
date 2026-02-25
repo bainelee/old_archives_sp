@@ -41,15 +41,15 @@ var truth_amount: int = 0:
 		truth_amount = v
 		_update_label(_label_truth, v)
 
-## 人员
+## 人员（researcher_count=总数，eroded_count=被侵蚀数；显示为 未侵蚀/总数）
 var researcher_count: int = 0:
 	set(v):
 		researcher_count = v
-		_update_label(_label_researcher, v)
-## 被侵蚀的研究员数量（无法工作）
+		_update_researcher_display()
 var eroded_count: int = 0:
 	set(v):
 		eroded_count = v
+		_update_researcher_display()
 		_update_label(_label_eroded, v)
 var investigator_count: int = 0:
 	set(v):
@@ -66,6 +66,12 @@ func _update_label(lbl: Label, value: int) -> void:
 		lbl.text = str(value)
 
 
+func _update_researcher_display() -> void:
+	if _label_researcher:
+		var healthy: int = maxi(0, researcher_count - eroded_count)
+		_label_researcher.text = "%d/%d" % [healthy, researcher_count]
+
+
 func _refresh_all() -> void:
 	_update_label(_label_cognition, cognition_amount)
 	_update_label(_label_computation, computation_amount)
@@ -73,7 +79,7 @@ func _refresh_all() -> void:
 	_update_label(_label_permission, permission_amount)
 	_update_label(_label_info, info_amount)
 	_update_label(_label_truth, truth_amount)
-	_update_label(_label_researcher, researcher_count)
+	_update_researcher_display()
 	_update_label(_label_eroded, eroded_count)
 	_update_label(_label_investigator, investigator_count)
 

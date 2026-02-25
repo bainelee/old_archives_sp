@@ -1,0 +1,155 @@
+[gd_scene load_steps=3 format=3 uid="uid://room_detail_panel_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/room_detail_panel.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.1, 0.1, 0.15, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.35, 0.45, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+[node name="RoomDetailPanel" type="CanvasLayer"]
+layer = 12
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 3
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -740.0
+offset_top = -240.0
+offset_right = -20.0
+offset_bottom = 240.0
+grow_horizontal = 0
+grow_vertical = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Margin"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="NameRow" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="Panel/Margin/Scroll/VBox/NameRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "房间名称"
+
+[node name="Value" type="Label" parent="Panel/Margin/Scroll/VBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 18
+text = "未命名"
+
+[node name="TypeRow" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="Panel/Margin/Scroll/VBox/TypeRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "房间类型"
+
+[node name="Value" type="Label" parent="Panel/Margin/Scroll/VBox/TypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "空房间"
+
+[node name="CleanRow" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="Panel/Margin/Scroll/VBox/CleanRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "清理状态"
+
+[node name="Value" type="Label" parent="Panel/Margin/Scroll/VBox/CleanRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "未清理"
+
+[node name="SizeRow" type="HBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="Panel/Margin/Scroll/VBox/SizeRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "尺寸"
+
+[node name="Value" type="Label" parent="Panel/Margin/Scroll/VBox/SizeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0×0"
+
+[node name="DescRow" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="Panel/Margin/Scroll/VBox/DescRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "描述"
+
+[node name="Content" type="RichTextLabel" parent="Panel/Margin/Scroll/VBox/DescRow"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+bbcode_enabled = false
+text = "（无描述）"
+wrap_mode = 1
+
+[node name="ResourcesRow" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="Panel/Margin/Scroll/VBox/ResourcesRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "资源产出"
+
+[node name="List" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox/ResourcesRow"]
+layout_mode = 2
+theme_override_constants/separation = 4

@@ -43,7 +43,7 @@
 |------|------|---------------|
 | 研究员 | researcher | personnel.researcher |
 | 劳动力 | labor | personnel.labor（当前版本暂未使用） |
-| 被侵蚀 | eroded | personnel.eroded |
+| 被侵蚀 | eroded | personnel.eroded，研究员被侵蚀后返回宿舍、不再工作 |
 | 调查员 | investigator | personnel.investigator |
 | 住房 | housing | 1 研究员需 1 住房 |
 | 英杰 | hero | 特殊单位，不占研究员/调查员名额 |
@@ -92,5 +92,10 @@
 | 神秘 | mystery | 与文明对应 |
 | 侵蚀 | erosion | 神秘侵蚀 |
 | 侵蚀预测 | erosion forecast | 未来 3 个月侵蚀 |
+| 侵蚀风险 | erosion risk | 每日判定累积，超过 5 个则被侵蚀 |
+| 治愈 | cure | 被侵蚀研究员在妥善/完美宿舍每 3 天判定 |
+| 灾厄值 | calamity value | 被侵蚀研究员每小时 +1、认知失能研究员每天 +10，影响最终危机 |
+| 认知危机 | cognition crisis | 认知不足时获得，上限 3，达到则认知失能 |
+| 认知失能 | cognitive impairment | 认知危机 ≥3，每天 +10 灾厄 |
 | 庇护 | shelter | 文明的庇佑 |
 | 庇护等级 | shelter level | 核心出力 1～4 级 |

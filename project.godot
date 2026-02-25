@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 
 GameTime="*res://scripts/core/game_time.gd"
 ErosionCore="*res://scripts/core/erosion_core.gd"
+PersonnelErosionCore="*res://scripts/core/personnel_erosion_core.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
 
 [display]

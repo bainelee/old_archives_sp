@@ -40,7 +40,7 @@ alwaysApply: false
 - 通过属性或 `set_resources(factors, currency, personnel)` 注入
 - 因子：cognition, computation, willpower, permission
 - 货币：info, truth
-- 人员：researcher, eroded（被侵蚀无法工作的研究员）, investigator
+- 人员：researcher（显示为 未侵蚀/总数，如 8/10；eroded 供 PersonnelErosionCore 使用）, investigator
 
 ## 参考
 

@@ -86,7 +86,7 @@
 
 - **因子**：cognition_amount, computation_amount, will_amount, permission_amount（对应 factors.cognition/computation/willpower/permission）
 - **货币**：info_amount, truth_amount
-- **人员**：researcher_count, eroded_count, investigator_count
+- **人员**：researcher_count（显示为 未侵蚀/总数，如 8/10）、eroded_count（供 PersonnelErosionCore）、investigator_count
 
 ### 3.2 Autoload 依赖
 
