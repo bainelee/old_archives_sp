@@ -163,9 +163,10 @@ var _cleanup_rooms_in_progress: Dictionary = {}  # room_index -> {"elapsed": flo
 
 ### 5.5 清理完成与资源授予
 
-- 清理进度达到 100% 时：`room.clean_status = CLEANED`，房间 `resources` 授予玩家
-- 授予逻辑：`_grant_room_resources_to_player()` 将 `room.resources` 中各 ResourceType 累加至 UIMain 对应属性
-- 消耗/授予后均调用 `_sync_resources_to_topbar()` 刷新 TopBar 显示
+- 清理进度达到 100% 时：`room.clean_status = CLEANED`
+- **可建设区域房间**（图书室、机房、资料库、教学室、实验室、推理室）：房间 `resources` **不**授予玩家，存量保留供 [12 - 已建设房间系统](12-built-room-system.md) 持续消耗
+- **其余房间**：`_grant_room_resources_to_player()` 将 `room.resources` 累加至 UIMain
+- 消耗/授予后均调用 `_sync_resources_to_topbar()` 刷新 TopBar
 
 ---
 

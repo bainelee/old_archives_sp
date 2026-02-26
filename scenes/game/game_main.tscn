@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="5_pause_menu"]
 [ext_resource type="PackedScene" path="res://scenes/ui/room_detail_panel.tscn" id="6_room_detail"]
 [ext_resource type="PackedScene" path="res://scenes/ui/cleanup_overlay.tscn" id="7_cleanup"]
+[ext_resource type="PackedScene" path="res://scenes/ui/construction_overlay.tscn" id="8_construction"]
 
 [node name="GameMain" type="Node2D" unique_id=857920342]
 script = ExtResource("1_game_main")
@@ -20,6 +21,8 @@ script = ExtResource("1_game_main")
 [node name="RoomDetailPanel" parent="." unique_id=10596567 instance=ExtResource("6_room_detail")]
 
 [node name="CleanupOverlay" parent="." unique_id=516201649 instance=ExtResource("7_cleanup")]
+
+[node name="ConstructionOverlay" parent="." unique_id=116726987 instance=ExtResource("8_construction")]
 
 [node name="Background" type="Sprite2D" parent="." unique_id=1151208090]
 z_index = -100

@@ -50,12 +50,7 @@
 	  "room_type_id": 5,
 	  "clean_status": 0,
 	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [
-		{
-		  "resource_type": 4,
-		  "resource_amount": 5000
-		}
-	  ],
+	  "resources": [],
 	  "pre_clean_text": "默认清理前文本",
 	  "desc": "小伊凡中尉精通制药，他的药剂学术超出时代、科技和现实的限制，\n他在地下建立了一个隐匿的医院。"
 	},
@@ -147,12 +142,7 @@
 	  "room_type_id": 6,
 	  "clean_status": 0,
 	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [
-		{
-		  "resource_type": 5,
-		  "resource_amount": 5000
-		}
-	  ],
+	  "resources": [],
 	  "pre_clean_text": "默认清理前文本",
 	  "desc": "旧的案件档案堆放其中，\n一个巨型的线索板满是贴纸。"
 	},

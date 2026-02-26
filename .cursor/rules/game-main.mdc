@@ -1,0 +1,32 @@
+---
+description: 游戏主场景模块结构、存档、渲染与模式规范
+globs:
+  - "scripts/game/game_main*.gd"
+alwaysApply: false
+---
+
+# 游戏主场景规范
+
+开发/修改 `game_main*.gd` 时须遵守以下约定。
+
+**模块拆分**：主逻辑在 `game_main.gd`；绘制在 `game_main_draw.gd`；存档在 `game_main_save.gd`；
+清理在 `game_main_cleanup.gd`；建设在 `game_main_construction.gd`；已建设产出在 `game_main_built_room.gd`；
+镜头在 `game_main_camera.gd`；输入在 `game_main_input.gd`。
+
+## 网格与常量
+
+- **网格**：80×60，每格 `CELL_SIZE` (20px)，与地图编辑器一致
+- **状态归属**：`_tiles`、`_rooms`、`_camera`、模式变量等保留在主文件
+
+## 辅助类调用约定
+
+- 各 helper 为 `extends RefCounted`，提供 `static func`，以 `game_main: Node2D` 为第一参数
+- helper 通过 `game_main.get("_rooms")` 等访问状态，通过 `game_main.call("_method", args)` 调用主文件方法
+- 节点路径（`_get_cleanup_overlay` 等）由主文件实现，helper 只接收返回的 Node
+
+## 参考
+
+- 设计文档：`docs/design/03-game-main.md`
+- 清理系统：`docs/design/10-room-cleanup-system.md`
+- 建设系统：`docs/design/11-zone-construction.md`
+- 已建设房间：`docs/design/12-built-room-system.md`

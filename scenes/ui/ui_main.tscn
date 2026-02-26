@@ -243,15 +243,16 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -426.0
-offset_top = -150.0
+offset_top = -85.0
 offset_right = -20.0
 offset_bottom = -20.0
 grow_horizontal = 0
 theme_override_constants/separation = 8
 
 [node name="BtnCleanup" type="Button" parent="BottomRightBar"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 65)
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
@@ -260,8 +261,9 @@ theme_override_font_sizes/font_size = 16
 text = "清理"
 
 [node name="BtnBuild" type="Button" parent="BottomRightBar"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 65)
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
@@ -270,8 +272,9 @@ theme_override_font_sizes/font_size = 16
 text = "建设"
 
 [node name="BtnRenovate" type="Button" parent="BottomRightBar"]
-custom_minimum_size = Vector2(130, 130)
+custom_minimum_size = Vector2(130, 65)
 layout_mode = 2
+size_flags_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")

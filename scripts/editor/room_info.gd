@@ -1,6 +1,8 @@
 class_name RoomInfo
 extends RefCounted
 
+const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
+
 ## 房间基础信息结构体
 
 ## 房间类型（对应名词解释）
@@ -49,6 +51,9 @@ var desc: String = ""  ## 房间描述（与 room_info.json 的 desc 对应）
 var cleanup_cost: Dictionary = {}  ## {"info": 20, ...}
 var cleanup_time_hours: float = -1.0  ## -1 表示用默认公式
 
+## 区域建设（0=无，见 ZoneType）
+var zone_type: int = 0
+
 
 func get_size() -> Vector2i:
 	return Vector2i(rect.size.x, rect.size.y)
@@ -92,6 +97,37 @@ func get_cleanup_time_hours() -> float:
 		return 3.0
 	else:
 		return 5.0
+
+
+## 建设指定区域类型所需的资源消耗（08-game-values 5.1）
+func get_construction_cost(construction_zone_type: int) -> Dictionary:
+	return ZoneTypeScript.get_construction_cost(construction_zone_type).duplicate()
+
+
+## 建设指定区域类型需占用的研究员数
+func get_construction_researcher_count(construction_zone_type: int) -> int:
+	return ZoneTypeScript.get_construction_researcher_count(construction_zone_type)
+
+
+## 建设指定区域类型所需时间（小时）= 房间单位数 × 每单位耗时
+func get_construction_time_hours(construction_zone_type: int) -> float:
+	var units: int = _get_room_units()
+	var per_unit: float = ZoneTypeScript.get_construction_time_per_unit_hours(construction_zone_type)
+	return units * per_unit
+
+
+## 该房间是否可建设指定区域类型（已清理、未建设、房间类型匹配）
+func can_build_zone(construction_zone_type: int) -> bool:
+	if construction_zone_type == 0:
+		return false
+	if room_type == RoomType.ARCHIVE_CORE:
+		return false  ## 档案馆核心不参与区域建设
+	if clean_status != CleanStatus.CLEANED:
+		return false
+	if zone_type != 0:
+		return false
+	var allowed: Array = ZoneTypeScript.get_rooms_for_zone(construction_zone_type)
+	return room_type in allowed
 
 
 ## 转为 room_info.json 中的房间条目格式
@@ -169,6 +205,7 @@ func to_dict() -> Dictionary:
 		"desc": desc,
 		"cleanup_cost": cleanup_cost,
 		"cleanup_time_hours": cleanup_time_hours,
+		"zone_type": zone_type,
 	}
 
 
@@ -206,4 +243,5 @@ static func from_dict(d: Dictionary) -> RoomInfo:
 		info.cleanup_cost = (d.get("cleanup_cost") as Dictionary).duplicate()
 	if d.has("cleanup_time_hours"):
 		info.cleanup_time_hours = float(d.get("cleanup_time_hours", -1))
+	info.zone_type = int(d.get("zone_type", 0))
 	return info

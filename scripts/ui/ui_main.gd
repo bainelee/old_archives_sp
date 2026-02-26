@@ -4,6 +4,7 @@ extends CanvasLayer
 ## 可挂载至任意主场景，数据通过属性或 Autoload 注入
 
 signal cleanup_button_pressed
+signal build_button_pressed
 
 @onready var _label_cognition: Label = $TopBar/Content/HBox/Factors/Cognition/Value
 @onready var _label_computation: Label = $TopBar/Content/HBox/Factors/Computation/Value
@@ -84,6 +85,9 @@ func _ready() -> void:
 	var btn: Button = get_node_or_null("BottomRightBar/BtnCleanup")
 	if btn:
 		btn.pressed.connect(_on_cleanup_button_pressed)
+	var build_btn: Button = get_node_or_null("BottomRightBar/BtnBuild")
+	if build_btn:
+		build_btn.pressed.connect(_on_build_button_pressed)
 	if _researcher_hover_area:
 		_researcher_hover_area.mouse_filter = Control.MOUSE_FILTER_STOP
 		_researcher_hover_area.mouse_entered.connect(_on_researcher_hover_entered)
@@ -92,6 +96,10 @@ func _ready() -> void:
 
 func _on_cleanup_button_pressed() -> void:
 	cleanup_button_pressed.emit()
+
+
+func _on_build_button_pressed() -> void:
+	build_button_pressed.emit()
 
 
 func _on_researcher_hover_entered() -> void:
@@ -126,6 +134,23 @@ func _update_researcher_hover_if_visible() -> void:
 			researchers_in_construction,
 			researchers_working_in_rooms
 		)
+
+
+## 建设选择模式下禁用其余 UI、隐藏灾厄
+func set_construction_blocking(blocked: bool) -> void:
+	if blocked and _researcher_hover_panel and _researcher_hover_panel.has_method("hide_panel"):
+		_researcher_hover_panel.hide_panel()
+	_set_buttons_blocked($TopBar, blocked)
+	_set_control_mouse_filter($TopBar, blocked)
+	var cleanup_btn: Button = get_node_or_null("BottomRightBar/BtnCleanup") as Button
+	if cleanup_btn:
+		cleanup_btn.disabled = blocked
+	var renovate_btn: Button = get_node_or_null("BottomRightBar/BtnRenovate") as Button
+	if renovate_btn:
+		renovate_btn.disabled = blocked
+	var calamity: Control = get_node_or_null("CalamityBar") as Control
+	if calamity:
+		calamity.visible = not blocked
 
 
 ## 清理选择模式下禁用其余 UI 的悬停与点击
