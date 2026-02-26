@@ -3,6 +3,7 @@ extends PanelContainer
 ## 显示：房间名称、房间类型、建设后产出/消耗、建设花费、研究员占用、材料不足提示
 
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
+const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 
 @onready var _label_name: Label = $Margin/VBox/Name
 @onready var _label_room_type: Label = $Margin/VBox/RoomType
@@ -15,17 +16,6 @@ const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const LABEL_COLOR := Color(0.95, 0.9, 0.8, 1)
 const LABEL_COLOR_DIM := Color(0.7, 0.75, 0.85, 1)
 const INSUFFICIENT_COLOR := Color(0.95, 0.4, 0.35, 1)
-
-## 研究区：每单位每小时产出（08 6.1）
-const RESEARCH_OUTPUT_PER_UNIT: Dictionary = {
-	RoomInfo.RoomType.LIBRARY: {"cognition": 5},
-	RoomInfo.RoomType.LAB: {"computation": 5},
-	RoomInfo.RoomType.ARCHIVE: {"permission": 10},
-	RoomInfo.RoomType.CLASSROOM: {"willpower": 10},
-}
-## 造物区：每单位每小时消耗与产出（08 7.1）
-const CREATION_WILL_PER_UNIT := 15
-const CREATION_OUTPUT_PER_UNIT := 15
 
 
 func _ready() -> void:
@@ -55,36 +45,44 @@ func show_for_room(room: RoomInfo, zone_type: int, player_resources: Dictionary,
 
 
 func _get_output_text(room: RoomInfo, zone_type: int) -> String:
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv == null:
+		return "（无）"
 	var area: int = room.rect.size.x * room.rect.size.y
 	var units: int = maxi(1, int(ceil(float(area) / 5.0)))
 	if zone_type == 1:  ## RESEARCH
-		var out: Dictionary = RESEARCH_OUTPUT_PER_UNIT.get(room.room_type, {})
-		if out.is_empty():
+		var amt: int = gv.get_research_output_per_unit_per_hour(room.room_type)
+		if amt <= 0:
 			return "（无）"
-		var parts: PackedStringArray = []
-		for k in out:
-			var name_map: Dictionary = {"cognition": "认知", "computation": "计算", "willpower": "意志", "permission": "权限"}
-			parts.append("%s %d/h" % [name_map.get(k, k), out[k] * units])
-		return ", ".join(parts)
+		var res: String = gv.get_research_output_resource(room.room_type)
+		var name_map: Dictionary = {"cognition": "认知", "computation": "计算", "willpower": "意志", "permission": "权限"}
+		return "%s %d/h" % [name_map.get(res, res), amt * units]
 	elif zone_type == 2:  ## CREATION
+		var output_per_unit: int = gv.get_creation_produce_per_unit_per_hour(room.room_type)
+		if output_per_unit <= 0:
+			return "（无）"
 		match room.room_type:
 			RoomInfo.RoomType.SERVER_ROOM:
-				return "权限 %d/h" % (CREATION_OUTPUT_PER_UNIT * units)
+				return "权限 %d/h" % (output_per_unit * units)
 			RoomInfo.RoomType.REASONING:
-				return "信息 %d/h" % (CREATION_OUTPUT_PER_UNIT * units)
+				return "信息 %d/h" % (output_per_unit * units)
 			_:
 				return "（无）"
 	elif zone_type == 4:  ## LIVING
-		return "住房 4"  ## 08 5.4 宿舍 3 单位提供 4 住房
+		return "住房 %d" % gv.get_housing_per_dormitory()
 	return "（无）"
 
 
 func _get_consume_text(room: RoomInfo, zone_type: int) -> String:
 	if zone_type != 2:  ## CREATION
 		return "（无）"
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv == null:
+		return "（无）"
 	var area: int = room.rect.size.x * room.rect.size.y
 	var units: int = maxi(1, int(ceil(float(area) / 5.0)))
-	return "意志 %d/h" % (CREATION_WILL_PER_UNIT * units)
+	var consume_per_unit: int = gv.get_creation_consume_per_unit_per_hour(room.room_type)
+	return "意志 %d/h" % (consume_per_unit * units)
 
 
 func _format_cost_with_have(cost: Dictionary, player_resources: Dictionary) -> String:

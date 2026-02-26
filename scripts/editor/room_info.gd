@@ -2,6 +2,7 @@ class_name RoomInfo
 extends RefCounted
 
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
+const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 
 ## 房间基础信息结构体
 
@@ -65,38 +66,35 @@ func _get_room_units() -> int:
 	return maxi(1, int(ceil(float(area) / 5.0)))
 
 
-## 获取清理此房间所需资源（未配置则按 08-game-values 4.1）
-## 3 单位：20 信息；6～7 单位：40 信息
+## 获取清理此房间所需资源（未配置则从 game_values.json 读取）
 func get_cleanup_cost() -> Dictionary:
 	if not cleanup_cost.is_empty():
 		return cleanup_cost.duplicate()
-	var units: int = _get_room_units()
-	if units <= 5:
-		return {"info": 20}
-	else:
-		return {"info": 40}
+	var gv: Node = _GameValuesRef.get_singleton()
+	var cfg: Variant = gv.get_cleanup_for_units(_get_room_units()) if gv else null
+	if cfg is Dictionary and cfg.has("info"):
+		return {"info": int(cfg.info)}
+	return {"info": 20}
 
 
-## 获取清理此房间需占用的研究员数量（08-game-values 4.1）
-## 3～5 单位：2 人；6～7 单位：3 人
+## 获取清理此房间需占用的研究员数量
 func get_cleanup_researcher_count() -> int:
-	var units: int = _get_room_units()
-	if units <= 5:
-		return 2
-	else:
-		return 3
+	var gv: Node = _GameValuesRef.get_singleton()
+	var cfg: Variant = gv.get_cleanup_for_units(_get_room_units()) if gv else null
+	if cfg is Dictionary and cfg.has("researchers"):
+		return int(cfg.researchers)
+	return 2
 
 
-## 获取清理此房间所需时间（小时，未配置则按 08-game-values 4.1）
-## 3 单位：3 小时；6～7 单位：5 小时
+## 获取清理此房间所需时间（小时）
 func get_cleanup_time_hours() -> float:
 	if cleanup_time_hours > 0:
 		return cleanup_time_hours
-	var units: int = _get_room_units()
-	if units <= 5:
-		return 3.0
-	else:
-		return 5.0
+	var gv: Node = _GameValuesRef.get_singleton()
+	var cfg: Variant = gv.get_cleanup_for_units(_get_room_units()) if gv else null
+	if cfg is Dictionary and cfg.has("hours"):
+		return float(cfg.hours)
+	return 3.0
 
 
 ## 建设指定区域类型所需的资源消耗（08-game-values 5.1）

@@ -121,6 +121,20 @@ theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0×0"
 
+[node name="ZoneOpRow" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="Panel/Margin/Scroll/VBox/ZoneOpRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "区域运作"
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox/ZoneOpRow"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
 [node name="DescRow" type="VBoxContainer" parent="Panel/Margin/Scroll/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 4

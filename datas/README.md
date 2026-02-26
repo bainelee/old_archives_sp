@@ -1,6 +1,29 @@
 # datas 数据文件夹
 
-本文件夹存放数据类文件（如 JSON），**未被 Godot 导入**（见项目根目录 `.gdignore`）。
+本文件夹存放数据类文件（如 JSON），**未被 Godot 导入**（见项目根目录 `.gdignore`）。位于 `res://datas/` 的文件会随项目打包进游戏，可供运行时加载。
+
+## game_values.json
+
+游戏数值数据，供 `GameValues`（Autoload）运行时加载。设计来源为 `docs/design/08-game-values.md`；该设计文档不打包进游戏，故游戏逻辑应读取本 JSON 作为唯一数据源。
+
+- `researcher_cognition`：研究员认知消耗（每小时每人）
+- `shelter`：档案馆核心庇护等级、范围档位、消耗倍率
+- `cleanup`：房间清理需求（按房间单位，支持 `units_min`/`units_max`）
+- `construction`：建设区域需求（按 zone_type）
+- `housing`：住房相关（宿舍单位、住房数量）
+- `research_output`：研究区产出（按 room_type）
+- `creation_output`：造物区产出（按 room_type）
+- `remodel`：空房间改造消耗
+
+数据键名与 `docs/settings/00-project-keywords.md` 一致。`_fields_comment` 等以 `_` 开头的键仅作说明，加载时跳过。
+
+### 修改后生效
+
+- **重启游戏**：始终生效
+- **编辑器 F5 运行**：保存后约 2 秒内自动检测并重载
+- **手动**：调用 `GameValues.reload()` 可立即生效
+
+详见 [13 - 游戏数值运行时系统](../docs/design/13-game-values-runtime.md)。
 
 ## game_base.json
 

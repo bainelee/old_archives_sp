@@ -1,6 +1,8 @@
 class_name ZoneType
 extends RefCounted
 
+const _GameValuesRef := preload("res://scripts/core/game_values_ref.gd")
+
 ## 区域类型枚举与建设数值
 ## 房间类型→区域映射见 11-zone-construction.md 1.1；建设消耗见 08-game-values 5.1
 
@@ -78,36 +80,19 @@ static func get_category_for_zone(zone: int) -> String:
 			return ""
 
 
-## 建设消耗（info, permission 等），08-game-values 5.1
+## 建设消耗（info, permission 等），源自 game_values.json
 static func get_construction_cost(zone: int) -> Dictionary:
-	match zone:
-		Type.RESEARCH, Type.CREATION:
-			return {"info": 100, "permission": 60}
-		Type.OFFICE:
-			return {"info": 100, "permission": 120}
-		Type.LIVING:
-			return {"info": 50}
-		_:
-			return {}
+	var gv: Node = _GameValuesRef.get_singleton()
+	return gv.get_construction_cost(zone) if gv else {}
 
 
 ## 建设需占用的研究员数
 static func get_construction_researcher_count(zone: int) -> int:
-	match zone:
-		Type.RESEARCH, Type.CREATION, Type.OFFICE:
-			return 2
-		Type.LIVING:
-			return 1
-		_:
-			return 0
+	var gv: Node = _GameValuesRef.get_singleton()
+	return gv.get_construction_researcher_count(zone) if gv else 0
 
 
-## 每单位耗时（小时），08-game-values 5.1
+## 每单位耗时（小时）
 static func get_construction_time_per_unit_hours(zone: int) -> float:
-	match zone:
-		Type.LIVING:
-			return 1.0
-		Type.RESEARCH, Type.CREATION, Type.OFFICE:
-			return 2.0
-		_:
-			return 2.0
+	var gv: Node = _GameValuesRef.get_singleton()
+	return gv.get_construction_hours_per_unit(zone) if gv else 2.0

@@ -1,0 +1,22 @@
+---
+description: 数值调整时触发全量同步工作流
+alwaysApply: true
+---
+
+# 游戏数值同步
+
+当用户表述中包含以下任一意图时，**必须**执行数值同步工作流：
+
+- 中文：`调整数值`、`我调整了数值`、`修改数值`、`改一下数值`、`更新数值`、`数值改了`
+- 英文：`adjusted values`、`modified values`、`changed values`、`update game values`、`tweak numbers`
+
+## 执行流程
+
+1. **启动数值同步子代理工作流**：按 `.cursor/subagents/game-values-sync.md` 执行
+2. **覆盖范围**：`datas/game_values.json`、`datas/game_base.json`、`docs/design/*.md` 中所有与数值相关文档、以及脚本中的硬编码数值
+3. **原则**：以用户所述变更为准，同步更新全部相关文件，确保数据源、设计文档、代码三者一致
+
+## 无需触发
+
+- 仅讨论数值设计、未明确「已调整」或「要调整」具体数值时
+- 仅询问数值含义或数据来源时

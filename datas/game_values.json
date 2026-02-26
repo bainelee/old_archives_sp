@@ -1,0 +1,60 @@
+{
+  "description": "游戏数值数据，运行时从 res://datas/game_values.json 加载。设计来源：docs/design/08-game-values.md。数据键名与 00-project-keywords.md 一致。",
+  "_fields_comment": {
+    "researcher_cognition": "研究员认知消耗：每小时每人消耗 1",
+    "shelter": "档案馆核心庇护等级与范围",
+    "cleanup": "房间清理需求",
+    "construction": "建设区域需求，键为 zone_type（1=研究区 2=造物区 3=事务所 4=生活区）",
+    "housing": "住房相关",
+    "research_output": "研究区产出，键为 room_type（0=图书室 1=机房 2=教学室 3=资料库）",
+    "creation_output": "造物区产出，键为 room_type（5=实验室 6=推理室）",
+    "remodel": "空房间改造消耗"
+  },
+  "researcher_cognition": {
+    "consumption_per_researcher_per_hour": 1
+  },
+  "shelter": {
+    "level_min": 1,
+    "level_max": 4,
+    "initial_level": 1,
+    "base_consumption_per_level_per_hour": 10,
+    "range_tiers": [
+      {"tier": 0, "increment": 12, "cumulative": 12},
+      {"tier": 1, "increment": 12, "cumulative": 24},
+      {"tier": 2, "increment": 24, "cumulative": 48},
+      {"tier": 3, "increment": 24, "cumulative": 72},
+      {"tier": 4, "increment": 48, "cumulative": 120}
+    ],
+    "consumption_multiplier_per_open_tier": 1.0
+  },
+  "cleanup": [
+    {"units_min": 3, "units_max": 5, "researchers": 2, "info": 20, "hours": 3},
+    {"units_min": 6, "units_max": 7, "researchers": 3, "info": 40, "hours": 5}
+  ],
+  "construction": {
+    "1": {"researchers": 2, "info": 100, "permission": 60, "hours_per_unit": 2},
+    "2": {"researchers": 2, "info": 100, "permission": 60, "hours_per_unit": 2},
+    "3": {"researchers": 2, "info": 100, "permission": 120, "hours_per_unit": 2},
+    "4": {"researchers": 1, "info": 50, "permission": 0, "hours_per_unit": 1}
+  },
+  "housing": {
+    "dormitory_units": 3,
+    "housing_per_dormitory": 4,
+    "housing_per_researcher": 1
+  },
+  "research_output": {
+    "0": {"resource": "cognition", "per_unit_per_hour": 5},
+    "1": {"resource": "computation", "per_unit_per_hour": 5},
+    "2": {"resource": "willpower", "per_unit_per_hour": 10},
+    "3": {"resource": "permission", "per_unit_per_hour": 10}
+  },
+  "creation_output": {
+    "5": {"consume": "willpower", "consume_per_unit_per_hour": 5, "produce": "permission", "produce_per_unit_per_hour": 5},
+    "6": {"consume": "willpower", "consume_per_unit_per_hour": 5, "produce": "info", "produce_per_unit_per_hour": 5}
+  },
+  "remodel": {
+    "info": 100,
+    "permission": 100,
+    "willpower": 100
+  }
+}

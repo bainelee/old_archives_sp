@@ -5,6 +5,7 @@ extends RefCounted
 ## 详见 docs/design/12-built-room-system.md
 
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
+const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 
 
 static func is_research_zone_room(room: RoomInfo) -> bool:
@@ -17,6 +18,27 @@ static func is_research_zone_room(room: RoomInfo) -> bool:
 static func get_room_units(room: RoomInfo) -> int:
 	var area: int = room.rect.size.x * room.rect.size.y
 	return maxi(1, int(ceil(float(area) / 5.0)))
+
+
+## 造物区 24 小时消耗量（意志）
+static func get_creation_zone_24h_consumption(room: RoomInfo) -> int:
+	if room.zone_type != ZoneTypeScript.Type.CREATION:
+		return 0
+	var gv: Node = _GameValuesRef.get_singleton()
+	var consume_per_unit: int = gv.get_creation_consume_per_unit_per_hour(room.room_type) if gv else 5
+	return get_room_units(room) * consume_per_unit * 24
+
+
+## 造物区是否暂停研究：玩家意志不足 24h 消耗
+static func is_creation_zone_paused(room: RoomInfo, ui: Node) -> bool:
+	if room.zone_type != ZoneTypeScript.Type.CREATION:
+		return false
+	if room.room_type != RoomInfo.RoomType.SERVER_ROOM and room.room_type != RoomInfo.RoomType.REASONING:
+		return false
+	var need: int = get_creation_zone_24h_consumption(room)
+	var pw: Variant = ui.get("will_amount")
+	var have: int = int(pw) if pw != null else 0
+	return have < need
 
 
 static func process_production(game_main: Node2D, game_hours_delta: float) -> void:
@@ -38,22 +60,30 @@ static func process_production(game_main: Node2D, game_hours_delta: float) -> vo
 			if room.zone_type == ZoneTypeScript.Type.RESEARCH:
 				_produce_research_zone_hour(room, ui, game_main)
 			elif room.zone_type == ZoneTypeScript.Type.CREATION:
-				_produce_creation_zone_hour(room, ui, game_main)
+				if not is_creation_zone_paused(room, ui):
+					_produce_creation_zone_hour(room, ui, game_main)
+
+
+static func _resource_name_to_type(name: String) -> int:
+	match name:
+		"cognition": return RoomInfo.ResourceType.COGNITION
+		"computation": return RoomInfo.ResourceType.COMPUTATION
+		"willpower": return RoomInfo.ResourceType.WILL
+		"permission": return RoomInfo.ResourceType.PERMISSION
+		_: return RoomInfo.ResourceType.NONE
 
 
 static func _produce_research_zone_hour(room: RoomInfo, ui: Node, game_main: Node2D) -> void:
-	var units: int = get_room_units(room)
-	var output_per_unit: Dictionary = {
-		RoomInfo.RoomType.LIBRARY: {"resource_type": RoomInfo.ResourceType.COGNITION, "amount": 5},
-		RoomInfo.RoomType.LAB: {"resource_type": RoomInfo.ResourceType.COMPUTATION, "amount": 5},
-		RoomInfo.RoomType.ARCHIVE: {"resource_type": RoomInfo.ResourceType.PERMISSION, "amount": 10},
-		RoomInfo.RoomType.CLASSROOM: {"resource_type": RoomInfo.ResourceType.WILL, "amount": 10},
-	}
-	var cfg: Variant = output_per_unit.get(room.room_type)
-	if cfg == null:
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv == null:
 		return
-	var rt: int = cfg["resource_type"]
-	var amt_per_unit: int = cfg["amount"]
+	var units: int = get_room_units(room)
+	var amt_per_unit: int = gv.get_research_output_per_unit_per_hour(room.room_type)
+	if amt_per_unit <= 0:
+		return
+	var rt: int = _resource_name_to_type(gv.get_research_output_resource(room.room_type))
+	if rt == RoomInfo.ResourceType.NONE:
+		return
 	var output_this_hour: int = units * amt_per_unit
 	var reserve_idx: int = -1
 	var reserve_amt: int = 0
@@ -105,14 +135,18 @@ static func _add_factor_to_player(ui: Node, resource_type: int, amt: int, game_m
 
 
 static func _produce_creation_zone_hour(room: RoomInfo, ui: Node, game_main: Node2D) -> void:
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv == null:
+		return
 	var units: int = get_room_units(room)
-	var will_per_unit: int = 15
+	var will_per_unit: int = gv.get_creation_consume_per_unit_per_hour(room.room_type)
 	var will_needed: int = units * will_per_unit
+	## 已由 process_production 在入口处检查 24h 暂停，此处仅做本小时兜底
 	var pw: Variant = ui.get("will_amount")
 	var player_will: int = int(pw) if pw != null else 0
 	if player_will < will_needed:
 		return
-	var output_per_unit: int = 15
+	var output_per_unit: int = gv.get_creation_produce_per_unit_per_hour(room.room_type)
 	var output_amt: int = units * output_per_unit
 	ui.will_amount = maxi(0, player_will - will_needed)
 	match room.room_type:
