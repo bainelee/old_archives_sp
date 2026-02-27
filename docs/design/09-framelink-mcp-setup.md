@@ -17,21 +17,18 @@
 
 详见 [Figma 官方文档](https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens)。
 
-## 2. 配置 MCP
+## 2. 配置 Token（本地文件，不推送 git）
 
-编辑 `.cursor/mcp.json`，将 `YOUR_FIGMA_API_KEY` 替换为你的 token：
+Token 存放在本地文件，**不会提交到 git**，Framelink MCP 启动时自动读取。
 
-```json
-"env": {
-  "FIGMA_API_KEY": "粘贴你的 token 到这里"
-}
-```
+1. 复制示例文件：
+   ```
+   .cursor/local/figma-token.txt.example  →  .cursor/local/figma-token.txt
+   ```
+2. 编辑 `.cursor/local/figma-token.txt`，填入你的 Figma Personal Access Token（纯文本，无引号）
+3. `figma-token.txt` 已加入 `.gitignore`，不会推送到远端
 
-或使用命令行参数（不推荐，token 会出现在配置中）：
-
-```json
-"args": ["/c", "npx", "-y", "figma-developer-mcp", "--figma-api-key=你的token", "--stdio"]
-```
+MCP 通过 `.cursor/scripts/run-framelink-mcp.ps1` 启动脚本自动读取该文件并注入环境变量。
 
 ## 3. 重启 Cursor
 

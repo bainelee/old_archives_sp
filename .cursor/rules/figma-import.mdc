@@ -30,7 +30,7 @@ alwaysApply: false
 
 - **API 调用**：
   - **Files/Nodes**：`GET https://api.figma.com/v1/files/:fileKey/nodes?ids=:nodeId`
-  - **Headers**：`X-Figma-Token: <FIGMA_API_KEY>`（需在 .cursor/mcp.json 中配置）
+  - **Headers**：`X-Figma-Token: <FIGMA_API_KEY>`（从 `.cursor/local/figma-token.txt` 读取，不推送到 git）
 
 ### 1.2 解析文档结构
 

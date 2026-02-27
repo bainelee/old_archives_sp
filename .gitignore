@@ -6,4 +6,7 @@ local_cache/
 
 # 本地临时文件：用于 UTF-8 提交信息，避免 PowerShell 中文乱码
 .git-commit-msg
+
+# 本地密钥（不推送）
+.cursor/local/figma-token.txt
 /android/
