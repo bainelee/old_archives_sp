@@ -52,10 +52,10 @@ static func try_create_room(editor: Node, start: Vector2i, end: Vector2i) -> voi
 			if gx < 0 or gx >= grid_w or gy < 0 or gy >= grid_h:
 				return
 			if tiles[gx][gy] != FloorTileType.Type.ROOM_FLOOR:
-				print("无法创建房间：区域内有非房间底板")
+				print(TranslationServer.translate("ERROR_CREATE_ROOM_NON_FLOOR"))
 				return
 			if room_ids[gx][gy] >= 0:
-				print("无法创建房间：与已有房间重叠")
+				print(TranslationServer.translate("ERROR_CREATE_ROOM_OVERLAP"))
 				return
 	var w: int = x_max - x_min + 1
 	var h: int = y_max - y_min + 1
@@ -63,11 +63,11 @@ static func try_create_room(editor: Node, start: Vector2i, end: Vector2i) -> voi
 	var next_id: int = editor.get("_next_room_id")
 	room.id = "room_%d" % next_id
 	editor.set("_next_room_id", next_id + 1)
-	room.room_name = "未命名房间"
+	room.room_name = TranslationServer.translate("DEFAULT_UNTITLED")
 	room.rect = Rect2i(x_min, y_min, w, h)
 	room.room_type = RoomInfo.RoomType.EMPTY_ROOM
 	room.clean_status = RoomInfo.CleanStatus.UNCLEANED
-	room.pre_clean_text = "默认清理前文本"
+	room.pre_clean_text = TranslationServer.translate("DEFAULT_PRE_CLEAN")
 	room.resources = []
 	rooms.append(room)
 	for gx in range(x_min, x_max + 1):
@@ -77,7 +77,7 @@ static func try_create_room(editor: Node, start: Vector2i, end: Vector2i) -> voi
 	editor.call("_refresh_room_panel")
 	editor.call("_refresh_room_list")
 	editor.queue_redraw()
-	print("已创建房间: ", room.room_name, " ", w, "×", h)
+	print(TranslationServer.translate("INFO_ROOM_CREATED") % [room.room_name, w, h])
 
 
 static func apply_paint_at_mouse(editor: Node) -> void:

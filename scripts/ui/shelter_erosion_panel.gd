@@ -159,7 +159,7 @@ func _on_cycle_segment_hovered(days_from_now: int, erosion_value: int) -> void:
 		return
 	_cycle_hide_timer.stop()
 	var name_str := ErosionCore.get_erosion_name_full(erosion_value)
-	_cycle_popup_label.text = "距离现在%d天 %s %d" % [days_from_now, name_str, erosion_value]
+	_cycle_popup_label.text = tr("EROSION_CYCLE_POPUP") % [days_from_now, name_str, erosion_value]
 	_cycle_popup.visible = true
 	_update_cycle_popup_position()
 

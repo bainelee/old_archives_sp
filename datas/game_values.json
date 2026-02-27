@@ -1,5 +1,5 @@
 {
-  "description": "游戏数值数据，运行时从 res://datas/game_values.json 加载。设计来源：docs/design/08-game-values.md。数据键名与 00-project-keywords.md 一致。",
+  "description": "游戏数值数据，运行时从 res://datas/game_values.json 加载。设计来源：docs/design/0-values/01-game-values.md。数据键名与 00-project-keywords.md 一致。",
   "_fields_comment": {
     "researcher_cognition": "研究员认知消耗：每小时每人消耗 1",
     "shelter": "档案馆核心庇护等级与范围",

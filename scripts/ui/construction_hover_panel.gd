@@ -27,19 +27,19 @@ func show_for_room(room: RoomInfo, zone_type: int, player_resources: Dictionary,
 	if room == null:
 		hide_panel()
 		return
-	_label_name.text = room.room_name if room.room_name else "未命名"
-	_label_room_type.text = "房间类型：%s" % RoomInfo.get_room_type_name(room.room_type)
+	_label_name.text = room.get_display_name()
+	_label_room_type.text = tr("HOVER_ROOM_TYPE") % RoomInfo.get_room_type_name(room.room_type)
 	var cost: Dictionary = room.get_construction_cost(zone_type)
-	_label_cost.text = "建设花费：%s" % _format_cost_with_have(cost, player_resources)
+	_label_cost.text = tr("HOVER_CONSTRUCTION_COST") % _format_cost_with_have(cost, player_resources)
 	if _label_researcher:
 		var needed: int = researchers_needed if researchers_needed > 0 else room.get_construction_researcher_count(zone_type)
-		_label_researcher.text = "研究员占用：%d 人（可用 %d）" % [needed, researchers_available]
+		_label_researcher.text = tr("RESEARCHER_OCCUPANCY") % [needed, researchers_available]
 		_label_researcher.visible = true
-	_label_output.text = "建设后每小时产出：%s" % _get_output_text(room, zone_type)
-	_label_consume.text = "建设后每小时消耗：%s" % _get_consume_text(room, zone_type)
+	_label_output.text = tr("HOVER_OUTPUT_HOUR") % _get_output_text(room, zone_type)
+	_label_consume.text = tr("HOVER_CONSUME_HOUR") % _get_consume_text(room, zone_type)
 	_label_consume.visible = zone_type == 2  ## CREATION
 	_label_insufficient.visible = not can_afford
-	_label_insufficient.text = "当前资源不足"
+	_label_insufficient.text = tr("HOVER_INSUFFICIENT")
 	_label_insufficient.add_theme_color_override("font_color", INSUFFICIENT_COLOR)
 	visible = true
 
@@ -47,63 +47,74 @@ func show_for_room(room: RoomInfo, zone_type: int, player_resources: Dictionary,
 func _get_output_text(room: RoomInfo, zone_type: int) -> String:
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
-		return "（无）"
+		return tr("OUTPUT_NONE")
 	var area: int = room.rect.size.x * room.rect.size.y
 	var units: int = maxi(1, int(ceil(float(area) / 5.0)))
 	if zone_type == 1:  ## RESEARCH
 		var amt: int = gv.get_research_output_per_unit_per_hour(room.room_type)
 		if amt <= 0:
-			return "（无）"
+			return tr("OUTPUT_NONE")
 		var res: String = gv.get_research_output_resource(room.room_type)
-		var name_map: Dictionary = {"cognition": "认知", "computation": "计算", "willpower": "意志", "permission": "权限"}
-		return "%s %d/h" % [name_map.get(res, res), amt * units]
+		var res_key: String = _resource_key_for_name(res)
+		return tr("OUTPUT_RES_H") % [tr(res_key), amt * units]
 	elif zone_type == 2:  ## CREATION
 		var output_per_unit: int = gv.get_creation_produce_per_unit_per_hour(room.room_type)
 		if output_per_unit <= 0:
-			return "（无）"
+			return tr("OUTPUT_NONE")
 		match room.room_type:
 			RoomInfo.RoomType.SERVER_ROOM:
-				return "权限 %d/h" % (output_per_unit * units)
+				return tr("LABEL_PERMISSION_H") % (output_per_unit * units)
 			RoomInfo.RoomType.REASONING:
-				return "信息 %d/h" % (output_per_unit * units)
+				return tr("LABEL_INFO_H") % (output_per_unit * units)
 			_:
-				return "（无）"
+				return tr("OUTPUT_NONE")
 	elif zone_type == 4:  ## LIVING
-		return "住房 %d" % gv.get_housing_per_dormitory()
-	return "（无）"
+		return tr("LABEL_HOUSING") % gv.get_housing_per_dormitory()
+	return tr("OUTPUT_NONE")
 
 
 func _get_consume_text(room: RoomInfo, zone_type: int) -> String:
 	if zone_type != 2:  ## CREATION
-		return "（无）"
+		return tr("OUTPUT_NONE")
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
-		return "（无）"
+		return tr("OUTPUT_NONE")
 	var area: int = room.rect.size.x * room.rect.size.y
 	var units: int = maxi(1, int(ceil(float(area) / 5.0)))
 	var consume_per_unit: int = gv.get_creation_consume_per_unit_per_hour(room.room_type)
-	return "意志 %d/h" % (consume_per_unit * units)
+	return tr("LABEL_WILL_H") % (consume_per_unit * units)
+
+
+func _resource_key_for_name(key: String) -> String:
+	match key:
+		"cognition": return "RESOURCE_COGNITION"
+		"computation": return "RESOURCE_COMPUTATION"
+		"willpower": return "RESOURCE_WILL"
+		"permission": return "RESOURCE_PERMISSION"
+		"info": return "RESOURCE_INFO"
+		"truth": return "RESOURCE_TRUTH"
+		_: return key
 
 
 func _format_cost_with_have(cost: Dictionary, player_resources: Dictionary) -> String:
 	if cost.is_empty():
-		return "无"
+		return tr("COST_NONE")
 	var parts: PackedStringArray = []
-	var key_names: Dictionary = {
-		"cognition": "认知因子",
-		"computation": "计算因子",
-		"willpower": "意志因子",
-		"permission": "权限因子",
-		"info": "信息",
-		"truth": "真相",
+	var key_tr: Dictionary = {
+		"cognition": "RESOURCE_COGNITION",
+		"computation": "RESOURCE_COMPUTATION",
+		"willpower": "RESOURCE_WILL",
+		"permission": "RESOURCE_PERMISSION",
+		"info": "RESOURCE_INFO",
+		"truth": "RESOURCE_TRUTH",
 	}
 	for key in cost:
 		var amt: int = int(cost.get(key, 0))
 		if amt > 0:
 			var have: int = int(player_resources.get(key, 0))
-			var name_str: String = key_names.get(key, key)
-			parts.append("%s %d (拥有 %d)" % [name_str, amt, have])
-	return ", ".join(parts) if parts.size() > 0 else "无"
+			var name_str: String = tr(key_tr.get(key, key))
+			parts.append(tr("COST_WITH_HAVE") % [name_str, amt, have])
+	return ", ".join(parts) if parts.size() > 0 else tr("COST_NONE")
 
 
 func hide_panel() -> void:

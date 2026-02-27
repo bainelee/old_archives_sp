@@ -2,7 +2,7 @@ class_name GameMainBuiltRoomHelper
 extends RefCounted
 
 ## 已建设房间持续产出 - 研究区消耗存量、造物区消耗意志
-## 详见 docs/design/12-built-room-system.md
+## 详见 docs/design/2-gameplay/06-built-room-system.md
 
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")

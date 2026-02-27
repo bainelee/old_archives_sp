@@ -1,0 +1,22 @@
+---
+description: room_info 调整时触发本地化同步工作流
+alwaysApply: true
+---
+
+# room_info 本地化同步
+
+当用户表述中包含以下任一意图时，**必须**执行 room_info 本地化同步工作流：
+
+- 中文：`我调整了 roominfo`、`我改了 room_info`、`roominfo 更新了`、`调整了 room_info`、`room_info 改了`
+- 英文：`adjusted roominfo`、`modified room_info`、`updated room_info`、`room info changed`
+
+## 执行流程
+
+1. **启动 room_info 本地化同步子代理工作流**：按 `.cursor/subagents/room-info-locale-sync.md` 执行
+2. **覆盖范围**：`datas/room_info.json` → `translations/translations.csv`（提取 room_name、pre_clean_text、desc，生成 ROOM_XXX_NAME/PRE_CLEAN/DESC 键，zh_CN=原文，en=AI 翻译）
+3. **原则**：room_info.json 保持中文便于设计；同步后 CSV 含中英双语文案，供运行时按 locale 显示
+
+## 无需触发
+
+- 仅讨论 room_info 设计、未明确「已调整」或「要调整」时
+- 仅询问 room_info 结构或字段含义时

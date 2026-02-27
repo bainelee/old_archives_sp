@@ -13,11 +13,11 @@
 ### 设计文档（需与数据文件一致）
 | 文件 | 内容 |
 |------|------|
-| `docs/design/08-game-values.md` | 核心数值设计（研究员消耗、庇护、清理、建设、产出、改造） |
-| `docs/design/09-researcher-erosion.md` | 侵蚀/治愈/死亡概率 |
-| `docs/design/10-room-cleanup-system.md` | 清理系统（引用 08 4.1） |
-| `docs/design/11-zone-construction.md` | 建设系统（引用 08 5.1） |
-| `docs/design/12-built-room-system.md` | 已建设房间产出（引用 08 6、7） |
+| `docs/design/0-values/01-game-values.md` | 核心数值设计（研究员消耗、庇护、清理、建设、产出、改造） |
+| `docs/design/2-gameplay/07-researcher-erosion.md` | 侵蚀/治愈/死亡概率 |
+| `docs/design/2-gameplay/04-room-cleanup-system.md` | 清理系统（引用 values/01 4.1） |
+| `docs/design/2-gameplay/05-zone-construction.md` | 建设系统（引用 values/01 5.1） |
+| `docs/design/2-gameplay/06-built-room-system.md` | 已建设房间产出（引用 values/01 6、7） |
 | `docs/design/00-project-overview.md` | 庇护等级说明 |
 | `datas/README.md` | game_values / game_base 字段说明 |
 
@@ -43,11 +43,11 @@
    - 消耗/产出/建设/清理/住房/改造 → `datas/game_values.json`
    - 开局资源 → `datas/game_base.json`
 
-3. **更新设计文档**：同步修改 `docs/design/08-game-values.md` 及相关文档中的表格与公式。
+3. **更新设计文档**：同步修改 `docs/design/0-values/01-game-values.md` 及相关文档中的表格与公式。
 
 4. **更新脚本**：数值相关脚本已全部改为引用 GameValues，一般只需同步 JSON 与设计文档；若 JSON 新增字段，需扩展 `game_values.gd` 接口。
 
-5. **校验**：确保 game_values.json、08-game-values.md 与脚本逻辑（均来自 JSON）一致。
+5. **校验**：确保 game_values.json、values/01-game-values.md 与脚本逻辑（均来自 JSON）一致。
 
 **委托子代理**：当变更涉及多类数值、或需系统性查找遗漏文件时，可调用 `mcp_task`（subagent_type=generalPurpose）将全量同步委托执行，prompt 中附上本工作流及用户具体变更描述。
 
@@ -55,7 +55,7 @@
 
 ## 三、运行时架构
 
-数值通过 `game_values.json` + `GameValues` (Autoload) 加载，脚本通过 `GameValuesRef` 引用。修改 JSON 后：重启生效、或编辑器 F5 下约 2 秒自动重载、或调用 `GameValues.reload()`。详见 [13 - 游戏数值运行时系统](../../docs/design/13-game-values-runtime.md)。
+数值通过 `game_values.json` + `GameValues` (Autoload) 加载，脚本通过 `GameValuesRef` 引用。修改 JSON 后：重启生效、或编辑器 F5 下约 2 秒自动重载、或调用 `GameValues.reload()`。详见 [02 - 游戏数值运行时系统](../../docs/design/0-values/02-game-values-runtime.md)。
 
 ---
 

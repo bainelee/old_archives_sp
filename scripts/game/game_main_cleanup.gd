@@ -2,7 +2,7 @@ class_name GameMainCleanupHelper
 extends RefCounted
 
 ## 清理房间模式逻辑 - 选择、确认、进度、消耗
-## 详见 docs/design/10-room-cleanup-system.md
+## 详见 docs/design/2-gameplay/04-room-cleanup-system.md
 
 const CLEANUP_NONE := 0
 const CLEANUP_SELECTING := 1

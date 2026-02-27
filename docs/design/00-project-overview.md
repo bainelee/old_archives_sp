@@ -130,8 +130,8 @@ datas/room_info.json ──导入──►  _rooms（从模板导入）
 
 ## 相关文档
 
-- [01 - 地图编辑器](01-map-editor.md)
-- [02 - 房间信息与 room_info.json 同步](02-room-info-and-json-sync.md)
-- [05 - 庇护/侵蚀 UI](05-shelter-erosion-ui.md)
-- [06 - 主 UI 设计概览](06-ui-main-overview.md)
+- [01 - 地图编辑器](1-editor/01-map-editor.md)
+- [02 - 房间信息与 room_info.json 同步](1-editor/02-room-info-and-json-sync.md)
+- [01 - 庇护/侵蚀 UI](3-ui/01-shelter-erosion-ui.md)
+- [02 - 主 UI 设计概览](3-ui/02-ui-main-overview.md)
 - [名词解释](../名词解释.md)

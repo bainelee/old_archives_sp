@@ -1,4 +1,4 @@
-# 02 - 房间信息编辑与 room_info.json 同步
+# 02 - 房间信息与 room_info.json 同步
 
 ## 概述
 

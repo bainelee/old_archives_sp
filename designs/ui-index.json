@@ -5,7 +5,7 @@
     {
       "id": "ui_main_topbar",
       "name": "主 UI TopBar",
-      "sources": ["scenes/ui/ui_main.tscn", "docs/design/06-ui-main-overview.md"],
+      "sources": ["scenes/ui/ui_main.tscn", "docs/design/3-ui/02-ui-main-overview.md"],
       "elements": [
         {"path": "TopBar/Content/HBox/Factors/Cognition/Name", "type": "Label", "text": "认知因子", "fill": "#b3c0daff", "fontSize": 12},
         {"path": "TopBar/Content/HBox/Factors/Cognition/Value", "type": "Label", "text": "0", "fill": "#f2e6b3ff", "fontSize": 14},
@@ -37,7 +37,7 @@
     {
       "id": "time_panel",
       "name": "时间面板 TimePanel",
-      "sources": ["scenes/ui/time_panel.tscn", "docs/design/04-time-system.md"],
+      "sources": ["scenes/ui/time_panel.tscn", "docs/design/2-gameplay/02-time-system.md"],
       "elements": [
         {"path": "TimePanel/PlayPauseButton", "type": "Button", "text": "⏸", "fill": "#e6e6d9ff", "fontSize": 14},
         {"path": "TimePanel/Speed1xButton", "type": "Button", "text": "1x", "fill": "#e6e6d9ff", "fontSize": 12},
@@ -55,7 +55,7 @@
     {
       "id": "shelter_erosion_panel",
       "name": "庇护/侵蚀面板 ShelterErosionPanel",
-      "sources": ["scenes/ui/shelter_erosion_panel.tscn", "docs/design/05-shelter-erosion-ui.md"],
+      "sources": ["scenes/ui/shelter_erosion_panel.tscn", "docs/design/3-ui/01-shelter-erosion-ui.md"],
       "elements": [
         {"path": "Left/LeftVBox/Title", "type": "Label", "text": "庇护 · 侵蚀", "fill": "#99a6bfff", "fontSize": 11},
         {"path": "Left/LeftVBox/ErosionLabel", "type": "Label", "text": "薄弱", "fill": "#e6d9bfff", "fontSize": 14},

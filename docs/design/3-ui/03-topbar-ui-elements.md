@@ -87,7 +87,7 @@ TopBar 从左到右依次为：
 
 ## 相关文档
 
-- [06 - 主 UI 设计概览与规范](06-ui-main-overview.md) — 布局与实现
-- [名词解释](../名词解释.md) — 游戏内专有名词
-- [04 - 时间流逝系统](04-time-system.md)
-- [05 - 庇护/侵蚀 UI](05-shelter-erosion-ui.md)
+- [02 - 主 UI 设计概览与规范](02-ui-main-overview.md) — 布局与实现
+- [名词解释](../../名词解释.md) — 游戏内专有名词
+- [02 - 时间流逝系统](../2-gameplay/02-time-system.md)
+- [01 - 庇护/侵蚀 UI](01-shelter-erosion-ui.md)

@@ -19,10 +19,10 @@ enum Type {
 	WONDER      ## 奇观区
 }
 
-## 分类 tag（工作类/后勤类/秘迹类）
-const CATEGORY_WORK := "工作类"
-const CATEGORY_LOGISTICS := "后勤类"
-const CATEGORY_MYSTERY := "秘迹类"
+## 分类 tag（内部 key，显示用 tr）
+const CATEGORY_WORK := "work"
+const CATEGORY_LOGISTICS := "logistics"
+const CATEGORY_MYSTERY := "mystery"
 
 ## RoomType 数值（与 RoomInfo.RoomType 对应，避免循环依赖）
 const RT_LIBRARY := 0
@@ -56,16 +56,16 @@ static func get_rooms_for_zone(zone: int) -> Array[int]:
 
 static func get_zone_name(zone: int) -> String:
 	match zone:
-		Type.NONE: return "无"
-		Type.RESEARCH: return "研究区"
-		Type.CREATION: return "造物区"
-		Type.OFFICE: return "事务所区"
-		Type.LIVING: return "生活区"
-		Type.MEDICAL: return "医疗区"
-		Type.ENTERTAINMENT: return "娱乐区"
-		Type.RELIGION: return "宗教区"
-		Type.WONDER: return "奇观区"
-		_: return "未知"
+		Type.NONE: return TranslationServer.translate("ZONE_NONE")
+		Type.RESEARCH: return TranslationServer.translate("ZONE_RESEARCH")
+		Type.CREATION: return TranslationServer.translate("ZONE_CREATION")
+		Type.OFFICE: return TranslationServer.translate("ZONE_OFFICE")
+		Type.LIVING: return TranslationServer.translate("ZONE_LIVING")
+		Type.MEDICAL: return TranslationServer.translate("ZONE_MEDICAL")
+		Type.ENTERTAINMENT: return TranslationServer.translate("ZONE_ENTERTAINMENT")
+		Type.RELIGION: return TranslationServer.translate("ZONE_RELIGION")
+		Type.WONDER: return TranslationServer.translate("ZONE_WONDER")
+		_: return TranslationServer.translate("UNKNOWN")
 
 
 static func get_category_for_zone(zone: int) -> String:
@@ -78,6 +78,14 @@ static func get_category_for_zone(zone: int) -> String:
 			return CATEGORY_MYSTERY
 		_:
 			return ""
+
+
+static func get_category_display_name(cat: String) -> String:
+	match cat:
+		CATEGORY_WORK: return TranslationServer.translate("CATEGORY_WORK")
+		CATEGORY_LOGISTICS: return TranslationServer.translate("CATEGORY_LOGISTICS")
+		CATEGORY_MYSTERY: return TranslationServer.translate("CATEGORY_MYSTERY")
+		_: return ""
 
 
 ## 建设消耗（info, permission 等），源自 game_values.json

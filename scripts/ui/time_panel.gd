@@ -27,7 +27,7 @@ func _ready() -> void:
 	_btn_play_pause.pressed.connect(_on_play_pause_pressed)
 	_btn_play_pause.mouse_entered.connect(_on_play_pause_mouse_entered)
 	_btn_play_pause.mouse_exited.connect(_on_play_pause_mouse_exited)
-	_btn_1x.tooltip_text = "恢复正常速度"
+	_btn_1x.tooltip_text = tr("TOOLTIP_NORMAL_SPEED")
 	_btn_1x.pressed.connect(_on_1x_pressed)
 	_btn_2x.pressed.connect(_on_2x_pressed)
 	_btn_6x.pressed.connect(_on_6x_pressed)
@@ -112,11 +112,11 @@ func _update_play_pause_icon() -> void:
 	if _hovering_play_pause:
 		# 悬浮时显示相反图标（点击后将切换到的状态）
 		_btn_play_pause.text = ICON_PAUSE if is_flowing else ICON_PLAY
-		_btn_play_pause.tooltip_text = "点击暂停" if is_flowing else "点击继续"
+		_btn_play_pause.tooltip_text = tr("TOOLTIP_CLICK_PAUSE") if is_flowing else tr("TOOLTIP_CLICK_RESUME")
 	else:
 		# 默认：流逝时显示播放，暂停时显示暂停
 		_btn_play_pause.text = ICON_PLAY if is_flowing else ICON_PAUSE
-		_btn_play_pause.tooltip_text = "暂停" if is_flowing else "继续"
+		_btn_play_pause.tooltip_text = tr("TOOLTIP_PAUSE") if is_flowing else tr("TOOLTIP_RESUME")
 
 
 func _update_speed_buttons() -> void:

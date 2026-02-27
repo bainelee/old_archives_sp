@@ -5,6 +5,8 @@ extends CanvasLayer
 @onready var _dim_overlay: Control = $DimOverlay
 @onready var _blocked_ui_overlay: Control = $BlockedUIOverlay
 @onready var _hint_panel: Control = $HintPanel
+@onready var _hint_title: Label = $HintPanel/Title
+@onready var _hint_sub: Label = $HintPanel/Sub
 @onready var _hover_panel: PanelContainer = $CleanupHoverPanel
 @onready var _confirm_container: Control = $ConfirmContainer
 @onready var _confirm_button: Button = $ConfirmContainer/ConfirmButton
@@ -26,7 +28,11 @@ func _ready() -> void:
 	_confirm_container.visible = false
 	_progress_ring.visible = false
 	_confirm_button.visible = true
-	_confirm_button.text = "✓"
+	_confirm_button.text = tr("BTN_CONFIRM")
+	if _hint_title:
+		_hint_title.text = tr("CLEANUP_SELECT")
+	if _hint_sub:
+		_hint_sub.text = tr("CLEANUP_RIGHT_CANCEL")
 	_confirm_button.pressed.connect(_on_confirm_pressed)
 
 

@@ -1,0 +1,435 @@
+keys,en,zh_CN
+MENU_TITLE,Old Archives,旧日档案馆
+MENU_NEW_GAME,New Game,新游戏
+MENU_CONTINUE,Continue,继续游戏
+MENU_SETTINGS,Settings,设定
+MENU_QUIT,Quit Game,退出游戏
+MENU_NO_SAVE,No save file,暂无存档
+SLOT_SELECT_TITLE,Select save slot,选择存档槽位
+SLOT_EMPTY,"Slot %d - Empty","槽位 %d - 空"
+SLOT_WITH_NAME,"Slot %d - %s","槽位 %d - %s"
+SLOT_TOOLTIP_NEW,New save,新建存档
+SLOT_TOOLTIP_OVERWRITE,Overwrite existing save,覆盖已有存档
+BTN_DELETE,Delete,删除
+BTN_CANCEL,Cancel,取消
+SLOT_DELETE_CONFIRM,Are you sure you want to delete this save?,确定要删除该槽位的存档吗？
+CONFIRM_DELETE_TITLE,Confirm Delete,确认删除
+LANG_ZH,Chinese,中文
+LANG_EN,English,英文
+PAUSE_PAUSE,Pause,暂停
+PAUSE_RESUME,Back to Game,返回游戏
+PAUSE_SAVE,Save Game,保存游戏
+PAUSE_LOAD,Load Game,载入游戏
+PAUSE_SETTINGS,Settings,设置
+PAUSE_QUIT,Quit Game,退出游戏
+SLOT_SELECT_SAVE,Select save slot,选择保存槽位
+SLOT_SELECT_LOAD,Select load slot,选择载入槽位
+LABEL_COGNITION,Cognition,认知因子
+LABEL_COMPUTATION,Computation,计算因子
+LABEL_WILLPOWER,Willpower,意志因子
+LABEL_PERMISSION,Permission,权限因子
+LABEL_INFO,Info,信息
+LABEL_TRUTH,Truth,真相
+LABEL_RESEARCHER,Researchers:,研究员：
+LABEL_ERODED,Eroded,被侵蚀
+LABEL_INVESTIGATOR,Investigators,调查员
+BTN_CLEANUP,Clean,清理
+BTN_CONSTRUCTION,Build,建设
+BTN_REMODEL,Remodel,改造
+ROOM_TYPE_LIBRARY,Library,图书室
+ROOM_TYPE_LAB,Lab,机房
+ROOM_TYPE_CLASSROOM,Classroom,教学室
+ROOM_TYPE_ARCHIVE,Archive,资料库
+ROOM_TYPE_ARCHIVE_CORE,Archive Core,档案馆核心
+ROOM_TYPE_SERVER_ROOM,Lab,实验室
+ROOM_TYPE_REASONING,Reasoning Room,推理室
+ROOM_TYPE_OFFICE_SITE,Office Site,事务所遗址
+ROOM_TYPE_DORMITORY,Dormitory,宿舍
+ROOM_TYPE_EMPTY_ROOM,Empty Room,空房间
+RESOURCE_NONE,None,无
+RESOURCE_COGNITION,Cognition,认知因子
+RESOURCE_COMPUTATION,Computation,计算因子
+RESOURCE_WILL,Willpower,意志因子
+RESOURCE_PERMISSION,Permission,权限因子
+RESOURCE_INFO,Info,信息
+RESOURCE_TRUTH,Truth,真相
+CLEAN_STATUS_UNCLEANED,Uncleaned,未清理
+CLEAN_STATUS_CLEANED,Cleaned,已清理
+ZONE_NONE,None,无
+ZONE_RESEARCH,Research Area,研究区
+ZONE_CREATION,Creation Area,造物区
+ZONE_OFFICE,Office Area,事务所区
+ZONE_LIVING,Living Area,生活区
+ZONE_MEDICAL,Medical Area,医疗区
+ZONE_ENTERTAINMENT,Entertainment Area,娱乐区
+ZONE_RELIGION,Religion Area,宗教区
+ZONE_WONDER,Wonder,奇观区
+CATEGORY_WORK,Work,工作类
+CATEGORY_LOGISTICS,Logistics,后勤类
+CATEGORY_MYSTERY,Mystery,秘迹类
+SHELTER_EXTREME,Extreme,绝境
+SHELTER_EXPOSED,Exposed,暴露
+SHELTER_WEAK,Weak,薄弱
+SHELTER_SAFE,Safe,妥善
+SHELTER_PERFECT,Perfect,完美
+EROSION_LATENT,Latent Erosion,隐性侵蚀
+EROSION_LATENT_SHORT,Latent,隐性
+EROSION_MILD,Mild Erosion,轻度侵蚀
+EROSION_MILD_SHORT,Mild,轻度
+EROSION_VISIBLE,Visible Erosion,显性侵蚀
+EROSION_VISIBLE_SHORT,Visible,显性
+EROSION_SURGE,Surge Shadow,涌动阴霾
+EROSION_LYCAON,Lycaon's Shadow,莱卡昂的暗影
+EROSION_MYSTERY,Mystery Erosion,神秘侵蚀
+SHELTER_STATUS_LINE,"Current shelter status: %s","当前的庇护状态：%s"
+SHELTER_BONUS_LINE,"+%d from civilization's blessing","+%d 来自 文明的庇佑"
+EROSION_SOURCE_LINE,"%d from %s","%d 来自 %s"
+SHELTER_EROSION_TITLE,Shelter · Erosion,庇护 · 侵蚀
+EROSION_CYCLE_TOOLTIP,"Next 3 months: white +1 latent / green 0 mild / orange -2 visible / red -4 surge / purple -8 Lycaon","未来3个月侵蚀：白色+1隐性、翠绿0轻度、橙黄-2显性、赤红-4涌动阴霾、深紫-8莱卡昂"
+EROSION_CYCLE_POPUP,"In %d days: %s %d","距离现在%d天 %s %d"
+LABEL_CALAMITY,Calamity,灾厄
+TOOLTIP_NORMAL_SPEED,Normal speed,恢复正常速度
+TOOLTIP_CLICK_PAUSE,Click to pause,点击暂停
+TOOLTIP_CLICK_RESUME,Click to resume,点击继续
+TOOLTIP_PAUSE,Pause,暂停
+TOOLTIP_RESUME,Resume,继续
+LABEL_ROOM_NAME,Room Name,房间名称
+LABEL_ROOM_TYPE,Room Type,房间类型
+LABEL_CLEAN_STATUS,Clean Status,清理状态
+LABEL_SIZE,Size,尺寸
+LABEL_ZONE_OPS,Zone Operations,区域运作
+LABEL_DESC,Description,描述
+LABEL_RESOURCES,Resource Output,资源产出
+DEFAULT_UNTITLED,Untitled,未命名
+DEFAULT_NO_DESC,(No description),（无描述）
+LABEL_ZONE,Zone,区域
+LABEL_NOTE,(To be implemented),（功能待定）
+LABEL_CURRENT_RESERVE,Current reserve,当前存量
+LABEL_HOURLY_OUTPUT,Hourly output,每小时产出
+LABEL_HOURLY_CONSUME,Hourly consume,每小时消耗
+LABEL_STATUS_PAUSED,Paused research,暂停研究
+LABEL_RECOVER_COND,Recovery condition,恢复条件
+WILL_24H_COND,"Willpower ≥ %d (24h consume)","意志 ≥ %d（24h 消耗）"
+LABEL_PERMISSION_H,"Permission +%d/h","权限 +%d/h"
+LABEL_INFO_H,"Info +%d/h","信息 +%d/h"
+LABEL_WILL_H,Willpower -%d/h,意志 -%d/h
+LABEL_HOUSING,"Housing %d","住房 %d"
+RESERVE_NONE,(None),（无）
+RESERVE_NO_OUTPUT,(No resource output),（无资源产出）
+HOVER_ROOM_TYPE,"Room type: %s","房间类型：%s"
+HOVER_CONSTRUCTION_COST,"Construction cost: %s","建设花费：%s"
+HOVER_RESEARCHER_COUNT,"%d person (available %d)","%d 人（可用 %d）"
+HOVER_OUTPUT_HOUR,"Output per hour: %s","建设后每小时产出：%s"
+HOVER_CONSUME_HOUR,"Consume per hour: %s","建设后每小时消耗：%s"
+HOVER_INSUFFICIENT,Insufficient resources,当前资源不足
+HOVER_BUILD_AREA,"Buildable area: %d×%d","可建设区域：%d×%d"
+HOVER_CLEANUP_COST,"Cleanup cost: %s","清理花费：%s"
+HOVER_CLEANUP_TIME,"Cleanup time: %.0f hours","清理时间：%.0f 小时"
+HOVER_RESERVE_EMPTY,"Resource reserve: (none)","资源储量：（无）"
+HOVER_RESERVE_LINE,"Resource reserve: %s","资源储量：%s"
+COST_WITH_HAVE,"%s %d (have %d)","%s %d (拥有 %d)"
+COST_NONE,None,无
+OUTPUT_NONE,(None),（无）
+OUTPUT_RES_H,"%s %d/h","%s %d/h"
+EDITOR_LEVEL,Edit level:,编辑层级：
+EDITOR_FLOOR,Floor,底板
+EDITOR_ROOM,Room,房间
+EDITOR_DELETE_ROOM,Delete Room,删除房间
+EDITOR_MOVE,Move,移动
+EDITOR_EMPTY,Empty,空
+EDITOR_WALL,Wall,墙壁
+EDITOR_ROOM_FLOOR,Room Floor,房间底板
+EDITOR_ERASER,Eraser,橡皮擦
+EDITOR_SINGLE,Single,单选
+EDITOR_BOX,Box select,框选
+EDITOR_FLOOR_SELECT,Select,选择
+EDITOR_MAP_NAME,Map name:,地图名：
+EDITOR_MAP_NAME_PLACEHOLDER,Untitled map,未命名地图
+EDITOR_GRID_SNAP,Grid snap,网格对齐
+EDITOR_SAVE_MAP,Save Map,保存地图
+EDITOR_OPEN_MAP,Open Map,打开地图
+EDITOR_PLAY,Enter Game,进入游戏
+EDITOR_SELECT_MAP,Select Map,选择地图
+EDITOR_CLOSE,Close,关闭
+EDITOR_ROOM_INFO,Room info (editable when selected),房间信息（选中房间后可编辑）
+EDITOR_IMPORT_TEMPLATE,Import from template,从模板导入
+EDITOR_LABEL_NAME,Name:,名称：
+EDITOR_PLACEHOLDER_ROOM,Room name,房间名称
+EDITOR_LABEL_TYPE,Type:,类型：
+EDITOR_LABEL_CLEAN,Clean status:,清理状态：
+EDITOR_LABEL_PRE_CLEAN,Pre-clean text:,清理前文本：
+EDITOR_PLACEHOLDER_PRE_CLEAN,Default pre-clean text,默认清理前文本
+EDITOR_LABEL_DESC,Description:,描述：
+EDITOR_PLACEHOLDER_DESC,Room background description,房间背景描述
+EDITOR_LABEL_RES,Resources:,资源：
+EDITOR_ADD,Add,添加
+EDITOR_LABEL_BASE,Base image:,底图：
+EDITOR_PLACEHOLDER_NONE,None,无
+EDITOR_SELECT,Select...,选择...
+EDITOR_CLEAR,Clear,清除
+EDITOR_DIALOG_BASE,Select base image,选择底图
+EDITOR_IMPORT_TITLE,Select room template to import (id + name),选择要导入的房间模板（编号 + 名称）
+EDITOR_IMPORT,Import,导入
+EDITOR_SAVE_TITLE,Save Map,保存地图
+EDITOR_SAVE_CURRENT,Save current map,保存当前地图
+EDITOR_SAVE_NEW,Save as new map,保存为新地图
+EDITOR_ROOM_LIST_DOWN,Room list ▼,房间列表 ▼
+EDITOR_ROOM_LIST_RIGHT,Room list ▶,房间列表 ▶
+EDITOR_ROOM_N,"Room %d","房间 %d"
+FLOOR_EMPTY,Empty,空
+FLOOR_WALL,Wall / decoration,墙壁/装饰
+FLOOR_ROOM,Room floor,房间底板
+FILTER_PNG,PNG images,PNG 图像
+FILTER_JPEG,JPEG images,JPEG 图像
+FILTER_WEBP,WebP images,WebP 图像
+CLEANUP_SELECT,Select room to clean,选择需要清理的房间
+CLEANUP_RIGHT_CANCEL,Right-click to cancel,右键取消
+BTN_CONFIRM,✓,✓
+RESEARCHER_TOTAL,"Researchers: %d","研究员总数：%d"
+RESEARCHER_ERODED,"Eroded: %d","被侵蚀：%d"
+RESEARCHER_IN_CLEANUP,"In cleanup: %d","清理中：%d"
+RESEARCHER_IN_CONSTRUCTION,"In construction: %d","建设中：%d"
+RESEARCHER_WORKING,"Working in room: %d","房间内工作：%d"
+RESEARCHER_IDLE,"Idle: %d","空闲：%d"
+DEFAULT_NEW_GAME,New Game,新游戏
+DEFAULT_PRE_CLEAN,Default pre-clean text,默认清理前文本
+TIME_FORMAT,"%dh %dd %dw","%d时，%d日，%d周"
+LABEL_REGION,Region,区域
+LABEL_EXPLAIN,Note,说明
+ERROR_GAME_VALUES_OPEN,"GameValues: Failed to open %s","GameValues: 无法打开 %s"
+ERROR_GAME_VALUES_JSON,"GameValues: JSON parse failed: %s","GameValues: JSON 解析失败: %s"
+ERROR_GAME_VALUES_ROOT,GameValues: Root must be Dictionary,GameValues: 根节点必须为 Dictionary
+ERROR_SAVE_FAILED,Save failed,保存失败
+ERROR_PAUSE_NO_COLLECT,PauseMenu: GameMain has no collect_game_state method,PauseMenu: GameMain 无 collect_game_state 方法
+ERROR_NEW_GAME_FAILED,New game save creation failed,新游戏存档创建失败
+ERROR_SAVE_MAP_FAILED,"Save failed: %s","保存失败: %s"
+ERROR_OPEN_FAILED,"Cannot open: %s","无法打开: %s"
+ERROR_READ_ROOM_JSON,Cannot read room_info.json,无法读取 room_info.json
+ERROR_WRITE_ROOM_JSON,"Cannot write room_info.json: %s","无法写入 room_info.json: %s"
+ERROR_SELECT_ROOM,Please select a room first,请先选中一个房间
+ERROR_ROOM_JSON_OPEN,Cannot open room_info.json or invalid format,无法打开 room_info.json 或格式错误
+ERROR_NO_SLOT_EMPTY,No empty slot. Cannot save as new map. Please delete or overwrite existing map.,没有空槽位，无法保存为新地图。请先删除或覆盖已有地图。
+ERROR_SAVE_FAILED_TITLE,Save Failed,保存失败
+DEFAULT_UNNAMED_MAP,Untitled map,未命名地图
+UNKNOWN,Unknown,未知
+NAME_COGNITION,Cognition,认知
+NAME_COMPUTATION,Computation,计算
+NAME_WILLPOWER,Willpower,意志
+NAME_PERMISSION,Permission,权限
+RESEARCHER_OCCUPANCY,"Researcher occupancy: %d (available %d)","研究员占用：%d 人（可用 %d）"
+EDITOR_SELECT_ROOM,Select room,选择房间
+EDITOR_BOX_ROOM,Box select room,框选房间
+LABEL_STATUS,Status,状态
+ERROR_CREATE_ROOM_NON_FLOOR,Cannot create room: area has non-room floor,无法创建房间：区域内有非房间底板
+ERROR_CREATE_ROOM_OVERLAP,Cannot create room: overlaps with existing room,无法创建房间：与已有房间重叠
+INFO_IMPORTED_TEMPLATE,Imported template: %s,已导入模板: %s
+INFO_ROOM_DELETED,Room deleted,已删除房间
+INFO_SLOT_EMPTY,Slot %d is empty,槽位 %d 为空
+INFO_MAP_LOADED,Map loaded: %s,已加载地图: %s
+INFO_ROOM_CREATED,Room created: %s %d×%d,已创建房间: %s %d×%d
+INFO_MIGRATED_MAP,Migrated from scene_archive.json to slot 1,已从 scene_archive.json 迁移到槽位 1
+INFO_MAP_SAVED,Map saved: %s (%s),地图已保存: %s (%s)
+INFO_ROOMS_SYNCED,Room info synced to room_info.json,房间信息已同步至 room_info.json
+LABEL_SUFFIX,": ","："
+MIGRATED_MAP_NAME,Original scene,原场景
+EDITOR_SYNC_SOURCE,Map editor sync,地图编辑器同步
+ROOM_001_NAME,Archive Hall,档案馆正厅
+ROOM_001_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_001_DESC,"The Seeker-Visser founded this archive and deciphered the beacons left by the Sage Roman with its wisdom.
+For this he tamed time and stepped into eternity.
+""As long as you remain within the archive, you need not heed time's cruelty.
+In eternal time, no path shall be blocked.""","探寻者-维瑟建立这座档案馆，并以此中智慧破译智者罗曼所留下的道标，
+为此他不惜驯服时间、迈入永恒。
+「 只要你仍在档案馆内，便无需理会时间之残忍。
+在永恒的时间中，并没有任何路径会被阻断。 」"
+ROOM_002_NAME,Archive Gatehouse,档案馆门卫室
+ROOM_002_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_002_DESC,"When the archive was a private estate, this was merely the steward's quarters.
+The eighth administrator Trend declared the archive open to the public and converted it into a gatehouse to screen visitors.
+He resolved to bring change to this fragmented world through the archive's knowledge. He succeeded—but that also became the cause of his late-life tragedy.
+""One of them?""","在档案馆作为私有庄园的年代，这里只是一个管家的居所，
+第八任管理员特伦德宣布档案馆对外开放，将此处改为门卫室查问外来者。
+他决心让档案馆中的知识和信息能带给这个离析的世界一些改变。他做到了，但这也是他晚年悲剧的原因。
+「之一？」"
+ROOM_003_NAME,Archive Core,档案馆核心
+ROOM_003_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_003_DESC,"The heart of the archive, able to bring civilization's blessing by consuming computation factor.
+Blocking the mystery erosion from the Tyrant Lycaon.
+Order is not innate—it must be maintained at great cost.","档案馆的心脏，能够通过消耗计算因子为档案馆带来文明的庇佑，
+阻隔来自暴君—莱卡昂的神秘侵蚀。
+秩序并非天生，它必须被极其昂贵地维持。"
+ROOM_004_NAME,Pharmaceutical Research Lab,制药研究室
+ROOM_004_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_004_DESC,"Lieutenant Ivan Jr.'s former lab. Glass ampules with chipped edges hold near-black residue, smelling of iodine and old copper.
+He mastered pharmacy; his craft ignored the boundaries of flesh and reality, transcending era, technology, and limits.
+Rumor has it he built a hidden hospital underground during his tenure to treat those wounded by war.
+He preferred denying Death its due over taking lives on the battlefield.","小伊凡中尉曾经的实验室,边缘带有缺口的玻璃安瓿瓶中残留着近乎黑色的药液，散发出碘伏与旧铜币的混合气味。
+他精通制药,技艺无视了血肉与现实的边界,也超出时代、科技和现实的限制。
+据传他负责档案馆期间，曾于地下建立了一个隐匿的医院，用于救治战争带来的伤患。
+比其在战场上夺去他人的生命，他更喜欢剥夺死神的权力。"
+ROOM_005_NAME,Philosophy Archives,哲学文献室
+ROOM_005_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_005_DESC,"An archive of philosophy materials and documents; the paper has curled with age, like the weights that once lingered here.
+Though long silent, the air still carries the scent of tobacco.
+A rural teacher from the Eastern provinces once tended this archive—organizing, compiling, and studying obscure philosophy.","以哲学资料、文献为主的档案室，纸张在岁月中卷曲，如同那些曾在此处盘旋的沉重。
+虽然沉寂多年，空气中仍然弥漫着厚重的烟草味。
+曾有一位来自东洲的乡村教师负责这个档案室，他在此整理、编纂、研习晦涩的哲思。"
+ROOM_006_NAME,Scribe's Room,书记员房间
+ROOM_006_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_006_DESC,"This room was once used by Mr. Baiwen's scribe, Fuye.
+He assisted in organizing, cataloging, and transcribing records of the archive's books.
+During that time he also wrote and published a novel about the youth of the Far East Resistance.
+""When you stand ready, Death will not come for you.""","这个房间曾经由白文先生的书记员-弗耶所使用，
+他负责辅助整理、收纳和誊写关于档案馆进出典籍的资料。
+也是在那段时间，他将极东抗争会的年轻人们的故事写成一部小说并出版。
+「当你严阵以待时，死神是不会找上你的。」"
+ROOM_007_NAME,Terminal Console,终端操作台
+ROOM_007_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_007_DESC,"The terminal console of the Pale Colossus.
+Even with only a fraction of its power, the low hum from within is enough to ward off fear.
+The brass knobs along the edges gleam from sweat and time. The Colossus is silent—but not dead.","苍白巨像的操作台终端，
+即便仅能使用一小部分苍白巨像的力量，其内部传来的低频嗡鸣也足以令让人免于恐惧。
+边缘的黄铜旋钮已被汗水与岁月磨得发亮。巨像沉默，但绝非死去。"
+ROOM_008_NAME,Periodical Archives,刊物档案室
+ROOM_008_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_008_DESC,"Adelia rebuilt the periodical archive with her knowledge of informatics and communications.
+Organizing and cataloging audiovisual publications from around the world.
+In the silence, one might almost hear the white noise of history.","阿德利亚依靠其信息学、传播学知识重建了刊物档案室，
+整理收纳了世界各地的录音录像出版物。
+静谧之中，仿佛能听见历史的白噪音。"
+ROOM_009_NAME,Gwen's Temporary Office,格温的临时事务所
+ROOM_009_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_009_DESC,"Gwen Belychenko's investigator team briefly used this as their base; maps lay scattered on the desk, never put away.
+As the investigator who resolved the Kolboko incident, Gwen eventually joined the war against Lycaon.
+""Kolboko is about to fall.""","格温·别利琴科组建的调查员团队短暂以此为据点,桌上散落着未及收起的地图。
+作为解决了科尔博柯事件的调查员，格温最终也加入到对抗莱卡昂的战争中。
+「科尔博柯就要掉下去了。」"
+ROOM_010_NAME,Case Exhibits Room,案情陈列室
+ROOM_010_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_010_DESC,"Old case files stacked here; a giant clue board pinned with faded documents and red thread.
+Those who once sought answers here stripped thought to layer upon layer, until only the uncompromising truth remained.
+Reason burned here, leaving light and ash.","旧的案件档案堆放其中，巨型线索板上钉满褪色的档案与红线，
+曾在此处寻觅答案的人将思绪层层剥解，直到只剩不可妥协的真相。
+理智在此燃烧，留下光辉与灰烬。"
+ROOM_011_NAME,Annex Room F101,副楼房间F101
+ROOM_011_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_011_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_012_NAME,Annex Room F102,副楼房间F102
+ROOM_012_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_012_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_013_NAME,Annex Room F201,副楼房间F201
+ROOM_013_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_013_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_014_NAME,Annex Room F202,副楼房间F202
+ROOM_014_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_014_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_015_NAME,Annex Room F301,副楼房间F301
+ROOM_015_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_015_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_016_NAME,Annex Room F302,副楼房间F302
+ROOM_016_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_016_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_017_NAME,Annex Room F401,副楼房间F401
+ROOM_017_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_017_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_018_NAME,Annex Room F402,副楼房间F402
+ROOM_018_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_018_DESC,Originally vacant, often used as guest rooms.,原本空闲的房间，也曾多用于客房。
+ROOM_019_NAME,Annex Room F501,副楼房间F501
+ROOM_019_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_019_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_029_NAME,Annex Room F101,副楼房间F101
+ROOM_029_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_029_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_030_NAME,Annex Room F102,副楼房间F102
+ROOM_030_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_030_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_031_NAME,Annex Room F201,副楼房间F201
+ROOM_031_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_031_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_032_NAME,Annex Room F202,副楼房间F202
+ROOM_032_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_032_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_033_NAME,Annex Room F301,副楼房间F301
+ROOM_033_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_033_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_034_NAME,Annex Room F302,副楼房间F302
+ROOM_034_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_034_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_035_NAME,Annex Room F401,副楼房间F401
+ROOM_035_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_035_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_036_NAME,Annex Room F402,副楼房间F402
+ROOM_036_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_036_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+ROOM_037_NAME,Annex Room F501,副楼房间F501
+ROOM_037_PRE_CLEAN,Default pre-clean text,默认清理前文本
+ROOM_037_DESC,"A dust-covered haven. An old bed with faded linen.
+The air mixes mildew and smoke, as if holding the warmth of days past.
+Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"

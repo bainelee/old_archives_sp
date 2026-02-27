@@ -17,7 +17,8 @@ const TILE_COLORS := {
 var _tiles: Array[Array] = []
 var _edit_level: int = FloorTileType.EditLevel.FLOOR
 var _select_mode: int = FloorTileType.SelectMode.SINGLE
-var _paint_tool: int = FloorTileType.PaintTool.ROOM_FLOOR
+@warning_ignore("unused_private_class_variable")
+var _paint_tool: int = FloorTileType.PaintTool.ROOM_FLOOR  ## 由 MapEditorToolbarBuilder/Grid 通过 get/set 使用
 var _rooms: Array = []
 var _room_ids: Array[Array] = []  ## gx,gy -> room_index (-1 表示无)
 var _selected_room_index: int = -1
@@ -45,28 +46,38 @@ var _select_buttons: Array[Button] = []
 var _tool_buttons: Array[Button] = []
 var _room_panel: PanelContainer
 var _room_name_edit: LineEdit
-var _room_type_option: OptionButton
-var _room_clean_option: OptionButton
+@warning_ignore("unused_private_class_variable")
+var _room_type_option: OptionButton  ## 由 MapEditorRoomUIBuilder 注入并读写
+@warning_ignore("unused_private_class_variable")
+var _room_clean_option: OptionButton  ## 同上
 var _room_pre_clean_edit: LineEdit  ## 清理前文本
 var _room_desc_edit: TextEdit  ## 房间描述（支持多行）
-var _room_resources_container: VBoxContainer  ## 资源列表，每行：类型下拉 + 储量数字 + 删除
-var _room_res_add_btn: Button
-var _room_base_image_edit: LineEdit  ## 底图路径，只读展示
-var _room_base_image_btn: Button    ## 选择底图按钮
+@warning_ignore("unused_private_class_variable")
+var _room_resources_container: VBoxContainer  ## 资源列表；由 MapEditorRoomUIBuilder 注入并读写
+@warning_ignore("unused_private_class_variable")
+var _room_res_add_btn: Button  ## 同上
+@warning_ignore("unused_private_class_variable")
+var _room_base_image_edit: LineEdit  ## 底图路径，只读展示；由 MapEditorRoomUIBuilder 注入并读写
+@warning_ignore("unused_private_class_variable")
+var _room_base_image_btn: Button    ## 选择底图按钮；同上
 var _room_base_image_dialog: FileDialog
 var _btn_delete_room: Button
-var _btn_import_template: Button
+@warning_ignore("unused_private_class_variable")
+var _btn_import_template: Button  ## 由 MapEditorRoomUIBuilder 注入并读写
 var _import_template_panel: PanelContainer  ## 从 room_info.json 导入模板的弹窗
 var _import_template_list: ItemList  ## 模板房间列表（编号+名称）
 var _import_template_data: Array = []  ## 从 JSON 加载的模板房间列表
 var _main_toolbar: HBoxContainer
-var _room_list_panel: PanelContainer
+@warning_ignore("unused_private_class_variable")
+var _room_list_panel: PanelContainer  ## 由 MapEditorRoomUIBuilder 注入并读写
 var _room_list_toggle_btn: Button
 var _room_list_dropdown_visible: bool = true
 var _room_list_scroll: ScrollContainer
-var _room_list_container: VBoxContainer
+@warning_ignore("unused_private_class_variable")
+var _room_list_container: VBoxContainer  ## 由 MapEditorRoomUIBuilder 注入并读写
 var _skip_room_name_callback: bool = false  ## 程序化设置 LineEdit 时跳过 text_changed，避免覆盖
-var _base_image_cache: Dictionary = {}  ## path -> Texture2D，避免每帧重复加载
+@warning_ignore("unused_private_class_variable")
+var _base_image_cache: Dictionary = {}  ## path -> Texture2D；由 MapEditorDrawHelper 通过 get 使用
 var _current_map_slot: int = -1  ## 当前地图槽位 0-4，-1 表示未保存
 var _map_name_edit: LineEdit
 var _open_map_panel: PanelContainer
@@ -130,11 +141,11 @@ func _setup_ui() -> void:
 	# 编辑层级
 	var level_bar: HBoxContainer = HBoxContainer.new()
 	var lbl_level: Label = Label.new()
-	lbl_level.text = "编辑层级："
+	lbl_level.text = tr("EDITOR_LEVEL")
 	level_bar.add_child(lbl_level)
 	_level_buttons.clear()
-	var btn_floor: Button = MapEditorToolbarBuilder.make_level_button(self, "底板", FloorTileType.EditLevel.FLOOR)
-	var btn_room: Button = MapEditorToolbarBuilder.make_level_button(self, "房间", FloorTileType.EditLevel.ROOM)
+	var btn_floor: Button = MapEditorToolbarBuilder.make_level_button(self, tr("EDITOR_FLOOR"), FloorTileType.EditLevel.FLOOR)
+	var btn_room: Button = MapEditorToolbarBuilder.make_level_button(self, tr("EDITOR_ROOM"), FloorTileType.EditLevel.ROOM)
 	_level_buttons.append(btn_floor)
 	_level_buttons.append(btn_room)
 	level_bar.add_child(btn_floor)
@@ -148,15 +159,15 @@ func _setup_ui() -> void:
 	
 	# 单选、框选、选择（互斥）
 	_select_buttons.clear()
-	var btn_single: Button = MapEditorToolbarBuilder.make_select_button(self, "单选", FloorTileType.SelectMode.SINGLE)
-	var btn_box: Button = MapEditorToolbarBuilder.make_select_button(self, "框选", FloorTileType.SelectMode.BOX)
-	var btn_floor_select: Button = MapEditorToolbarBuilder.make_select_button(self, "选择", FloorTileType.SelectMode.FLOOR_SELECT)
+	var btn_single: Button = MapEditorToolbarBuilder.make_select_button(self, tr("EDITOR_SINGLE"), FloorTileType.SelectMode.SINGLE)
+	var btn_box: Button = MapEditorToolbarBuilder.make_select_button(self, tr("EDITOR_BOX"), FloorTileType.SelectMode.BOX)
+	var btn_floor_select: Button = MapEditorToolbarBuilder.make_select_button(self, tr("EDITOR_FLOOR_SELECT"), FloorTileType.SelectMode.FLOOR_SELECT)
 	_select_buttons.append(btn_single)
 	_select_buttons.append(btn_box)
 	_select_buttons.append(btn_floor_select)
 	_main_toolbar.add_child(btn_single)
 	_btn_delete_room = Button.new()
-	_btn_delete_room.text = "删除房间"
+	_btn_delete_room.text = tr("EDITOR_DELETE_ROOM")
 	_btn_delete_room.pressed.connect(_on_delete_room_pressed)
 	_btn_delete_room.visible = false
 	_main_toolbar.add_child(_btn_delete_room)
@@ -173,17 +184,17 @@ func _setup_ui() -> void:
 	
 	# 底板层级：移动（选择模式下有选区时显示）
 	_btn_floor_move = Button.new()
-	_btn_floor_move.text = "移动"
+	_btn_floor_move.text = tr("EDITOR_MOVE")
 	_btn_floor_move.toggle_mode = true
 	_btn_floor_move.toggled.connect(_on_floor_move_toggled)
 	_main_toolbar.add_child(_btn_floor_move)
 	
 	# 工具：空、墙壁、房间底板、橡皮擦（一级编辑时使用）
 	_tool_buttons.clear()
-	var btn_empty: Button = MapEditorToolbarBuilder.make_tool_button(self, "空", FloorTileType.PaintTool.EMPTY)
-	var btn_wall: Button = MapEditorToolbarBuilder.make_tool_button(self, "墙壁", FloorTileType.PaintTool.WALL)
-	var btn_room_floor: Button = MapEditorToolbarBuilder.make_tool_button(self, "房间底板", FloorTileType.PaintTool.ROOM_FLOOR)
-	var btn_eraser: Button = MapEditorToolbarBuilder.make_tool_button(self, "橡皮擦", FloorTileType.PaintTool.ERASER)
+	var btn_empty: Button = MapEditorToolbarBuilder.make_tool_button(self, tr("EDITOR_EMPTY"), FloorTileType.PaintTool.EMPTY)
+	var btn_wall: Button = MapEditorToolbarBuilder.make_tool_button(self, tr("EDITOR_WALL"), FloorTileType.PaintTool.WALL)
+	var btn_room_floor: Button = MapEditorToolbarBuilder.make_tool_button(self, tr("EDITOR_ROOM_FLOOR"), FloorTileType.PaintTool.ROOM_FLOOR)
+	var btn_eraser: Button = MapEditorToolbarBuilder.make_tool_button(self, tr("EDITOR_ERASER"), FloorTileType.PaintTool.ERASER)
 	_tool_buttons.append(btn_empty)
 	_tool_buttons.append(btn_wall)
 	_tool_buttons.append(btn_room_floor)
@@ -202,10 +213,10 @@ func _setup_ui() -> void:
 	# 地图名称
 	var name_row: HBoxContainer = HBoxContainer.new()
 	var lbl_name: Label = Label.new()
-	lbl_name.text = "地图名："
+	lbl_name.text = tr("EDITOR_MAP_NAME")
 	name_row.add_child(lbl_name)
 	_map_name_edit = LineEdit.new()
-	_map_name_edit.placeholder_text = "未命名地图"
+	_map_name_edit.placeholder_text = tr("EDITOR_MAP_NAME_PLACEHOLDER")
 	_map_name_edit.custom_minimum_size.x = 140
 	name_row.add_child(_map_name_edit)
 	vbox.add_child(name_row)
@@ -213,7 +224,7 @@ func _setup_ui() -> void:
 	# 网格对齐开关（已隐藏，自适应标尺已足够）
 	_grid_snap_check = CheckBox.new()
 	_grid_snap_check.name = "GridSnapCheck"
-	_grid_snap_check.text = "网格对齐"
+	_grid_snap_check.text = tr("EDITOR_GRID_SNAP")
 	_grid_snap_check.toggled.connect(_on_grid_snap_toggled)
 	_grid_snap_check.visible = false
 	vbox.add_child(_grid_snap_check)
@@ -221,15 +232,15 @@ func _setup_ui() -> void:
 	# 保存、打开、进入游戏
 	var save_open_row: HBoxContainer = HBoxContainer.new()
 	var btn_save: Button = Button.new()
-	btn_save.text = "保存地图"
+	btn_save.text = tr("EDITOR_SAVE_MAP")
 	btn_save.pressed.connect(_on_save_pressed)
 	save_open_row.add_child(btn_save)
 	var btn_open: Button = Button.new()
-	btn_open.text = "打开地图"
+	btn_open.text = tr("EDITOR_OPEN_MAP")
 	btn_open.pressed.connect(_on_open_map_pressed)
 	save_open_row.add_child(btn_open)
 	var btn_play: Button = Button.new()
-	btn_play.text = "进入游戏"
+	btn_play.text = tr("EDITOR_PLAY")
 	btn_play.pressed.connect(_on_enter_game_pressed)
 	save_open_row.add_child(btn_play)
 	vbox.add_child(save_open_row)
@@ -247,7 +258,7 @@ func _setup_ui() -> void:
 	_open_map_panel.visible = false
 	var open_vbox: VBoxContainer = VBoxContainer.new()
 	var open_title: Label = Label.new()
-	open_title.text = "选择地图"
+	open_title.text = tr("EDITOR_SELECT_MAP")
 	open_vbox.add_child(open_title)
 	_open_map_slot_buttons.clear()
 	for i in MapEditorMapIO.MAP_SLOTS:
@@ -261,7 +272,7 @@ func _setup_ui() -> void:
 		_open_map_slot_buttons.append(btn)
 		open_vbox.add_child(btn)
 	var btn_close_open: Button = Button.new()
-	btn_close_open.text = "关闭"
+	btn_close_open.text = tr("EDITOR_CLOSE")
 	btn_close_open.pressed.connect(func() -> void:
 		_open_map_panel.visible = false
 	)
@@ -296,11 +307,11 @@ func _setup_ui() -> void:
 
 func _on_import_template_pressed() -> void:
 	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
-		push_error("请先选中一个房间")
+		push_error(tr("ERROR_SELECT_ROOM"))
 		return
 	var rooms_arr: Variant = MapEditorRoomUIBuilder.load_room_templates()
 	if rooms_arr == null:
-		push_error("无法打开 room_info.json 或格式错误")
+		push_error(tr("ERROR_ROOM_JSON_OPEN"))
 		return
 	_import_template_data.clear()
 	_import_template_list.clear()
@@ -333,7 +344,7 @@ func _on_import_template_confirm_pressed() -> void:
 	room.room_name = str(t.get("room_name", ""))
 	room.room_type = int(t.get("room_type_id", RoomInfo.RoomType.EMPTY_ROOM))
 	room.clean_status = int(t.get("clean_status", RoomInfo.CleanStatus.UNCLEANED))
-	room.pre_clean_text = RoomInfo.parse_text_field(t.get("pre_clean_text"), "默认清理前文本")
+	room.pre_clean_text = RoomInfo.parse_text_field(t.get("pre_clean_text"), tr("DEFAULT_PRE_CLEAN"))
 	room.base_image_path = str(t.get("base_image_path", ""))
 	room.desc = RoomInfo.parse_text_field(t.get("desc"), "")
 	room.resources.clear()
@@ -346,7 +357,7 @@ func _on_import_template_confirm_pressed() -> void:
 	_import_template_panel.visible = false
 	_refresh_room_panel()
 	queue_redraw()
-	print("已导入模板: ", room.room_name)
+	print(tr("INFO_IMPORTED_TEMPLATE") % room.room_name)
 
 
 func _on_room_name_changed(_new_text: String) -> void:
@@ -425,7 +436,7 @@ func _on_delete_room_pressed() -> void:
 	_refresh_room_panel()
 	_refresh_room_list()
 	queue_redraw()
-	print("已删除房间")
+	print(tr("INFO_ROOM_DELETED"))
 
 
 func _on_base_image_pick_pressed() -> void:
@@ -462,7 +473,7 @@ func _update_all_buttons() -> void:
 func _on_room_list_toggle_pressed() -> void:
 	_room_list_dropdown_visible = not _room_list_dropdown_visible
 	_room_list_scroll.visible = _room_list_dropdown_visible
-	_room_list_toggle_btn.text = "房间列表 ▼" if _room_list_dropdown_visible else "房间列表 ▶"
+	_room_list_toggle_btn.text = tr("EDITOR_ROOM_LIST_DOWN") if _room_list_dropdown_visible else tr("EDITOR_ROOM_LIST_RIGHT")
 
 
 func _refresh_room_list() -> void:
@@ -679,9 +690,9 @@ func _refresh_open_map_panel() -> void:
 		var name_str: String = MapEditorMapIO.get_slot_map_name(i)
 		var btn: Button = _open_map_slot_buttons[i]
 		if name_str.is_empty():
-			btn.text = "槽位 %d: (空)" % (i + 1)
+			btn.text = tr("SLOT_EMPTY") % (i + 1)
 		else:
-			btn.text = "槽位 %d: %s" % [i + 1, name_str]
+			btn.text = tr("SLOT_WITH_NAME") % [i + 1, name_str]
 
 
 func _on_save_pressed() -> void:
@@ -704,7 +715,7 @@ func _on_save_confirm_save_new() -> void:
 			break
 	if empty_slot < 0:
 		_save_confirm_panel.visible = false
-		OS.alert("没有空槽位，无法保存为新地图。请先删除或覆盖已有地图。", "保存失败")
+		OS.alert(tr("ERROR_NO_SLOT_EMPTY"), tr("ERROR_SAVE_FAILED_TITLE"))
 		return
 	_save_confirm_panel.visible = false
 	_do_save_to_slot(empty_slot)
@@ -714,7 +725,7 @@ func _do_save_to_slot(slot: int) -> void:
 	_current_map_slot = slot
 	var map_name: String = _map_name_edit.text.strip_edges()
 	if map_name.is_empty():
-		map_name = "未命名地图"
+		map_name = tr("DEFAULT_UNNAMED_MAP")
 	var ok: bool = MapEditorMapIO.save_to_slot(slot, GRID_WIDTH, GRID_HEIGHT, CELL_SIZE, _tiles, _rooms, map_name, _next_room_id)
 	if ok:
 		MapEditorMapIO.sync_rooms_to_json(_rooms)
@@ -733,7 +744,7 @@ func _on_enter_game_pressed() -> void:
 func _load_map_from_slot(slot: int) -> void:
 	var result: Variant = MapEditorMapIO.load_from_slot(slot)
 	if result == null:
-		print("槽位 ", slot + 1, " 为空")
+		print(tr("INFO_SLOT_EMPTY") % (slot + 1))
 		return
 	var path: String = MapEditorMapIO.get_slot_path(slot)
 	if result is Dictionary:
@@ -763,4 +774,4 @@ func _load_map_from_slot(slot: int) -> void:
 		_current_map_slot = slot
 		_open_map_panel.visible = false
 		queue_redraw()
-		print("已加载地图: ", path)
+		print(tr("INFO_MAP_LOADED") % path)

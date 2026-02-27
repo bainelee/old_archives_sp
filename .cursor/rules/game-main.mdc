@@ -26,7 +26,7 @@ alwaysApply: false
 
 ## 参考
 
-- 设计文档：`docs/design/03-game-main.md`
-- 清理系统：`docs/design/10-room-cleanup-system.md`
-- 建设系统：`docs/design/11-zone-construction.md`
-- 已建设房间：`docs/design/12-built-room-system.md`
+- 设计文档：`docs/design/2-gameplay/01-game-main.md`
+- 清理系统：`docs/design/2-gameplay/04-room-cleanup-system.md`
+- 建设系统：`docs/design/2-gameplay/05-zone-construction.md`
+- 已建设房间：`docs/design/2-gameplay/06-built-room-system.md`

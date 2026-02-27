@@ -1,4 +1,4 @@
-# 07 - 存档系统
+# 03 - 存档系统
 
 ## 概述
 
@@ -114,7 +114,7 @@
 
 ### 3.2 必存数据清单
 
-存档必须保存以下游戏状态。字段中英对照见 [00-project-keywords](../settings/00-project-keywords.md)。
+存档必须保存以下游戏状态。字段中英对照见 [00-project-keywords](../../settings/00-project-keywords.md)。
 
 | 类别 | 字段 | 说明 |
 |------|------|------|
@@ -313,10 +313,10 @@
 
 ## 11. 相关文档
 
-- [00 - 项目概览](00-project-overview.md)
-- [02 - 房间信息与 room_info.json 同步](02-room-info-and-json-sync.md)
-- [03 - 游戏主场景](03-game-main.md)
-- [04 - 时间流逝系统](04-time-system.md)
+- [00 - 项目概览](../00-project-overview.md)
+- [02 - 房间信息与 room_info.json 同步](../1-editor/02-room-info-and-json-sync.md)
+- [01 - 游戏主场景](01-game-main.md)
+- [02 - 时间流逝系统](02-time-system.md)
 
 ---
 

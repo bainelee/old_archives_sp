@@ -75,12 +75,12 @@ func _on_resume() -> void:
 
 func _on_save() -> void:
 	_mode = Mode.SAVE
-	_show_slot_panel("选择保存槽位")
+	_show_slot_panel(tr("SLOT_SELECT_SAVE"))
 
 
 func _on_load() -> void:
 	_mode = Mode.LOAD
-	_show_slot_panel("选择载入槽位")
+	_show_slot_panel(tr("SLOT_SELECT_LOAD"))
 
 
 func _show_slot_panel(title: String) -> void:
@@ -96,11 +96,11 @@ func _refresh_slot_buttons() -> void:
 	for i in _slot_buttons.size():
 		var meta: Variant = SaveManager.get_slot_metadata(i)
 		if meta == null:
-			_slot_buttons[i].text = "槽位 %d - 空" % [i + 1]
+			_slot_buttons[i].text = tr("SLOT_EMPTY") % [i + 1]
 			_delete_buttons[i].disabled = true
 		else:
-			var name_str: String = (meta as Dictionary).get("map_name", "未命名")
-			_slot_buttons[i].text = "槽位 %d - %s" % [i + 1, name_str]
+			var name_str: String = (meta as Dictionary).get("map_name", tr("DEFAULT_UNTITLED"))
+			_slot_buttons[i].text = tr("SLOT_WITH_NAME") % [i + 1, name_str]
 			_delete_buttons[i].disabled = false
 		_slot_buttons[i].disabled = (_mode == Mode.LOAD and meta == null)
 
@@ -135,7 +135,7 @@ func _on_slot_selected(slot: int) -> void:
 func _do_save(slot: int) -> void:
 	var game_main: Node = get_parent()
 	if not game_main.has_method("collect_game_state"):
-		push_error("PauseMenu: GameMain 无 collect_game_state 方法")
+		push_error(tr("ERROR_PAUSE_NO_COLLECT"))
 		return
 	var game_state: Dictionary = game_main.collect_game_state()
 	if SaveManager.save_to_slot(slot, game_state):
@@ -143,7 +143,7 @@ func _do_save(slot: int) -> void:
 		# 可选：Toast 提示，暂用 print
 		print("已保存至槽位 %d" % [slot + 1])
 	else:
-		push_error("保存失败")
+		push_error(tr("ERROR_SAVE_FAILED"))
 
 
 func _do_load(slot: int) -> void:

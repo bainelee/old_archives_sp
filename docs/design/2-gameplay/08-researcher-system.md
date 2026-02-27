@@ -1,10 +1,10 @@
-# 14 - 研究员系统
+# 08 - 研究员系统
 
 ## 概述
 
-本文档将**研究员**作为独立系统进行策划与实现整理，汇总当前设定、已实现功能及待办事项。术语中英对照见 [00-project-keywords](../settings/00-project-keywords.md)。
+本文档将**研究员**作为独立系统进行策划与实现整理，汇总当前设定、已实现功能及待办事项。术语中英对照见 [00-project-keywords](../../settings/00-project-keywords.md)。
 
-相关文档分散于 [08 - 游戏数值系统](08-game-values.md)、[09 - 研究员侵蚀机制](09-researcher-erosion.md)、[10 - 房间清理系统](10-room-cleanup-system.md)、[11 - 区域建设功能](11-zone-construction.md)、[名词解释](../../名词解释.md) 等，本文档作为研究员系统的统一入口。
+相关文档分散于 [01 - 游戏数值系统](../0-values/01-game-values.md)、[07 - 研究员侵蚀机制](07-researcher-erosion.md)、[04 - 房间清理系统](04-room-cleanup-system.md)、[05 - 区域建设功能](05-zone-construction.md)、[名词解释](../../名词解释.md) 等，本文档作为研究员系统的统一入口。
 
 ---
 
@@ -55,7 +55,7 @@
 
 ### 1.6 侵蚀与治愈（设定完整，**已实现**）
 
-详见 [09 - 研究员侵蚀机制](09-researcher-erosion.md)，摘要：
+详见 [07 - 研究员侵蚀机制](07-researcher-erosion.md)，摘要：
 
 | 阶段 | 说明 |
 |------|------|
@@ -217,9 +217,9 @@
 
 ## 7. 相关文档
 
-- [08 - 游戏数值系统](08-game-values.md)（认知消耗、清理、建设、住房）
-- [09 - 研究员侵蚀机制](09-researcher-erosion.md)
-- [10 - 房间清理系统](10-room-cleanup-system.md)
-- [11 - 区域建设功能](11-zone-construction.md)
-- [12 - 已建设房间系统](12-built-room-system.md)
+- [01 - 游戏数值系统](../0-values/01-game-values.md)（认知消耗、清理、建设、住房）
+- [07 - 研究员侵蚀机制](07-researcher-erosion.md)
+- [04 - 房间清理系统](04-room-cleanup-system.md)
+- [05 - 区域建设功能](05-zone-construction.md)
+- [06 - 已建设房间系统](06-built-room-system.md)
 - [名词解释：研究员](../../名词解释.md#研究员)

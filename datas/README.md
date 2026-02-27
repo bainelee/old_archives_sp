@@ -4,7 +4,7 @@
 
 ## game_values.json
 
-游戏数值数据，供 `GameValues`（Autoload）运行时加载。设计来源为 `docs/design/08-game-values.md`；该设计文档不打包进游戏，故游戏逻辑应读取本 JSON 作为唯一数据源。
+游戏数值数据，供 `GameValues`（Autoload）运行时加载。设计来源为 `docs/design/0-values/01-game-values.md`；该设计文档不打包进游戏，故游戏逻辑应读取本 JSON 作为唯一数据源。
 
 - `researcher_cognition`：研究员认知消耗（每小时每人）
 - `shelter`：档案馆核心庇护等级、范围档位、消耗倍率
@@ -23,7 +23,7 @@
 - **编辑器 F5 运行**：保存后约 2 秒内自动检测并重载
 - **手动**：调用 `GameValues.reload()` 可立即生效
 
-详见 [13 - 游戏数值运行时系统](../docs/design/13-game-values-runtime.md)。
+详见 [02 - 游戏数值运行时系统](../docs/design/0-values/02-game-values-runtime.md)。
 
 ## game_base.json
 

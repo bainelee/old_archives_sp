@@ -45,11 +45,11 @@ func show_room(room: RoomInfo) -> void:
 		hide_panel()
 		return
 	_current_room = room
-	_label_name.text = room.room_name if room.room_name else "未命名"
+	_label_name.text = room.get_display_name()
 	_label_type.text = RoomInfo.get_room_type_name(room.room_type)
 	_label_clean.text = RoomInfo.get_clean_status_name(room.clean_status)
 	_label_size.text = "%d×%d" % [room.rect.size.x, room.rect.size.y]
-	_label_desc.text = room.desc if room.desc else "（无描述）"
+	_label_desc.text = room.get_display_desc()
 	_update_zone_operation(room)
 	_update_resources(room)
 	visible = true
@@ -63,13 +63,13 @@ func _update_zone_operation(room: RoomInfo) -> void:
 		return
 	_zone_op_row.visible = true
 	var zone_name: String = ZoneTypeScript.get_zone_name(room.zone_type)
-	_add_zone_op_line("区域", zone_name, Color(0.7, 0.75, 0.85))
+	_add_zone_op_line(tr("LABEL_ZONE"), zone_name, Color(0.7, 0.75, 0.85))
 	if room.zone_type == ZoneTypeScript.Type.RESEARCH:
 		_add_research_zone_info(room)
 	elif room.zone_type == ZoneTypeScript.Type.CREATION:
 		_add_creation_zone_info(room)
 	else:
-		_add_zone_op_line("说明", "（功能待定）", Color(0.6, 0.6, 0.65))
+		_add_zone_op_line(tr("LABEL_EXPLAIN"), tr("LABEL_NOTE"), Color(0.6, 0.6, 0.65))
 
 
 static func _resource_name_to_type(res_name: String) -> int:
@@ -97,8 +97,8 @@ func _add_research_zone_info(room: RoomInfo) -> void:
 		if r is Dictionary and int(r.get("resource_type", -1)) == rt:
 			reserve_amt = int(r.get("resource_amount", 0))
 			break
-	_add_zone_op_line("当前存量", "%s %d" % [RoomInfo.get_resource_type_name(rt), reserve_amt], Color(0.95, 0.9, 0.7))
-	_add_zone_op_line("每小时产出", "%s +%d" % [RoomInfo.get_resource_type_name(rt), output_hour], Color(0.5, 0.9, 0.6))
+	_add_zone_op_line(tr("LABEL_CURRENT_RESERVE"), "%s %d" % [RoomInfo.get_resource_type_name(rt), reserve_amt], Color(0.95, 0.9, 0.7))
+	_add_zone_op_line(tr("LABEL_HOURLY_OUTPUT"), "%s +%d" % [RoomInfo.get_resource_type_name(rt), output_hour], Color(0.5, 0.9, 0.6))
 
 
 func _add_creation_zone_info(room: RoomInfo) -> void:
@@ -109,21 +109,21 @@ func _add_creation_zone_info(room: RoomInfo) -> void:
 	var ui: Node = get_node_or_null("../UIMain")
 	var is_paused: bool = ui != null and BuiltRoomHelper.is_creation_zone_paused(room, ui)
 	if is_paused:
-		_add_zone_op_line("状态", "暂停研究", Color(0.9, 0.3, 0.3))
+		_add_zone_op_line(tr("LABEL_STATUS"), tr("LABEL_STATUS_PAUSED"), Color(0.9, 0.3, 0.3))
 	var will_per_unit: int = gv.get_creation_consume_per_unit_per_hour(room.room_type)
 	var output_per_unit: int = gv.get_creation_produce_per_unit_per_hour(room.room_type)
 	var units: int = BuiltRoomHelper.get_room_units(room)
 	var will_hour: int = units * will_per_unit
 	var output_hour: int = units * output_per_unit
 	var need_24h: int = BuiltRoomHelper.get_creation_zone_24h_consumption(room)
-	_add_zone_op_line("每小时消耗", "意志 -%d" % will_hour, Color(0.95, 0.7, 0.5))
+	_add_zone_op_line(tr("LABEL_HOURLY_CONSUME"), tr("LABEL_WILL_H") % will_hour, Color(0.95, 0.7, 0.5))
 	if is_paused:
-		_add_zone_op_line("恢复条件", "意志 ≥ %d（24h 消耗）" % need_24h, Color(0.7, 0.75, 0.85))
+		_add_zone_op_line(tr("LABEL_RECOVER_COND"), tr("WILL_24H_COND") % need_24h, Color(0.7, 0.75, 0.85))
 	match room.room_type:
 		RoomInfo.RoomType.SERVER_ROOM:
-			_add_zone_op_line("每小时产出", "权限 +%d" % output_hour, Color(0.5, 0.9, 0.6))
+			_add_zone_op_line(tr("LABEL_HOURLY_OUTPUT"), tr("LABEL_PERMISSION_H") % output_hour, Color(0.5, 0.9, 0.6))
 		RoomInfo.RoomType.REASONING:
-			_add_zone_op_line("每小时产出", "信息 +%d" % output_hour, Color(0.5, 0.9, 0.6))
+			_add_zone_op_line(tr("LABEL_HOURLY_OUTPUT"), tr("LABEL_INFO_H") % output_hour, Color(0.5, 0.9, 0.6))
 		_:
 			pass
 
@@ -132,7 +132,7 @@ func _add_zone_op_line(label_text: String, value: String, value_color: Color) ->
 	var h: HBoxContainer = HBoxContainer.new()
 	h.add_theme_constant_override("separation", 12)
 	var lbl: Label = Label.new()
-	lbl.text = label_text + "："
+	lbl.text = label_text + tr("LABEL_SUFFIX")
 	lbl.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
 	lbl.add_theme_font_size_override("font_size", 13)
 	var val: Label = Label.new()
@@ -149,13 +149,13 @@ func _update_resources(room: RoomInfo) -> void:
 	for child in _resources_container.get_children():
 		child.queue_free()
 	if room.zone_type == ZoneTypeScript.Type.RESEARCH:
-		_resources_label.text = "当前存量"
+		_resources_label.text = tr("LABEL_CURRENT_RESERVE")
 	else:
-		_resources_label.text = "资源产出"
+		_resources_label.text = tr("LABEL_RESOURCES")
 	var resources: Array = room.resources
 	if resources.is_empty():
 		var lbl: Label = Label.new()
-		lbl.text = "（无）" if room.zone_type != 0 else "（无资源产出）"
+		lbl.text = tr("RESERVE_NONE") if room.zone_type != 0 else tr("RESERVE_NO_OUTPUT")
 		lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65))
 		_resources_container.add_child(lbl)
 	else:

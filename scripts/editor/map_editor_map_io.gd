@@ -35,13 +35,13 @@ static func migrate_old_map_to_slot0() -> void:
 	var data: Variant = JSON.parse_string(json_str)
 	if not (data is Dictionary):
 		return
-	(data as Dictionary)[SAVE_KEY_MAP_NAME] = "原场景"
+	(data as Dictionary)[SAVE_KEY_MAP_NAME] = TranslationServer.translate("MIGRATED_MAP_NAME")
 	ensure_maps_dir()
 	var out: FileAccess = FileAccess.open(slot0_path, FileAccess.WRITE)
 	if out:
 		out.store_string(JSON.stringify(data))
 		out.close()
-		print("已从 scene_archive.json 迁移到槽位 1")
+		print(TranslationServer.translate("INFO_MIGRATED_MAP"))
 
 
 static func ensure_maps_dir() -> void:
@@ -85,11 +85,11 @@ static func save_to_slot(slot: int, grid_width: int, grid_height: int, cell_size
 	var path: String = get_slot_path(slot)
 	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if not file:
-		push_error("保存失败: ", path)
+		push_error(TranslationServer.translate("ERROR_SAVE_MAP_FAILED") % path)
 		return false
 	file.store_string(JSON.stringify(data))
 	file.close()
-	print("地图已保存: ", path, " (", map_name, ")")
+	print(TranslationServer.translate("INFO_MAP_SAVED") % [path, map_name])
 	return true
 
 
@@ -99,7 +99,7 @@ static func load_from_slot(slot: int) -> Variant:
 		return null
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if not file:
-		push_error("无法打开: ", path)
+		push_error(TranslationServer.translate("ERROR_OPEN_FAILED") % path)
 		return null
 	var json: String = file.get_as_text()
 	file.close()
@@ -115,7 +115,7 @@ static func sync_rooms_to_json(rooms: Array) -> bool:
 	if FileAccess.file_exists(json_path):
 		var f: FileAccess = FileAccess.open(json_path, FileAccess.READ)
 		if not f:
-			push_error("无法读取 room_info.json")
+			push_error(TranslationServer.translate("ERROR_READ_ROOM_JSON"))
 			return false
 		var parsed: Variant = JSON.parse_string(f.get_as_text())
 		f.close()
@@ -123,10 +123,10 @@ static func sync_rooms_to_json(rooms: Array) -> bool:
 			json_data = parsed as Dictionary
 			json_rooms = (json_data.get("rooms", []) as Array).duplicate()
 		else:
-			json_data = {"source": "地图编辑器同步", "rooms": []}
+			json_data = {"source": TranslationServer.translate("EDITOR_SYNC_SOURCE"), "rooms": []}
 			json_rooms = []
 	else:
-		json_data = {"source": "地图编辑器同步", "rooms": []}
+		json_data = {"source": TranslationServer.translate("EDITOR_SYNC_SOURCE"), "rooms": []}
 		json_rooms = []
 	var max_num: int = 0
 	for r in json_rooms:
@@ -156,9 +156,9 @@ static func sync_rooms_to_json(rooms: Array) -> bool:
 	json_data["rooms"] = json_rooms
 	var out: FileAccess = FileAccess.open(json_path, FileAccess.WRITE)
 	if not out:
-		push_error("无法写入 room_info.json: ", json_path)
+		push_error(TranslationServer.translate("ERROR_WRITE_ROOM_JSON") % json_path)
 		return false
 	out.store_string(JSON.stringify(json_data, "  ", false))
 	out.close()
-	print("房间信息已同步至 room_info.json")
+	print(TranslationServer.translate("INFO_ROOMS_SYNCED"))
 	return true

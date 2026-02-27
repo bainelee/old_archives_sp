@@ -1,8 +1,8 @@
-# 13 - 游戏数值运行时系统
+# 02 - 游戏数值运行时系统
 
 ## 概述
 
-本文档描述《旧日档案馆》中游戏数值的**运行时架构**：数据来源、加载方式、引用约定、热重载机制及同步工作流。设计层面的数值定义见 [08 - 游戏数值系统](08-game-values.md)。
+本文档描述《旧日档案馆》中游戏数值的**运行时架构**：数据来源、加载方式、引用约定、热重载机制及同步工作流。设计层面的数值定义见 [01 - 游戏数值系统](01-game-values.md)。
 
 ---
 
@@ -15,7 +15,7 @@
 | `datas/game_values.json` | 消耗、产出、建设、清理、住房、改造 | GameValues (Autoload) |
 | `datas/game_base.json` | 新游戏开局资源默认值 | SaveManager |
 
-`docs/design/08-game-values.md` 为设计文档，**不打包进游戏**，游戏逻辑以 `game_values.json` 为唯一运行时数据源。
+`docs/design/0-values/01-game-values.md` 为设计文档，**不打包进游戏**，游戏逻辑以 `game_values.json` 为唯一运行时数据源。
 
 ### 1.2 GameValues Autoload
 
@@ -78,7 +78,7 @@ if gv:
 当用户表示「调整数值」「我调整了数值」等时，按 `.cursor/subagents/game-values-sync.md` 执行全量同步：
 
 - 更新 `datas/game_values.json`、`datas/game_base.json`
-- 同步 `docs/design/08-game-values.md` 及相关设计文档
+- 同步 `docs/design/0-values/01-game-values.md` 及相关设计文档
 - 确保脚本中的数值引用与 JSON 一致（脚本已全部改为引用，无需同步硬编码）
 
 ---
@@ -95,6 +95,6 @@ if gv:
 
 ## 5. 相关文档
 
-- [08 - 游戏数值系统](08-game-values.md)（设计）
-- [datas/README.md](../datas/README.md)（数据文件说明）
-- [.cursor/subagents/game-values-sync.md](../../.cursor/subagents/game-values-sync.md)（数值同步工作流）
+- [01 - 游戏数值系统](01-game-values.md)（设计）
+- [datas/README.md](../../../datas/README.md)（数据文件说明）
+- [.cursor/subagents/game-values-sync.md](../../../.cursor/subagents/game-values-sync.md)（数值同步工作流）

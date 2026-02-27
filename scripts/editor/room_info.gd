@@ -44,7 +44,7 @@ var room_type: int = RoomType.EMPTY_ROOM
 var clean_status: int = CleanStatus.UNCLEANED
 var resources: Array = []  ## 资源列表，每项为 {"resource_type": int, "resource_amount": int}
 var base_image_path: String = ""  ## 底图路径，相对于 res://，例如 res://assets/tiles/floor/xxx.png
-var pre_clean_text: String = "默认清理前文本"  ## 清理前文本
+var pre_clean_text: String = ""  ## 清理前文本
 var json_room_id: String = ""  ## 关联的 JSON 模板 id（如 ROOM_001），空表示编辑器新建未同步
 var desc: String = ""  ## 房间描述（与 room_info.json 的 desc 对应）
 
@@ -54,6 +54,39 @@ var cleanup_time_hours: float = -1.0  ## -1 表示用默认公式
 
 ## 区域建设（0=无，见 ZoneType）
 var zone_type: int = 0
+
+
+## 获取显示用房间名称：有 json_room_id 时用 tr(ROOM_XXX_NAME)，否则用原始 room_name
+func get_display_name() -> String:
+	if json_room_id.is_empty():
+		if room_name.is_empty():
+			return TranslationServer.translate("DEFAULT_UNTITLED")
+		return room_name
+	var key: String = json_room_id + "_NAME"
+	var out: String = TranslationServer.translate(key)
+	return out if out != key else room_name
+
+
+## 获取显示用房间描述：有 json_room_id 时用 tr(ROOM_XXX_DESC)，否则用原始 desc
+func get_display_desc() -> String:
+	if json_room_id.is_empty():
+		if desc.is_empty():
+			return TranslationServer.translate("DEFAULT_NO_DESC")
+		return desc
+	var key: String = json_room_id + "_DESC"
+	var out: String = TranslationServer.translate(key)
+	return out if out != key else desc
+
+
+## 获取显示用清理前文本：有 json_room_id 时用 tr(ROOM_XXX_PRE_CLEAN)，否则用原始 pre_clean_text
+func get_display_pre_clean_text() -> String:
+	if json_room_id.is_empty():
+		if pre_clean_text.is_empty():
+			return TranslationServer.translate("DEFAULT_PRE_CLEAN")
+		return pre_clean_text
+	var key: String = json_room_id + "_PRE_CLEAN"
+	var out: String = TranslationServer.translate(key)
+	return out if out != key else pre_clean_text
 
 
 func get_size() -> Vector2i:
@@ -180,36 +213,36 @@ func to_json_room_dict(json_id: String) -> Dictionary:
 
 static func get_room_type_name(t: int) -> String:
 	match t:
-		RoomType.LIBRARY: return "图书室"
-		RoomType.LAB: return "机房"
-		RoomType.CLASSROOM: return "教学室"
-		RoomType.ARCHIVE: return "资料库"
-		RoomType.ARCHIVE_CORE: return "档案馆核心"
-		RoomType.SERVER_ROOM: return "实验室"
-		RoomType.REASONING: return "推理室"
-		RoomType.OFFICE_SITE: return "事务所遗址"
-		RoomType.DORMITORY: return "宿舍"
-		RoomType.EMPTY_ROOM: return "空房间"
-		_: return "未知"
+		RoomType.LIBRARY: return TranslationServer.translate("ROOM_TYPE_LIBRARY")
+		RoomType.LAB: return TranslationServer.translate("ROOM_TYPE_LAB")
+		RoomType.CLASSROOM: return TranslationServer.translate("ROOM_TYPE_CLASSROOM")
+		RoomType.ARCHIVE: return TranslationServer.translate("ROOM_TYPE_ARCHIVE")
+		RoomType.ARCHIVE_CORE: return TranslationServer.translate("ROOM_TYPE_ARCHIVE_CORE")
+		RoomType.SERVER_ROOM: return TranslationServer.translate("ROOM_TYPE_SERVER_ROOM")
+		RoomType.REASONING: return TranslationServer.translate("ROOM_TYPE_REASONING")
+		RoomType.OFFICE_SITE: return TranslationServer.translate("ROOM_TYPE_OFFICE_SITE")
+		RoomType.DORMITORY: return TranslationServer.translate("ROOM_TYPE_DORMITORY")
+		RoomType.EMPTY_ROOM: return TranslationServer.translate("ROOM_TYPE_EMPTY_ROOM")
+		_: return TranslationServer.translate("UNKNOWN")
 
 
 static func get_resource_type_name(t: int) -> String:
 	match t:
-		ResourceType.NONE: return "无"
-		ResourceType.COGNITION: return "认知因子"
-		ResourceType.COMPUTATION: return "计算因子"
-		ResourceType.WILL: return "意志因子"
-		ResourceType.PERMISSION: return "权限因子"
-		ResourceType.INFO: return "信息"
-		ResourceType.TRUTH: return "真相"
-		_: return "未知"
+		ResourceType.NONE: return TranslationServer.translate("RESOURCE_NONE")
+		ResourceType.COGNITION: return TranslationServer.translate("RESOURCE_COGNITION")
+		ResourceType.COMPUTATION: return TranslationServer.translate("RESOURCE_COMPUTATION")
+		ResourceType.WILL: return TranslationServer.translate("RESOURCE_WILL")
+		ResourceType.PERMISSION: return TranslationServer.translate("RESOURCE_PERMISSION")
+		ResourceType.INFO: return TranslationServer.translate("RESOURCE_INFO")
+		ResourceType.TRUTH: return TranslationServer.translate("RESOURCE_TRUTH")
+		_: return TranslationServer.translate("UNKNOWN")
 
 
 static func get_clean_status_name(t: int) -> String:
 	match t:
-		CleanStatus.UNCLEANED: return "未清理"
-		CleanStatus.CLEANED: return "已清理"
-		_: return "未知"
+		CleanStatus.UNCLEANED: return TranslationServer.translate("CLEAN_STATUS_UNCLEANED")
+		CleanStatus.CLEANED: return TranslationServer.translate("CLEAN_STATUS_CLEANED")
+		_: return TranslationServer.translate("UNKNOWN")
 
 
 func to_dict() -> Dictionary:
@@ -264,7 +297,7 @@ static func from_dict(d: Dictionary) -> RoomInfo:
 		if rt != ResourceType.NONE or amt > 0:
 			info.resources.append({"resource_type": rt, "resource_amount": amt})
 	info.base_image_path = str(d.get("base_image_path", ""))
-	info.pre_clean_text = parse_text_field(d.get("pre_clean_text"), "默认清理前文本")
+	info.pre_clean_text = parse_text_field(d.get("pre_clean_text"), TranslationServer.translate("DEFAULT_PRE_CLEAN"))
 	info.json_room_id = str(d.get("json_room_id", ""))
 	info.desc = parse_text_field(d.get("desc"), "")
 	if d.has("cleanup_cost") and d.get("cleanup_cost") is Dictionary:

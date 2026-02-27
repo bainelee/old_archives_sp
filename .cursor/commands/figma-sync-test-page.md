@@ -14,7 +14,7 @@
 
 1. **要求用户** 在 Figma 中选中要同步的 Frame（含 Title、Btn1/2/3 的父节点）
 
-2. **可选 MCP**：优先使用 **Framelink MCP for Figma**（`get_figma_data`）— 返回结构化 layout 数据更稳定。配置见 `docs/design/09-framelink-mcp-setup.md`。若用 Figma Desktop MCP 且报 “Path for asset writes”，见 `docs/design/figma_process/02-figma-mcp-write-to-disk-config.md`。
+2. **可选 MCP**：优先使用 **Framelink MCP for Figma**（`get_figma_data`）— 返回结构化 layout 数据更稳定。配置见 `docs/design/99-tools/01-framelink-mcp-setup.md`。若用 Figma Desktop MCP 且报 “Path for asset writes”，见 `docs/design/100-figma_process/02-figma-mcp-write-to-disk-config.md`。
 
 3. **调用 Figma MCP** 获取原始数据：
    - `get_metadata`：获取节点结构、layout（left, top, width, height）
@@ -43,4 +43,4 @@
 
 - `scenes/ui/test_figma_page.tscn`：唯一数据源，编辑器中直接可见
 - `scripts/ui/test_figma_page.gd`：仅负责缩放与 show/hide
-- `docs/design/figma_process/01-test-figma-page-sync.md`：同步说明
+- `docs/design/100-figma_process/01-test-figma-page-sync.md`：同步说明

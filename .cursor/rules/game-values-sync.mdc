@@ -13,7 +13,7 @@ alwaysApply: true
 ## 执行流程
 
 1. **启动数值同步子代理工作流**：按 `.cursor/subagents/game-values-sync.md` 执行
-2. **覆盖范围**：`datas/game_values.json`、`datas/game_base.json`、`docs/design/*.md` 中所有与数值相关文档、以及脚本中的硬编码数值
+2. **覆盖范围**：`datas/game_values.json`、`datas/game_base.json`、`docs/design/` 下各模块中与数值相关文档（见 subagent 清单）、以及脚本中的硬编码数值
 3. **原则**：以用户所述变更为准，同步更新全部相关文件，确保数据源、设计文档、代码三者一致
 
 ## 无需触发

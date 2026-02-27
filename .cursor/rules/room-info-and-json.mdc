@@ -38,4 +38,4 @@ alwaysApply: false
 
 ## 参考
 
-- 详细说明：`docs/design/02-room-info-and-json-sync.md`
+- 详细说明：`docs/design/1-editor/02-room-info-and-json-sync.md`

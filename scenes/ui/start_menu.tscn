@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://c8start_menu01"]
+[gd_scene load_steps=4 format=3 uid="uid://c8start_menu01"]
 
 [ext_resource type="Script" path="res://scripts/ui/start_menu.gd" id="1_start_menu"]
 
@@ -17,6 +17,8 @@ content_margin_left = 24.0
 content_margin_top = 24.0
 content_margin_right = 24.0
 content_margin_bottom = 24.0
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_lang"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.08, 0.08, 0.12, 1)
@@ -59,32 +61,51 @@ theme_override_constants/separation = 24
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.85, 0.75, 1)
 theme_override_font_sizes/font_size = 42
-text = "旧日档案馆"
+text = "MENU_TITLE"
 horizontal_alignment = 1
 
 [node name="BtnNewGame" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "新游戏"
+text = "MENU_NEW_GAME"
 
 [node name="BtnContinue" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "继续游戏"
+text = "MENU_CONTINUE"
 
 [node name="BtnSettings" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "设定"
+text = "MENU_SETTINGS"
 
 [node name="BtnQuit" type="Button" parent="Center/VBox"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "退出游戏"
+text = "MENU_QUIT"
+
+[node name="LangRow" type="HBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+size_flags_horizontal = 4
+
+[node name="BtnLangZh" type="CheckButton" parent="Center/VBox/LangRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+button_group = SubResource("ButtonGroup_lang")
+toggle_mode = true
+text = "LANG_ZH"
+
+[node name="BtnLangEn" type="CheckButton" parent="Center/VBox/LangRow"]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+button_group = SubResource("ButtonGroup_lang")
+toggle_mode = true
+text = "LANG_EN"
 
 [node name="SlotSelectPanel" type="Control" parent="."]
 visible = false
@@ -124,7 +145,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.85, 0.75, 1)
 theme_override_font_sizes/font_size = 20
-text = "选择存档槽位"
+text = "SLOT_SELECT_TITLE"
 horizontal_alignment = 1
 
 [node name="Slot0Row" type="HBoxContainer" parent="SlotSelectPanel/Center/Panel/VBox"]
@@ -135,12 +156,12 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "槽位 1 - 空"
+text = "SLOT_EMPTY"
 
 [node name="BtnDelete0" type="Button" parent="SlotSelectPanel/Center/Panel/VBox/Slot0Row"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
-text = "删除"
+text = "BTN_DELETE"
 
 [node name="Slot1Row" type="HBoxContainer" parent="SlotSelectPanel/Center/Panel/VBox"]
 layout_mode = 2
@@ -150,12 +171,12 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "槽位 2 - 空"
+text = "SLOT_EMPTY"
 
 [node name="BtnDelete1" type="Button" parent="SlotSelectPanel/Center/Panel/VBox/Slot1Row"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
-text = "删除"
+text = "BTN_DELETE"
 
 [node name="Slot2Row" type="HBoxContainer" parent="SlotSelectPanel/Center/Panel/VBox"]
 layout_mode = 2
@@ -165,12 +186,12 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "槽位 3 - 空"
+text = "SLOT_EMPTY"
 
 [node name="BtnDelete2" type="Button" parent="SlotSelectPanel/Center/Panel/VBox/Slot2Row"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
-text = "删除"
+text = "BTN_DELETE"
 
 [node name="Slot3Row" type="HBoxContainer" parent="SlotSelectPanel/Center/Panel/VBox"]
 layout_mode = 2
@@ -180,12 +201,12 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "槽位 4 - 空"
+text = "SLOT_EMPTY"
 
 [node name="BtnDelete3" type="Button" parent="SlotSelectPanel/Center/Panel/VBox/Slot3Row"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
-text = "删除"
+text = "BTN_DELETE"
 
 [node name="Slot4Row" type="HBoxContainer" parent="SlotSelectPanel/Center/Panel/VBox"]
 layout_mode = 2
@@ -195,20 +216,20 @@ theme_override_constants/separation = 8
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "槽位 5 - 空"
+text = "SLOT_EMPTY"
 
 [node name="BtnDelete4" type="Button" parent="SlotSelectPanel/Center/Panel/VBox/Slot4Row"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
-text = "删除"
+text = "BTN_DELETE"
 
 [node name="DeleteConfirmDialog" type="ConfirmationDialog" parent="SlotSelectPanel"]
-title = "确认删除"
-dialog_text = "确定要删除该槽位的存档吗？"
+title = "CONFIRM_DELETE_TITLE"
+dialog_text = "SLOT_DELETE_CONFIRM"
 initial_position = 2
 
 [node name="BtnCancel" type="Button" parent="SlotSelectPanel/Center/Panel/VBox"]
 custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "取消"
+text = "BTN_CANCEL"

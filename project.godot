@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+LocaleManager="*res://scripts/core/locale_manager.gd"
 GameTime="*res://scripts/core/game_time.gd"
 ErosionCore="*res://scripts/core/erosion_core.gd"
 GameValues="*res://scripts/core/game_values.gd"
@@ -31,6 +32,11 @@ SaveManager="*res://scripts/core/save_manager.gd"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://translations/translations.en.translation", "res://translations/translations.zh_CN.translation")
+locale/fallback="zh_CN"
 
 [physics]
 

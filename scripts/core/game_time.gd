@@ -96,7 +96,7 @@ func format_time() -> String:
 	var h: int = get_hour()
 	var d: int = get_day_in_week()  # 1～7，本周第几日
 	var w: int = get_week()  # 累计周数，1 起始
-	return "%d时，%d日，%d周" % [h, d, w]
+	return tr("TIME_FORMAT") % [h, d, w]
 
 
 ## 简短格式，与 format_time 相同：xx时 第XX天 第XX周

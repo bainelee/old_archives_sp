@@ -34,5 +34,5 @@ alwaysApply: false
 
 ## 参考
 
-- 设计文档：`docs/design/01-map-editor.md`
-- 房间与 JSON：`docs/design/02-room-info-and-json-sync.md`
+- 设计文档：`docs/design/1-editor/01-map-editor.md`
+- 房间与 JSON：`docs/design/1-editor/02-room-info-and-json-sync.md`

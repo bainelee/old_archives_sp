@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Build UI index from old-archives Godot project.
-Parses .tscn files and docs/design/*.md, outputs designs/ui-index.json.
+Parses .tscn files and docs/design/ module docs, outputs designs/ui-index.json.
 Uses only stdlib: json, re, pathlib.
 """
 
@@ -108,9 +108,9 @@ def parse_tscn_styles(path: Path) -> dict:
 
 
 def extract_layout_from_docs(docs_dir: Path) -> dict:
-    """Extract layout constants from docs/design/*.md."""
+    """Extract layout constants from docs/design/3-ui/*.md."""
     layout: dict = {}
-    overview = docs_dir / "06-ui-main-overview.md"
+    overview = docs_dir / "3-ui" / "02-ui-main-overview.md"
     if overview.exists():
         text = overview.read_text(encoding="utf-8")
         # Color(0.12, 0.12, 0.18, 0.92)
@@ -156,7 +156,7 @@ def main() -> None:
             {
                 "id": "ui_main_topbar",
                 "name": "主 UI TopBar",
-                "sources": ["scenes/ui/ui_main.tscn", "docs/design/06-ui-main-overview.md"],
+                "sources": ["scenes/ui/ui_main.tscn", "docs/design/3-ui/02-ui-main-overview.md"],
                 "elements": topbar_elements,
                 "layout": {
                     "orientation": "horizontal",
@@ -176,7 +176,7 @@ def main() -> None:
             {
                 "id": "time_panel",
                 "name": "时间面板 TimePanel",
-                "sources": ["scenes/ui/time_panel.tscn", "docs/design/04-time-system.md"],
+                "sources": ["scenes/ui/time_panel.tscn", "docs/design/2-gameplay/02-time-system.md"],
                 "elements": elements,
                 "layout": {"orientation": "horizontal", "height": 28, "gap": 12},
             }
@@ -190,7 +190,7 @@ def main() -> None:
             {
                 "id": "shelter_erosion_panel",
                 "name": "庇护/侵蚀面板 ShelterErosionPanel",
-                "sources": ["scenes/ui/shelter_erosion_panel.tscn", "docs/design/05-shelter-erosion-ui.md"],
+                "sources": ["scenes/ui/shelter_erosion_panel.tscn", "docs/design/3-ui/01-shelter-erosion-ui.md"],
                 "elements": elements,
                 "layout": {"orientation": "horizontal", "minWidth": 280, "gap": 12},
             }

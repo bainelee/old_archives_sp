@@ -84,7 +84,9 @@ func validate_save(data: Dictionary) -> bool:
 	return has_map or has_legacy_map
 
 
-func create_new_game_state(map_name: String = "新游戏") -> Dictionary:
+func create_new_game_state(map_name: String = "") -> Dictionary:
+	if map_name.is_empty():
+		map_name = tr("DEFAULT_NEW_GAME")
 	## 创建新游戏状态：从地图编辑器 slot_0 读取起始地图 + game_base 默认值
 	## 地图编辑器保存的是项目级资源，新游戏以编号第一张地图为起始场景
 	var map_data: Dictionary = _load_start_map()
@@ -157,7 +159,7 @@ func _make_blank_map() -> Dictionary:
 		"tiles": tiles,
 		"rooms": [],
 		"next_room_id": 1,
-		"map_name": "新游戏",
+		"map_name": tr("DEFAULT_NEW_GAME"),
 	}
 
 
@@ -175,7 +177,7 @@ func save_to_slot(slot: int, game_state: Dictionary) -> bool:
 	var path: String = get_slot_path(slot)
 	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if not file:
-		push_error("SaveManager: 保存失败 ", path)
+		push_error(tr("ERROR_SAVE_FAILED") + " " + path)
 		return false
 	file.store_string(JSON.stringify(game_state))
 	file.close()
@@ -220,7 +222,7 @@ func _migrate_to_game_state(d: Dictionary) -> void:
 	if not d.has(KEY_MAP_NAME) and d.has(KEY_MAP):
 		var m: Variant = d[KEY_MAP]
 		if m is Dictionary:
-			d[KEY_MAP_NAME] = (m as Dictionary).get(KEY_MAP_NAME, "未命名")
+			d[KEY_MAP_NAME] = (m as Dictionary).get(KEY_MAP_NAME, tr("DEFAULT_UNTITLED"))
 
 
 func _fill_defaults(d: Dictionary) -> void:

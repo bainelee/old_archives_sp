@@ -1,8 +1,8 @@
-# 10 - 房间清理系统
+# 04 - 房间清理系统
 
 ## 概述
 
-本文档描述《旧日档案馆》中**房间清理**的完整交互流程、UI 设计与实现，包括选择未清理房间、确认清理、多房间同时清理及进度推进。术语对照见 [00-project-keywords](../settings/00-project-keywords.md)。
+本文档描述《旧日档案馆》中**房间清理**的完整交互流程、UI 设计与实现，包括选择未清理房间、确认清理、多房间同时清理及进度推进。术语对照见 [00-project-keywords](../../settings/00-project-keywords.md)。
 
 ---
 
@@ -40,7 +40,7 @@ NONE（恢复时间）
 - **进入选择模式**：若时间正在流逝，则暂停；TopBar 的 TimePanel 同步为暂停图标
 - **退出选择模式**：若进入前时间在流动，则恢复
 - **确认清理后**：立即恢复时间（若曾流动），以便进度按游戏时间推进
-- **清理进度**：完全按游戏内时间规则，暂停则停、加速则加速（见 [04 - 时间流逝系统](04-time-system.md)）
+- **清理进度**：完全按游戏内时间规则，暂停则停、加速则加速（见 [02 - 时间流逝系统](02-time-system.md)）
 
 ---
 
@@ -164,7 +164,7 @@ var _cleanup_rooms_in_progress: Dictionary = {}  # room_index -> {"elapsed": flo
 ### 5.5 清理完成与资源授予
 
 - 清理进度达到 100% 时：`room.clean_status = CLEANED`
-- **可建设区域房间**（图书室、机房、资料库、教学室、实验室、推理室）：房间 `resources` **不**授予玩家，存量保留供 [12 - 已建设房间系统](12-built-room-system.md) 持续消耗
+- **可建设区域房间**（图书室、机房、资料库、教学室、实验室、推理室）：房间 `resources` **不**授予玩家，存量保留供 [06 - 已建设房间系统](06-built-room-system.md) 持续消耗
 - **其余房间**：`_grant_room_resources_to_player()` 将 `room.resources` 累加至 UIMain
 - 消耗/授予后均调用 `_sync_resources_to_topbar()` 刷新 TopBar
 
@@ -250,7 +250,7 @@ var _cleanup_rooms_in_progress: Dictionary = {}  # room_index -> {"elapsed": flo
 
 ## 10. 参考
 
-- [02 - 房间信息与 room_info.json 同步](02-room-info-and-json-sync.md)
-- [04 - 时间流逝系统](04-time-system.md)
-- [06 - 主 UI 设计概览](06-ui-main-overview.md)
-- [08 - 游戏数值系统](08-game-values.md)（含建设、清理的规划数值，当前实现采用简化公式）
+- [02 - 房间信息与 room_info.json 同步](../1-editor/02-room-info-and-json-sync.md)
+- [02 - 时间流逝系统](02-time-system.md)
+- [02 - 主 UI 设计概览](../3-ui/02-ui-main-overview.md)
+- [01 - 游戏数值系统](../0-values/01-game-values.md)（含建设、清理的规划数值，当前实现采用简化公式）

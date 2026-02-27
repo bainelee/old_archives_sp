@@ -3,7 +3,8 @@ description: 主 UI (TopBar) 布局、可复用组件、数据与视觉规范
 globs:
   - "scripts/ui/**"
   - "scenes/ui/**"
-  - "docs/design/0[4-6]*.md"
+  - "docs/design/2-gameplay/02-time-system.md"
+  - "docs/design/3-ui/*.md"
 alwaysApply: false
 ---
 
@@ -44,4 +45,4 @@ alwaysApply: false
 
 ## 参考
 
-- 设计文档：`docs/design/04-time-system.md`、`05-shelter-erosion-ui.md`、`06-ui-main-overview.md`
+- 设计文档：`docs/design/2-gameplay/02-time-system.md`、`docs/design/3-ui/01-shelter-erosion-ui.md`、`docs/design/3-ui/02-ui-main-overview.md`

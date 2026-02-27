@@ -99,8 +99,8 @@ static func update_all_buttons(editor: Node) -> void:
 	for i in level_buttons.size():
 		level_buttons[i].button_pressed = (edit_level == levels[i])
 	var select_modes: Array[int] = [FloorTileType.SelectMode.SINGLE, FloorTileType.SelectMode.BOX, FloorTileType.SelectMode.FLOOR_SELECT]
-	var single_text: String = "选择房间" if edit_level == FloorTileType.EditLevel.ROOM else "单选"
-	var box_text: String = "框选房间" if edit_level == FloorTileType.EditLevel.ROOM else "框选"
+	var single_text: String = TranslationServer.translate("EDITOR_SELECT_ROOM") if edit_level == FloorTileType.EditLevel.ROOM else TranslationServer.translate("EDITOR_SINGLE")
+	var box_text: String = TranslationServer.translate("EDITOR_BOX_ROOM") if edit_level == FloorTileType.EditLevel.ROOM else TranslationServer.translate("EDITOR_BOX")
 	for i in select_buttons.size():
 		select_buttons[i].button_pressed = (i < select_modes.size() and select_mode == select_modes[i])
 		if i == 0:

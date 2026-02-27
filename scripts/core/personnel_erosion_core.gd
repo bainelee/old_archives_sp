@@ -1,7 +1,7 @@
 extends Node
 ## 研究员侵蚀核心（Autoload: PersonnelErosionCore）
 ## 实现侵蚀风险、被侵蚀状态、死亡、治愈、灾厄值等逻辑
-## 详见 docs/design/09-researcher-erosion.md
+## 详见 docs/design/2-gameplay/07-researcher-erosion.md
 
 ## 庇护等级对应的每日侵蚀概率（%）
 const EROSION_PROB_EXTREME := 80  ## 绝境 ≤-5

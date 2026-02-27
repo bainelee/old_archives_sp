@@ -1,7 +1,7 @@
 extends Node
 ## 游戏数值加载器（Autoload: GameValues）
 ## 运行时从 res://datas/game_values.json 加载数值，供消耗、产出、建设等逻辑调用。
-## 数据来源与设计文档对应：docs/design/08-game-values.md（该文档不打包进游戏）。
+## 数据来源与设计文档对应：docs/design/0-values/01-game-values.md（该文档不打包进游戏）。
 ## 修改 JSON 后：重启游戏会生效；或调用 reload() 手动重载；开发时每 2 秒自动检测文件变化并重载。
 
 const GAME_VALUES_PATH := "res://datas/game_values.json"
@@ -21,7 +21,7 @@ func _load(force: bool = false) -> bool:
 		return true
 	var file := FileAccess.open(GAME_VALUES_PATH, FileAccess.READ)
 	if file == null:
-		push_error("GameValues: 无法打开 %s" % GAME_VALUES_PATH)
+		push_error(tr("ERROR_GAME_VALUES_OPEN") % GAME_VALUES_PATH)
 		return false
 	var content: String = file.get_as_text()
 	file.close()
@@ -29,11 +29,11 @@ func _load(force: bool = false) -> bool:
 	var json := JSON.new()
 	var err := json.parse(content)
 	if err != OK:
-		push_error("GameValues: JSON 解析失败: %s" % json.get_error_message())
+		push_error(tr("ERROR_GAME_VALUES_JSON") % json.get_error_message())
 		return false
 	var raw: Variant = json.get_data()
 	if not (raw is Dictionary):
-		push_error("GameValues: 根节点必须为 Dictionary")
+		push_error(tr("ERROR_GAME_VALUES_ROOT"))
 		return false
 	_data = _filter_comment_keys(raw as Dictionary)
 	return true

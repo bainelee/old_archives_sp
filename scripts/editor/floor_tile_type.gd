@@ -31,7 +31,7 @@ enum PaintTool {
 
 static func get_type_name(type: int) -> String:
 	match type:
-		Type.EMPTY: return "空"
-		Type.WALL: return "墙壁/装饰"
-		Type.ROOM_FLOOR: return "房间底板"
-		_: return "未知"
+		Type.EMPTY: return TranslationServer.translate("FLOOR_EMPTY")
+		Type.WALL: return TranslationServer.translate("FLOOR_WALL")
+		Type.ROOM_FLOOR: return TranslationServer.translate("FLOOR_ROOM")
+		_: return TranslationServer.translate("UNKNOWN")

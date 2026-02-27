@@ -3,7 +3,7 @@ description: Figma 设计读取、下载、导入 Godot 的完整流程
 globs:
   - "scenes/ui/test_figma_page.tscn"
   - "scripts/ui/test_figma_page.gd"
-  - "docs/design/figma_process/**"
+  - "docs/design/100-figma_process/**"
   - ".cursor/commands/figma-sync-test-page.md"
   - "assets/icons/**"
   - "assets/ui/**"
@@ -106,6 +106,6 @@ offset_bottom = canvas_top + height
 
 ## 参考文件
 
-- `docs/design/figma_process/01-test-figma-page-sync.md`：test_figma_page 同步规范
-- `docs/design/figma_process/02-figma-mcp-write-to-disk-config.md`：Figma Desktop MCP 配置
+- `docs/design/100-figma_process/01-test-figma-page-sync.md`：test_figma_page 同步规范
+- `docs/design/100-figma_process/02-figma-mcp-write-to-disk-config.md`：Figma Desktop MCP 配置
 - `.cursor/commands/figma-sync-test-page.md`：同步命令与步骤

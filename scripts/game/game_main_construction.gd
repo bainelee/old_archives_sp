@@ -2,7 +2,7 @@ class_name GameMainConstructionHelper
 extends RefCounted
 
 ## 建设模式逻辑 - 选择区域、选择房间、确认、进度、消耗
-## 详见 docs/design/11-zone-construction.md
+## 详见 docs/design/2-gameplay/05-zone-construction.md
 
 const CONSTRUCTION_NONE := 0
 const CONSTRUCTION_SELECTING_ZONE := 1

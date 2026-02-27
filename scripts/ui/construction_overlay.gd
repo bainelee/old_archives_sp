@@ -26,11 +26,11 @@ const PROGRESS_RING_RADIUS := 40.0
 
 ## 分类 -> 区域列表（当前实现的区域）
 var _category_zones: Dictionary = {
-	"工作类": [1, 2, 3],  ## RESEARCH, CREATION, OFFICE
-	"后勤类": [4],        ## LIVING
-	"秘迹类": [],
+	ZoneTypeScript.CATEGORY_WORK: [1, 2, 3],  ## RESEARCH, CREATION, OFFICE
+	ZoneTypeScript.CATEGORY_LOGISTICS: [4],   ## LIVING
+	ZoneTypeScript.CATEGORY_MYSTERY: [],
 }
-var _current_category: String = "工作类"
+var _current_category: String = ZoneTypeScript.CATEGORY_WORK
 
 
 func _ready() -> void:
@@ -38,7 +38,7 @@ func _ready() -> void:
 	_progress_rings_container = get_node_or_null("ProgressRingsContainer") as Control
 	_confirm_container.visible = false
 	_confirm_button.visible = true
-	_confirm_button.text = "✓"
+	_confirm_button.text = tr("BTN_CONFIRM")
 	_confirm_button.pressed.connect(_on_confirm_pressed)
 	_setup_category_tags()
 	_show_zone_buttons_for_category(_current_category)
@@ -47,9 +47,9 @@ func _ready() -> void:
 func _setup_category_tags() -> void:
 	if not _category_tags or not _category_tags is HBoxContainer:
 		return
-	for cat in ["工作类", "后勤类", "秘迹类"]:
+	for cat in [ZoneTypeScript.CATEGORY_WORK, ZoneTypeScript.CATEGORY_LOGISTICS, ZoneTypeScript.CATEGORY_MYSTERY]:
 		var btn: Button = Button.new()
-		btn.text = cat
+		btn.text = ZoneTypeScript.get_category_display_name(cat)
 		btn.pressed.connect(_on_category_tag_pressed.bind(cat))
 		_category_tags.add_child(btn)
 

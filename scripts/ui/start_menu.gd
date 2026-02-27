@@ -27,12 +27,15 @@ const GAME_MAIN_SCENE := "res://scenes/game/game_main.tscn"
 ]
 @onready var _btn_cancel: Button = $SlotSelectPanel/Center/Panel/VBox/BtnCancel
 @onready var _delete_confirm: ConfirmationDialog = $SlotSelectPanel/DeleteConfirmDialog
+@onready var _btn_lang_zh: CheckButton = $Center/VBox/LangRow/BtnLangZh
+@onready var _btn_lang_en: CheckButton = $Center/VBox/LangRow/BtnLangEn
 
 var _pending_delete_slot: int = -1
 
 
 func _ready() -> void:
 	_setup_buttons()
+	_setup_lang_buttons()
 	_setup_slot_panel()
 	_update_continue_availability()
 
@@ -42,6 +45,20 @@ func _setup_buttons() -> void:
 	_btn_continue.pressed.connect(_on_continue)
 	_btn_settings.pressed.connect(_on_settings)
 	_btn_quit.pressed.connect(_on_quit)
+
+
+func _setup_lang_buttons() -> void:
+	var current: String = LocaleManager.get_locale()
+	_btn_lang_zh.button_pressed = (current == "zh_CN")
+	_btn_lang_en.button_pressed = (current == "en")
+	_btn_lang_zh.toggled.connect(func(pressed: bool) -> void:
+		if pressed:
+			LocaleManager.set_locale("zh_CN")
+	)
+	_btn_lang_en.toggled.connect(func(pressed: bool) -> void:
+		if pressed:
+			LocaleManager.set_locale("en")
+	)
 
 
 func _setup_slot_panel() -> void:
@@ -58,7 +75,7 @@ func _update_continue_availability() -> void:
 	var has_save := SaveManager.get_first_occupied_slot() >= 0
 	_btn_continue.disabled = not has_save
 	if not has_save:
-		_btn_continue.tooltip_text = "暂无存档"
+		_btn_continue.tooltip_text = tr("MENU_NO_SAVE")
 	else:
 		_btn_continue.tooltip_text = ""
 
@@ -73,9 +90,9 @@ func _on_slot_cancel() -> void:
 
 
 func _on_slot_selected(slot: int) -> void:
-	var game_state: Dictionary = SaveManager.create_new_game_state("新游戏")
+	var game_state: Dictionary = SaveManager.create_new_game_state(tr("DEFAULT_NEW_GAME"))
 	if not SaveManager.save_to_slot(slot, game_state):
-		push_error("新游戏存档创建失败")
+		push_error(tr("ERROR_NEW_GAME_FAILED"))
 		return
 	SaveManager.pending_load_slot = slot
 	get_tree().change_scene_to_file(GAME_MAIN_SCENE)
@@ -86,13 +103,13 @@ func _refresh_slot_panel() -> void:
 	for i in _slot_buttons.size():
 		var meta: Variant = SaveManager.get_slot_metadata(i)
 		if meta == null:
-			_slot_buttons[i].text = "槽位 %d - 空" % [i + 1]
-			_slot_buttons[i].tooltip_text = "新建存档"
+			_slot_buttons[i].text = tr("SLOT_EMPTY") % [i + 1]
+			_slot_buttons[i].tooltip_text = tr("SLOT_TOOLTIP_NEW")
 			_delete_buttons[i].disabled = true
 		else:
-			var name_str: String = (meta as Dictionary).get("map_name", "未命名")
-			_slot_buttons[i].text = "槽位 %d - %s" % [i + 1, name_str]
-			_slot_buttons[i].tooltip_text = "覆盖已有存档"
+			var name_str: String = (meta as Dictionary).get("map_name", tr("DEFAULT_UNTITLED"))
+			_slot_buttons[i].text = tr("SLOT_WITH_NAME") % [i + 1, name_str]
+			_slot_buttons[i].tooltip_text = tr("SLOT_TOOLTIP_OVERWRITE")
 			_delete_buttons[i].disabled = false
 	_update_continue_availability()
 

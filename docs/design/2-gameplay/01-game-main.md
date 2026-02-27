@@ -1,4 +1,4 @@
-# 03 - 游戏主场景
+# 01 - 游戏主场景
 
 ## 概述
 
@@ -58,9 +58,9 @@ game_main.gd (_ready/_process/_input/_draw)
 
 ## 相关文档
 
-- [00 - 项目概览](00-project-overview.md)
-- [01 - 地图编辑器](01-map-editor.md)（地图编辑与保存）
-- [07 - 存档系统](07-save-system.md)
-- [10 - 房间清理系统](10-room-cleanup-system.md)
-- [11 - 区域建设功能](11-zone-construction.md)
-- [12 - 已建设房间系统](12-built-room-system.md)
+- [00 - 项目概览](../00-project-overview.md)
+- [01 - 地图编辑器](../1-editor/01-map-editor.md)（地图编辑与保存）
+- [03 - 存档系统](03-save-system.md)
+- [04 - 房间清理系统](04-room-cleanup-system.md)
+- [05 - 区域建设功能](05-zone-construction.md)
+- [06 - 已建设房间系统](06-built-room-system.md)

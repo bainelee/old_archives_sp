@@ -52,16 +52,15 @@ static func draw_all(canvas: CanvasItem, editor: Node) -> void:
 	var hide_source: bool = floor_move_drag and floor_sel.position.x >= 0
 	for x in grid_w:
 		for y in grid_h:
+			var tile_rect: Rect2 = Rect2(x * cell_size, y * cell_size, cell_size, cell_size)
 			if hide_source and editor._is_point_in_floor_selection(Vector2i(x, y)):
-				var rect: Rect2 = Rect2(x * cell_size, y * cell_size, cell_size, cell_size)
-				canvas.draw_rect(rect, tile_colors[FloorTileType.Type.EMPTY])
-				canvas.draw_rect(rect, Color(0.2, 0.2, 0.25), false)
+				canvas.draw_rect(tile_rect, tile_colors[FloorTileType.Type.EMPTY])
+				canvas.draw_rect(tile_rect, Color(0.2, 0.2, 0.25), false)
 				continue
 			var tile_type: int = tiles[x][y] as int
 			var color: Color = tile_colors.get(tile_type, tile_colors[FloorTileType.Type.EMPTY]) as Color
-			var rect: Rect2 = Rect2(x * cell_size, y * cell_size, cell_size, cell_size)
-			canvas.draw_rect(rect, color)
-			canvas.draw_rect(rect, Color(0.2, 0.2, 0.25), false)
+			canvas.draw_rect(tile_rect, color)
+			canvas.draw_rect(tile_rect, Color(0.2, 0.2, 0.25), false)
 
 	for x in grid_w + 1:
 		canvas.draw_line(
@@ -106,9 +105,9 @@ static func draw_all(canvas: CanvasItem, editor: Node) -> void:
 		var font_size: int = 12
 		var padding: int = 2
 		for room in rooms:
-			var name_text: String = room.room_name if room.room_name else "未命名"
+			var name_text: String = room.get_display_name()
 			if name_text.is_empty():
-				name_text = "未命名"
+				name_text = (editor as Node).tr("DEFAULT_UNTITLED")
 			var txt_size: Vector2 = font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 			var rx: float = room.rect.position.x * cell_size
 			var ry: float = room.rect.position.y * cell_size

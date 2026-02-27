@@ -17,12 +17,12 @@ func _ready() -> void:
 
 func show_panel(total: int, eroded: int, in_cleanup: int, in_construction: int, working: int) -> void:
 	var idle: int = maxi(0, total - eroded - in_cleanup - in_construction - working)
-	_label_total.text = "研究员总数：%d" % total
-	_label_eroded.text = "被侵蚀：%d" % eroded
-	_label_in_cleanup.text = "清理中：%d" % in_cleanup
-	_label_in_construction.text = "建设中：%d" % in_construction
-	_label_working.text = "房间内工作：%d" % working
-	_label_idle.text = "空闲：%d" % idle
+	_label_total.text = tr("RESEARCHER_TOTAL") % total
+	_label_eroded.text = tr("RESEARCHER_ERODED") % eroded
+	_label_in_cleanup.text = tr("RESEARCHER_IN_CLEANUP") % in_cleanup
+	_label_in_construction.text = tr("RESEARCHER_IN_CONSTRUCTION") % in_construction
+	_label_working.text = tr("RESEARCHER_WORKING") % working
+	_label_idle.text = tr("RESEARCHER_IDLE") % idle
 	visible = true
 
 

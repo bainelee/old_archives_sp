@@ -1,6 +1,6 @@
 ---
 description: 存档系统规范，清空存档时仅操作游戏存档
-globs: ["scripts/core/save_manager.gd", "scripts/ui/start_menu.gd", "docs/design/07-save-system.md"]
+globs: ["scripts/core/save_manager.gd", "scripts/ui/start_menu.gd", "docs/design/2-gameplay/03-save-system.md"]
 alwaysApply: false
 ---
 

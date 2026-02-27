@@ -24,73 +24,73 @@ func show_for_room(room: RoomInfo, player_resources: Dictionary, can_afford: boo
 	if room == null:
 		hide_panel()
 		return
-	_label_name.text = room.room_name if room.room_name else "未命名"
-	_label_build_area.text = "可建设区域：%d×%d" % [room.rect.size.x, room.rect.size.y]
+	_label_name.text = room.get_display_name()
+	_label_build_area.text = tr("HOVER_BUILD_AREA") % [room.rect.size.x, room.rect.size.y]
 	_label_resources.text = _format_room_resources(room.resources)
 	var cost: Dictionary = room.get_cleanup_cost()
-	_label_cost.text = "清理花费：%s" % _format_cost_with_have(cost, player_resources)
+	_label_cost.text = tr("HOVER_CLEANUP_COST") % _format_cost_with_have(cost, player_resources)
 	if _label_researcher:
 		var needed: int = researchers_needed if researchers_needed > 0 else room.get_cleanup_researcher_count()
-		_label_researcher.text = "研究员占用：%d 人（可用 %d）" % [needed, researchers_available]
+		_label_researcher.text = tr("RESEARCHER_OCCUPANCY") % [needed, researchers_available]
 		_label_researcher.visible = true
-	_label_time.text = "清理时间：%.0f 小时" % room.get_cleanup_time_hours()
+	_label_time.text = tr("HOVER_CLEANUP_TIME") % room.get_cleanup_time_hours()
 	_label_insufficient.visible = not can_afford
-	_label_insufficient.text = "当前资源不足"
+	_label_insufficient.text = tr("HOVER_INSUFFICIENT")
 	_label_insufficient.add_theme_color_override("font_color", INSUFFICIENT_COLOR)
 	visible = true
 
 
 func _format_room_resources(resources: Array) -> String:
 	if resources.is_empty():
-		return "资源储量：（无）"
+		return tr("HOVER_RESERVE_EMPTY")
 	var parts: PackedStringArray = []
 	for r in resources:
 		if r is Dictionary:
 			var rt: int = int(r.get("resource_type", RoomInfo.ResourceType.NONE))
 			var amt: int = int(r.get("resource_amount", 0))
 			parts.append(RoomInfo.get_resource_type_name(rt) + " %d" % amt)
-	return "资源储量：" + ", ".join(parts)
+	return tr("HOVER_RESERVE_LINE") % ", ".join(parts)
 
 
 func _format_cost(cost: Dictionary) -> String:
 	if cost.is_empty():
-		return "无"
+		return tr("COST_NONE")
 	var parts: PackedStringArray = []
-	var key_names: Dictionary = {
-		"cognition": "认知因子",
-		"computation": "计算因子",
-		"willpower": "意志因子",
-		"permission": "权限因子",
-		"info": "信息",
-		"truth": "真相",
+	var key_tr: Dictionary = {
+		"cognition": "RESOURCE_COGNITION",
+		"computation": "RESOURCE_COMPUTATION",
+		"willpower": "RESOURCE_WILL",
+		"permission": "RESOURCE_PERMISSION",
+		"info": "RESOURCE_INFO",
+		"truth": "RESOURCE_TRUTH",
 	}
 	for key in cost:
 		var amt: int = int(cost.get(key, 0))
 		if amt > 0:
-			parts.append("%s %d" % [key_names.get(key, key), amt])
-	return ", ".join(parts) if parts.size() > 0 else "无"
+			parts.append("%s %d" % [tr(key_tr.get(key, key)), amt])
+	return ", ".join(parts) if parts.size() > 0 else tr("COST_NONE")
 
 
 func _format_cost_with_have(cost: Dictionary, player_resources: Dictionary) -> String:
 	## 显示消耗并附带玩家拥有量，如「信息 20 (拥有 500)」
 	if cost.is_empty():
-		return "无"
+		return tr("COST_NONE")
 	var parts: PackedStringArray = []
-	var key_names: Dictionary = {
-		"cognition": "认知因子",
-		"computation": "计算因子",
-		"willpower": "意志因子",
-		"permission": "权限因子",
-		"info": "信息",
-		"truth": "真相",
+	var key_tr: Dictionary = {
+		"cognition": "RESOURCE_COGNITION",
+		"computation": "RESOURCE_COMPUTATION",
+		"willpower": "RESOURCE_WILL",
+		"permission": "RESOURCE_PERMISSION",
+		"info": "RESOURCE_INFO",
+		"truth": "RESOURCE_TRUTH",
 	}
 	for key in cost:
 		var amt: int = int(cost.get(key, 0))
 		if amt > 0:
 			var have: int = int(player_resources.get(key, 0))
-			var name_str: String = key_names.get(key, key)
-			parts.append("%s %d (拥有 %d)" % [name_str, amt, have])
-	return ", ".join(parts) if parts.size() > 0 else "无"
+			var name_str: String = tr(key_tr.get(key, key))
+			parts.append(tr("COST_WITH_HAVE") % [name_str, amt, have])
+	return ", ".join(parts) if parts.size() > 0 else tr("COST_NONE")
 
 
 func hide_panel() -> void:

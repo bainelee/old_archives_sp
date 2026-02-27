@@ -63,7 +63,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Cognition" unique_id=2110231674]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "认知因子"
+text = "LABEL_COGNITION"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Cognition" unique_id=2142687568]
 layout_mode = 2
@@ -78,7 +78,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Computation" unique_id=1575393854]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "计算因子"
+text = "LABEL_COMPUTATION"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Computation" unique_id=1261180492]
 layout_mode = 2
@@ -93,7 +93,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Will" unique_id=1187124427]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "意志因子"
+text = "LABEL_WILLPOWER"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Will" unique_id=2103199719]
 layout_mode = 2
@@ -108,7 +108,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Permission" unique_id=1874155186]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "权限因子"
+text = "LABEL_PERMISSION"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Permission" unique_id=716455947]
 layout_mode = 2
@@ -131,7 +131,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Currency/Info" unique_id=147395422]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "信息"
+text = "LABEL_INFO"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Currency/Info" unique_id=1633927112]
 layout_mode = 2
@@ -146,7 +146,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Currency/Truth" unique_id=1601590714]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "真相"
+text = "LABEL_TRUTH"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Currency/Truth" unique_id=2061691647]
 layout_mode = 2
@@ -179,7 +179,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Researcher" unique_id=1328253095]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "研究员："
+text = "LABEL_RESEARCHER"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Researcher" unique_id=1305669362]
 layout_mode = 2
@@ -194,7 +194,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Eroded" unique_id=2037656035]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "被侵蚀"
+text = "LABEL_ERODED"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Eroded" unique_id=790474339]
 layout_mode = 2
@@ -209,7 +209,7 @@ theme_override_constants/separation = 4
 [node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Investigator" unique_id=1292956805]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
-text = "调查员"
+text = "LABEL_INVESTIGATOR"
 
 [node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Investigator" unique_id=1112209640]
 layout_mode = 2
@@ -252,7 +252,7 @@ theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
-text = "清理"
+text = "BTN_CLEANUP"
 
 [node name="BtnBuild" type="Button" parent="BottomRightBar" unique_id=603276110]
 custom_minimum_size = Vector2(130, 65)
@@ -263,7 +263,7 @@ theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
-text = "建设"
+text = "BTN_CONSTRUCTION"
 
 [node name="BtnRenovate" type="Button" parent="BottomRightBar" unique_id=1700922277]
 custom_minimum_size = Vector2(130, 65)
@@ -274,4 +274,4 @@ theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
-text = "改造"
+text = "BTN_REMODEL"

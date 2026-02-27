@@ -14,22 +14,22 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 	panel.add_child(vbox)
 
 	var lbl: Label = Label.new()
-	lbl.text = "房间信息（选中房间后可编辑）"
+	lbl.text = TranslationServer.translate("EDITOR_ROOM_INFO")
 	vbox.add_child(lbl)
 
 	var import_row: HBoxContainer = HBoxContainer.new()
 	var btn_import_template: Button = Button.new()
-	btn_import_template.text = "从模板导入"
+	btn_import_template.text = TranslationServer.translate("EDITOR_IMPORT_TEMPLATE")
 	btn_import_template.pressed.connect(editor._on_import_template_pressed)
 	import_row.add_child(btn_import_template)
 	vbox.add_child(import_row)
 
 	var name_row: HBoxContainer = HBoxContainer.new()
 	var lbl_name: Label = Label.new()
-	lbl_name.text = "名称："
+	lbl_name.text = TranslationServer.translate("EDITOR_LABEL_NAME")
 	name_row.add_child(lbl_name)
 	var room_name_edit: LineEdit = LineEdit.new()
-	room_name_edit.placeholder_text = "房间名称"
+	room_name_edit.placeholder_text = TranslationServer.translate("EDITOR_PLACEHOLDER_ROOM")
 	room_name_edit.custom_minimum_size.x = 160
 	room_name_edit.text_changed.connect(editor._on_room_name_changed)
 	name_row.add_child(room_name_edit)
@@ -37,7 +37,7 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 
 	var type_row: HBoxContainer = HBoxContainer.new()
 	var lbl_type: Label = Label.new()
-	lbl_type.text = "类型："
+	lbl_type.text = TranslationServer.translate("EDITOR_LABEL_TYPE")
 	type_row.add_child(lbl_type)
 	var room_type_option: OptionButton = OptionButton.new()
 	for i in range(10):
@@ -48,7 +48,7 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 
 	var clean_row: HBoxContainer = HBoxContainer.new()
 	var lbl_clean: Label = Label.new()
-	lbl_clean.text = "清理状态："
+	lbl_clean.text = TranslationServer.translate("EDITOR_LABEL_CLEAN")
 	clean_row.add_child(lbl_clean)
 	var room_clean_option: OptionButton = OptionButton.new()
 	for i in range(2):
@@ -59,10 +59,10 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 
 	var pre_clean_row: HBoxContainer = HBoxContainer.new()
 	var lbl_pre_clean: Label = Label.new()
-	lbl_pre_clean.text = "清理前文本："
+	lbl_pre_clean.text = TranslationServer.translate("EDITOR_LABEL_PRE_CLEAN")
 	pre_clean_row.add_child(lbl_pre_clean)
 	var room_pre_clean_edit: LineEdit = LineEdit.new()
-	room_pre_clean_edit.placeholder_text = "默认清理前文本"
+	room_pre_clean_edit.placeholder_text = TranslationServer.translate("EDITOR_PLACEHOLDER_PRE_CLEAN")
 	room_pre_clean_edit.custom_minimum_size.x = 160
 	room_pre_clean_edit.text_changed.connect(editor._on_room_pre_clean_changed)
 	pre_clean_row.add_child(room_pre_clean_edit)
@@ -70,10 +70,10 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 
 	var desc_row: HBoxContainer = HBoxContainer.new()
 	var lbl_desc: Label = Label.new()
-	lbl_desc.text = "描述："
+	lbl_desc.text = TranslationServer.translate("EDITOR_LABEL_DESC")
 	desc_row.add_child(lbl_desc)
 	var room_desc_edit: TextEdit = TextEdit.new()
-	room_desc_edit.placeholder_text = "房间背景描述"
+	room_desc_edit.placeholder_text = TranslationServer.translate("EDITOR_PLACEHOLDER_DESC")
 	room_desc_edit.custom_minimum_size = Vector2(200, 100)
 	room_desc_edit.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 	room_desc_edit.text_changed.connect(editor._on_room_desc_changed)
@@ -82,10 +82,10 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 
 	var res_label_row: HBoxContainer = HBoxContainer.new()
 	var lbl_res: Label = Label.new()
-	lbl_res.text = "资源："
+	lbl_res.text = TranslationServer.translate("EDITOR_LABEL_RES")
 	res_label_row.add_child(lbl_res)
 	var room_res_add_btn: Button = Button.new()
-	room_res_add_btn.text = "添加"
+	room_res_add_btn.text = TranslationServer.translate("EDITOR_ADD")
 	room_res_add_btn.pressed.connect(editor._on_room_res_add_pressed)
 	res_label_row.add_child(room_res_add_btn)
 	vbox.add_child(res_label_row)
@@ -94,28 +94,28 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 
 	var base_row: HBoxContainer = HBoxContainer.new()
 	var lbl_base: Label = Label.new()
-	lbl_base.text = "底图："
+	lbl_base.text = TranslationServer.translate("EDITOR_LABEL_BASE")
 	base_row.add_child(lbl_base)
 	var room_base_image_edit: LineEdit = LineEdit.new()
-	room_base_image_edit.placeholder_text = "无"
+	room_base_image_edit.placeholder_text = TranslationServer.translate("EDITOR_PLACEHOLDER_NONE")
 	room_base_image_edit.editable = false
 	room_base_image_edit.custom_minimum_size.x = 120
 	base_row.add_child(room_base_image_edit)
 	var room_base_image_btn: Button = Button.new()
-	room_base_image_btn.text = "选择..."
+	room_base_image_btn.text = TranslationServer.translate("EDITOR_SELECT")
 	room_base_image_btn.pressed.connect(editor._on_base_image_pick_pressed)
 	base_row.add_child(room_base_image_btn)
 	var btn_clear_base: Button = Button.new()
-	btn_clear_base.text = "清除"
+	btn_clear_base.text = TranslationServer.translate("EDITOR_CLEAR")
 	btn_clear_base.pressed.connect(editor._on_base_image_clear_pressed)
 	base_row.add_child(btn_clear_base)
 	vbox.add_child(base_row)
 
 	var room_base_image_dialog: FileDialog = FileDialog.new()
-	room_base_image_dialog.title = "选择底图"
+	room_base_image_dialog.title = TranslationServer.translate("EDITOR_DIALOG_BASE")
 	room_base_image_dialog.access = FileDialog.ACCESS_RESOURCES
 	room_base_image_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
-	room_base_image_dialog.filters = ["*.png ; PNG 图像", "*.jpg, *.jpeg ; JPEG 图像", "*.webp ; WebP 图像"]
+	room_base_image_dialog.filters = ["*.png ; " + TranslationServer.translate("FILTER_PNG"), "*.jpg, *.jpeg ; " + TranslationServer.translate("FILTER_JPEG"), "*.webp ; " + TranslationServer.translate("FILTER_WEBP")]
 	room_base_image_dialog.current_dir = "res://"
 	room_base_image_dialog.file_selected.connect(editor._on_base_image_selected)
 
@@ -139,7 +139,7 @@ static func build_import_template_panel(editor: Node, ui_layer: CanvasLayer) -> 
 	import_template_panel.visible = false
 	var vbox: VBoxContainer = VBoxContainer.new()
 	var lbl: Label = Label.new()
-	lbl.text = "选择要导入的房间模板（编号 + 名称）"
+	lbl.text = TranslationServer.translate("EDITOR_IMPORT_TITLE")
 	vbox.add_child(lbl)
 	var import_template_list: ItemList = ItemList.new()
 	import_template_list.custom_minimum_size = Vector2(220, 280)
@@ -147,11 +147,11 @@ static func build_import_template_panel(editor: Node, ui_layer: CanvasLayer) -> 
 	vbox.add_child(import_template_list)
 	var btn_row: HBoxContainer = HBoxContainer.new()
 	var btn_import: Button = Button.new()
-	btn_import.text = "导入"
+	btn_import.text = TranslationServer.translate("EDITOR_IMPORT")
 	btn_import.pressed.connect(editor._on_import_template_confirm_pressed)
 	btn_row.add_child(btn_import)
 	var btn_cancel: Button = Button.new()
-	btn_cancel.text = "取消"
+	btn_cancel.text = TranslationServer.translate("BTN_CANCEL")
 	btn_cancel.pressed.connect(func() -> void: import_template_panel.visible = false)
 	btn_row.add_child(btn_cancel)
 	vbox.add_child(btn_row)
@@ -172,18 +172,18 @@ static func build_save_confirm_panel(editor: Node, ui_layer: CanvasLayer) -> voi
 	save_confirm_panel.visible = false
 	var vbox: VBoxContainer = VBoxContainer.new()
 	var lbl: Label = Label.new()
-	lbl.text = "保存地图"
+	lbl.text = TranslationServer.translate("EDITOR_SAVE_TITLE")
 	vbox.add_child(lbl)
 	var btn_save_current: Button = Button.new()
-	btn_save_current.text = "保存当前地图"
+	btn_save_current.text = TranslationServer.translate("EDITOR_SAVE_CURRENT")
 	btn_save_current.pressed.connect(editor._on_save_confirm_save_current)
 	vbox.add_child(btn_save_current)
 	var btn_save_new: Button = Button.new()
-	btn_save_new.text = "保存为新地图"
+	btn_save_new.text = TranslationServer.translate("EDITOR_SAVE_NEW")
 	btn_save_new.pressed.connect(editor._on_save_confirm_save_new)
 	vbox.add_child(btn_save_new)
 	var btn_cancel: Button = Button.new()
-	btn_cancel.text = "取消"
+	btn_cancel.text = TranslationServer.translate("BTN_CANCEL")
 	btn_cancel.pressed.connect(func() -> void: save_confirm_panel.visible = false)
 	vbox.add_child(btn_cancel)
 	save_confirm_panel.add_child(vbox)
@@ -202,7 +202,7 @@ static func build_room_list_panel(editor: Node, ui_layer: CanvasLayer) -> void:
 	room_list_panel.visible = false
 	var room_list_vbox: VBoxContainer = VBoxContainer.new()
 	var room_list_toggle_btn: Button = Button.new()
-	room_list_toggle_btn.text = "房间列表 ▼"
+	room_list_toggle_btn.text = TranslationServer.translate("EDITOR_ROOM_LIST_DOWN")
 	room_list_toggle_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	room_list_toggle_btn.pressed.connect(editor._on_room_list_toggle_pressed)
 	room_list_vbox.add_child(room_list_toggle_btn)
@@ -276,7 +276,10 @@ static func refresh_room_panel(editor: Node) -> void:
 	room_pre_clean_edit.text = room.pre_clean_text
 	room_desc_edit.text = room.desc
 	editor.call("_refresh_room_resources_ui")
-	room_base_image_edit.text = room.base_image_path.get_file() if room.base_image_path else ""
+	if room.base_image_path:
+		room_base_image_edit.text = room.base_image_path.get_file()
+	else:
+		room_base_image_edit.text = TranslationServer.translate("EDITOR_PLACEHOLDER_NONE")
 
 
 static func refresh_room_list(editor: Node) -> void:
@@ -287,7 +290,7 @@ static func refresh_room_list(editor: Node) -> void:
 	for i in rooms.size():
 		var room: RoomInfo = rooms[i]
 		var btn: Button = Button.new()
-		var display_name: String = room.room_name if room.room_name else ("房间 %d" % (i + 1))
+		var display_name: String = room.room_name if room.room_name else (TranslationServer.translate("EDITOR_ROOM_N") % (i + 1))
 		btn.text = display_name
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var room_index: int = i
@@ -334,7 +337,7 @@ static func update_room_panel_visibility(editor: Node) -> void:
 	btn_delete_room.visible = (edit_level == FloorTileType.EditLevel.ROOM and selected_idx >= 0)
 	if edit_level == FloorTileType.EditLevel.ROOM:
 		room_list_scroll.visible = room_list_dropdown_visible
-		room_list_toggle_btn.text = "房间列表 ▼" if room_list_dropdown_visible else "房间列表 ▶"
+		room_list_toggle_btn.text = TranslationServer.translate("EDITOR_ROOM_LIST_DOWN") if room_list_dropdown_visible else TranslationServer.translate("EDITOR_ROOM_LIST_RIGHT")
 		refresh_room_list(editor)
 	var show_floor_tools: bool = (edit_level == FloorTileType.EditLevel.FLOOR)
 	for btn in tool_buttons:
@@ -376,7 +379,7 @@ static func refresh_room_resources_ui(editor: Node) -> void:
 		spin.value_changed.connect(func(v: float) -> void: editor.call("_on_room_res_amount_changed", res_idx, v))
 		row.add_child(spin)
 		var btn_rm: Button = Button.new()
-		btn_rm.text = "删除"
+		btn_rm.text = TranslationServer.translate("BTN_DELETE")
 		btn_rm.pressed.connect(func() -> void: editor.call("_on_room_res_remove_pressed", res_idx))
 		row.add_child(btn_rm)
 		room_resources_container.add_child(row)
