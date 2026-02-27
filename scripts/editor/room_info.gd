@@ -128,6 +128,36 @@ func can_build_zone(construction_zone_type: int) -> bool:
 	return room_type in allowed
 
 
+## 解析 desc/pre_clean_text：支持字符串或数组（数组合并便于阅读），返回字符串
+## 数组形式：每项之间自动插入换行，无需在 JSON 中写 \n；\n 仍可用于段落空行等
+static func parse_text_field(v: Variant, default_val: String = "") -> String:
+	if v is Array:
+		var arr: Array = v as Array
+		var parts: PackedStringArray = []
+		for item in arr:
+			parts.append(str(item))
+		return "\n".join(parts)
+	if v == null:
+		return default_val
+	return str(v)
+
+
+## 将长文本格式化为 JSON 数组（方便阅读、修改）；短文本或空串保持字符串
+## 每行作为数组一项，读取时 parse_text_field 会以 \n 拼接，无需在元素内写 \n
+static func format_text_for_json(s: String, min_len_for_array: int = 30) -> Variant:
+	if s.is_empty():
+		return ""
+	if s.length() < min_len_for_array and not "\n" in s:
+		return s
+	var split_arr: PackedStringArray = s.split("\n")
+	if split_arr.size() <= 1:
+		return s
+	var parts: Array = []
+	for line in split_arr:
+		parts.append(line)
+	return parts
+
+
 ## 转为 room_info.json 中的房间条目格式
 func to_json_room_dict(json_id: String) -> Dictionary:
 	var res_list: Array = []
@@ -143,8 +173,8 @@ func to_json_room_dict(json_id: String) -> Dictionary:
 		"clean_status": clean_status,
 		"base_image_path": base_image_path,
 		"resources": res_list,
-		"pre_clean_text": pre_clean_text,
-		"desc": desc,
+		"pre_clean_text": format_text_for_json(pre_clean_text),
+		"desc": format_text_for_json(desc),
 	}
 
 
@@ -234,9 +264,9 @@ static func from_dict(d: Dictionary) -> RoomInfo:
 		if rt != ResourceType.NONE or amt > 0:
 			info.resources.append({"resource_type": rt, "resource_amount": amt})
 	info.base_image_path = str(d.get("base_image_path", ""))
-	info.pre_clean_text = str(d.get("pre_clean_text", "默认清理前文本"))
+	info.pre_clean_text = parse_text_field(d.get("pre_clean_text"), "默认清理前文本")
 	info.json_room_id = str(d.get("json_room_id", ""))
-	info.desc = str(d.get("desc", ""))
+	info.desc = parse_text_field(d.get("desc"), "")
 	if d.has("cleanup_cost") and d.get("cleanup_cost") is Dictionary:
 		info.cleanup_cost = (d.get("cleanup_cost") as Dictionary).duplicate()
 	if d.has("cleanup_time_hours"):

@@ -11,6 +11,9 @@
 | [02 - 房间信息与 room_info.json 同步](02-room-info-and-json-sync.md) | RoomInfo 结构、JSON 格式、同步逻辑 |
 | [03 - 游戏主场景](03-game-main.md) | 主运行入口、slot_0 展示、编辑器隔离 |
 | [04 - 时间流逝系统](04-time-system.md) | GameTime Autoload、TimePanel UI、时间比例与倍速 |
+| [05 - 庇护/侵蚀 UI](05-shelter-erosion-ui.md) | ShelterErosionPanel、ErosionCycleBar、侵蚀等级与周期 |
+| [06 - 主 UI 设计概览](06-ui-main-overview.md) | TopBar 布局、TimePanel、数据 API |
+| [06 - TopBar UI 元素说明](06-topbar-ui-elements.md) | 顶栏各项显示信息及游戏内作用 |
 | [07 - 存档系统](07-save-system.md) | 存档架构、数据模型、保存/加载流程、与地图槽位关系 |
 | [08 - 游戏数值系统](08-game-values.md) | 研究员认知消耗、核心庇护/范围、房间清理、建设区域、生活区住房、研究区/造物区产出、空房间改造 |
 | [09 - 研究员侵蚀机制](09-researcher-erosion.md) | 侵蚀风险、被侵蚀状态、灾厄值、死亡、治愈 |
@@ -19,6 +22,17 @@
 | [12 - 已建设房间系统](12-built-room-system.md) | 已建设房间持续运作、研究区/造物区产出、存量耗尽、住房 |
 | [13 - 游戏数值运行时系统](13-game-values-runtime.md) | 数值数据源、加载与引用、热重载、同步工作流 |
 | [14 - 研究员系统](14-researcher-system.md) | 研究员设定汇总、占用分类、已实现功能、待办事项 |
+
+### 子目录
+
+| 目录 | 说明 |
+|------|------|
+| [figma_process/](figma_process/README.md) | Figma 设计与同步规则、MCP 配置（独立编号 01、02…） |
+
+## 文档编号约定
+
+- **根目录 00–14**：已用于核心系统，新 design 文档**不得复用**这些编号
+- **子目录**：如 `figma_process/` 使用自身编号体系（01、02…）
 
 ---
 

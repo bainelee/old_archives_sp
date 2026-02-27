@@ -333,9 +333,9 @@ func _on_import_template_confirm_pressed() -> void:
 	room.room_name = str(t.get("room_name", ""))
 	room.room_type = int(t.get("room_type_id", RoomInfo.RoomType.EMPTY_ROOM))
 	room.clean_status = int(t.get("clean_status", RoomInfo.CleanStatus.UNCLEANED))
-	room.pre_clean_text = str(t.get("pre_clean_text", "默认清理前文本"))
+	room.pre_clean_text = RoomInfo.parse_text_field(t.get("pre_clean_text"), "默认清理前文本")
 	room.base_image_path = str(t.get("base_image_path", ""))
-	room.desc = str(t.get("desc", ""))
+	room.desc = RoomInfo.parse_text_field(t.get("desc"), "")
 	room.resources.clear()
 	for res in (t.get("resources", []) as Array):
 		if res is Dictionary:

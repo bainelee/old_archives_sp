@@ -1,0 +1,10 @@
+---
+title: Memorix Context Loader
+description: Load relevant memories when user submits a prompt
+event: prompt_submit
+---
+
+Before responding, search for relevant context:
+1. Call memorix_search with a query related to the user's prompt
+2. If results are found, use memorix_detail to fetch the most relevant ones
+3. Reference relevant memories naturally in your response

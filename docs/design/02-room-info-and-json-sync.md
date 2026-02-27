@@ -56,6 +56,21 @@
 - `room_type`：人类可读类型名，由 `RoomInfo.get_room_type_name()` 生成
 - `room_type_id`：数值类型 ID，用于程序解析
 
+### 长文本数组格式（desc / pre_clean_text）
+
+为方便阅读和修改，长文本可采用**字符串数组**形式书写，每行一个元素，换行符保留在续行元素开头：
+
+```json
+"desc": [
+  "第一段文字，",
+  "\n第二段文字。"
+]
+```
+
+- **读取**：数组会按顺序拼接为字符串（`RoomInfo.parse_text_field`）
+- **写入**：保存地图同步时，超过约 30 字或含换行的文本会自动转为数组格式（`RoomInfo.format_text_for_json`）
+- **兼容**：字符串与数组两种格式均支持
+
 ---
 
 ## 房间编辑 UI

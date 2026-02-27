@@ -1,9 +1,10 @@
 class_name GameMainDrawHelper
 extends RefCounted
 
-## 游戏主场景绘制逻辑 - 底板、房间底图、房间遮罩、边框
+## 游戏主场景绘制逻辑 - 底板、房间底图、房间遮罩、边框、暂停研究标记
 ## 接收 CanvasItem 与 game_main，将绘制逻辑与主类解耦
 
+const BuiltRoomHelper = preload("res://scripts/game/game_main_built_room.gd")
 const TILE_COLORS := {
 	FloorTileType.Type.EMPTY: Color(0.15, 0.15, 0.2),
 	FloorTileType.Type.WALL: Color(0.4, 0.4, 0.45),
@@ -109,6 +110,29 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 				canvas.draw_rect(rect, Color(0, 0, 0, 0.6), true)
 		elif room.clean_status == RoomInfo.CleanStatus.UNCLEANED:
 			canvas.draw_rect(rect, Color(0, 0, 0, 0.4), true)
+		# 已建设房间：30% 透明度绿色遮罩，提示可辨识
+		elif room.zone_type != 0:
+			canvas.draw_rect(rect, Color(0.2, 0.8, 0.3, 0.3), true)
+
+	# 暂停研究标记（造物区、玩家意志不足 24h 消耗，12-built-room-system 3）
+	var ui: Node = game_main.get_node_or_null("UIMain")
+	if ui:
+		var font: Font = ThemeDB.fallback_font
+		var font_size: int = 12
+		for i in rooms.size():
+			var room: RoomInfo = rooms[i]
+			if BuiltRoomHelper.is_creation_zone_paused(room, ui):
+				var px: float = room.rect.position.x * cell_size
+				var py: float = room.rect.position.y * cell_size
+				var badge_size: float = 18.0
+				var badge_rect: Rect2 = Rect2(px + 4, py + 4, badge_size, badge_size)
+				canvas.draw_rect(badge_rect, Color(0.9, 0.2, 0.2, 0.95), true)
+				canvas.draw_rect(badge_rect, Color(1, 0.3, 0.3, 1), false)
+				canvas.draw_string(font, Vector2(px + 7, py + 4 + font.get_ascent(font_size)), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+				var label_text: String = "暂停研究"
+				var txt_size: Vector2 = font.get_string_size(label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+				canvas.draw_rect(Rect2(px + 4, py + 4 + badge_size + 2, txt_size.x + 8, txt_size.y + 4), Color(0.1, 0.1, 0.12, 0.9), true)
+				canvas.draw_string(font, Vector2(px + 8, py + 4 + badge_size + 2 + font.get_ascent(font_size) + 2), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 
 	# 房间边框（清理/建设模式下不显示）
 	if cleanup_mode != CLEANUP_SELECTING and cleanup_mode != CLEANUP_CONFIRMING and construction_mode != CONSTRUCTION_SELECTING_TARGET and construction_mode != CONSTRUCTION_CONFIRMING:

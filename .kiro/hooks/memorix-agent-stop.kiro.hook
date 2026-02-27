@@ -1,0 +1,9 @@
+---
+title: Memorix Session Memory
+description: Record session context when agent completes a turn
+event: agent_stop
+---
+
+Call memorix MCP tools to store important context from this conversation:
+1. Use memorix_store to record any decisions, bug fixes, gotchas, or configuration changes
+2. Include relevant file paths and concepts for searchability

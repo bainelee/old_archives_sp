@@ -1,10 +1,15 @@
-[gd_scene load_steps=7 format=3 uid="uid://b3xk7m2vq8nrp"]
+[gd_scene format=3 uid="uid://b3xk7m2vq8nrp"]
 
-[ext_resource type="Script" path="res://scripts/ui/ui_main.gd" id="1_ui_main"]
+[ext_resource type="Script" uid="uid://b5uajm0ty58x7" path="res://scripts/ui/ui_main.gd" id="1_ui_main"]
 [ext_resource type="PackedScene" uid="uid://dnym5k2x8qrwh" path="res://scenes/ui/time_panel.tscn" id="2_time_panel"]
 [ext_resource type="PackedScene" uid="uid://b71gsf1lhvmn8" path="res://scenes/ui/shelter_erosion_panel.tscn" id="3_shelter_erosion"]
-[ext_resource type="PackedScene" uid="uid://calamity_bar_001" path="res://scenes/ui/calamity_bar.tscn" id="4_calamity_bar"]
-[ext_resource type="PackedScene" uid="uid://researcher_hover_panel_01" path="res://scenes/ui/researcher_hover_panel.tscn" id="5_researcher_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/calamity_bar.tscn" id="4_calamity_bar"]
+[ext_resource type="PackedScene" path="res://scenes/ui/researcher_hover_panel.tscn" id="5_researcher_panel"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
+bg_color = Color(0.12, 0.12, 0.18, 0.92)
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bottom_btn"]
 bg_color = Color(0.18, 0.15, 0.2, 0.9)
@@ -15,228 +20,216 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bottom_btn_hover"]
 bg_color = Color(0.18, 0.15, 0.2, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.5, 0.65, 0.9, 0.95)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
-bg_color = Color(0.12, 0.12, 0.18, 0.92)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="UIMain" type="CanvasLayer"]
+[node name="UIMain" type="CanvasLayer" unique_id=1949984106]
 layer = 10
 script = ExtResource("1_ui_main")
 
-[node name="TopBar" type="PanelContainer" parent="."]
-layout_mode = 3
+[node name="TopBar" type="PanelContainer" parent="." unique_id=275162635]
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 48.0
-offset_left = 0.0
-offset_right = 0.0
-offset_top = 0.0
+grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
 
-[node name="Content" type="MarginContainer" parent="TopBar"]
+[node name="Content" type="MarginContainer" parent="TopBar" unique_id=1033782650]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 6
 
-[node name="HBox" type="HBoxContainer" parent="TopBar/Content"]
+[node name="HBox" type="HBoxContainer" parent="TopBar/Content" unique_id=723091000]
 layout_mode = 2
 theme_override_constants/separation = 32
 
-[node name="Factors" type="HBoxContainer" parent="TopBar/Content/HBox"]
+[node name="Factors" type="HBoxContainer" parent="TopBar/Content/HBox" unique_id=389324436]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Cognition" type="HBoxContainer" parent="TopBar/Content/HBox/Factors"]
+[node name="Cognition" type="HBoxContainer" parent="TopBar/Content/HBox/Factors" unique_id=756527860]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Cognition"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Cognition" unique_id=2110231674]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "认知因子"
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Cognition"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Cognition" unique_id=2142687568]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="Computation" type="HBoxContainer" parent="TopBar/Content/HBox/Factors"]
+[node name="Computation" type="HBoxContainer" parent="TopBar/Content/HBox/Factors" unique_id=2003437018]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Computation"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Computation" unique_id=1575393854]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "计算因子"
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Computation"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Computation" unique_id=1261180492]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="Will" type="HBoxContainer" parent="TopBar/Content/HBox/Factors"]
+[node name="Will" type="HBoxContainer" parent="TopBar/Content/HBox/Factors" unique_id=547477094]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Will"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Will" unique_id=1187124427]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "意志因子"
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Will"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Will" unique_id=2103199719]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="Permission" type="HBoxContainer" parent="TopBar/Content/HBox/Factors"]
+[node name="Permission" type="HBoxContainer" parent="TopBar/Content/HBox/Factors" unique_id=212381073]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Permission"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Factors/Permission" unique_id=1874155186]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "权限因子"
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Permission"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Factors/Permission" unique_id=716455947]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="VSep1" type="VSeparator" parent="TopBar/Content/HBox"]
-layout_mode = 2
+[node name="VSep1" type="VSeparator" parent="TopBar/Content/HBox" unique_id=2062547030]
 custom_minimum_size = Vector2(2, 0)
+layout_mode = 2
 
-[node name="Currency" type="HBoxContainer" parent="TopBar/Content/HBox"]
+[node name="Currency" type="HBoxContainer" parent="TopBar/Content/HBox" unique_id=546837546]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Info" type="HBoxContainer" parent="TopBar/Content/HBox/Currency"]
+[node name="Info" type="HBoxContainer" parent="TopBar/Content/HBox/Currency" unique_id=19592512]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Currency/Info"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Currency/Info" unique_id=147395422]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "信息"
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Currency/Info"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Currency/Info" unique_id=1633927112]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="Truth" type="HBoxContainer" parent="TopBar/Content/HBox/Currency"]
+[node name="Truth" type="HBoxContainer" parent="TopBar/Content/HBox/Currency" unique_id=1216287696]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Currency/Truth"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Currency/Truth" unique_id=1601590714]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "真相"
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Currency/Truth"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Currency/Truth" unique_id=2061691647]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="SpacerLeft" type="Control" parent="TopBar/Content/HBox"]
+[node name="SpacerLeft" type="Control" parent="TopBar/Content/HBox" unique_id=1765395828]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="TimePanel" parent="TopBar/Content/HBox" instance=ExtResource("2_time_panel")]
-layout_mode = 2
+[node name="TimePanel" parent="TopBar/Content/HBox" unique_id=927601295 instance=ExtResource("2_time_panel")]
 
-[node name="SpacerRight" type="Control" parent="TopBar/Content/HBox"]
+[node name="SpacerRight" type="Control" parent="TopBar/Content/HBox" unique_id=106976343]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="VSep2" type="VSeparator" parent="TopBar/Content/HBox"]
-layout_mode = 2
+[node name="VSep2" type="VSeparator" parent="TopBar/Content/HBox" unique_id=1381550642]
 custom_minimum_size = Vector2(2, 0)
+layout_mode = 2
 
-[node name="Personnel" type="HBoxContainer" parent="TopBar/Content/HBox"]
+[node name="Personnel" type="HBoxContainer" parent="TopBar/Content/HBox" unique_id=1871047160]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Researcher" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel"]
+[node name="Researcher" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel" unique_id=1822222101]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Researcher"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Researcher" unique_id=1328253095]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "研究员："
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Researcher"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Researcher" unique_id=1305669362]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0/0"
 
-[node name="Eroded" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel"]
+[node name="Eroded" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel" unique_id=375667824]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Eroded"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Eroded" unique_id=2037656035]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "被侵蚀"
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Eroded"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Eroded" unique_id=790474339]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="Investigator" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel"]
+[node name="Investigator" type="HBoxContainer" parent="TopBar/Content/HBox/Personnel" unique_id=1333229603]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Investigator"]
+[node name="Name" type="Label" parent="TopBar/Content/HBox/Personnel/Investigator" unique_id=1292956805]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 text = "调查员"
 
-[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Investigator"]
+[node name="Value" type="Label" parent="TopBar/Content/HBox/Personnel/Investigator" unique_id=1112209640]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="VSep3" type="VSeparator" parent="TopBar/Content/HBox"]
-layout_mode = 2
+[node name="VSep3" type="VSeparator" parent="TopBar/Content/HBox" unique_id=537730995]
 custom_minimum_size = Vector2(2, 0)
-
-[node name="ShelterErosionPanel" parent="TopBar/Content/HBox" instance=ExtResource("3_shelter_erosion")]
 layout_mode = 2
+
+[node name="ShelterErosionPanel" parent="TopBar/Content/HBox" unique_id=448861784 instance=ExtResource("3_shelter_erosion")]
 custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
 
-[node name="CalamityBar" parent="." instance=ExtResource("4_calamity_bar")]
+[node name="CalamityBar" parent="." unique_id=1203875538 instance=ExtResource("4_calamity_bar")]
 
-[node name="ResearcherHoverPanel" parent="." instance=ExtResource("5_researcher_panel")]
+[node name="ResearcherHoverPanel" parent="." unique_id=994421564 instance=ExtResource("5_researcher_panel")]
 
-[node name="BottomRightBar" type="HBoxContainer" parent="."]
-layout_mode = 3
+[node name="BottomRightBar" type="HBoxContainer" parent="." unique_id=2046743287]
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -247,37 +240,38 @@ offset_top = -85.0
 offset_right = -20.0
 offset_bottom = -20.0
 grow_horizontal = 0
+grow_vertical = 0
 theme_override_constants/separation = 8
 
-[node name="BtnCleanup" type="Button" parent="BottomRightBar"]
+[node name="BtnCleanup" type="Button" parent="BottomRightBar" unique_id=1060668944]
 custom_minimum_size = Vector2(130, 65)
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
 theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
 text = "清理"
 
-[node name="BtnBuild" type="Button" parent="BottomRightBar"]
+[node name="BtnBuild" type="Button" parent="BottomRightBar" unique_id=603276110]
 custom_minimum_size = Vector2(130, 65)
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
 theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
 text = "建设"
 
-[node name="BtnRenovate" type="Button" parent="BottomRightBar"]
+[node name="BtnRenovate" type="Button" parent="BottomRightBar" unique_id=1700922277]
 custom_minimum_size = Vector2(130, 65)
 layout_mode = 2
 size_flags_vertical = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
 theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
 theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
 text = "改造"

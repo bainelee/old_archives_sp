@@ -1,0 +1,110 @@
+---
+description: Figma 设计读取、下载、导入 Godot 的完整流程
+globs:
+  - "scenes/ui/test_figma_page.tscn"
+  - "scripts/ui/test_figma_page.gd"
+  - "docs/design/figma_process/**"
+  - ".cursor/commands/figma-sync-test-page.md"
+  - "assets/icons/**"
+  - "assets/ui/**"
+  - "assets/misc/**"
+alwaysApply: false
+---
+
+# Figma → Godot 导入流程
+
+执行 Figma 设计同步或从 Figma 导入 UI 时，必须完整遵循以下流程。
+
+## 原则（禁止）
+
+- **禁止**：截图作为设计依据、JSON 运行时加载、猜测或估算数值
+- **必须**：使用 Figma REST API 原始数据，直接编辑 .tscn
+
+## 流程一：读取 Figma 数据
+
+### 1.1 获取节点结构
+
+- **URL 解析**：从 `https://www.figma.com/design/:fileKey/:fileName?node-id=X-Y` 提取
+  - `fileKey`：如 `diDiJC5JoDCH6ljTZpbw9e`
+  - `nodeId`：`X-Y` 转为 `X:Y`（如 `6-2` → `6:2`）
+
+- **API 调用**：
+  - **Files/Nodes**：`GET https://api.figma.com/v1/files/:fileKey/nodes?ids=:nodeId`
+  - **Headers**：`X-Figma-Token: <FIGMA_API_KEY>`（需在 .cursor/mcp.json 中配置）
+
+### 1.2 解析文档结构
+
+从 `nodes.document` 提取：
+
+- **画布/Frame**：`absoluteBoundingBox` → x, y, width, height（画布原点偏移用于坐标换算）
+- **子节点**：递归遍历 `children`，按 `type` 区分：
+  - `RECTANGLE` + `fills[0].type=SOLID` → 背景/按钮色块
+  - `RECTANGLE` + `fills[0].type=IMAGE` → 图片资源，记 `imageRef`、node id、name
+  - `TEXT` → 文本、字体、字号、颜色
+  - `GROUP` → 容器，取其 `absoluteBoundingBox` 作为整体尺寸
+
+## 流程二：下载图片资源
+
+### 2.1 调用 Images API
+
+```
+GET https://api.figma.com/v1/images/:fileKey?ids=:nodeIds&format=png&scale=1
+```
+
+- `nodeIds`：逗号分隔，如 `4:4,13:8,14:15`（需 URL 编码 `%3A`）
+- **scale=1**：必须与 Figma 设计一致（1:1），避免导出 2x 导致 Godot 显示尺寸错误
+
+### 2.2 按命名分类存放
+
+| Figma 元素命名规则 | 存放路径 |
+|-------------------|----------|
+| `icon*`（icon_news、icon_firesalt 等） | `assets/icons/` |
+| `button_back` | `assets/ui/` |
+| 其余未分类 | `assets/misc/` |
+
+- 文件名：使用语义化名称，如 `icon_news.png`、`button_back.png`、`archives_test_1.png`
+- 下载：用 `Invoke-WebRequest -OutFile`（PowerShell）或 `curl` 将 API 返回的 URL 内容保存
+
+## 流程三：导入 Godot 场景
+
+### 3.1 坐标换算
+
+Frame 原点 `(frame_x, frame_y)` 来自 Frame 的 `absoluteBoundingBox`（常为负值，如 -215, -104）。
+
+```
+canvas_left = node_x - frame_x   // 即 node_x + |frame_x|
+canvas_top  = node_y - frame_y
+offset_left   = canvas_left
+offset_top    = canvas_top
+offset_right  = canvas_left + width
+offset_bottom = canvas_top + height
+```
+
+### 3.2 属性映射
+
+| Figma | Godot .tscn |
+|-------|-------------|
+| fills[0].color (0–1) | Color(r,g,b,a) |
+| absoluteBoundingBox | offset_left/top/right/bottom |
+| cornerRadius | StyleBoxFlat corner_radius_* = 0（直角）|
+| fontSize | theme_override_font_sizes/font_size |
+| characters | text |
+| IMAGE fill | Texture2D ext_resource → TextureButton/TextureRect/StyleBoxTexture |
+
+### 3.3 图片节点规范
+
+- **TextureButton**：`ignore_texture_size = true`，`stretch_mode = 5`（Keep Aspect Centered）
+- **TextureRect**：`expand_mode = 1`（EXPAND_IGNORE_SIZE），`stretch_mode = 5`
+- **Button 背景图**：`StyleBoxTexture`，texture 引用 `res://assets/ui/button_back.png`
+- **引用路径**：`res://assets/icons/xxx.png`、`res://assets/ui/xxx.png`、`res://assets/misc/xxx.png`
+
+### 3.4 直接编辑 .tscn
+
+- 不通过 JSON 或运行时加载
+- 布局、颜色、样式全部写入场景文件，引擎编辑器打开即可见
+
+## 参考文件
+
+- `docs/design/figma_process/01-test-figma-page-sync.md`：test_figma_page 同步规范
+- `docs/design/figma_process/02-figma-mcp-write-to-disk-config.md`：Figma Desktop MCP 配置
+- `.cursor/commands/figma-sync-test-page.md`：同步命令与步骤

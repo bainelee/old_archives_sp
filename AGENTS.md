@@ -7,6 +7,7 @@ Godot 4.6 项目：场景编辑器 + 2D 基地建设游戏。
 - **存档规则**：清空存档 = 仅 `user://saves/`，绝不动 `user://maps/`（见 `.cursor/rules/save-system.mdc`）
 - **规范**：`.cursor/rules/`（按 globs 加载，编辑相关文件时自动匹配）
   - Godot 通用：`godot-gdscript.mdc`（.gd）、`godot-scenes-performance.mdc`（.tscn/.gd）
+  - **Figma 导入**：从 Figma 读取→下载→导入 Godot 时，按 `.cursor/rules/figma-import.mdc` 执行
   - **数值同步**：用户说「调整数值」「我调整了数值」等时，按 `.cursor/subagents/game-values-sync.md` 全量同步 `datas/game_values.json`、`game_base.json`、`docs/design/*.md` 及脚本硬编码
 - **术语对照**：[docs/settings/00-project-keywords.md](docs/settings/00-project-keywords.md)
 - **详情**：[docs/design/00-project-overview.md](docs/design/00-project-overview.md)

@@ -1,0 +1,10 @@
+---
+title: Memorix File Change Tracker
+description: Track significant file changes for cross-session memory
+event: file_save
+filePattern: "**/*.{ts,js,tsx,jsx,py,rs,go,java,md}"
+---
+
+```bash
+memorix hook
+```

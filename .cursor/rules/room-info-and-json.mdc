@@ -20,6 +20,7 @@ alwaysApply: false
 
 - **路径**：`datas/room_info.json`，UTF-8
 - **结构**：`{ "source": "...", "rooms": [ {...}, ... ] }`
+- **desc/pre_clean_text 数组**：每项之间自动换行（`parse_text_field` 用 `\n` 拼接），无需写 `\n`；字符串内的 `\n` 仍有效
 - **房间 id**：`ROOM_001` 格式，三位数字
 - **输出**：`JSON.stringify(data, "  ", false)` 保持 pretty-print
 

@@ -1,0 +1,205 @@
+[gd_scene load_steps=13 format=3 uid="uid://test_figma_page_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/test_figma_page.gd" id="1_test_figma"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_back.png" id="2_btn_back"]
+[ext_resource type="Texture2D" path="res://assets/icons/icon_news.png" id="3_icon_news"]
+[ext_resource type="Texture2D" path="res://assets/icons/icon_paper.png" id="4_icon_paper"]
+[ext_resource type="Texture2D" path="res://assets/icons/icon_book.png" id="5_icon_book"]
+[ext_resource type="Texture2D" path="res://assets/icons/icon_email.png" id="6_icon_email"]
+[ext_resource type="Texture2D" path="res://assets/icons/icon_firesalt.png" id="7_icon_firesalt"]
+[ext_resource type="Texture2D" path="res://assets/misc/archives_test_1.png" id="8_archives_test_1"]
+[ext_resource type="Texture2D" path="res://assets/misc/archives_book_1.png" id="9_archives_book_1"]
+[ext_resource type="Texture2D" path="res://assets/misc/archives_book_0.png" id="10_archives_book_0"]
+[ext_resource type="Texture2D" path="res://assets/misc/important_letter.png" id="11_important_letter"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn1"]
+texture = ExtResource("2_btn_back")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.666, 0.666, 0.666, 1)
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_right = 0
+corner_radius_bottom_left = 0
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+
+[node name="TestFigmaPage" type="CanvasLayer"]
+layer = 15
+script = ExtResource("1_test_figma")
+
+[node name="Content" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="Content"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.85, 0.85, 0.85, 1)
+
+[node name="Center" type="CenterContainer" parent="Content"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DesignCanvas" type="Control" parent="Content/Center"]
+custom_minimum_size = Vector2(1920, 1080)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="ArchivesTest1" type="TextureRect" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 41.0
+offset_right = 137.0
+offset_bottom = 149.0
+expand_mode = 1
+texture = ExtResource("8_archives_test_1")
+stretch_mode = 5
+
+[node name="ArchivesBook1" type="TextureRect" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 137.0
+offset_top = 41.0
+offset_right = 225.0
+offset_bottom = 149.0
+expand_mode = 1
+texture = ExtResource("9_archives_book_1")
+stretch_mode = 5
+
+[node name="ArchivesBook0" type="TextureRect" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 225.0
+offset_top = 41.0
+offset_right = 313.0
+offset_bottom = 149.0
+expand_mode = 1
+texture = ExtResource("10_archives_book_0")
+stretch_mode = 5
+
+[node name="ImportantLetter" type="TextureRect" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 313.0
+offset_top = 41.0
+offset_right = 401.0
+offset_bottom = 149.0
+expand_mode = 1
+texture = ExtResource("11_important_letter")
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 414.0
+offset_top = 287.0
+offset_right = 1506.0
+offset_bottom = 413.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 96
+text = "GAME NAME TEST"
+horizontal_alignment = 1
+
+[node name="Btn1" type="Button" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 771.0
+offset_top = 559.0
+offset_right = 1173.0
+offset_bottom = 666.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn1")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn1")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn1")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_btn1")
+text = "BUTTON-1"
+
+[node name="Btn2" type="Button" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 771.0
+offset_top = 698.0
+offset_right = 1173.0
+offset_bottom = 805.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn")
+text = "BUTTON-2"
+
+[node name="Btn3" type="Button" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 771.0
+offset_top = 837.0
+offset_right = 1173.0
+offset_bottom = 944.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_btn")
+text = "BUTTON-3"
+
+[node name="IconFiresalt" type="TextureButton" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 106.0
+offset_top = 836.0
+offset_right = 194.0
+offset_bottom = 944.0
+ignore_texture_size = true
+texture_normal = ExtResource("7_icon_firesalt")
+stretch_mode = 5
+
+[node name="IconBtnNews" type="TextureButton" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 1438.0
+offset_top = 963.0
+offset_right = 1518.0
+offset_bottom = 1043.0
+ignore_texture_size = true
+texture_normal = ExtResource("3_icon_news")
+stretch_mode = 5
+
+[node name="IconBtnPaper" type="TextureButton" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 1555.0
+offset_top = 963.0
+offset_right = 1635.0
+offset_bottom = 1043.0
+ignore_texture_size = true
+texture_normal = ExtResource("4_icon_paper")
+stretch_mode = 5
+
+[node name="IconBtnBook" type="TextureButton" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 1672.0
+offset_top = 963.0
+offset_right = 1752.0
+offset_bottom = 1043.0
+ignore_texture_size = true
+texture_normal = ExtResource("5_icon_book")
+stretch_mode = 5
+
+[node name="IconBtnEmail" type="TextureButton" parent="Content/Center/DesignCanvas"]
+layout_mode = 0
+offset_left = 1789.0
+offset_top = 963.0
+offset_right = 1869.0
+offset_bottom = 1043.0
+ignore_texture_size = true
+texture_normal = ExtResource("6_icon_email")
+stretch_mode = 5

@@ -7,6 +7,8 @@ alwaysApply: true
 
 You have access to Memorix memory tools. Follow these rules to maintain persistent context across sessions. **当 Memorix MCP 仍生效时，本规则适用；若工具不可用则跳过。**
 
+> **项目**：[AVIDS2/memorix](https://github.com/AVIDS2/memorix) | **配置**：必须用 `"command":"memorix","args":["serve"]`，禁止 npx（会导致超时与 capabilities 注册失败）
+
 ## 全局规则：会话开始时搜索项目上下文
 
 **用 memorix 搜索当前项目上下文** —— 在**每次对话开始**、回复用户之前：
