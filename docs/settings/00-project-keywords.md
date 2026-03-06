@@ -20,6 +20,19 @@
 |------|------|------|
 | 旧日档案馆 | old archives | 游戏全称 |
 | 地图编辑器 | map editor | 编辑地图（底板、房间等） |
+| 3D 场景编辑器 | 3D scene editor | 在 3D 空间中编辑元件、基于 3D 格子的编辑器 |
+| 3D 格子 | 3D grid cell | 基础单位，1 格 = 0.5m × 0.5m × 0.5m |
+| 正常方向 | normal direction | Z 朝外、X 朝右、Y 朝上；三面网格为底面、左墙侧面、后方墙面 |
+| 元件盒 | actor box | actor_box，定义 3D 元件占用体积的可复用组件 |
+| 3D 元件 | 3D actor | 可挂载 actor_box 的 3D 场景节点 |
+| 元件 ID | actor id | type_name1_name2_..._index，如 table_wood_desk_0 |
+| 元件表 | actor table | actor_id → 游戏内名称等，供运行时查询 |
+| 建造模式 | build mode | 游戏内建造/布置时，元件盒可见 |
+| 预设房间框架 | preset room frame | preset_room_frame，可复用的 3D 房间场景模板 |
+| 房间参考网格 | room reference grid | 基于房间体积的三面网格，每格 0.5m |
+| 房间外轮廓 | room out block | 黑色 Box 组成的房间边界轮廓 |
+| 房间外墙 | room wall land | room_wall_land，放置外墙模型的节点 |
+| 房间道具 | room items | room_items，放置 items/lights/doors 的容器 |
 
 ---
 

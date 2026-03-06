@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://cf0q2n0kkx3ar"]
+
+[ext_resource type="Script" uid="uid://cmmhv1ark6dwn" path="res://scripts/actors/actor_info.gd" id="1_acygo"]
+[ext_resource type="PackedScene" path="res://scenes/actors/actor_box.tscn" id="2_ssfmq"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_rajx2"]
+
+[node name="3d_actor" type="Node3D" unique_id=704696443]
+
+[node name="ActorInfo" type="Node" parent="." unique_id=1321255198]
+script = ExtResource("1_acygo")
+actor_id = "test_wood_desk_0"
+display_name = "测试类木制书桌"
+
+[node name="ActorBox" parent="." unique_id=89151655 instance=ExtResource("2_ssfmq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+volume = Vector3(6, 8, 4)
+
+[node name="ModelContainer" type="Node3D" parent="." unique_id=844796965]
+
+[node name="mesh_test_wood_desk_0" type="MeshInstance3D" parent="ModelContainer" unique_id=930287764]
+transform = Transform3D(2.4, 0, 0, 0, 2.2, 0, 0, 0, 1, 0, 1.1470342, 0)
+mesh = SubResource("BoxMesh_rajx2")

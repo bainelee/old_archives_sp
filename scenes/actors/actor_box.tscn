@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://actor_box_001"]
+
+[ext_resource type="Script" path="res://scripts/actors/actor_box.gd" id="1_actor_box"]
+
+[node name="ActorBox" type="Node3D"]
+script = ExtResource("1_actor_box")
+volume = Vector3(2, 2, 2)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]

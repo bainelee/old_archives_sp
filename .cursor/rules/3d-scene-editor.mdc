@@ -1,0 +1,44 @@
+---
+description: 3D 场景编辑器方向与组件规范
+globs:
+  - "scripts/actors/*.gd"
+  - "scripts/rooms/*.gd"
+  - "scenes/actors/*.tscn"
+  - "scenes/rooms/*.tscn"
+alwaysApply: false
+---
+
+# 3D 场景编辑器规范
+
+开发 actor_box、RoomReferenceGrid、preset_room_frame 等 3D 场景相关模块时须遵守。
+
+## 正常方向（须牢记）
+
+| 轴 | 方向 |
+|----|------|
+| **Z** | 朝屏幕外（负值 = 靠近相机 = 后方） |
+| **X** | 朝右 |
+| **Y** | 朝上 |
+
+## 3d_actor 场景规范
+
+- **root 节点 transform 必须为 (0,0,0)**：所有偏移在放置该 actor 的父场景（如 preset_room_frame）中设置
+- 新建 3d 元件时，复制 3d_actor 模板，root 保持 identity，在实例化场景中设置 position
+
+## 网格颜色
+
+- **ActorBox**：黑色
+- **RoomReferenceGrid**：灰白色
+
+## 三面网格
+
+actor_box、RoomReferenceGrid 显示的三面为：
+
+1. **底面**：XZ 平面
+2. **左墙侧面**：YZ 平面，**X 为负值**（x=-hx）
+3. **后方墙面**：XY 平面，**Z 为负值**（z=-hz）
+
+## 参考
+
+- `docs/design/1-editor/03-3d-scene-editor.md`
+- `docs/design/1-editor/04-preset-room-frame.md`

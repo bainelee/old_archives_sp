@@ -1,0 +1,10 @@
+{
+  "source": "3D 元件表，供游戏运行时通过 actor_id 查询元件名称等",
+  "actors": [
+    {
+      "id": "table_wood_desk_0",
+      "name_zh": "木制书桌",
+      "name_en": "Wooden Desk"
+    }
+  ]
+}

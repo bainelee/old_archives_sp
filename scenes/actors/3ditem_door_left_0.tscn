@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://pv10xtb1sg53"]
+
+[ext_resource type="Script" path="res://scripts/actors/actor_info.gd" id="1_actor_info"]
+[ext_resource type="PackedScene" uid="uid://actor_box_001" path="res://scenes/actors/actor_box.tscn" id="2_actor_box"]
+
+[node name="3ditem_door_left_0" type="Node3D"]
+
+[node name="ActorInfo" type="Node" parent="."]
+script = ExtResource("1_actor_info")
+actor_id = "3ditem_door_left_0"
+display_name = "左门"
+
+[node name="ActorBox" parent="." instance=ExtResource("2_actor_box")]
+volume = Vector3(1, 5, 3)
+
+[node name="ModelContainer" type="Node3D" parent="."]

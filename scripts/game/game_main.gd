@@ -12,6 +12,7 @@ const DEFAULT_SLOT := 0
 var _tiles: Array[Array] = []
 var _current_slot: int = 0
 var _rooms: Array = []
+
 var _base_image_cache: Dictionary = {}
 var _camera: Camera2D
 var _is_panning := false
