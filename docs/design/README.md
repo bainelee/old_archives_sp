@@ -20,6 +20,7 @@
 | | [02 - 房间信息与 room_info.json 同步](1-editor/02-room-info-and-json-sync.md) | RoomInfo 结构、JSON 格式、同步逻辑 |
 | | [03 - 3D 场景编辑器](1-editor/03-3d-scene-editor.md) | 3D 格子、元件盒 actor_box、3d_actor 模板 |
 | | [04 - 预设 3D 房间框架](1-editor/04-preset-room-frame.md) | preset_room_frame、房间参考网格、外轮廓、外墙、道具 |
+| | [05 - RoomItems 网格对齐](1-editor/05-room-items-grid-snap.md) | 编辑器插件：RoomItems 子节点移动时对齐 RoomReferenceGrid 网格 |
 | **2-gameplay/** | [01 - 游戏主场景](2-gameplay/01-game-main.md) | 主运行入口、slot_0 展示、编辑器隔离 |
 | | [02 - 时间流逝系统](2-gameplay/02-time-system.md) | GameTime Autoload、TimePanel UI、时间比例与倍速 |
 | | [03 - 存档系统](2-gameplay/03-save-system.md) | 存档架构、数据模型、保存/加载流程、与地图槽位关系 |

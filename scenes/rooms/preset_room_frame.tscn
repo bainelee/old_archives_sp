@@ -25,7 +25,6 @@ script = ExtResource("2_room_info")
 
 [node name="RoomReferenceGrid" type="Node3D" parent="." unique_id=1696730859]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
-visible = false
 script = ExtResource("3_ref_grid")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RoomReferenceGrid" unique_id=1414768887]
@@ -59,7 +58,6 @@ mesh = SubResource("BoxMesh_jxogr")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
 [node name="wall_and_land2" parent="RoomWallLand" unique_id=1427451507 instance=ExtResource("5_akewn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.158414)
 
 [node name="RoomItems" type="Node3D" parent="." unique_id=376391717]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
@@ -74,4 +72,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.75, 0, 1.25)
 
 [node name="3ditem_door_right_0" parent="RoomItems/doors" unique_id=551264739 instance=ExtResource("6_door_right")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.75, 0, 1.25)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1)

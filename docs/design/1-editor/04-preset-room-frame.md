@@ -145,5 +145,6 @@ preset_room_frame (Node3D, root)
 ## 相关文档
 
 - [03 - 3D 场景编辑器](03-3d-scene-editor.md)
+- [05 - RoomItems 网格对齐](05-room-items-grid-snap.md)
 - [02 - 房间信息与 room_info.json 同步](02-room-info-and-json-sync.md)
 - [01 - 地图编辑器](01-map-editor.md)

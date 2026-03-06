@@ -11,7 +11,7 @@ actor_id = "3ditem_door_right_0"
 display_name = "右门"
 
 [node name="ActorBox" parent="." unique_id=89418202 instance=ExtResource("2_actor_box")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
-volume = Vector3(1, 5, 3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+volume = Vector3(2, 4, 2)
 
 [node name="ModelContainer" type="Node3D" parent="." unique_id=719883695]
