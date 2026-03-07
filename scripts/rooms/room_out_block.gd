@@ -4,6 +4,11 @@ extends Node3D
 
 ## 房间外轮廓：根据 room_volume 生成四个黑色 Box。
 ## 从兄弟节点 RoomInfo3D 读取 room_volume。
+## 尺寸规范见 docs/design/1-editor/04-preset-room-frame.md
+
+const GRID_SIZE: float = 0.5
+const THICKNESS_OUT: float = 0.4  ## room_out_block 厚度（旧版 0.5，改为 0.4 以与格子对应）
+const THICKNESS_IN: float = 0.2   ## 墙/地板厚度之和（左右墙各 0.1 或 天花板+地板各 0.1）
 
 @onready var _down: MeshInstance3D = $room_out_block_down
 @onready var _up: MeshInstance3D = $room_out_block_up
@@ -37,13 +42,21 @@ func _update_blocks() -> void:
 	if xR <= 0 or yR <= 0 or zR <= 0:
 		return
 
-	var size_lr: Vector3 = Vector3(0.5, 0.5 * yR + 1.2, 0.5 * zR + 1.2)
-	var size_ud: Vector3 = Vector3(0.5 * xR + 1.2, 0.5, 0.5 * zR + 1.2)
+	var size_lr: Vector3 = Vector3(
+		THICKNESS_OUT,
+		GRID_SIZE * yR + THICKNESS_IN + THICKNESS_OUT * 2,
+		GRID_SIZE * zR + THICKNESS_IN / 2
+	)
+	var size_ud: Vector3 = Vector3(
+		GRID_SIZE * xR + THICKNESS_IN + THICKNESS_OUT * 2,
+		THICKNESS_OUT,
+		GRID_SIZE * zR + THICKNESS_IN / 2
+	)
 
-	var pos_down: Vector3 = Vector3(0.0, 0.25, 0.0)
-	var pos_up: Vector3 = Vector3(0.0, 0.5 * yR + 0.2 + 0.5 + 0.25, 0.0)
-	var h_lr: float = (0.5 * yR + 1.2) / 2.0
-	var x_offset: float = (xR * 0.5 + 0.2) / 2.0 + 0.25
+	var pos_down: Vector3 = Vector3(0.0, THICKNESS_OUT / 2, 0.0)
+	var pos_up: Vector3 = Vector3(0.0, GRID_SIZE * yR + THICKNESS_IN + THICKNESS_OUT + THICKNESS_OUT / 2, 0.0)
+	var h_lr: float = (GRID_SIZE * yR + THICKNESS_IN + THICKNESS_OUT * 2) / 2.0
+	var x_offset: float = (GRID_SIZE * xR + THICKNESS_IN + THICKNESS_OUT) / 2.0
 	var pos_left: Vector3 = Vector3(-x_offset, h_lr, 0.0)
 	var pos_right: Vector3 = Vector3(x_offset, h_lr, 0.0)
 

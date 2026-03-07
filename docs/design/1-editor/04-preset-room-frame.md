@@ -49,8 +49,8 @@ preset_room_frame (Node3D, root)
 | 组成 | 底面（XZ）、左墙侧面（YZ，X 负值）、后方墙面（XY，Z 负值） |
 | 网格尺寸 | 每格 0.5m |
 | 中心点 | 位于底面中心 |
-| 在 preset_room_frame 中的 position | **(0, 0.6, 0)** |
-| 分解 | 0.5 = 底部外轮廓厚度；0.1 = 房间地板厚度 |
+| 在 preset_room_frame 中的 position | **(0, 0.5, 0)** |
+| 分解 | 0.5 = thickness_out(0.4) + thickness_in/2(0.1)，即地板顶面高度 |
 
 ---
 
@@ -58,44 +58,48 @@ preset_room_frame (Node3D, root)
 
 根据房间体积生成的黑色外轮廓，由四个 3D Box 构成，Material 为**完全黑色**。
 
-> **+0.2 的由来**：wall_and_land 模型的地板厚度与天花板厚度均为 0.1m，故公式中常用 0.2（0.1+0.1）表示地板+天花板厚度之和。
+### 4.0 规范化常量
 
-### 4.1 Box 尺寸
+```
+grid_size = 0.5
+room_volume = (xR, yR, zR)
 
-| 方向 | Box 尺寸 (x, y, z) | 说明 |
-|------|-------------------|------|
-| 左、右 | (0.5, 0.5×yR+1.2, 0.5×zR+1.2) | 厚度 0.5，高度与纵深覆盖房间并留边 |
-| 上、下 | (0.5×xR+1.2, 0.5, 0.5×zR+1.2) | 厚度 0.5，长宽覆盖房间并留边 |
+// room_out_block_thickness
+// 旧版本为 0.5，加上墙壁厚度后难以与格子尺寸对应，改为 0.4
+thickness_out = 0.4
 
-其中 xR、yR、zR 为 RoomInfo 中的房间体积格子数。
+// room_wall_or_floor_thickness
+// 实际为 2 倍：左侧墙+右侧墙厚度之和（各 0.1），或天花板+地板厚度之和（各 0.1）
+thickness_in = 0.2
+```
 
-以 20×10×10 房间为例：
+### 4.1 Box 尺寸与 position
 
-| 方向 | Box 尺寸 | 说明 |
-|------|----------|------|
-| 左、右 | (0.5, 5+1.2, 5+1.2) | 即 (0.5, 6.2, 6.2) |
-| 上、下 | (10+1.2, 0.5, 5+1.2) | 即 (11.2, 0.5, 6.2) |
+| 节点 | scale | position |
+|------|-------|----------|
+| room_out_block_left | (thickness_out, grid_size×yR + thickness_in + thickness_out×2, grid_size×zR + thickness_in/2) | (-grid_size×xR/2 - thickness_in/2 - thickness_out/2, (grid_size×yR + thickness_in + thickness_out×2)/2, 0) |
+| room_out_block_right | (thickness_out, grid_size×yR + thickness_in + thickness_out×2, grid_size×zR + thickness_in/2) | (+(grid_size×xR + thickness_in + thickness_out)/2, (grid_size×yR + thickness_in + thickness_out×2)/2, 0) |
+| room_out_block_down | (grid_size×xR + thickness_in + thickness_out×2, thickness_out, grid_size×zR + thickness_in/2) | (0, thickness_out/2, 0) |
+| room_out_block_up | (grid_size×xR + thickness_in + thickness_out×2, thickness_out, grid_size×zR + thickness_in/2) | (0, grid_size×yR + thickness_in + thickness_out + thickness_out/2, 0) |
 
-### 4.2 position
+- **down**：底面贴地，中心 y = thickness_out/2
+- **up**：位于房间顶部之上，中心 y = 房间顶 + thickness_in + thickness_out/2
 
-| 节点 | position |
-|------|----------|
-| room_out_block_down | (0, 0.25, 0) |
-| room_out_block_up | (0, 0.5×yR+0.2+0.5+0.25, 0) |
-| room_out_block_left | (-(xR×0.5+0.2)/2 - 0.25, (0.5×yR+1.2)/2, 0) |
-| room_out_block_right | (+(xR×0.5+0.2)/2 + 0.25, (0.5×yR+1.2)/2, 0) |
+### 4.2 验证：20×10×10 房间 (xR=20, yR=10, zR=10)
 
-- **down**：厚度 0.5 的 Box，中心 y=0.25，底面贴地
-- **up**：0.2 = wall_and_land 模型的地板+天花板厚度，0.5 = room_out_block_down 的厚度，0.25 = room_out_block_up 的中心偏移
+| 节点 | scale | position |
+|------|-------|----------|
+| room_out_block_left | (0.4, 6, 5.1) | (-5.3, 3, 0) |
+| room_out_block_right | (0.4, 6, 5.1) | (5.3, 3, 0) |
+| room_out_block_down | (11, 0.4, 5.1) | (0, 0.2, 0) |
+| room_out_block_up | (11, 0.4, 5.1) | (0, 5.8, 0) |
 
-以 20×10×10 房间为例：
-
-| 节点 | position |
-|------|----------|
-| room_out_block_down | (0, 0.25, 0) |
-| room_out_block_up | (0, 5.95, 0) |
-| room_out_block_left | (-5.35, 3.1, 0) |
-| room_out_block_right | (5.35, 3.1, 0) |
+**验算**：
+- left scale: (0.4, 0.5×10+0.2+0.8, 0.5×10+0.1) = (0.4, 6, 5.1) ✓
+- left position x: -5 - 0.1 - 0.2 = -5.3 ✓；y: (5+0.2+0.8)/2 = 3 ✓
+- right position x: (10+0.2+0.4)/2 = 5.3 ✓
+- down scale: (10+0.2+0.8, 0.4, 5.1) = (11, 0.4, 5.1) ✓；position y: 0.4/2 = 0.2 ✓
+- up position y: 5+0.2+0.4+0.2 = 5.8 ✓
 
 ---
 
@@ -107,7 +111,8 @@ preset_room_frame (Node3D, root)
 |------|-----|
 | 类型 | Node3D |
 | 默认子节点 | wall_and_land_0 |
-| position | (0, 0.5, 0) |
+| position | (0, 0.4, 0) |
+| 说明 | 0.4 = thickness_out，外墙模型底面与 room_out_block_down 顶面齐平 |
 
 ---
 
@@ -117,7 +122,8 @@ preset_room_frame (Node3D, root)
 
 | 属性 | 值 |
 |------|-----|
-| position | (0, 0.6, 0) |
+| position | (0, 0.5, 0) |
+| 说明 | 0.5 = thickness_out + thickness_in/2，底面位于地板顶面 |
 | 子节点 | items、lights、doors |
 
 ### 6.1 默认门（doors）

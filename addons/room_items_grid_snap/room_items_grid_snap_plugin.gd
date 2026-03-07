@@ -4,8 +4,8 @@ extends EditorPlugin
 ## RoomItems 网格对齐插件：在 preset_room_frame 场景中，移动 RoomItems 子节点时自动对齐到 0.5m 网格。
 ## 详见 docs/design/1-editor/05-room-items-grid-snap.md
 
-const GRID_CELL_SIZE: float = 0.5
-const GRID_FLOOR_Y: float = 0.6
+const GRID_CELL_SIZE: float = 0.5  ## 与 preset_room_frame 中 grid_size 一致
+const GRID_FLOOR_Y: float = 0.5   ## RoomItems 底面 y，= thickness_out(0.4) + thickness_in/2(0.1)，见 04-preset-room-frame.md
 const SETTING_KEY: String = "old_archives/room_items_grid_snap_enabled"
 const STABLE_FRAMES_REQUIRED: int = 2
 ## 预览盒体颜色（便于统一调整，避免魔法数字）

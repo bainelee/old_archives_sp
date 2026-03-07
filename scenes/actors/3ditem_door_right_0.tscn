@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cmmhv1ark6dwn" path="res://scripts/actors/actor_info.gd" id="1_actor_info"]
 [ext_resource type="PackedScene" path="res://scenes/actors/actor_box.tscn" id="2_actor_box"]
+[ext_resource type="PackedScene" uid="uid://bbjyk73ev787k" path="res://assets/meshes/door_left_0.glb" id="3_myvyb"]
 
 [node name="3ditem_door_right_0" type="Node3D" unique_id=584722344]
 
@@ -11,7 +12,10 @@ actor_id = "3ditem_door_right_0"
 display_name = "右门"
 
 [node name="ActorBox" parent="." unique_id=89418202 instance=ExtResource("2_actor_box")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-volume = Vector3(2, 4, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+volume = Vector3(1, 5, 3)
 
 [node name="ModelContainer" type="Node3D" parent="." unique_id=719883695]
+
+[node name="door_left_02" parent="ModelContainer" unique_id=1720482565 instance=ExtResource("3_myvyb")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0.25, 0, 0)
