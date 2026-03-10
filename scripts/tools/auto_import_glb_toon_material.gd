@@ -67,10 +67,10 @@ func _process_node(node: Node, mat_dir: String, glb_basename: String, processed:
 				mat.specular_mode = StandardMaterial3D.SPECULAR_TOON
 				mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 				# 设置 Stencil Outline 参数
-				mat.stencil_mode = StandardMaterial3D.STENCIL_MODE_OUTLINE
-				mat.stencil_reference = 1
-				mat.stencil_color = Color(0, 0, 0, 1) # #000000 纯黑
-				mat.stencil_outline_thickness = 0.02
+				#mat.stencil_mode = StandardMaterial3D.STENCIL_MODE_OUTLINE
+				#mat.stencil_reference = 1
+				#mat.stencil_color = Color(0, 0, 0, 1) # #000000 纯黑
+				#mat.stencil_outline_thickness = 0.02
 				
 				var err = ResourceSaver.save(mat, save_path, ResourceSaver.FLAG_REPLACE_SUBRESOURCE_PATHS)
 				

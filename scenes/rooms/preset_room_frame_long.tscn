@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://d0nv4dewcwg1i"]
+
+[ext_resource type="Script" uid="uid://dd00mv2kw1w1j" path="res://scripts/rooms/room_info_3d.gd" id="1_tm57n"]
+[ext_resource type="Script" uid="uid://cr15441eg53lj" path="res://scripts/rooms/room_reference_grid.gd" id="2_u5f7w"]
+[ext_resource type="Script" uid="uid://dlfs5rd74eh0a" path="res://scripts/rooms/room_out_block.gd" id="3_c2ea6"]
+[ext_resource type="Material" uid="uid://bbt2c0nf0biog" path="res://assets/materials/base_materials/mat_base_black.tres" id="4_gquep"]
+[ext_resource type="PackedScene" uid="uid://dnlt4arndw2fx" path="res://assets/meshes/wall_and_land.glb" id="5_8akqp"]
+[ext_resource type="PackedScene" uid="uid://v805wvr8l136" path="res://scenes/actors/3ditem_door_left_0.tscn" id="6_auyt4"]
+[ext_resource type="PackedScene" uid="uid://bmmrxhrjlkml3" path="res://scenes/actors/3ditem_door_right_0.tscn" id="7_1disb"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d8i0g"]
+cull_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_color = Color(0.85, 0.85, 0.9, 0.95)
+
+[sub_resource type="ImmediateMesh" id="ImmediateMesh_tm57n"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_jxogr"]
+
+[node name="PresetRoomFrame" type="Node3D" unique_id=1590681676]
+
+[node name="RoomInfo" type="Node" parent="." unique_id=1044471062]
+script = ExtResource("1_tm57n")
+room_volume = Vector3(42, 10, 10)
+
+[node name="RoomReferenceGrid" type="Node3D" parent="." unique_id=1696730859]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+visible = false
+script = ExtResource("2_u5f7w")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomReferenceGrid" unique_id=1414768887]
+material_override = SubResource("StandardMaterial3D_d8i0g")
+mesh = SubResource("ImmediateMesh_tm57n")
+
+[node name="RoomOutBlock" type="Node3D" parent="." unique_id=521249584]
+script = ExtResource("3_c2ea6")
+
+[node name="room_out_block_down" type="MeshInstance3D" parent="RoomOutBlock" unique_id=116851226]
+transform = Transform3D(22, 0, 0, 0, 0.4, 0, 0, 0, 5.1, 0, 0.2, 0)
+material_override = ExtResource("4_gquep")
+mesh = SubResource("BoxMesh_jxogr")
+
+[node name="room_out_block_up" type="MeshInstance3D" parent="RoomOutBlock" unique_id=1924126235]
+transform = Transform3D(22, 0, 0, 0, 0.4, 0, 0, 0, 5.1, 0, 5.8, 0)
+material_override = ExtResource("4_gquep")
+mesh = SubResource("BoxMesh_jxogr")
+
+[node name="room_out_block_left" type="MeshInstance3D" parent="RoomOutBlock" unique_id=1917410204]
+transform = Transform3D(0.4, 0, 0, 0, 6, 0, 0, 0, 5.1, -10.8, 3, 0)
+material_override = ExtResource("4_gquep")
+mesh = SubResource("BoxMesh_jxogr")
+
+[node name="room_out_block_right" type="MeshInstance3D" parent="RoomOutBlock" unique_id=2083001999]
+transform = Transform3D(0.4, 0, 0, 0, 6, 0, 0, 0, 5.1, 10.8, 3, 0)
+material_override = ExtResource("4_gquep")
+mesh = SubResource("BoxMesh_jxogr")
+
+[node name="RoomWallLand" type="Node3D" parent="." unique_id=1734437051]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+
+[node name="wall_and_land2" parent="RoomWallLand" unique_id=1427451507 instance=ExtResource("5_8akqp")]
+visible = false
+
+[node name="RoomItems" type="Node3D" parent="." unique_id=376391717]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="items" type="Node3D" parent="RoomItems" unique_id=1990846437]
+
+[node name="lights" type="Node3D" parent="RoomItems" unique_id=1335187601]
+
+[node name="doors" type="Node3D" parent="RoomItems" unique_id=1423152990]
+
+[node name="3ditem_door_left_0" parent="RoomItems/doors" unique_id=1952781647 instance=ExtResource("6_auyt4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.25, 0, 1.25)
+
+[node name="3ditem_door_right_0" parent="RoomItems/doors" unique_id=551264739 instance=ExtResource("7_1disb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.25, 0, 1.25)

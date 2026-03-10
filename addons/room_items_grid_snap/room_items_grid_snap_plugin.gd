@@ -147,6 +147,34 @@ func _has_room_reference_grid(room_items: Node) -> bool:
 	return parent.get_node_or_null("RoomReferenceGrid") != null
 
 
+func _get_room_grid_origin(node: Node3D) -> Vector3:
+	## RoomReferenceGrid 的世界原点（底面中心）
+	var room_items: Node = _find_room_items_ancestor(node)
+	if room_items == null:
+		return Vector3(0.0, GRID_FLOOR_Y, 0.0)
+	var parent: Node = room_items.get_parent()
+	if parent == null:
+		return Vector3(0.0, GRID_FLOOR_Y, 0.0)
+	var grid: Node3D = parent.get_node_or_null("RoomReferenceGrid") as Node3D
+	if grid == null or not is_instance_valid(grid):
+		return Vector3(0.0, GRID_FLOOR_Y, 0.0)
+	return grid.global_position
+
+
+func _get_room_volume(node: Node3D) -> Vector3:
+	## 从 RoomInfo 获取房间体积，用于计算房间网格的 min 角
+	var room_items: Node = _find_room_items_ancestor(node)
+	if room_items == null:
+		return Vector3.ZERO
+	var parent: Node = room_items.get_parent()
+	if parent == null:
+		return Vector3.ZERO
+	var room_info: Node = parent.get_node_or_null("RoomInfo")
+	if room_info == null or not is_instance_valid(room_info) or room_info.get("room_volume") == null:
+		return Vector3.ZERO
+	return room_info.get("room_volume")
+
+
 func _update_snap_preview(selected: Array) -> void:
 	## 拖动时：原位置显示灰色盒体；将吸附时，目标位置显示绿色盒体。
 	var drag_node: Node3D = null
@@ -162,8 +190,8 @@ func _update_snap_preview(selected: Array) -> void:
 		drag_node = node
 		var start_pos: Vector3 = _drag_start_positions[nid]
 		var current_pos: Vector3 = node.global_position
-		var start_cell: Vector3i = _world_to_grid_cell(_get_reference_point(node, start_pos))
-		var current_cell: Vector3i = _world_to_grid_cell(_get_reference_point(node, current_pos))
+		var start_cell: Vector3i = _world_to_grid_cell(_get_reference_point(node, start_pos), node)
+		var current_cell: Vector3i = _world_to_grid_cell(_get_reference_point(node, current_pos), node)
 		would_snap = (start_cell != current_cell)
 		break
 	if drag_node == null:
@@ -207,10 +235,7 @@ func _set_preview_box_size(mi: MeshInstance3D, box_size: Vector3) -> void:
 
 
 func _get_preview_box_size(node: Node3D) -> Vector3:
-	var actor_box: ActorBox = node.get_node_or_null("ActorBox") as ActorBox
-	if actor_box == null or not is_instance_valid(actor_box):
-		return Vector3(GRID_CELL_SIZE, GRID_CELL_SIZE, GRID_CELL_SIZE)
-	var vol: Vector3 = actor_box.volume
+	var vol: Vector3 = _get_volume_for_node(node)
 	if vol.x <= 0 or vol.y <= 0 or vol.z <= 0:
 		return Vector3(GRID_CELL_SIZE, GRID_CELL_SIZE, GRID_CELL_SIZE)
 	return Vector3(
@@ -322,8 +347,8 @@ func _process_node(node: Node3D) -> void:
 		if nid in _drag_start_positions:
 			var start_pos: Vector3 = _drag_start_positions[nid]
 			# 按网格单位判断：参考点所在格是否变化（整数比较，无浮点误差）
-			var start_cell: Vector3i = _world_to_grid_cell(_get_reference_point(node, start_pos))
-			var current_cell: Vector3i = _world_to_grid_cell(_get_reference_point(node, current_pos))
+			var start_cell: Vector3i = _world_to_grid_cell(_get_reference_point(node, start_pos), node)
+			var current_cell: Vector3i = _world_to_grid_cell(_get_reference_point(node, current_pos), node)
 			if start_cell == current_cell:
 				should_revert = true
 				revert_target = start_pos
@@ -334,7 +359,8 @@ func _process_node(node: Node3D) -> void:
 		if should_revert:
 			_revert_to_position(node, revert_target)
 		else:
-			_apply_snap(node)
+			# 延后一帧执行吸附，避免与编辑器拖拽结束逻辑竞争
+			_apply_snap_deferred(node)
 
 
 func _revert_to_position(node: Node3D, target_pos: Vector3) -> void:
@@ -352,12 +378,17 @@ func _revert_to_position(node: Node3D, target_pos: Vector3) -> void:
 	undo_redo.commit_action()
 
 
+func _apply_snap_deferred(node: Node3D) -> void:
+	call_deferred("_apply_snap", node)
+
+
 func _apply_snap(node: Node3D) -> void:
 	if not is_instance_valid(node):
 		return
 	var current_pos: Vector3 = node.global_position
 	var snapped_pos: Vector3 = _snap_position_for_node(node, current_pos)
-	if current_pos.is_equal_approx(snapped_pos):
+	# 仅当吸附结果与当前位置差距超过 0.01 时才执行
+	if current_pos.distance_to(snapped_pos) < 0.01:
 		return
 	var undo_redo: EditorUndoRedoManager = get_undo_redo()
 	if undo_redo == null:
@@ -368,21 +399,34 @@ func _apply_snap(node: Node3D) -> void:
 	undo_redo.commit_action()
 
 
-func _world_to_grid_cell(world_pos: Vector3) -> Vector3i:
-	## 将世界坐标转换为网格格坐标（整数），用于按网格单位判断位移。
+func _world_to_grid_cell(world_pos: Vector3, node: Node3D) -> Vector3i:
+	## 将世界坐标转换为相对房间网格的格坐标，用于跨格判断。假设 RoomReferenceGrid 无旋转。
+	var grid_origin: Vector3 = _get_room_grid_origin(node)
+	var room_vol: Vector3 = _get_room_volume(node)
+	var room_hx: float = room_vol.x * GRID_CELL_SIZE * 0.5 if room_vol.x > 0 else 0.0
+	var room_hz: float = room_vol.z * GRID_CELL_SIZE * 0.5 if room_vol.z > 0 else 0.0
+	var room_min_x: float = grid_origin.x - room_hx
+	var room_min_z: float = grid_origin.z - room_hz
 	return Vector3i(
-		int(round(world_pos.x / GRID_CELL_SIZE)),
-		int(round((world_pos.y - GRID_FLOOR_Y) / GRID_CELL_SIZE)),
-		int(round(world_pos.z / GRID_CELL_SIZE))
+		int(round((world_pos.x - room_min_x) / GRID_CELL_SIZE)),
+		int(round((world_pos.y - grid_origin.y) / GRID_CELL_SIZE)),
+		int(round((world_pos.z - room_min_z) / GRID_CELL_SIZE))
 	)
 
 
-func _get_reference_point(node: Node3D, pivot_pos: Vector3) -> Vector3:
-	## 获取用于网格对齐的参考点（actor_box 的 min 角或 pivot 本身）。
+func _get_volume_for_node(node: Node3D) -> Vector3:
+	## 优先 ActorBox，其次 RoomInfo3D.room_volume，用于参考点与吸附。
 	var actor_box: ActorBox = node.get_node_or_null("ActorBox") as ActorBox
-	if actor_box == null or not is_instance_valid(actor_box):
-		return pivot_pos
-	var vol: Vector3 = actor_box.volume
+	if actor_box != null and is_instance_valid(actor_box):
+		return actor_box.volume
+	var room_info: Node = node.get_node_or_null("RoomInfo")
+	if room_info != null and is_instance_valid(room_info) and room_info.get("room_volume") != null:
+		return room_info.get("room_volume")
+	return Vector3.ZERO
+
+
+func _get_reference_point(node: Node3D, pivot_pos: Vector3) -> Vector3:
+	var vol: Vector3 = _get_volume_for_node(node)
 	if vol.x <= 0 or vol.y <= 0 or vol.z <= 0:
 		return pivot_pos
 	var hx: float = vol.x * GRID_CELL_SIZE * 0.5
@@ -391,32 +435,39 @@ func _get_reference_point(node: Node3D, pivot_pos: Vector3) -> Vector3:
 
 
 func _snap_position_for_node(node: Node3D, pivot_pos: Vector3) -> Vector3:
-	## 使 actor_box 的外边缘顶点吸附到网格线交点，而非 item 中心点。
-	## 若有 ActorBox，则根据 volume 计算偏移；否则退化为中心点吸附。
-	var actor_box: ActorBox = node.get_node_or_null("ActorBox") as ActorBox
-	if actor_box == null or not is_instance_valid(actor_box):
-		return _snap_center(pivot_pos)
-	var vol: Vector3 = actor_box.volume
+	## 将 item 的 min 角吸附到房间网格线，再反算 pivot。相对 RoomReferenceGrid 与 room_volume 计算。
+	var vol: Vector3 = _get_volume_for_node(node)
 	if vol.x <= 0 or vol.y <= 0 or vol.z <= 0:
-		return _snap_center(pivot_pos)
+		return _snap_center_relative(pivot_pos, node)
+	var grid_origin: Vector3 = _get_room_grid_origin(node)
+	var room_vol: Vector3 = _get_room_volume(node)
+	if room_vol.x <= 0 or room_vol.z <= 0:
+		# room_vol 无效时退化为相对 grid_origin 的 0.5 网格
+		return _snap_center_relative(pivot_pos, node)
+	var room_hx: float = room_vol.x * GRID_CELL_SIZE * 0.5
+	var room_hz: float = room_vol.z * GRID_CELL_SIZE * 0.5
+	var room_min_x: float = grid_origin.x - room_hx
+	var room_min_z: float = grid_origin.z - room_hz
 	var hx: float = vol.x * GRID_CELL_SIZE * 0.5
-	var hy: float = vol.y * GRID_CELL_SIZE * 0.5
 	var hz: float = vol.z * GRID_CELL_SIZE * 0.5
-	# actor_box 左下后角（min 角）在 pivot + (-hx, 0, -hz)，底面在 pivot.y
-	# 将该角吸附到网格，则 new_pivot = snapped_corner + (hx, 0, hz)
 	var min_corner: Vector3 = pivot_pos + Vector3(-hx, 0.0, -hz)
-	var snapped_corner: Vector3 = Vector3(
-		snappedf(min_corner.x, GRID_CELL_SIZE),
-		snappedf(min_corner.y - GRID_FLOOR_Y, GRID_CELL_SIZE) + GRID_FLOOR_Y,
-		snappedf(min_corner.z, GRID_CELL_SIZE)
-	)
-	return snapped_corner + Vector3(hx, 0.0, hz)
+	# 相对房间 min 角做格坐标吸附，支持房间 odd/even 任意组合
+	var cell_x: int = int(round((min_corner.x - room_min_x) / GRID_CELL_SIZE))
+	var cell_z: int = int(round((min_corner.z - room_min_z) / GRID_CELL_SIZE))
+	var snapped_min_x: float = room_min_x + cell_x * GRID_CELL_SIZE
+	var snapped_min_z: float = room_min_z + cell_z * GRID_CELL_SIZE
+	var vx: float = snapped_min_x + hx
+	var vz: float = snapped_min_z + hz
+	var vy: float = snappedf(pivot_pos.y - grid_origin.y, GRID_CELL_SIZE) + grid_origin.y
+	return Vector3(vx, vy, vz)
 
 
-func _snap_center(pos: Vector3) -> Vector3:
-	## 无 ActorBox 时退化为中心点吸附（如 items、lights、doors 容器节点）
-	return Vector3(
-		snappedf(pos.x, GRID_CELL_SIZE),
-		snappedf(pos.y - GRID_FLOOR_Y, GRID_CELL_SIZE) + GRID_FLOOR_Y,
-		snappedf(pos.z, GRID_CELL_SIZE)
+func _snap_center_relative(pos: Vector3, node: Node3D) -> Vector3:
+	## 无 volume 或 room_vol 无效时，相对 grid_origin 将 pivot 吸附到 0.5m 网格。
+	var grid_origin: Vector3 = _get_room_grid_origin(node)
+	var local: Vector3 = pos - grid_origin
+	return grid_origin + Vector3(
+		snappedf(local.x, GRID_CELL_SIZE),
+		snappedf(local.y, GRID_CELL_SIZE),
+		snappedf(local.z, GRID_CELL_SIZE)
 	)

@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://dflbwpclcqtag"]
+
+[ext_resource type="Material" uid="uid://lghiqutxljvk" path="res://assets/materials/base_materials/mat_base_dark.tres" id="1_m7yjj"]
+[ext_resource type="Material" uid="uid://bbt2c0nf0biog" path="res://assets/materials/base_materials/mat_base_black.tres" id="2_1ckpc"]
+[ext_resource type="Texture2D" uid="uid://d26ielqcpqjqs" path="res://assets/sprites/backgrounds/bg_test_0.png" id="3_1ckpc"]
+[ext_resource type="PackedScene" uid="uid://d0nv4dewcwg1i" path="res://scenes/rooms/preset_room_frame_long.tscn" id="3_gixrl"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_dh1cd"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gixrl"]
+albedo_texture = ExtResource("3_1ckpc")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_dh1cd"]
+
+[node name="ArchivesBase0" type="Node3D" unique_id=1020832352]
+
+[node name="world_land" type="Node3D" parent="." unique_id=1707917158]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="world_land" unique_id=936784289]
+transform = Transform3D(200, 0, 0, 0, 1, 0, 0, 0, 8, 0, -0.5, 0)
+material_override = ExtResource("1_m7yjj")
+mesh = SubResource("BoxMesh_dh1cd")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="world_land" unique_id=530565301]
+transform = Transform3D(200, 0, 0, 0, 100, 0, 0, 0, 8, 0, -51, 0)
+material_override = ExtResource("2_1ckpc")
+mesh = SubResource("BoxMesh_dh1cd")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="world_land" unique_id=765360464]
+transform = Transform3D(54.005432, 0, 0, 0, -2.3606524e-06, -54.005432, 0, 54.005432, -2.3606524e-06, -52.246128, -0.4385643, -19.407127)
+material_override = SubResource("StandardMaterial3D_gixrl")
+mesh = SubResource("PlaneMesh_dh1cd")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="world_land" unique_id=1488733431]
+transform = Transform3D(54.005432, 0, 0, 0, -2.3606524e-06, -54.005432, 0, 54.005432, -2.3606524e-06, 55.764736, -0.4385643, -19.407127)
+material_override = SubResource("StandardMaterial3D_gixrl")
+mesh = SubResource("PlaneMesh_dh1cd")
+
+[node name="archives_rooms" type="Node3D" parent="." unique_id=1887479598]
+
+[node name="PresetRoomFrame" parent="archives_rooms" unique_id=1590681676 instance=ExtResource("3_gixrl")]

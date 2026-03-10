@@ -57,11 +57,15 @@
 
 | 函数 | 实现要点 |
 |------|----------|
-| `_get_reference_point()` | 有 ActorBox：取 min 角 `pivot + (-hx, 0, -hz)`；无则用 pivot |
-| `_snap_position_for_node()` | 将参考点吸附到网格后，反算 pivot：`snapped_corner + (hx, 0, hz)` |
-| `_snap_center()` | 无 ActorBox 时退化为中心点吸附 |
+| `_get_volume_for_node()` | 优先 ActorBox.volume，其次 RoomInfo3D.room_volume，用于参考点与预览盒体尺寸 |
+| `_get_reference_point()` | 有 volume：取 min 角 `pivot + (-hx, 0, -hz)`；无则用 pivot |
+| `_snap_position_for_node()` | **min 角吸附**：相对房间网格（RoomReferenceGrid + room_volume）将 min 角吸附，反算 pivot |
+| `_get_room_grid_origin()` | RoomReferenceGrid 的世界原点 |
+| `_get_room_volume()` | RoomInfo.room_volume，用于 room_min 计算 |
+| `_snap_center_relative()` | 无 volume 或 room_vol 无效时，相对 grid_origin 将 pivot 吸附 |
 
-> BoxMesh 以中心为原点，预览盒体需 `position = pivot + (0, hy, 0)` 才能与 actor_box 视觉对齐。
+> - 房间 odd/even 时网格线位置不同，须相对 room_min 吸附。
+> - room_vol 无效（x/z≤0）时退化为相对 grid_origin 的 0.5 网格。
 
 ### 2.5 预览盒体
 
@@ -91,8 +95,8 @@
 
 ### 3.2 网格对齐规则
 
-- **有 ActorBox**：actor_box 的 min 角吸附到网格线交点
-- **无 ActorBox**：pivot 中心点吸附
+- **有 volume**：将 min 角（左下后）吸附到 0.5m 网格线，再反算 pivot；任意奇偶 (1,5,3)、(2,4,6) 等组合均使边缘落格
+- **无 volume**：pivot 吸附到网格
 - 仅修改 `global_position`，旋转、缩放保持不变
 
 ### 3.3 数据流示意
