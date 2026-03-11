@@ -4,7 +4,7 @@ import json
 import csv
 import os
 
-ROOM_INFO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "datas", "room_info.json")
+ROOM_INFO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "datas", "room_info_legacy.json")
 TRANSLATIONS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "translations", "translations.csv")
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "translations", "translations_new.csv")
 

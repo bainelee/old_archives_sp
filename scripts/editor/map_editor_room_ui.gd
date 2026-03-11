@@ -4,7 +4,7 @@ extends RefCounted
 ## 地图编辑器房间相关 UI 构建 - 房间编辑面板、导入模板弹窗、保存确认弹窗、房间列表
 ## 将 UI 构建逻辑与主类解耦，通过 editor 参数连接信号与注入控件引用
 
-const ROOM_INFO_JSON_PATH := "datas/room_info.json"
+const ROOM_INFO_JSON_PATH := "datas/room_info_legacy.json"
 
 
 static func build_room_edit_panel(editor: Node) -> PanelContainer:

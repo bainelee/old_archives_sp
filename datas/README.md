@@ -36,26 +36,36 @@
 
 `_fields_comment` 为字段中英对照，加载时需跳过（以 `_` 开头的键仅作说明用）。所有数值为整数。
 
-## room_info.json
+## room_info.json（新版本，v2）
 
-房间信息表，从地图槽位 1（基础档案馆分布）导出，UTF-8 编码。每个房间具有唯一编号 `id`（如 ROOM_001）。
+3D 档案馆房间信息表，UTF-8 编码。每个房间具有唯一 `id`。设计参考 `docs/design/4-archives_rooms/01-archive_rooms_info.md`。
 
 ```json
 {
-  "source": "数据来源说明",
+  "source": "新版本档案馆房间 (3D)",
+  "version": 2,
   "rooms": [
     {
-      "id": "ROOM_001",
-      "room_name": "房间名称",
-      "size": "5×3",
-      "room_type": "房间类型",
-      "room_type_id": 3,
+      "id": "room_00",
       "clean_status": 0,
-      "base_image_path": "res://assets/...",
-      "resources": [{"resource_type": 4, "resource_amount": 5000}],
-      "pre_clean_text": "默认清理前文本",
-      "desc": "房间背景描述"
+      "room_name": "档案馆核心",
+      "3d_size": "base|long|tall|small|small_tall",
+      "room_type": "核心",
+      "items_in_room": [{"item_id": "xxx", "item_position": [x, y, z]}],
+      "room_resources": [{"type": 2, "amount": 0}],
+      "pre_clean_text": "默认清理前描述",
+      "desc": ["描述行1", "描述行2"]
     }
   ]
 }
 ```
+
+- **clean_status**：0=未清理，1=已清理
+- **3d_size**：房间体积标识，见 `docs/design/4-archives_rooms/02-room-dimensions-and-specs.md`
+- **room_type**：房间类型，见 `docs/design/4-archives_rooms/03-room-types.md`
+- **items_in_room**：房间内道具，`item_position` 为格子坐标 [x, y, z]
+- **room_resources**：`type` 对应 RoomInfo.ResourceType 枚举，`amount` 为数量
+
+## room_info_legacy.json（旧版，2D 地图编辑器用）
+
+2D 地图编辑器模板库，从地图槽位导出。编辑器保存/导入模板、本地化同步脚本均引用此文件。每个房间 `id` 为 ROOM_XXX 格式。

@@ -12,7 +12,7 @@ const SAVE_KEY_ROOMS := "rooms"
 const SAVE_KEY_MAP_NAME := "map_name"
 const MAP_SLOTS := 5
 const MAPS_DIR := "user://maps/"
-const ROOM_INFO_JSON_PATH := "datas/room_info.json"
+const ROOM_INFO_JSON_PATH := "datas/room_info_legacy.json"
 
 
 static func get_slot_path(slot: int) -> String:

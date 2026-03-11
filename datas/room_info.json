@@ -1,480 +1,416 @@
 {
-  "source": "基础档案馆分布 (槽位1)",
+  "source": "新版本档案馆房间 (3D)",
+  "version": 2,
   "rooms": [
-	{
-	  "id": "ROOM_001",
-	  "room_name": "档案馆正厅",
-	  "size": "5×3",
-	  "room_type": "资料库",
-	  "room_type_id": 3,
-	  "clean_status": 1,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [
-		{
-		  "resource_type": 4,
-		  "resource_amount": 5000
-		}
-	  ],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"探寻者-维瑟建立这座档案馆，并以此中智慧破译智者罗曼所留下的道标，",
-		"为此他不惜驯服时间、迈入永恒。",
-		"「 只要你仍在档案馆内，便无需理会时间之残忍。",
-		"在永恒的时间中，并没有任何路径会被阻断。 」"
-	  ]
-	},
-	{
-	  "id": "ROOM_002",
-	  "room_name": "档案馆门卫室",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"在档案馆作为私有庄园的年代，这里只是一个管家的居所，",
-		"第八任管理员特伦德宣布档案馆对外开放，将此处改为门卫室查问外来者。",
-		"他决心让档案馆中的知识和信息能带给这个离析的世界一些改变。他做到了，但这也是他晚年悲剧的原因。",
-		"「之一？」"
-	  ]
-	},
-	{
-	  "id": "ROOM_003",
-	  "room_name": "档案馆核心",
-	  "size": "5×7",
-	  "room_type": "档案馆核心",
-	  "room_type_id": 4,
-	  "clean_status": 1,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x7.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"档案馆的心脏，能够通过消耗计算因子为档案馆带来文明的庇佑，",
-		"阻隔来自暴君—莱卡昂的神秘侵蚀。",
-		"秩序并非天生，它必须被极其昂贵地维持。"
-	  ]
-	},
-	{
-	  "id": "ROOM_004",
-	  "room_name": "制药研究室",
-	  "size": "5×3",
-	  "room_type": "实验室",
-	  "room_type_id": 5,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"小伊凡中尉曾经的实验室,边缘带有缺口的玻璃安瓿瓶中残留着近乎黑色的药液，散发出碘伏与旧铜币的混合气味。",
-		"他精通制药,技艺无视了血肉与现实的边界,也超出时代、科技和现实的限制。",
-		"据传他负责档案馆期间，曾于地下建立了一个隐匿的医院，用于救治战争带来的伤患。",
-        "比其在战场上夺去他人的生命，他更喜欢剥夺死神的权力。"
-	  ]
-	},
-	{
-	  "id": "ROOM_005",
-	  "room_name": "哲学文献室",
-	  "size": "5×3",
-	  "room_type": "图书室",
-	  "room_type_id": 0,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [
-		{
-		  "resource_type": 1,
-		  "resource_amount": 5000
-		}
-	  ],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"以哲学资料、文献为主的档案室，纸张在岁月中卷曲，如同那些曾在此处盘旋的沉重。",
-		"虽然沉寂多年，空气中仍然弥漫着厚重的烟草味。",
+    {
+      "id": "room_00",
+      "clean_status": 0,
+      "room_name": "档案馆核心",
+      "3d_size": "tall",
+      "room_type": "核心",
+      "items_in_room": [],
+      "room_resources": [{ "type": 2, "amount": 0 }],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "档案馆的心脏，能够通过消耗计算因子为档案馆带来文明的庇佑，",
+        "阻隔来自暴君—莱卡昂的神秘侵蚀。",
+        "秩序并非天生，它必须被极其昂贵地维持。"
+      ]
+    },
+    {
+      "id": "room_01",
+      "clean_status": 0,
+      "room_name": "档案馆正厅",
+      "3d_size": "long",
+      "room_type": "资料库",
+      "items_in_room": [],
+      "room_resources": [{ "type": 4, "amount": 0 }],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "探寻者-维瑟建立这座档案馆，并以此中智慧破译智者罗曼所留下的道标，",
+        "为此他不惜驯服时间、迈入永恒。",
+        "「 只要你仍在档案馆内，便无需理会时间之残忍。",
+        "在永恒的时间中，并没有任何路径会被阻断。 」"
+      ]
+    },
+    {
+      "id": "room_02",
+      "clean_status": 0,
+      "room_name": "档案馆门卫室",
+      "3d_size": "base",
+      "room_type": "资料库",
+      "items_in_room": [],
+      "room_resources": [{ "type": 4, "amount": 0 }],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "在档案馆作为私有庄园的年代，这里只是一个管家的居所，",
+        "第八任管理员特伦德宣布档案馆对外开放，将此处改为门卫室查问外来者。",
+        "他决心让档案馆中的知识和信息能带给这个离析的世界一些改变。他做到了，但这也是他晚年悲剧的原因。",
+        "「之一？」"
+      ]
+    },
+    {
+      "id": "room_03",
+      "clean_status": 0,
+      "room_name": "哲学文献室",
+      "3d_size": "base",
+      "room_type": "图书室",
+      "items_in_room": [],
+      "room_resources": [{ "type": 1, "amount": 0 }],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "以哲学资料、文献为主的档案室，纸张在岁月中卷曲，如同那些曾在此处盘旋的沉重。",
+        "虽然沉寂多年，空气中仍然弥漫着厚重的烟草味。",
         "曾有一位来自东洲的乡村教师负责这个档案室，他在此整理、编纂、研习晦涩的哲思。"
-	  ]
-	},
-	{
-	  "id": "ROOM_006",
-	  "room_name": "书记员房间",
-	  "size": "5×3",
-	  "room_type": "教学室",
-	  "room_type_id": 2,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [
-		{
-		  "resource_type": 3,
-		  "resource_amount": 5000
-		}
-	  ],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"这个房间曾经由白文先生的书记员-弗耶所使用，",
-		"他负责辅助整理、收纳和誊写关于档案馆进出典籍的资料。",
-		"也是在那段时间，他将极东抗争会的年轻人们的故事写成一部小说并出版。",
-		"「当你严阵以待时，死神是不会找上你的。」"
-
-	  ]
-	},
-	{
-	  "id": "ROOM_007",
-	  "room_name": "终端操作台",
-	  "size": "5×3",
-	  "room_type": "机房",
-	  "room_type_id": 1,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [
-		{
-		  "resource_type": 2,
-		  "resource_amount": 5000
-		}
-	  ],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"苍白巨像的操作台终端，",
-		"即便仅能使用一小部分苍白巨像的力量，其内部传来的低频嗡鸣也足以令让人免于恐惧。",
-		"边缘的黄铜旋钮已被汗水与岁月磨得发亮。巨像沉默，但绝非死去。"
-	  ]
-	},
-	{
-	  "id": "ROOM_008",
-	  "room_name": "刊物档案室",
-	  "size": "5×3",
-	  "room_type": "图书室",
-	  "room_type_id": 0,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [
-		{
-		  "resource_type": 1,
-		  "resource_amount": 5000
-		}
-	  ],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"阿德利亚依靠其信息学、传播学知识重建了刊物档案室，",
-		"整理收纳了世界各地的录音录像出版物。",
-		"静谧之中，仿佛能听见历史的白噪音。"
-
-	  ]
-	},
-	{
-	  "id": "ROOM_009",
-	  "room_name": "格温的临时事务所",
-	  "size": "10×3",
-	  "room_type": "事务所遗址",
-	  "room_type_id": 7,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_10x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"格温·别利琴科组建的调查员团队短暂以此为据点,桌上散落着未及收起的地图。",
-		"作为解决了科尔博柯事件的调查员，格温最终也加入到对抗莱卡昂的战争中。",
-		"「科尔博柯就要掉下去了。」"
-	  ]
-	},
-	{
-	  "id": "ROOM_010",
-	  "room_name": "案情陈列室",
-	  "size": "5×3",
-	  "room_type": "推理室",
-	  "room_type_id": 6,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"旧的案件档案堆放其中，巨型线索板上钉满褪色的档案与红线，",
-		"曾在此处寻觅答案的人将思绪层层剥解，直到只剩不可妥协的真相。",
-		"理智在此燃烧，留下光辉与灰烬。"
-	  ]
-	},
-	{
-	  "id": "ROOM_011",
-	  "room_name": "副楼房间F101",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_012",
-	  "room_name": "副楼房间F102",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_013",
-	  "room_name": "副楼房间F201",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_014",
-	  "room_name": "副楼房间F202",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_015",
-	  "room_name": "副楼房间F301",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_016",
-	  "room_name": "副楼房间F302",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_017",
-	  "room_name": "副楼房间F401",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_018",
-	  "room_name": "副楼房间F402",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": "原本空闲的房间，也曾多用于客房。"
-	},
-	{
-	  "id": "ROOM_019",
-	  "room_name": "副楼房间F501",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8.0,
-	  "clean_status": 0.0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_029",
-	  "room_name": "副楼房间F101",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	"desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_030",
-	  "room_name": "副楼房间F102",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_031",
-	  "room_name": "副楼房间F201",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_032",
-	  "room_name": "副楼房间F202",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_033",
-	  "room_name": "副楼房间F301",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_034",
-	  "room_name": "副楼房间F302",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_035",
-	  "room_name": "副楼房间F401",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_036",
-	  "room_name": "副楼房间F402",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	},
-	{
-	  "id": "ROOM_037",
-	  "room_name": "副楼房间F501",
-	  "size": "5×3",
-	  "room_type": "宿舍",
-	  "room_type_id": 8,
-	  "clean_status": 0,
-	  "base_image_path": "res://assets/sprites/roombacks/base_room_back_5x3.png",
-	  "resources": [],
-	  "pre_clean_text": "默认清理前文本",
-	  "desc": [
-		"蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
-		"空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
-		"曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
-	  ]
-	}
+      ]
+    },
+    {
+      "id": "room_04",
+      "clean_status": 0,
+      "room_name": "刊物档案室",
+      "3d_size": "base",
+      "room_type": "图书室",
+      "items_in_room": [],
+      "room_resources": [{ "type": 1, "amount": 0 }],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "阿德利亚依靠其信息学、传播学以及特殊学术的知识重建了刊物档案室；",
+        "她不仅仅整理旧版的报刊，还整理收纳了世界各地的录音录像出版物。",
+        "静谧之中，仿佛能听见历史的白噪音。"
+      ]
+    },
+    {
+      "id": "room_05",
+      "clean_status": 0,
+      "room_name": "终端操作台",
+      "3d_size": "base",
+      "room_type": "机房",
+      "items_in_room": [],
+      "room_resources": [{ "type": 2, "amount": 0 }],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "苍白巨像的操作台终端，",
+        "即便仅能使用一小部分苍白巨像的力量，其内部传来的低频嗡鸣也足以令让人免于恐惧。",
+        "边缘的黄铜旋钮已被汗水与岁月磨得发亮。",
+        "巨像沉默，但绝非死去。"
+      ]
+    },
+    {
+      "id": "room_06",
+      "clean_status": 0,
+      "room_name": "书记员办公室",
+      "3d_size": "base",
+      "room_type": "教学室",
+      "items_in_room": [],
+      "room_resources": [{ "type": 3, "amount": 0 }],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "这个房间曾经由白文先生的书记员-弗耶所使用，",
+        "他负责辅助白文先生整理、收纳和誊写关于档案馆进出典籍的资料，",
+        "进出此地的每一份禁忌，都被他用近乎强迫症般的笔迹锁入账册。",
+        "也是在那段时间，他将极东抗争会的年轻人们的故事写成一部小说并出版。",
+        "\"当你严阵以待时，死神是不会找上你的。\""
+      ]
+    },
+    {
+      "id": "room_07",
+      "clean_status": 0,
+      "room_name": "异常基理教习室",
+      "3d_size": "base",
+      "room_type": "教学室",
+      "items_in_room": [],
+      "room_resources": [{ "type": 3, "amount": 0 }],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "理论学者——巴塞洛缪曾在这里向初学者们讲授常识之外的法则。",
+        "他用粉笔和直尺在黑板上精准地解构了第二个月亮的碎裂，在维度与质量的转换算式极其精妙，但对于最复杂的秘源量却使用相当易懂且笨拙的算法。",
+        "他严厉斥责后排某个旁听的年轻教师身上散不去的劣质烟草味，工作记录中抱怨后勤处这个月又克扣了他用来润喉的甘草糖。",
+        "\"不要在教室吸烟，不要迟到。\""
+      ]
+    },
+    {
+      "id": "room_08",
+      "clean_status": 0,
+      "room_name": "制药研究室",
+      "3d_size": "base",
+      "room_type": "实验室",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "小伊凡中尉曾经的实验室,边缘带有缺口的玻璃安瓿瓶中残留着近乎黑色的药液，散发出碘伏与旧铜币的混合气味。",
+        "他精通制药,技艺无视了血肉与现实的边界,也超出时代、科技和现实的限制。",
+        "据传他负责档案馆期间，曾于地下建立了一个隐匿的医院，用于救治战争带来的伤患。",
+        "比其在战场上夺去他人的生命，他更喜欢剥夺死神的权力。"
+      ]
+    },
+    {
+      "id": "room_09",
+      "clean_status": 0,
+      "room_name": "格温的临时事务所",
+      "3d_size": "long",
+      "room_type": "事务所遗址",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "格温·别利琴科组建的调查员团队短暂以此为据点,桌上散落着未及收起的地图。",
+        "作为解决了科尔博柯事件的调查员，格温最终也加入到对抗莱卡昂的战争中。",
+        "「科尔博柯就要掉下去了。」"
+      ]
+    },
+    {
+      "id": "room_10",
+      "clean_status": 0,
+      "room_name": "案情陈列室",
+      "3d_size": "base",
+      "room_type": "推理室",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "旧的案件档案堆放其中，巨型线索板上钉满褪色的档案与红线，",
+        "曾在此处寻觅答案的人将思绪层层剥解，直到只剩不可妥协的真相。",
+        "\"理智在此燃烧，留下光辉与灰烬。\""
+      ]
+    },
+    {
+      "id": "room_11",
+      "clean_status": 0,
+      "room_name": "东侧内部廊道",
+      "3d_size": "long",
+      "room_type": "庭院",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "东侧内部廊道"
+    },
+    {
+      "id": "room_hall_00",
+      "clean_status": 0,
+      "room_name": "副楼房间F101",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_01",
+      "clean_status": 0,
+      "room_name": "副楼房间F102",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_02",
+      "clean_status": 0,
+      "room_name": "副楼房间F201",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_03",
+      "clean_status": 0,
+      "room_name": "副楼房间F202",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_04",
+      "clean_status": 0,
+      "room_name": "副楼房间F301",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_05",
+      "clean_status": 0,
+      "room_name": "副楼房间F302",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_06",
+      "clean_status": 0,
+      "room_name": "副楼房间F401",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_07",
+      "clean_status": 0,
+      "room_name": "副楼房间F402",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_08",
+      "clean_status": 0,
+      "room_name": "副楼房间F501",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_hall_09",
+      "clean_status": 0,
+      "room_name": "副楼房间F502",
+      "3d_size": "base",
+      "room_type": "宿舍",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": [
+        "蒙尘的栖所。一张铺着褪色亚麻布的旧床。",
+        "空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。",
+        "曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+      ]
+    },
+    {
+      "id": "room_pass_0",
+      "clean_status": 0,
+      "room_name": "F1东侧楼梯间",
+      "3d_size": "small",
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_1",
+      "clean_status": 0,
+      "room_name": "F1西侧楼梯间",
+      "3d_size": "small",
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_2",
+      "clean_status": 0,
+      "room_name": "F2西侧核心通道",
+      "3d_size": "small",
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_3",
+      "clean_status": 0,
+      "room_name": "F3西侧核心通道",
+      "3d_size": "small",
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_4",
+      "clean_status": 0,
+      "room_name": "机房东侧通道",
+      "3d_size": "small",
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_5",
+      "clean_status": 0,
+      "room_name": "档案馆东侧门",
+      "3d_size": "small",
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_6",
+      "clean_status": 0,
+      "room_name": "内侧回廊",
+      "3d_size": "base",
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    }
   ]
 }
