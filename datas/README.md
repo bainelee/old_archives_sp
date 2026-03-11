@@ -6,6 +6,7 @@
 
 游戏数值数据，供 `GameValues`（Autoload）运行时加载。设计来源为 `docs/design/0-values/01-game-values.md`；该设计文档不打包进游戏，故游戏逻辑应读取本 JSON 作为唯一数据源。
 
+- `factor_caps`：四种因子储藏上限（cognition/computation/willpower/permission），达上限后不再获得
 - `researcher_cognition`：研究员认知消耗（每小时每人）
 - `shelter`：档案馆核心庇护等级、范围档位、消耗倍率
 - `cleanup`：房间清理需求（按房间单位，支持 `units_min`/`units_max`）
@@ -29,7 +30,7 @@
 
 游戏基础数据，存放固定数值（如新游戏开局时的资源与人员）。供 SaveManager、GameMain 等读取，作为新游戏默认值或存档缺省补齐。数据键名与 [docs/settings/00-project-keywords.md](../docs/settings/00-project-keywords.md) 一致。
 
-- `initial_resources.factors`：四种因子（cognition 认知, computation 计算, willpower 意志, permission 权限）
+- `initial_resources.factors`：四种因子（cognition 认知, computation 计算, willpower 意志, permission 权限）；计算因子 60,000，认知 6,000，意志/权限 4,000
 - `initial_resources.currency`：货币（info 信息, truth 真相）
 - `initial_resources.personnel`：人员（researcher 研究员, labor 劳动力（暂未使用）, eroded 被侵蚀, investigator 调查员）
 - `initial_time.total_game_hours`：开局游戏内小时数（通常为 0）

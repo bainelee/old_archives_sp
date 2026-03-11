@@ -3,6 +3,42 @@
 [ext_resource type="Material" uid="uid://lghiqutxljvk" path="res://assets/materials/base_materials/mat_base_dark.tres" id="1_m7yjj"]
 [ext_resource type="Material" uid="uid://bbt2c0nf0biog" path="res://assets/materials/base_materials/mat_base_black.tres" id="2_1ckpc"]
 [ext_resource type="Texture2D" uid="uid://d26ielqcpqjqs" path="res://assets/sprites/backgrounds/bg_test_0.png" id="3_1ckpc"]
+[ext_resource type="PackedScene" uid="uid://bm13qvkg0ml" path="res://scenes/rooms/archives_rooms/room_00.tscn" id="4_1ckpc"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_0.tscn" id="4_7roug"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_01.tscn" id="5_gixrl"]
+[ext_resource type="PackedScene" uid="uid://dh51hn3hrmoad" path="res://scenes/rooms/archives_rooms/room_pass_1.tscn" id="5_m8pwu"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_2.tscn" id="6_8b7pf"]
+[ext_resource type="PackedScene" uid="uid://dfgmsv83pyldq" path="res://scenes/rooms/archives_rooms/room_02.tscn" id="6_dh1cd"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_3.tscn" id="7_uurwl"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_4.tscn" id="8_xfkpw"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_5.tscn" id="9_n4uct"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_6.tscn" id="10_y040e"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_03.tscn" id="14_kc0ry"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_04.tscn" id="15_ubybn"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_05.tscn" id="16_uh7pj"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_06.tscn" id="17_ys4d8"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_07.tscn" id="18_gno8f"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_08.tscn" id="19_h82yi"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_09.tscn" id="20_4i7iy"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_10.tscn" id="21_onfiw"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_11.tscn" id="22_0hcfs"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_00.tscn" id="23_ys4d8"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_01.tscn" id="24_gno8f"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_02.tscn" id="25_h82yi"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_03.tscn" id="26_4i7iy"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_04.tscn" id="27_onfiw"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_05.tscn" id="28_0hcfs"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_06.tscn" id="29_v855m"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_07.tscn" id="30_poaee"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_08.tscn" id="31_uf8hd"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_hall_09.tscn" id="32_nmfrl"]
+[ext_resource type="PackedScene" uid="uid://dc435ixixma2f" path="res://scenes/rooms/archives_rooms/room_12.tscn" id="33_room12"]
+[ext_resource type="PackedScene" uid="uid://colptb0ryjut2" path="res://scenes/rooms/archives_rooms/room_13.tscn" id="34_room13"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_7.tscn" id="35_pass7"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_8.tscn" id="36_pass8"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_9.tscn" id="37_pass9"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_10.tscn" id="38_pass10"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/archives_rooms/room_pass_11.tscn" id="39_pass11"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_dh1cd"]
 
@@ -16,12 +52,12 @@ albedo_texture = ExtResource("3_1ckpc")
 [node name="world_land" type="Node3D" parent="." unique_id=1707917158]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="world_land" unique_id=936784289]
-transform = Transform3D(200, 0, 0, 0, 1, 0, 0, 0, 8, 0, -0.5, 0)
+transform = Transform3D(300, 0, 0, 0, 1, 0, 0, 0, 8, 0, -0.5, 0)
 material_override = ExtResource("1_m7yjj")
 mesh = SubResource("BoxMesh_dh1cd")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="world_land" unique_id=530565301]
-transform = Transform3D(200, 0, 0, 0, 100, 0, 0, 0, 8, 0, -51, 0)
+transform = Transform3D(300, 0, 0, 0, 100, 0, 0, 0, 8, 0.41151428, -51, 0)
 material_override = ExtResource("2_1ckpc")
 mesh = SubResource("BoxMesh_dh1cd")
 
@@ -36,3 +72,116 @@ material_override = SubResource("StandardMaterial3D_gixrl")
 mesh = SubResource("PlaneMesh_dh1cd")
 
 [node name="archives_rooms" type="Node3D" parent="." unique_id=1887479598]
+
+[node name="archives_pass" type="Node3D" parent="archives_rooms" unique_id=1810279447]
+
+[node name="room_pass_0" parent="archives_rooms/archives_pass" unique_id=1590681676 instance=ExtResource("4_7roug")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.75, -5.9604645e-08, 0)
+
+[node name="room_pass_1" parent="archives_rooms/archives_pass" unique_id=943876900 instance=ExtResource("5_m8pwu")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.75, 8.940697e-08, 0)
+
+[node name="room_pass_2" parent="archives_rooms/archives_pass" unique_id=400388140 instance=ExtResource("6_8b7pf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.75, 6, 0)
+
+[node name="room_pass_3" parent="archives_rooms/archives_pass" unique_id=1653061498 instance=ExtResource("7_uurwl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.75, 12, 0)
+
+[node name="room_pass_4" parent="archives_rooms/archives_pass" unique_id=534144866 instance=ExtResource("8_xfkpw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.75, 18, 0)
+
+[node name="room_pass_5" parent="archives_rooms/archives_pass" unique_id=1442423397 instance=ExtResource("9_n4uct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52.25, 0, 0)
+
+[node name="room_pass_6" parent="archives_rooms/archives_pass" unique_id=1090895944 instance=ExtResource("10_y040e")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33, 1.1920929e-07, 0)
+
+[node name="room_pass_7" parent="archives_rooms/archives_pass" unique_id=1075515387 instance=ExtResource("35_pass7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.75, 0, 0)
+
+[node name="room_pass_8" parent="archives_rooms/archives_pass" unique_id=1085515388 instance=ExtResource("36_pass8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.75, 6, 5.722046e-06)
+
+[node name="room_pass_9" parent="archives_rooms/archives_pass" unique_id=1095515389 instance=ExtResource("37_pass9")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.75, 12, 5.722046e-06)
+
+[node name="room_pass_10" parent="archives_rooms/archives_pass" unique_id=1105515390 instance=ExtResource("38_pass10")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.75, 18.000002, 4.7683716e-07)
+
+[node name="room_pass_11" parent="archives_rooms/archives_pass" unique_id=1115515391 instance=ExtResource("39_pass11")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.75, 24, 0)
+
+[node name="base_rooms" type="Node3D" parent="archives_rooms" unique_id=1141079896]
+
+[node name="room_00" parent="archives_rooms/base_rooms" unique_id=507500614 instance=ExtResource("4_1ckpc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+
+[node name="room_01" parent="archives_rooms/base_rooms" unique_id=1779269868 instance=ExtResource("5_gixrl")]
+
+[node name="room_02" parent="archives_rooms/base_rooms" unique_id=1717488696 instance=ExtResource("6_dh1cd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 1.1920929e-07, 0)
+
+[node name="room_03" parent="archives_rooms/base_rooms" unique_id=877659993 instance=ExtResource("14_kc0ry")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 6, 4.7683716e-07)
+
+[node name="room_04" parent="archives_rooms/base_rooms" unique_id=465245344 instance=ExtResource("15_ubybn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0, 0)
+
+[node name="room_05" parent="archives_rooms/base_rooms" unique_id=1407814077 instance=ExtResource("16_uh7pj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, 0)
+
+[node name="room_06" parent="archives_rooms/base_rooms" unique_id=1889913221 instance=ExtResource("17_ys4d8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.999996, 18, -9.536743e-07)
+
+[node name="room_07" parent="archives_rooms/base_rooms" unique_id=884600392 instance=ExtResource("18_gno8f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 6, 4.7683716e-07)
+
+[node name="room_08" parent="archives_rooms/base_rooms" unique_id=1556423722 instance=ExtResource("19_h82yi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.00001, 12, 4.7683716e-07)
+
+[node name="room_09" parent="archives_rooms/base_rooms" unique_id=1283793751 instance=ExtResource("20_4i7iy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 6, 4.7683716e-07)
+
+[node name="room_10" parent="archives_rooms/base_rooms" unique_id=2006719647 instance=ExtResource("21_onfiw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 6, 4.7683716e-07)
+
+[node name="room_11" parent="archives_rooms/base_rooms" unique_id=2039441380 instance=ExtResource("22_0hcfs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66, 0, 0)
+
+[node name="room_12" parent="archives_rooms/base_rooms" unique_id=1205515386 instance=ExtResource("33_room12")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.25, 6, 6.866455e-05)
+
+[node name="room_13" parent="archives_rooms/base_rooms" unique_id=1305515387 instance=ExtResource("34_room13")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.25, 18, 0)
+
+[node name="hall" type="Node3D" parent="archives_rooms" unique_id=1248036944]
+
+[node name="room_hall_00" parent="archives_rooms/hall" unique_id=1256201707 instance=ExtResource("23_ys4d8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82.5, 0, 0)
+
+[node name="room_hall_01" parent="archives_rooms/hall" unique_id=829293941 instance=ExtResource("24_gno8f")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99, 4.7683716e-07, 0)
+
+[node name="room_hall_02" parent="archives_rooms/hall" unique_id=2127337070 instance=ExtResource("25_h82yi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82.5, 6, 0)
+
+[node name="room_hall_03" parent="archives_rooms/hall" unique_id=1174711846 instance=ExtResource("26_4i7iy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99, 6.0000005, 0)
+
+[node name="room_hall_04" parent="archives_rooms/hall" unique_id=1672774901 instance=ExtResource("27_onfiw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82.5, 12, 0)
+
+[node name="room_hall_05" parent="archives_rooms/hall" unique_id=1917396389 instance=ExtResource("28_0hcfs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99, 12.000001, 0)
+
+[node name="room_hall_06" parent="archives_rooms/hall" unique_id=1175899339 instance=ExtResource("29_v855m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82.5, 18, 0)
+
+[node name="room_hall_07" parent="archives_rooms/hall" unique_id=495268334 instance=ExtResource("30_poaee")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99, 18, 0)
+
+[node name="room_hall_08" parent="archives_rooms/hall" unique_id=1420309416 instance=ExtResource("31_uf8hd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 82.5, 24, 0)
+
+[node name="room_hall_09" parent="archives_rooms/hall" unique_id=1066849112 instance=ExtResource("32_nmfrl")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99, 24, 0)

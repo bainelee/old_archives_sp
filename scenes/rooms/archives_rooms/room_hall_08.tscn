@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dnlt4arndw2fx" path="res://assets/meshes/wall_and_land.glb" id="5_akewn"]
 [ext_resource type="PackedScene" uid="uid://v805wvr8l136" path="res://scenes/actors/3ditem_door_left_0.tscn" id="5_door_left"]
 [ext_resource type="PackedScene" uid="uid://bmmrxhrjlkml3" path="res://scenes/actors/3ditem_door_right_0.tscn" id="6_door_right"]
+[ext_resource type="Script" path="res://scripts/rooms/room_name_sign.gd" id="8_sign"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d8i0g"]
 cull_mode = 2
@@ -76,3 +77,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.75, 0, 1.25)
 
 [node name="3ditem_door_right_0" parent="RoomItems/doors" unique_id=551264739 instance=ExtResource("6_door_right")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.75, 0, 1.25)
+[node name="RoomNameSign" type="Node3D" parent="."]
+script = ExtResource("8_sign")
+
+[node name="Label3D" type="Label3D" parent="RoomNameSign"]
+text = ""

@@ -4,9 +4,9 @@
 [ext_resource type="Script" uid="uid://cr15441eg53lj" path="res://scripts/rooms/room_reference_grid.gd" id="2_r2jq0"]
 [ext_resource type="Script" uid="uid://dlfs5rd74eh0a" path="res://scripts/rooms/room_out_block.gd" id="3_37ttb"]
 [ext_resource type="Material" uid="uid://bbt2c0nf0biog" path="res://assets/materials/base_materials/mat_base_black.tres" id="4_lysvo"]
-[ext_resource type="PackedScene" uid="uid://dnlt4arndw2fx" path="res://assets/meshes/wall_and_land.glb" id="5_mjjhn"]
 [ext_resource type="PackedScene" uid="uid://v805wvr8l136" path="res://scenes/actors/3ditem_door_left_0.tscn" id="6_gw8ar"]
 [ext_resource type="PackedScene" uid="uid://bmmrxhrjlkml3" path="res://scenes/actors/3ditem_door_right_0.tscn" id="7_ixqap"]
+[ext_resource type="Script" path="res://scripts/rooms/room_name_sign.gd" id="8_sign"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d8i0g"]
 cull_mode = 2
@@ -60,9 +60,6 @@ mesh = SubResource("BoxMesh_jxogr")
 [node name="RoomWallLand" type="Node3D" parent="." unique_id=1734437051]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 
-[node name="wall_and_land2" parent="RoomWallLand" unique_id=1427451507 instance=ExtResource("5_mjjhn")]
-visible = false
-
 [node name="RoomItems" type="Node3D" parent="." unique_id=376391717]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 
@@ -77,3 +74,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 1.25)
 
 [node name="3ditem_door_right_0" parent="RoomItems/doors" unique_id=551264739 instance=ExtResource("7_ixqap")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 1.25)
+[node name="RoomNameSign" type="Node3D" parent="."]
+script = ExtResource("8_sign")
+
+[node name="Label3D" type="Label3D" parent="RoomNameSign"]
+text = ""

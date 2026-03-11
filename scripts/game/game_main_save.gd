@@ -4,6 +4,9 @@ extends RefCounted
 ## 游戏主场景存档收集与加载应用
 ## 纯 I/O 逻辑，与 UI 解耦
 
+const RoomLayoutHelper = preload("res://scripts/game/room_layout_helper.gd")
+const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
+
 const SAVE_KEY_TILES := "tiles"
 const SAVE_KEY_ROOMS := "rooms"
 const KEY_MAP := "map"
@@ -16,22 +19,22 @@ const KEY_EROSION := "erosion"
 const KEY_PERSONNEL_EROSION := "personnel_erosion"
 
 
+static func _get_shelter_level_from_game_main(game_main: Node2D) -> int:
+	var v: Variant = game_main.get("_shelter_level")
+	return int(v) if v != null else 1
+
+
 static func collect_game_state(game_main: Node2D) -> Dictionary:
 	## 收集当前游戏状态（供暂停菜单保存调用）
 	var grid_width: int = game_main.get("GRID_WIDTH")
 	var grid_height: int = game_main.get("GRID_HEIGHT")
 	var cell_size: int = game_main.get("CELL_SIZE")
-	var tiles: Array = game_main.get("_tiles")
 	var rooms: Array = game_main.get("_rooms")
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
 
 	var map_name: String = "存档"
+	## 不再保存 tiles（2D 网格），archives 模式仅使用 rooms
 	var tiles_data: Array = []
-	for x in grid_width:
-		var col: Array = []
-		for y in grid_height:
-			col.append(tiles[x][y])
-		tiles_data.append(col)
 	var rooms_data: Array = []
 	for i in rooms.size():
 		var room: RoomInfo = rooms[i]
@@ -75,11 +78,47 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 			"speed_multiplier": GameTime.speed_multiplier if GameTime else 1.0,
 		},
 		KEY_RESOURCES: resources,
-		KEY_EROSION: {},
+		KEY_EROSION: {"shelter_level": _get_shelter_level_from_game_main(game_main)},
 	}
 	if PersonnelErosionCore:
 		state[KEY_PERSONNEL_EROSION] = PersonnelErosionCore.to_save_dict()
 	return state
+
+
+## 新游戏时调用：若房间有 grid 且无 adjacent_ids（未从存档恢复），则计算邻接并应用开篇
+## 读档时跳过，避免覆盖已恢复的 unlocked
+static func ensure_layout_and_prologue(game_main: Node2D) -> void:
+	var rooms: Array = game_main.get("_rooms")
+	if rooms.is_empty():
+		return
+	var has_any_adjacent: bool = false
+	var has_any_grid: bool = false
+	for room in rooms:
+		if room.adjacent_ids.size() > 0:
+			has_any_adjacent = true
+		if room.grid_x != 0 or room.grid_y != 0 or room.size_3d != "":
+			has_any_grid = true
+	if has_any_adjacent:
+		return
+	if not has_any_grid:
+		return
+	RoomLayoutHelper.compute_adjacency(rooms, {})
+	var id_to_index: Dictionary = RoomLayoutHelper.build_id_to_index(rooms)
+	var base: Dictionary = _load_game_base()
+	var prologue: Array = base.get("prologue_room_ids", []) as Array
+	RoomLayoutHelper.apply_prologue(rooms, prologue, id_to_index)
+
+
+static func _load_game_base() -> Dictionary:
+	var path: String = "res://datas/game_base.json"
+	if not FileAccess.file_exists(path):
+		return {}
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return {}
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	file.close()
+	return parsed if parsed is Dictionary else {}
 
 
 static func apply_map(game_main: Node2D, d: Dictionary) -> void:
@@ -91,16 +130,18 @@ static func apply_map(game_main: Node2D, d: Dictionary) -> void:
 	if not (map_data is Dictionary):
 		return
 	var m: Dictionary = map_data as Dictionary
+	## 不再加载 tiles（2D 网格已废弃），保持 _tiles 为 EMPTY
 	var tiles_data: Array = m.get(SAVE_KEY_TILES, []) as Array
 	var tiles: Array = game_main.get("_tiles")
 	for x in grid_width:
 		for y in grid_height:
 			tiles[x][y] = FloorTileType.Type.EMPTY
-	for x in min(tiles_data.size(), grid_width):
-		var col: Variant = tiles_data[x]
-		if col is Array:
-			for y in min(col.size(), grid_height):
-				tiles[x][y] = int(col[y])
+	if not tiles_data.is_empty():
+		for x in min(tiles_data.size(), grid_width):
+			var col: Variant = tiles_data[x]
+			if col is Array:
+				for y in min(col.size(), grid_height):
+					tiles[x][y] = int(col[y])
 
 	var rooms: Array = game_main.get("_rooms")
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
@@ -123,6 +164,7 @@ static func apply_map(game_main: Node2D, d: Dictionary) -> void:
 						"total": tot,
 						"zone_type": int(rd.get("zone_building_zone_type", 0))
 					}
+	ensure_layout_and_prologue(game_main)
 	game_main.call("_sync_researchers_working_in_rooms_to_ui")
 
 
@@ -164,3 +206,13 @@ static func apply_resources(game_main: Node2D, d: Dictionary) -> void:
 		game_main.call("_register_cognition_provider", ui)
 		if not PersonnelErosionCore.personnel_updated.is_connected(Callable(game_main, "_on_personnel_updated")):
 			PersonnelErosionCore.personnel_updated.connect(Callable(game_main, "_on_personnel_updated"))
+
+	## 庇护核心等级
+	var erosion_data: Variant = d.get(KEY_EROSION, null)
+	var shelter_level: int = 1
+	if erosion_data is Dictionary:
+		shelter_level = int((erosion_data as Dictionary).get("shelter_level", 1))
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv and gv.has_method("get_shelter_level_min"):
+		shelter_level = clampi(shelter_level, gv.get_shelter_level_min(), gv.get_shelter_level_max())
+	game_main.set("_shelter_level", shelter_level)

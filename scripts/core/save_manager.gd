@@ -2,11 +2,10 @@ extends Node
 ## 存档管理器（Autoload: SaveManager）
 ## 负责游戏存档槽位的保存、加载、元数据获取
 ## 注意：游戏存档（user://saves/）与地图编辑器（user://maps/）完全分离。
-## 地图编辑器保存的是项目级地图资源；新游戏以 maps/slot_0 为起始场景。
+## 新游戏从 room_info.json 加载房间，不再使用地图编辑器 maps/slot_0。
 
 const SAVES_DIR := "user://saves/"
 const MAPS_DIR := "user://maps/"
-const START_MAP_SLOT := 0  ## 新游戏使用的起始地图槽位（地图编辑器编号第一张）
 const SLOT_COUNT := 5
 const SAVE_VERSION_CURRENT := 1
 
@@ -65,7 +64,7 @@ func get_slot_metadata(slot: int) -> Variant:
 		return null
 	var d: Dictionary = data as Dictionary
 	var map_name: String = _get_map_name_from_data(d)
-	if map_name.is_empty() and not d.has(KEY_MAP) and not d.has("tiles"):
+	if map_name.is_empty() and not d.has(KEY_MAP):
 		return null
 	return {
 		"map_name": map_name,
@@ -87,14 +86,14 @@ func validate_save(data: Dictionary) -> bool:
 func create_new_game_state(map_name: String = "") -> Dictionary:
 	if map_name.is_empty():
 		map_name = tr("DEFAULT_NEW_GAME")
-	## 创建新游戏状态：从地图编辑器 slot_0 读取起始地图 + game_base 默认值
-	## 地图编辑器保存的是项目级资源，新游戏以编号第一张地图为起始场景
-	var map_data: Dictionary = _load_start_map()
+	## 创建新游戏状态：从 room_info.json 加载带 grid 的房间 + game_base 默认值
+	## 不再使用地图编辑器 maps/slot_0
+	var map_data: Dictionary = _load_map_from_room_info()
 	var base: Dictionary = _load_game_base()
 	var resources: Dictionary
 	if base.is_empty():
 		resources = {
-			"factors": {"cognition": 500, "computation": 0, "willpower": 400, "permission": 400},
+			"factors": {"cognition": 6000, "computation": 60000, "willpower": 4000, "permission": 4000},
 			"currency": {"info": 500, "truth": 0},
 			"personnel": {"researcher": 10, "labor": 0, "eroded": 0, "investigator": 0},
 		}
@@ -119,44 +118,36 @@ func create_new_game_state(map_name: String = "") -> Dictionary:
 	}
 
 
-func _load_start_map() -> Dictionary:
-	## 从地图编辑器 slot_0 读取起始地图；不存在则返回空白网格
-	var path: String = MAPS_DIR + "slot_%d.json" % START_MAP_SLOT
-	if not FileAccess.file_exists(path):
+func _load_map_from_room_info() -> Dictionary:
+	## 从 room_info.json 加载带 grid 的房间，计算邻接并应用开篇
+	var rooms: Array = RoomInfoLoader.load_rooms_from_room_info(true)
+	if rooms.is_empty():
 		return _make_blank_map()
-	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
-	if not file:
-		return _make_blank_map()
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
-	file.close()
-	if not (parsed is Dictionary):
-		return _make_blank_map()
-	var d: Dictionary = (parsed as Dictionary).duplicate(true)
-	# 地图格式：根级 grid_width, grid_height, cell_size, tiles, rooms, map_name, next_room_id
-	# 封装为 map 结构以符合 GameState
-	if not d.has(KEY_MAP):
-		var map_obj: Dictionary = {}
-		for key in ["grid_width", "grid_height", "cell_size", "tiles", "rooms", "next_room_id", "map_name"]:
-			if d.has(key):
-				map_obj[key] = d[key]
-		if not map_obj.has("next_room_id"):
-			map_obj["next_room_id"] = 1
-		return map_obj
-	return d.get(KEY_MAP, {}) as Dictionary
-
-
-func _make_blank_map() -> Dictionary:
-	var tiles: Array = []
-	for x in GRID_WIDTH:
-		var col: Array = []
-		for y in GRID_HEIGHT:
-			col.append(FloorTileType.Type.EMPTY)
-		tiles.append(col)
+	RoomLayoutHelper.compute_adjacency(rooms, {})
+	var id_to_index: Dictionary = RoomLayoutHelper.build_id_to_index(rooms)
+	var base: Dictionary = _load_game_base()
+	var prologue: Array = base.get("prologue_room_ids", []) as Array
+	RoomLayoutHelper.apply_prologue(rooms, prologue, id_to_index)
+	var rooms_data: Array = []
+	for room in rooms:
+		rooms_data.append(room.to_dict())
 	return {
 		"grid_width": GRID_WIDTH,
 		"grid_height": GRID_HEIGHT,
 		"cell_size": CELL_SIZE,
-		"tiles": tiles,
+		"tiles": [],
+		"rooms": rooms_data,
+		"next_room_id": 1,
+		"map_name": tr("DEFAULT_NEW_GAME"),
+	}
+
+
+func _make_blank_map() -> Dictionary:
+	return {
+		"grid_width": GRID_WIDTH,
+		"grid_height": GRID_HEIGHT,
+		"cell_size": CELL_SIZE,
+		"tiles": [],
 		"rooms": [],
 		"next_room_id": 1,
 		"map_name": tr("DEFAULT_NEW_GAME"),
@@ -237,7 +228,7 @@ func _fill_defaults(d: Dictionary) -> void:
 	if base.is_empty():
 		if not d.has(KEY_RESOURCES):
 			d[KEY_RESOURCES] = {
-				"factors": {"cognition": 500, "computation": 0, "willpower": 400, "permission": 400},
+				"factors": {"cognition": 6000, "computation": 60000, "willpower": 4000, "permission": 4000},
 				"currency": {"info": 500, "truth": 0},
 				"personnel": {"researcher": 10, "labor": 0, "eroded": 0, "investigator": 0},
 			}

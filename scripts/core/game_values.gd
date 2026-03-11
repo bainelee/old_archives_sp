@@ -87,30 +87,56 @@ func _check_for_reload() -> void:
 		reload()
 
 
+## --- 因子储藏上限 ---
+## factor_key: cognition / computation / willpower / permission
+func get_factor_cap(factor_key: String) -> int:
+	var caps: Dictionary = _data.get("factor_caps", {})
+	return int(caps.get(factor_key, 999999))
+
+
 ## --- 研究员认知消耗 ---
 func get_researcher_cognition_per_hour() -> int:
 	return int(_data.get("researcher_cognition", {}).get("consumption_per_researcher_per_hour", 1))
 
 
-## --- 庇护等级 ---
+## --- 庇护能量 ---
+## 核心能耗等级 1～5，1 CF/h = 1 庇护能量
 func get_shelter_level_min() -> int:
 	return int(_data.get("shelter", {}).get("level_min", 1))
 
 
 func get_shelter_level_max() -> int:
-	return int(_data.get("shelter", {}).get("level_max", 4))
+	return int(_data.get("shelter", {}).get("level_max", 5))
 
 
-func get_shelter_base_consumption_per_level_per_hour() -> int:
-	return int(_data.get("shelter", {}).get("base_consumption_per_level_per_hour", 10))
+## 返回 energy_levels 数组：{"level", "cf_per_hour", "energy_cap"}
+func get_shelter_energy_levels() -> Array:
+	return _data.get("shelter", {}).get("energy_levels", [])
 
 
-func get_shelter_consumption_multiplier_per_tier() -> float:
-	return float(_data.get("shelter", {}).get("consumption_multiplier_per_open_tier", 1.0))
+## 根据核心等级返回 {cf_per_hour, cf_per_day?, energy_cap}
+## cf_per_day 若存在则限制每日 CF 消耗上限，有效 energy_cap = min(energy_cap, cf_per_day/24)
+func get_shelter_cf_and_cap_for_level(level: int) -> Dictionary:
+	var levels: Array = get_shelter_energy_levels()
+	for cfg in levels:
+		if cfg is Dictionary and int(cfg.get("level", 0)) == level:
+			var cf_per_hour: int = int(cfg.get("cf_per_hour", 30))
+			var energy_cap: int = int(cfg.get("energy_cap", 30))
+			var result: Dictionary = {"cf_per_hour": cf_per_hour, "energy_cap": energy_cap}
+			if cfg.has("cf_per_day"):
+				result["cf_per_day"] = int(cfg.get("cf_per_day", 0))
+			return result
+	return {"cf_per_hour": 30, "energy_cap": 30}
 
 
-func get_shelter_range_tiers() -> Array:
-	return _data.get("shelter", {}).get("range_tiers", [])
+## 每个房间由核心提供的庇护能量上限（与侵蚀无关）
+func get_shelter_energy_per_room_max() -> int:
+	return int(_data.get("shelter", {}).get("energy_per_room_max", 5))
+
+
+## 不参与庇护分配的房间类型（RoomInfo.RoomType 枚举值）
+func get_shelter_room_types_no_shelter() -> Array:
+	return _data.get("shelter", {}).get("room_types_no_shelter", [4, 9, 10])
 
 
 ## --- 房间清理 ---

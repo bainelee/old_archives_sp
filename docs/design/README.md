@@ -29,6 +29,7 @@
 | | [06 - 已建设房间系统](2-gameplay/06-built-room-system.md) | 已建设房间持续运作、研究区/造物区产出、存量耗尽、住房 |
 | | [07 - 研究员侵蚀机制](2-gameplay/07-researcher-erosion.md) | 侵蚀风险、被侵蚀状态、灾厄值、死亡、治愈 |
 | | [08 - 研究员系统](2-gameplay/08-researcher-system.md) | 研究员设定汇总、占用分类、已实现功能、待办事项 |
+| | [09 - Debug 因子/庇护/UI 技术问题总结](2-gameplay/09-debug-factor-shelter-ui-lessons.md) | 因子细则显示异常、庇护消耗、Node.get 解析问题等 debug 经验 |
 | **3-ui/** | [01 - 庇护/侵蚀 UI](3-ui/01-shelter-erosion-ui.md) | ShelterErosionPanel、ErosionCycleBar、侵蚀等级与周期 |
 | | [02 - 主 UI 设计概览](3-ui/02-ui-main-overview.md) | TopBar 布局、TimePanel、数据 API |
 | | [03 - TopBar UI 元素说明](3-ui/03-topbar-ui-elements.md) | 顶栏各项显示信息及游戏内作用 |

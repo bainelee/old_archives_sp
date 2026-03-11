@@ -31,8 +31,9 @@ const CALAMITY_PER_ERODED_PER_HOUR := 1
 ## 灾厄值上限
 const CALAMITY_MAX := 30000
 
-## 每人每天消耗认知
+## 每人每天消耗认知（与设计 §1 一致，按小时结算：1/人/小时 = 24/人/天）
 const COGNITION_PER_RESEARCHER_PER_DAY := 24
+const COGNITION_PER_RESEARCHER_PER_HOUR := 1
 ## 认知危机标记上限
 const COGNITION_CRISIS_MAX := 3
 ## 认知失能研究员每天增加的灾厄值
@@ -46,6 +47,9 @@ signal calamity_updated(new_value: float)
 var _cognition_getter: Callable = func() -> int: return 0
 var _cognition_setter: Callable = func(_amt: int) -> void: pass
 
+## 庇护解析器：(researcher) -> {shelter_level: int, has_no_housing: bool}；为空时用 ErosionCore.current_erosion
+var _shelter_resolver: Callable = Callable()
+
 ## 研究员记录
 var _researchers: Array[Dictionary] = []
 var _calamity_value: float = 0.0
@@ -53,6 +57,8 @@ var _investigator_count: int = 0
 var _last_game_day: int = -1
 var _last_game_hour_floor: int = -1
 var _next_researcher_id: int = 0
+## 当日已因认知不足添加过危机的研究员 id 集合，每日重置
+var _cognition_crisis_added_today: Dictionary = {}
 
 
 func _ready() -> void:
@@ -75,6 +81,7 @@ func initialize_from_personnel(personnel: Dictionary, _total_game_hours: float =
 		_researchers.append(_make_eroded_researcher(0))
 	_last_game_day = -1
 	_last_game_hour_floor = -1
+	_cognition_crisis_added_today.clear()
 	_calamity_value = 0.0
 	_investigator_count = int(personnel.get("investigator", 0))
 	personnel_updated.emit()
@@ -124,26 +131,31 @@ func get_calamity_max() -> int:
 	return CALAMITY_MAX
 
 
-## 获取当前庇护状态对应的侵蚀概率（0 表示无判定）
-func _get_erosion_probability() -> int:
-	if not ErosionCore:
-		return 0
-	var val: int = ErosionCore.current_erosion
-	if val <= -5:
+## 获取研究员的庇护信息 {shelter_level, has_no_housing}
+func _get_shelter_info(researcher: Dictionary) -> Dictionary:
+	if _shelter_resolver.is_valid():
+		var ret: Variant = _shelter_resolver.call(researcher)
+		if ret is Dictionary:
+			return ret
+	return {"shelter_level": _fallback_erosion(), "has_no_housing": false}
+
+
+func _fallback_erosion() -> int:
+	return int(ErosionCore.current_erosion) if ErosionCore else 0
+
+
+func _erosion_prob_for_level(level: int) -> int:
+	if level <= -5:
 		return EROSION_PROB_EXTREME
-	elif val >= -4 and val <= -2:
+	elif level >= -4 and level <= -2:
 		return EROSION_PROB_EXPOSED
-	elif val >= -1 and val <= 1:
+	elif level >= -1 and level <= 1:
 		return EROSION_PROB_WEAK
 	return 0
 
 
-## 获取宿舍庇护等级（当前简化：使用全局 current_erosion）
-## 妥善 2~4，完美 ≥5，否则不满足治愈条件
-func _get_dorm_shelter_level() -> int:
-	if not ErosionCore:
-		return -10
-	return ErosionCore.current_erosion
+func register_shelter_resolver(callable: Callable) -> void:
+	_shelter_resolver = callable
 
 
 ##  death probability at given eroded_days
@@ -160,7 +172,7 @@ func _on_time_updated() -> void:
 	var hours: float = GameTime.get_total_hours()
 	var day_floor: int = int(floor(hours / 24.0))
 	var hour_floor: int = int(floor(hours))
-	# 每小时：灾厄值
+	# 每小时：认知消耗（设计 §1：1/人/小时）、灾厄值
 	if hour_floor > _last_game_hour_floor and _last_game_hour_floor >= 0:
 		var hours_passed: int = hour_floor - _last_game_hour_floor
 		var eroded_count: int = 0
@@ -169,6 +181,8 @@ func _on_time_updated() -> void:
 				eroded_count += 1
 		_calamity_value = minf(_calamity_value + eroded_count * CALAMITY_PER_ERODED_PER_HOUR * hours_passed, float(CALAMITY_MAX))
 		calamity_updated.emit(_calamity_value)
+		# 认知消耗：按设计 §1 每小时每人 1，使各倍速下都能实时看到变化
+		_process_hourly_cognition(hours_passed)
 	_last_game_hour_floor = hour_floor
 	# 每天结束：侵蚀判定、死亡、治愈、7 日结算
 	if day_floor > _last_game_day and _last_game_day >= 0:
@@ -177,25 +191,39 @@ func _on_time_updated() -> void:
 			_run_daily_logic(_last_game_day + d + 1)
 		personnel_updated.emit()
 		calamity_updated.emit(_calamity_value)
+		_cognition_crisis_added_today.clear()  ## 新的一天开始，重置当日认知危机标记
 	_last_game_day = day_floor
 
 
-func _run_daily_logic(day: int) -> void:
-	# 0. 认知消耗（按 id 顺序，每人 24 认知；不足则 +1 认知危机，成功则 -1 认知危机）
-	var cognition_left: int = _cognition_getter.call() if _cognition_getter.is_valid() else 0
+func _process_hourly_cognition(hours_passed: int) -> void:
+	## 设计 §1：每小时每人 1 认知，按 id 顺序结算；不足则 +1 认知危机（每人每天最多 +1）
+	if not _cognition_getter.is_valid() or not _cognition_setter.is_valid():
+		return
+	var cognition_left: int = _cognition_getter.call()
 	var sorted_by_id: Array[Dictionary] = _researchers.duplicate()
 	sorted_by_id.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.get("id", 0) < b.get("id", 0))
-	for r in sorted_by_id:
-		if cognition_left >= COGNITION_PER_RESEARCHER_PER_DAY:
-			cognition_left -= COGNITION_PER_RESEARCHER_PER_DAY
+	for _h in hours_passed:
+		for r in sorted_by_id:
+			if cognition_left >= COGNITION_PER_RESEARCHER_PER_HOUR:
+				cognition_left -= COGNITION_PER_RESEARCHER_PER_HOUR
+			else:
+				var rid: int = int(r.get("id", -1))
+				if rid >= 0 and not _cognition_crisis_added_today.get(rid, false):
+					_cognition_crisis_added_today[rid] = true
+					var crisis: int = int(r.get("cognition_crisis", 0))
+					r["cognition_crisis"] = mini(crisis + 1, COGNITION_CRISIS_MAX)
+	if _cognition_setter.is_valid():
+		_cognition_setter.call(cognition_left)
+
+
+func _run_daily_logic(day: int) -> void:
+	# 0. 认知危机恢复：当日未因认知不足添加危机的研究员，危机 -1
+	for r in _researchers:
+		var rid: int = int(r.get("id", -1))
+		if rid >= 0 and not _cognition_crisis_added_today.get(rid, false):
 			var crisis: int = int(r.get("cognition_crisis", 0))
 			if crisis > 0:
 				r["cognition_crisis"] = crisis - 1
-		else:
-			var crisis: int = int(r.get("cognition_crisis", 0))
-			r["cognition_crisis"] = mini(crisis + 1, COGNITION_CRISIS_MAX)
-	if _cognition_setter.is_valid():
-		_cognition_setter.call(cognition_left)
 	# 0b. 认知失能研究员每天 +10 灾厄
 	var impaired_count: int = 0
 	for r in _researchers:
@@ -218,35 +246,42 @@ func _run_daily_logic(day: int) -> void:
 	if to_remove.size() > 0:
 		_remove_researcher(to_remove[0])
 	# 2. 治愈判定（每 3 天）
-	var dorm_level: int = _get_dorm_shelter_level()
-	if dorm_level >= 2:
+	for r in _researchers:
+		if not r.get("is_eroded", false):
+			continue
+		var info: Dictionary = _get_shelter_info(r)
+		if info.get("has_no_housing", false):
+			continue
+		var dorm_level: int = int(info.get("shelter_level", _fallback_erosion()))
+		if dorm_level < 2:
+			continue
 		var cure_prob: int = CURE_PROB_ADEQUATE if dorm_level < 5 else CURE_PROB_PERFECT
-		for r in _researchers:
-			if not r.get("is_eroded", false):
-				continue
-			var eroded_days: int = int(r.get("eroded_days", 0))
-			if eroded_days > 0 and eroded_days % CURE_INTERVAL_DAYS == 0:
-				if randi_range(1, 100) <= cure_prob:
-					r["is_eroded"] = false
-					r["eroded_days"] = 0
-					r["erosion_risk"] = 0
-					r["immunity_days"] = IMMUNITY_DAYS
+		var eroded_days: int = int(r.get("eroded_days", 0))
+		if eroded_days > 0 and eroded_days % CURE_INTERVAL_DAYS == 0:
+			if randi_range(1, 100) <= cure_prob:
+				r["is_eroded"] = false
+				r["eroded_days"] = 0
+				r["erosion_risk"] = 0
+				r["immunity_days"] = IMMUNITY_DAYS
 	# 3. 增加被侵蚀者的 eroded_days
 	for r in _researchers:
 		if r.get("is_eroded", false):
 			r["eroded_days"] = int(r.get("eroded_days", 0)) + 1
 		elif r.get("immunity_days", 0) > 0:
 			r["immunity_days"] = int(r.get("immunity_days", 0)) - 1
-	# 4. 侵蚀风险判定（对非侵蚀、非免疫的工作者）
-	var erosion_prob: int = _get_erosion_probability()
-	if erosion_prob > 0:
-		for r in _researchers:
-			if r.get("is_eroded", false):
-				continue
-			if r.get("immunity_days", 0) > 0:
-				continue
-			if randi_range(1, 100) <= erosion_prob:
-				r["erosion_risk"] = int(r.get("erosion_risk", 0)) + 1
+	# 4. 侵蚀风险判定（对非侵蚀、非免疫的工作者，按每人庇护等级）
+	for r in _researchers:
+		if r.get("is_eroded", false):
+			continue
+		if r.get("immunity_days", 0) > 0:
+			continue
+		var info: Dictionary = _get_shelter_info(r)
+		var shelter_level: int = int(info.get("shelter_level", _fallback_erosion()))
+		var erosion_prob: int = _erosion_prob_for_level(shelter_level)
+		if info.get("has_no_housing", false):
+			erosion_prob = mini(100, erosion_prob * 2)
+		if erosion_prob > 0 and randi_range(1, 100) <= erosion_prob:
+			r["erosion_risk"] = int(r.get("erosion_risk", 0)) + 1
 	# 5. 每 7 天结束时结算侵蚀风险（day 8/15/22... = 第 7/14/21 天刚结束）
 	if day >= 8 and (day % 7) == 1:
 		for r in _researchers:
@@ -317,6 +352,7 @@ func load_from_save_dict(d: Dictionary, personnel: Dictionary = {}) -> void:
 	_investigator_count = int(d.get("investigator", personnel.get("investigator", 0)))
 	_last_game_day = -1
 	_last_game_hour_floor = -1
+	_cognition_crisis_added_today.clear()
 	personnel_updated.emit()
 	calamity_updated.emit(_calamity_value)
 

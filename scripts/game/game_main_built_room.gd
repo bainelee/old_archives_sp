@@ -36,16 +36,17 @@ static func is_creation_zone_paused(room: RoomInfo, ui: Node) -> bool:
 	if room.room_type != RoomInfo.RoomType.SERVER_ROOM and room.room_type != RoomInfo.RoomType.REASONING:
 		return false
 	var need: int = get_creation_zone_24h_consumption(room)
-	var pw: Variant = ui.get("will_amount")
-	var have: int = int(pw) if pw != null else 0
+	var have: int = ui.get_willpower() if ui.has_method("get_willpower") else int(ui.get("will_amount") or 0)
 	return have < need
 
+
+const MAX_HOURS_PER_FRAME := 24  ## 单帧上限，与因子面板前实现一致，避免 delta 尖峰导致意志等因子瞬间耗尽
 
 static func process_production(game_main: Node2D, game_hours_delta: float) -> void:
 	var rooms: Array = game_main.get("_rooms")
 	var accumulator: float = game_main.get("_built_room_production_accumulator")
 	accumulator += game_hours_delta
-	var hours_to_process: int = int(accumulator)
+	var hours_to_process: int = mini(int(accumulator), MAX_HOURS_PER_FRAME)
 	if hours_to_process <= 0:
 		game_main.set("_built_room_production_accumulator", accumulator)
 		return
@@ -120,15 +121,22 @@ static func _reserve_subtract(room: RoomInfo, reserve_idx: int, amt: int) -> voi
 
 
 static func _add_factor_to_player(ui: Node, resource_type: int, amt: int, game_main: Node2D) -> void:
+	var gv: Node = _GameValuesRef.get_singleton()
+	var cap: int = 999999
 	match resource_type:
 		RoomInfo.ResourceType.COGNITION:
-			ui.cognition_amount = ui.cognition_amount + amt
+			cap = gv.get_factor_cap("cognition") if gv else 999999
+			ui.cognition_amount = mini(ui.cognition_amount + amt, cap)
 		RoomInfo.ResourceType.COMPUTATION:
-			ui.computation_amount = ui.computation_amount + amt
+			cap = gv.get_factor_cap("computation") if gv else 999999
+			var cf_now: int = ui.get_computation() if ui.has_method("get_computation") else int(ui.get("computation_amount") or 0)
+			ui.computation_amount = mini(cf_now + amt, cap)
 		RoomInfo.ResourceType.WILL:
-			ui.will_amount = ui.will_amount + amt
+			cap = gv.get_factor_cap("willpower") if gv else 999999
+			ui.will_amount = mini(ui.will_amount + amt, cap)
 		RoomInfo.ResourceType.PERMISSION:
-			ui.permission_amount = ui.permission_amount + amt
+			cap = gv.get_factor_cap("permission") if gv else 999999
+			ui.permission_amount = mini(ui.permission_amount + amt, cap)
 		_:
 			return
 	game_main.call("_sync_resources_to_topbar")
@@ -142,8 +150,7 @@ static func _produce_creation_zone_hour(room: RoomInfo, ui: Node, game_main: Nod
 	var will_per_unit: int = gv.get_creation_consume_per_unit_per_hour(room.room_type)
 	var will_needed: int = units * will_per_unit
 	## 已由 process_production 在入口处检查 24h 暂停，此处仅做本小时兜底
-	var pw: Variant = ui.get("will_amount")
-	var player_will: int = int(pw) if pw != null else 0
+	var player_will: int = ui.get_willpower() if ui.has_method("get_willpower") else int(ui.get("will_amount") or 0)
 	if player_will < will_needed:
 		return
 	var output_per_unit: int = gv.get_creation_produce_per_unit_per_hour(room.room_type)
@@ -151,7 +158,8 @@ static func _produce_creation_zone_hour(room: RoomInfo, ui: Node, game_main: Nod
 	ui.will_amount = maxi(0, player_will - will_needed)
 	match room.room_type:
 		RoomInfo.RoomType.SERVER_ROOM:
-			ui.permission_amount = ui.permission_amount + output_amt
+			var perm_cap: int = gv.get_factor_cap("permission") if gv else 999999
+			ui.permission_amount = mini(ui.permission_amount + output_amt, perm_cap)
 		RoomInfo.RoomType.REASONING:
 			ui.info_amount = ui.info_amount + output_amt
 		_:

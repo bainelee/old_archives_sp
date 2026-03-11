@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://b71gsf1lhvmn8" path="res://scenes/ui/shelter_erosion_panel.tscn" id="3_shelter_erosion"]
 [ext_resource type="PackedScene" path="res://scenes/ui/calamity_bar.tscn" id="4_calamity_bar"]
 [ext_resource type="PackedScene" path="res://scenes/ui/researcher_hover_panel.tscn" id="5_researcher_panel"]
+[ext_resource type="PackedScene" uid="uid://factor_hover_panel_01" path="res://scenes/ui/factor_hover_panel.tscn" id="6_factor_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
 bg_color = Color(0.12, 0.12, 0.18, 0.92)
@@ -225,9 +226,108 @@ layout_mode = 2
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 
+[node name="DebugInfoPanel" type="PanelContainer" parent="." unique_id=900002001]
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 20.0
+offset_top = 55.0
+offset_right = 280.0
+offset_bottom = 140.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+
+[node name="Margin" type="MarginContainer" parent="DebugInfoPanel" unique_id=900002002]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="VBox" type="VBoxContainer" parent="DebugInfoPanel/Margin" unique_id=900002003]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="DebugInfoPanel/Margin/VBox" unique_id=900002004]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 12
+text = "Debug"
+
+[node name="Content" type="Label" parent="DebugInfoPanel/Margin/VBox" unique_id=900002005]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+text = "悬停: -"
+
+[node name="CameraDistance" type="Label" parent="DebugInfoPanel/Margin/VBox" unique_id=900002009]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "镜头距离: --"
+
+[node name="ShowRayHit" type="CheckButton" parent="DebugInfoPanel/Margin/VBox" unique_id=900002006]
+layout_mode = 2
+text = "显示射线落点 (2秒)"
+
+[node name="HoverLockedRooms" type="CheckButton" parent="DebugInfoPanel/Margin/VBox" unique_id=900002007]
+layout_mode = 2
+text = "可以悬停未解锁房间"
+
+[node name="ShowRoomInfo" type="CheckButton" parent="DebugInfoPanel/Margin/VBox" unique_id=900002008]
+layout_mode = 2
+text = "显示房间信息"
+
+[node name="DebugPanSpeed" type="PanelContainer" parent="." unique_id=900001001]
+anchors_preset = 1
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -80.0
+offset_right = 220.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+
+[node name="Margin" type="MarginContainer" parent="DebugPanSpeed" unique_id=900001002]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="DebugPanSpeed/Margin" unique_id=900001003]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DebugPanSpeed/Margin/HBox" unique_id=900001004]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "LABEL_PAN_SPEED"
+
+[node name="PanSpeedSlider" type="HSlider" parent="DebugPanSpeed/Margin/HBox" unique_id=900001005]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+min_value = 0.02
+max_value = 0.1
+step = 0.01
+value = 0.02
+
+[node name="Value" type="Label" parent="DebugPanSpeed/Margin/HBox" unique_id=900001006]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "0.02"
+
 [node name="CalamityBar" parent="." unique_id=1203875538 instance=ExtResource("4_calamity_bar")]
 
 [node name="ResearcherHoverPanel" parent="." unique_id=994421564 instance=ExtResource("5_researcher_panel")]
+
+[node name="FactorHoverPanel" parent="." unique_id=994421565 instance=ExtResource("6_factor_panel")]
 
 [node name="BottomRightBar" type="HBoxContainer" parent="." unique_id=2046743287]
 anchors_preset = 3

@@ -3,10 +3,24 @@ extends RefCounted
 
 ## 镜头控制 - 初始化、聚焦房间、缓动
 ## 中键平移与滚轮缩放在 GameMainInputHelper 中处理
+## 3D 模式：以场景中 game_main_camera 的 FOV 与位置为基准，滚轮改变镜头距离 (Z)
 
 const FOCUS_DURATION := 0.5
 const FOCUS_CENTER_ZONE_SIZE := 150
 const FOCUS_CELL_SCREEN_SIZE := 50.0
+
+## 3D 镜头距离：基准 30（与 game_main_camera 初始 z 一致），滚轮缩放时在此范围限制
+const CAM3D_DISTANCE_MIN := 5.0
+const CAM3D_DISTANCE_MAX := 75.0
+const CAM3D_ZOOM_FACTOR := 1.1
+
+## 3D 平移范围随镜头距离线性插值：dist=5 时 X±140/Y±40，dist=75 时 X±75/Y±10
+static func _get_cam3d_pan_limits(dist: float) -> Vector2:
+	var d: float = clampf(dist, CAM3D_DISTANCE_MIN, CAM3D_DISTANCE_MAX)
+	var t: float = (d - CAM3D_DISTANCE_MIN) / (CAM3D_DISTANCE_MAX - CAM3D_DISTANCE_MIN)
+	var x_limit: float = lerpf(140.0, 75.0, t)
+	var y_limit: float = lerpf(40.0, 10.0, t)
+	return Vector2(x_limit, y_limit)
 
 
 static func setup_camera(game_main: Node2D) -> void:
@@ -50,18 +64,47 @@ static func focus_camera_on_room(game_main: Node2D, room_index: int) -> void:
 
 
 static func apply_pan(game_main: Node2D, current_mouse_pos: Vector2) -> void:
-	var camera: Camera2D = game_main.get("_camera")
 	var pan_start: Vector2 = game_main.get("_pan_start")
-	if not camera:
-		return
 	var delta: Vector2 = current_mouse_pos - pan_start
 	game_main.set("_pan_start", current_mouse_pos)
-	camera.position -= delta / camera.zoom
+	var camera3d: Camera3D = game_main.get("_camera3d")
+	if camera3d:
+		## 3D 平移：沿 XZ 平面移动镜头，速度由 _pan_speed 控制，范围随镜头距离换算
+		var raw_ps: Variant = game_main.get("_pan_speed")
+		var ps: float = maxf(0.01, float(raw_ps)) if raw_ps != null else 0.02
+		var pos: Vector3 = camera3d.global_position
+		pos += Vector3(-delta.x * ps, delta.y * ps, 0)
+		var limits: Vector2 = _get_cam3d_pan_limits(pos.z)
+		pos.x = clampf(pos.x, -limits.x, limits.x)
+		pos.y = clampf(pos.y, -limits.y, limits.y)
+		camera3d.global_position = pos
+		return
+	var camera: Camera2D = game_main.get("_camera")
+	if not camera:
+		return
+	var raw_ps2: Variant = game_main.get("_pan_speed")
+	var ps2: float = maxf(0.01, float(raw_ps2)) if raw_ps2 != null else 0.02
+	camera.position -= (delta / camera.zoom) * ps2
 	camera.position.x = roundf(camera.position.x)
 	camera.position.y = roundf(camera.position.y)
 
 
 static func apply_zoom(game_main: Node2D, zoom_in: bool) -> void:
+	var camera3d: Camera3D = game_main.get("_camera3d")
+	if camera3d:
+		var dist: float = game_main.get("_camera_distance")
+		if zoom_in:
+			dist /= CAM3D_ZOOM_FACTOR
+		else:
+			dist *= CAM3D_ZOOM_FACTOR
+		dist = clampf(dist, CAM3D_DISTANCE_MIN, CAM3D_DISTANCE_MAX)
+		game_main.set("_camera_distance", dist)
+		var pos: Vector3 = camera3d.global_position
+		var limits: Vector2 = _get_cam3d_pan_limits(dist)
+		pos.x = clampf(pos.x, -limits.x, limits.x)
+		pos.y = clampf(pos.y, -limits.y, limits.y)
+		camera3d.global_position = Vector3(pos.x, pos.y, dist)
+		return
 	var camera: Camera2D = game_main.get("_camera")
 	if not camera:
 		return

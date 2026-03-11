@@ -29,10 +29,19 @@ LABEL_COMPUTATION,Computation,计算因子
 LABEL_WILLPOWER,Willpower,意志因子
 LABEL_PERMISSION,Permission,权限因子
 LABEL_INFO,Info,信息
+HOVER_FACTOR_STOCK,"%s 库存 %s / %s","%s 库存 %s / %s"
+HOVER_FACTOR_DAYS,"总消耗：%s/天 可供使用 %s天","总消耗：%s/天 可供使用 %s天"
+HOVER_FACTOR_DAYS_NO_CONSUME,"可供使用 %s天","可供使用 %s天"
+HOVER_FACTOR_CONSUME_HEADER,消耗细则——,消耗细则——
+HOVER_FACTOR_PRODUCE_HEADER,产出——,产出——
+HOVER_FACTOR_NONE,无,无
+HOVER_FACTOR_PERSONNEL_ZONE,人员,人员
+HOVER_FACTOR_PERSONNEL_ROOM,研究员与调查员,研究员与调查员
 LABEL_TRUTH,Truth,真相
 LABEL_RESEARCHER,Researchers:,研究员：
 LABEL_ERODED,Eroded,被侵蚀
 LABEL_INVESTIGATOR,Investigators,调查员
+LABEL_PAN_SPEED,Pan Speed,拖动速度
 BTN_CLEANUP,Clean,清理
 BTN_CONSTRUCTION,Build,建设
 BTN_REMODEL,Remodel,改造
@@ -46,6 +55,9 @@ ROOM_TYPE_REASONING,Reasoning Room,推理室
 ROOM_TYPE_OFFICE_SITE,Office Site,事务所遗址
 ROOM_TYPE_DORMITORY,Dormitory,宿舍
 ROOM_TYPE_EMPTY_ROOM,Empty Room,空房间
+ROOM_TYPE_MAINTENANCE,Maintenance Room,检修室
+ROOM_TYPE_CORRIDOR,Corridor,通道
+ROOM_TYPE_COURTYARD,Courtyard,庭院
 RESOURCE_NONE,None,无
 RESOURCE_COGNITION,Cognition,认知因子
 RESOURCE_COMPUTATION,Computation,计算因子
@@ -64,6 +76,7 @@ ZONE_MEDICAL,Medical Area,医疗区
 ZONE_ENTERTAINMENT,Entertainment Area,娱乐区
 ZONE_RELIGION,Religion Area,宗教区
 ZONE_WONDER,Wonder,奇观区
+ZONE_CORE,Core Area,核心区
 CATEGORY_WORK,Work,工作类
 CATEGORY_LOGISTICS,Logistics,后勤类
 CATEGORY_MYSTERY,Mystery,秘迹类
@@ -433,3 +446,24 @@ The air mixes mildew and smoke, as if holding the warmth of days past.
 Many visitors with secrets once rested here, leaving their dreams and weariness in this unassuming guest room.","蒙尘的栖所。一张铺着褪色亚麻布的旧床。
 空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
 曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_12_NAME,Core Maintenance Room,核心检修室
+room_12_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_12_DESC,Default maintenance room text,默认检修室文案
+room_13_NAME,Server Tower Maintenance Room,机房检修塔
+room_13_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_13_DESC,Default maintenance room text,默认检修室文案
+room_pass_7_NAME,Annex Floor 1 Corridor,副楼1层走廊
+room_pass_7_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_7_DESC,Default corridor description,默认通道描述
+room_pass_8_NAME,Annex Floor 2 Corridor,副楼2层走廊
+room_pass_8_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_8_DESC,Default corridor description,默认通道描述
+room_pass_9_NAME,Annex Floor 3 Corridor,副楼3层走廊
+room_pass_9_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_9_DESC,Default corridor description,默认通道描述
+room_pass_10_NAME,Annex Floor 4 Corridor,副楼4层走廊
+room_pass_10_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_10_DESC,Default corridor description,默认通道描述
+room_pass_11_NAME,Annex Floor 5 Corridor,副楼5层走廊
+room_pass_11_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_11_DESC,Default corridor description,默认通道描述

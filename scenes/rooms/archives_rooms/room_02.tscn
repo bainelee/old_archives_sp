@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://room02archv1"]
+[gd_scene format=3 uid="uid://dfgmsv83pyldq"]
 
 [ext_resource type="Material" uid="uid://bbt2c0nf0biog" path="res://assets/materials/base_materials/mat_base_black.tres" id="1_mat"]
 [ext_resource type="Script" uid="uid://dd00mv2kw1w1j" path="res://scripts/rooms/room_info_3d.gd" id="2_room_info"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dnlt4arndw2fx" path="res://assets/meshes/wall_and_land.glb" id="5_akewn"]
 [ext_resource type="PackedScene" uid="uid://v805wvr8l136" path="res://scenes/actors/3ditem_door_left_0.tscn" id="5_door_left"]
 [ext_resource type="PackedScene" uid="uid://bmmrxhrjlkml3" path="res://scenes/actors/3ditem_door_right_0.tscn" id="6_door_right"]
+[ext_resource type="Script" uid="uid://c4xj4new4ta6f" path="res://scripts/rooms/room_name_sign.gd" id="8_sign"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d8i0g"]
 cull_mode = 2
@@ -14,7 +15,7 @@ shading_mode = 0
 vertex_color_use_as_albedo = true
 albedo_color = Color(0.85, 0.85, 0.9, 0.95)
 
-[sub_resource type="ImmediateMesh" id="ImmediateMesh_i66ju"]
+[sub_resource type="ImmediateMesh" id="ImmediateMesh_gjw75"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_jxogr"]
 
@@ -22,7 +23,6 @@ albedo_color = Color(0.85, 0.85, 0.9, 0.95)
 
 [node name="RoomInfo" type="Node" parent="." unique_id=1044471062]
 script = ExtResource("2_room_info")
-room_volume = Vector3(20, 10, 10)
 room_id = "room_02"
 room_name = "档案馆门卫室"
 
@@ -32,7 +32,7 @@ script = ExtResource("3_ref_grid")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RoomReferenceGrid" unique_id=1414768887]
 material_override = SubResource("StandardMaterial3D_d8i0g")
-mesh = SubResource("ImmediateMesh_i66ju")
+mesh = SubResource("ImmediateMesh_gjw75")
 
 [node name="RoomOutBlock" type="Node3D" parent="." unique_id=521249584]
 script = ExtResource("4_out_block")
@@ -76,3 +76,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.75, 0, 1.25)
 
 [node name="3ditem_door_right_0" parent="RoomItems/doors" unique_id=551264739 instance=ExtResource("6_door_right")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.75, 0, 1.25)
+
+[node name="RoomNameSign" type="Node3D" parent="." unique_id=739700223]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 1)
+script = ExtResource("8_sign")
+
+[node name="Label3D" type="Label3D" parent="RoomNameSign" unique_id=1450433100]
+modulate = Color(0.95, 0.9, 0.85, 1)
+text = "档案馆门卫室"
+font_size = 160
+outline_size = 0

@@ -15,6 +15,7 @@ const ICON_PAUSE := "⏸"
 
 var _indicator_rotation: float = 0.0
 var _hovering_play_pause: bool = false
+var _last_displayed_hour: int = -1  ## 上次显示的游戏整小时
 
 
 func _ready() -> void:
@@ -52,7 +53,13 @@ func _on_speed_changed(_speed: float) -> void:
 
 
 func _on_time_updated() -> void:
-	_update_time_label()
+	## 仅当游戏整小时变化时更新时间显示，避免每帧重复刷新
+	if not GameTime:
+		return
+	var hour_floor: int = int(floor(GameTime.get_total_hours()))
+	if _last_displayed_hour < 0 or hour_floor != _last_displayed_hour:
+		_last_displayed_hour = hour_floor
+		_update_time_label()
 
 
 func _on_play_pause_pressed() -> void:

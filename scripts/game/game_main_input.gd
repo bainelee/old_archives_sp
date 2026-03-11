@@ -10,9 +10,6 @@ const CONSTRUCTION_SELECTING_ZONE := 1
 const CONSTRUCTION_SELECTING_TARGET := 2
 const CONSTRUCTION_CONFIRMING := 3
 
-const DEBUG_CLEANUP_INPUT := false
-
-
 static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> bool:
 	var test_page: CanvasLayer = game_main.get_node_or_null("TestFigmaPage") as CanvasLayer
 	if test_page and test_page.visible:
@@ -28,6 +25,12 @@ static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> b
 		return true
 	var calamity: Control = game_main.get_node_or_null("UIMain/CalamityBar") as Control
 	if calamity and calamity.get_global_rect().has_point(mouse_pos):
+		return true
+	var debug_pan: Control = game_main.get_node_or_null("UIMain/DebugPanSpeed") as Control
+	if debug_pan and debug_pan.visible and debug_pan.get_global_rect().has_point(mouse_pos):
+		return true
+	var debug_info: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control
+	if debug_info and debug_info.visible and debug_info.get_global_rect().has_point(mouse_pos):
 		return true
 	var overlay: Node = game_main.call("_get_cleanup_overlay")
 	if overlay:
@@ -46,14 +49,6 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 				test_page.toggle()
 				game_main.get_viewport().set_input_as_handled()
 				return
-
-	if DEBUG_CLEANUP_INPUT and event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
-			var cleanup_mode: int = game_main.get("_cleanup_mode")
-			var in_sel: bool = (cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING)
-			if in_sel:
-				print("[Cleanup] _input 收到左键 (清理模式)")
 
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
@@ -87,17 +82,19 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 				if is_click_over_ui_buttons(game_main, mouse_pos):
 					return
 
-			if DEBUG_CLEANUP_INPUT:
-				print("[Cleanup] 左键点击 pos=%s mode=%s" % [mouse_pos, cleanup_mode])
-			var grid: Vector2i = game_main.call("_get_mouse_grid")
-			var rid: int = game_main.call("_get_room_at_grid", grid.x, grid.y)
-			if DEBUG_CLEANUP_INPUT:
-				print("[Cleanup] 左键 grid=%s rid=%s" % [grid, rid])
+			var rid: int = -1
+			var camera3d: Camera3D = game_main.get("_camera3d")
+			if camera3d:
+				rid = game_main.call("_get_room_at_mouse_3d")
+			else:
+				var grid: Vector2i = game_main.call("_get_mouse_grid")
+				rid = game_main.call("_get_room_at_grid", grid.x, grid.y)
 
 			if cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING:
 				GameMainCleanupHelper.handle_left_click(game_main, rid)
 			elif construction_mode == CONSTRUCTION_SELECTING_TARGET or construction_mode == CONSTRUCTION_CONFIRMING:
 				GameMainConstructionHelper.handle_left_click(game_main, rid)
+				game_main.call("_update_room_highlights")
 			else:
 				var rooms: Array = game_main.get("_rooms")
 				game_main.set("_selected_room_index", rid)
@@ -121,24 +118,37 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 				game_main.set("_construction_confirm_room_index", -1)
 				game_main.call("_get_construction_overlay").hide_confirm()
 				GameMainConstructionHelper.exit_mode(game_main)
+				game_main.call("_update_room_highlights")
 				game_main.get_viewport().set_input_as_handled()
 
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_UP:
 			GameMainCameraHelper.apply_zoom(game_main, true)
+			game_main.call("_update_debug_info")
 			game_main.get_viewport().set_input_as_handled()
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			GameMainCameraHelper.apply_zoom(game_main, false)
+			game_main.call("_update_debug_info")
 			game_main.get_viewport().set_input_as_handled()
 
 	if event is InputEventMouseMotion:
-		if game_main.get("_is_panning") and game_main.get("_camera"):
+		if game_main.get("_is_panning") and (game_main.get("_camera3d") or game_main.get("_camera")):
 			var current_pos: Vector2 = game_main.get_viewport().get_mouse_position()
 			GameMainCameraHelper.apply_pan(game_main, current_pos)
 			game_main.get_viewport().set_input_as_handled()
 		else:
-			var grid: Vector2i = game_main.call("_get_mouse_grid")
-			var new_hover: int = game_main.call("_get_room_at_grid", grid.x, grid.y)
+			var new_hover: int = -1
+			var mouse_pos: Vector2 = game_main.get_viewport().get_mouse_position()
+			var camera3d: Camera3D = game_main.get("_camera3d")
+			if not is_click_over_ui_buttons(game_main, mouse_pos):
+				if camera3d:
+					new_hover = game_main.call("_get_room_at_mouse_3d")
+				else:
+					var grid: Vector2i = game_main.call("_get_mouse_grid")
+					new_hover = game_main.call("_get_room_at_grid", grid.x, grid.y)
 			var hovered: int = game_main.get("_hovered_room_index")
 			if new_hover != hovered:
 				game_main.set("_hovered_room_index", new_hover)
+				game_main.call("_update_room_highlights")
 				game_main.queue_redraw()
+			if game_main.get("_debug_show_ray_hit") and camera3d:
+				game_main.call("_update_debug_ray_hit")

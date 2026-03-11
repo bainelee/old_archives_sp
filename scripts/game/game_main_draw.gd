@@ -99,7 +99,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 		var is_room_cleaning: bool = cleanup_rooms.has(i)
 		var is_room_constructing: bool = construction_rooms.has(i)
 		if in_cleanup_selecting:
-			if room.clean_status == RoomInfo.CleanStatus.UNCLEANED and not is_room_cleaning:
+			if room.unlocked and room.clean_status == RoomInfo.CleanStatus.UNCLEANED and not is_room_cleaning:
 				canvas.draw_rect(rect, Color(1, 1, 1, 0.4), true)
 			else:
 				canvas.draw_rect(rect, Color(0, 0, 0, 0.6), true)
@@ -108,7 +108,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 				canvas.draw_rect(rect, Color(0.2, 0.5, 1.0, 0.4), true)
 			else:
 				canvas.draw_rect(rect, Color(0, 0, 0, 0.6), true)
-		elif room.clean_status == RoomInfo.CleanStatus.UNCLEANED:
+		elif room.clean_status == RoomInfo.CleanStatus.UNCLEANED or not room.unlocked:
 			canvas.draw_rect(rect, Color(0, 0, 0, 0.4), true)
 		# 已建设房间：30% 透明度绿色遮罩，提示可辨识
 		elif room.zone_type != 0:

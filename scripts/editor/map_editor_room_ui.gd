@@ -40,7 +40,7 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 	lbl_type.text = TranslationServer.translate("EDITOR_LABEL_TYPE")
 	type_row.add_child(lbl_type)
 	var room_type_option: OptionButton = OptionButton.new()
-	for i in range(10):
+	for i in range(RoomInfo.RoomType.size()):
 		room_type_option.add_item(RoomInfo.get_room_type_name(i), i)
 	room_type_option.item_selected.connect(editor._on_room_type_selected)
 	type_row.add_child(room_type_option)

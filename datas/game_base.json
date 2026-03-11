@@ -23,10 +23,10 @@
   },
   "initial_resources": {
     "factors": {
-      "cognition": 500,
-      "computation": 0,
-      "willpower": 400,
-      "permission": 400
+      "cognition": 6000,
+      "computation": 60000,
+      "willpower": 4000,
+      "permission": 4000
     },
     "currency": {
       "info": 500,
@@ -41,5 +41,6 @@
   },
   "initial_time": {
     "total_game_hours": 0
-  }
+  },
+  "prologue_room_ids": ["room_00"]
 }

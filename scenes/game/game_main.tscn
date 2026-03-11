@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dv76sutm3e6vc"]
 
 [ext_resource type="Script" uid="uid://brdemd7q8w6jf" path="res://scripts/game/game_main.gd" id="1_game_main"]
-[ext_resource type="Texture2D" uid="uid://d26ielqcpqjqs" path="res://assets/sprites/backgrounds/bg_test_0.png" id="2_bg"]
+[ext_resource type="PackedScene" uid="uid://dflbwpclcqtag" path="res://scenes/game/archives_base_0.tscn" id="2_archives"]
 [ext_resource type="PackedScene" uid="uid://b3xk7m2vq8nrp" path="res://scenes/ui/ui_main.tscn" id="3_ui_main"]
 [ext_resource type="PackedScene" path="res://scenes/ui/cheat_shelter_panel.tscn" id="4_cheat"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="5_pause_menu"]
@@ -25,10 +25,10 @@ script = ExtResource("1_game_main")
 
 [node name="ConstructionOverlay" parent="." unique_id=116726987 instance=ExtResource("8_construction")]
 
-[node name="TestFigmaPage" parent="." instance=ExtResource("9_test_figma")]
+[node name="TestFigmaPage" parent="." unique_id=1564220616 instance=ExtResource("9_test_figma")]
 
-[node name="Background" type="Sprite2D" parent="." unique_id=1151208090]
-z_index = -100
-position = Vector2(800, 600)
-scale = Vector2(3.125, 2.34375)
-texture = ExtResource("2_bg")
+[node name="ArchivesBase0" parent="." unique_id=1866609128 instance=ExtResource("2_archives")]
+
+[node name="game_main_camera" type="Camera3D" parent="." unique_id=787419857]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.94, 30)
+fov = 55.0

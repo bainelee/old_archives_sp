@@ -7,9 +7,16 @@
       "clean_status": 0,
       "room_name": "档案馆核心",
       "3d_size": "tall",
+      "grid_x": -1,
+      "grid_y": 1,
       "room_type": "核心",
       "items_in_room": [],
-      "room_resources": [{ "type": 2, "amount": 0 }],
+      "room_resources": [
+        {
+          "type": 2,
+          "amount": 0
+        }
+      ],
       "pre_clean_text": "默认清理前描述",
       "desc": [
         "档案馆的心脏，能够通过消耗计算因子为档案馆带来文明的庇佑，",
@@ -22,9 +29,16 @@
       "clean_status": 0,
       "room_name": "档案馆正厅",
       "3d_size": "long",
+      "grid_x": -2,
+      "grid_y": 0,
       "room_type": "资料库",
       "items_in_room": [],
-      "room_resources": [{ "type": 4, "amount": 0 }],
+      "room_resources": [
+        {
+          "type": 4,
+          "amount": 3000
+        }
+      ],
       "pre_clean_text": "默认清理前描述",
       "desc": [
         "探寻者-维瑟建立这座档案馆，并以此中智慧破译智者罗曼所留下的道标，",
@@ -38,9 +52,16 @@
       "clean_status": 0,
       "room_name": "档案馆门卫室",
       "3d_size": "base",
+      "grid_x": 7,
+      "grid_y": 0,
       "room_type": "资料库",
       "items_in_room": [],
-      "room_resources": [{ "type": 4, "amount": 0 }],
+      "room_resources": [
+        {
+          "type": 4,
+          "amount": 2000
+        }
+      ],
       "pre_clean_text": "默认清理前描述",
       "desc": [
         "在档案馆作为私有庄园的年代，这里只是一个管家的居所，",
@@ -54,9 +75,16 @@
       "clean_status": 0,
       "room_name": "哲学文献室",
       "3d_size": "base",
+      "grid_x": 1,
+      "grid_y": 1,
       "room_type": "图书室",
       "items_in_room": [],
-      "room_resources": [{ "type": 1, "amount": 0 }],
+      "room_resources": [
+        {
+          "type": 1,
+          "amount": 5000
+        }
+      ],
       "pre_clean_text": "默认清理前描述",
       "desc": [
         "以哲学资料、文献为主的档案室，纸张在岁月中卷曲，如同那些曾在此处盘旋的沉重。",
@@ -69,9 +97,16 @@
       "clean_status": 0,
       "room_name": "刊物档案室",
       "3d_size": "base",
+      "grid_x": 3,
+      "grid_y": 0,
       "room_type": "图书室",
       "items_in_room": [],
-      "room_resources": [{ "type": 1, "amount": 0 }],
+      "room_resources": [
+        {
+          "type": 1,
+          "amount": 5000
+        }
+      ],
       "pre_clean_text": "默认清理前描述",
       "desc": [
         "阿德利亚依靠其信息学、传播学以及特殊学术的知识重建了刊物档案室；",
@@ -84,9 +119,16 @@
       "clean_status": 0,
       "room_name": "终端操作台",
       "3d_size": "base",
+      "grid_x": -1,
+      "grid_y": 3,
       "room_type": "机房",
       "items_in_room": [],
-      "room_resources": [{ "type": 2, "amount": 0 }],
+      "room_resources": [
+        {
+          "type": 2,
+          "amount": 60000
+        }
+      ],
       "pre_clean_text": "默认清理前描述",
       "desc": [
         "苍白巨像的操作台终端，",
@@ -100,9 +142,16 @@
       "clean_status": 0,
       "room_name": "书记员办公室",
       "3d_size": "base",
+      "grid_x": -4,
+      "grid_y": 3,
       "room_type": "教学室",
       "items_in_room": [],
-      "room_resources": [{ "type": 3, "amount": 0 }],
+      "room_resources": [
+        {
+          "type": 3,
+          "amount": 3000
+        }
+      ],
       "pre_clean_text": "默认清理前描述",
       "desc": [
         "这个房间曾经由白文先生的书记员-弗耶所使用，",
@@ -117,9 +166,16 @@
       "clean_status": 0,
       "room_name": "异常基理教习室",
       "3d_size": "base",
+      "grid_x": 3,
+      "grid_y": 1,
       "room_type": "教学室",
       "items_in_room": [],
-      "room_resources": [{ "type": 3, "amount": 0 }],
+      "room_resources": [
+        {
+          "type": 3,
+          "amount": 5000
+        }
+      ],
       "pre_clean_text": "默认清理前描述",
       "desc": [
         "理论学者——巴塞洛缪曾在这里向初学者们讲授常识之外的法则。",
@@ -133,6 +189,8 @@
       "clean_status": 0,
       "room_name": "制药研究室",
       "3d_size": "base",
+      "grid_x": 1,
+      "grid_y": 2,
       "room_type": "实验室",
       "items_in_room": [],
       "room_resources": [],
@@ -149,6 +207,8 @@
       "clean_status": 0,
       "room_name": "格温的临时事务所",
       "3d_size": "long",
+      "grid_x": -8,
+      "grid_y": 1,
       "room_type": "事务所遗址",
       "items_in_room": [],
       "room_resources": [],
@@ -164,6 +224,8 @@
       "clean_status": 0,
       "room_name": "案情陈列室",
       "3d_size": "base",
+      "grid_x": -10,
+      "grid_y": 1,
       "room_type": "推理室",
       "items_in_room": [],
       "room_resources": [],
@@ -179,6 +241,8 @@
       "clean_status": 0,
       "room_name": "东侧内部廊道",
       "3d_size": "long",
+      "grid_x": 10,
+      "grid_y": 0,
       "room_type": "庭院",
       "items_in_room": [],
       "room_resources": [],
@@ -190,6 +254,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F101",
       "3d_size": "base",
+      "grid_x": 14,
+      "grid_y": 0,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -205,6 +271,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F102",
       "3d_size": "base",
+      "grid_x": 17,
+      "grid_y": 0,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -220,6 +288,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F201",
       "3d_size": "base",
+      "grid_x": 14,
+      "grid_y": 1,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -235,6 +305,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F202",
       "3d_size": "base",
+      "grid_x": 17,
+      "grid_y": 1,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -250,6 +322,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F301",
       "3d_size": "base",
+      "grid_x": 14,
+      "grid_y": 2,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -265,6 +339,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F302",
       "3d_size": "base",
+      "grid_x": 17,
+      "grid_y": 2,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -280,6 +356,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F401",
       "3d_size": "base",
+      "grid_x": 14,
+      "grid_y": 3,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -295,6 +373,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F402",
       "3d_size": "base",
+      "grid_x": 17,
+      "grid_y": 3,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -310,6 +390,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F501",
       "3d_size": "base",
+      "grid_x": 14,
+      "grid_y": 4,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -325,6 +407,8 @@
       "clean_status": 0,
       "room_name": "副楼房间F502",
       "3d_size": "base",
+      "grid_x": 17,
+      "grid_y": 4,
       "room_type": "宿舍",
       "items_in_room": [],
       "room_resources": [],
@@ -340,6 +424,8 @@
       "clean_status": 0,
       "room_name": "F1东侧楼梯间",
       "3d_size": "small",
+      "grid_x": 2,
+      "grid_y": 0,
       "room_type": "通道",
       "items_in_room": [],
       "room_resources": [],
@@ -351,6 +437,8 @@
       "clean_status": 0,
       "room_name": "F1西侧楼梯间",
       "3d_size": "small",
+      "grid_x": -4,
+      "grid_y": 0,
       "room_type": "通道",
       "items_in_room": [],
       "room_resources": [],
@@ -362,6 +450,8 @@
       "clean_status": 0,
       "room_name": "F2西侧核心通道",
       "3d_size": "small",
+      "grid_x": -4,
+      "grid_y": 1,
       "room_type": "通道",
       "items_in_room": [],
       "room_resources": [],
@@ -373,6 +463,8 @@
       "clean_status": 0,
       "room_name": "F3西侧核心通道",
       "3d_size": "small",
+      "grid_x": -4,
+      "grid_y": 2,
       "room_type": "通道",
       "items_in_room": [],
       "room_resources": [],
@@ -384,6 +476,8 @@
       "clean_status": 0,
       "room_name": "机房东侧通道",
       "3d_size": "small",
+      "grid_x": 2,
+      "grid_y": 3,
       "room_type": "通道",
       "items_in_room": [],
       "room_resources": [],
@@ -395,6 +489,8 @@
       "clean_status": 0,
       "room_name": "档案馆东侧门",
       "3d_size": "small",
+      "grid_x": 9,
+      "grid_y": 0,
       "room_type": "通道",
       "items_in_room": [],
       "room_resources": [],
@@ -406,11 +502,104 @@
       "clean_status": 0,
       "room_name": "内侧回廊",
       "3d_size": "base",
+      "grid_x": 5,
+      "grid_y": 0,
       "room_type": "通道",
       "items_in_room": [],
       "room_resources": [],
       "pre_clean_text": "默认清理前描述",
       "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_7",
+      "clean_status": 0,
+      "room_name": "副楼1层走廊",
+      "3d_size": "small",
+      "grid_x": 16,
+      "grid_y": 0,
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_8",
+      "clean_status": 0,
+      "room_name": "副楼2层走廊",
+      "3d_size": "small",
+      "grid_x": 16,
+      "grid_y": 1,
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_9",
+      "clean_status": 0,
+      "room_name": "副楼3层走廊",
+      "3d_size": "small",
+      "grid_x": 16,
+      "grid_y": 2,
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_10",
+      "clean_status": 0,
+      "room_name": "副楼4层走廊",
+      "3d_size": "small",
+      "grid_x": 16,
+      "grid_y": 3,
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_pass_11",
+      "clean_status": 0,
+      "room_name": "副楼5层走廊",
+      "3d_size": "small",
+      "grid_x": 16,
+      "grid_y": 4,
+      "room_type": "通道",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认通道描述"
+    },
+    {
+      "id": "room_12",
+      "clean_status": 0,
+      "room_name": "核心检修室",
+      "3d_size": "small_tall",
+      "grid_x": -2,
+      "grid_y": 1,
+      "room_type": "检修室",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认检修室文案"
+    },
+    {
+      "id": "room_13",
+      "clean_status": 0,
+      "room_name": "机房检修塔",
+      "3d_size": "small_tall",
+      "grid_x": 1,
+      "grid_y": 3,
+      "room_type": "检修室",
+      "items_in_room": [],
+      "room_resources": [],
+      "pre_clean_text": "默认清理前描述",
+      "desc": "默认检修室文案"
     }
   ]
 }

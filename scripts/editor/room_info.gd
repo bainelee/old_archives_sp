@@ -17,6 +17,9 @@ enum RoomType {
 	REASONING,     ## 推理室
 	OFFICE_SITE,   ## 事务所遗址
 	DORMITORY,     ## 宿舍
+	MAINTENANCE,   ## 检修室
+	CORRIDOR,      ## 通道
+	COURTYARD,     ## 庭院
 	EMPTY_ROOM     ## 空房间
 }
 
@@ -54,6 +57,13 @@ var cleanup_time_hours: float = -1.0  ## -1 表示用默认公式
 
 ## 区域建设（0=无，见 ZoneType）
 var zone_type: int = 0
+
+## 房间解锁与邻接（04-room-unlock-adjacency）
+var unlocked: bool = true  ## 是否可被清理选中，默认 true 兼容旧存档
+var adjacent_ids: Array = []  ## 邻接房间 id 列表
+var grid_x: int = 0  ## 布局网格 X
+var grid_y: int = 0  ## 布局网格 Y
+var size_3d: String = ""  ## 3d_size：base|small|tall|small_tall|long
 
 
 ## 获取显示用房间名称：有 json_room_id 时用 tr(ROOM_XXX_NAME)，否则用原始 room_name
@@ -222,6 +232,9 @@ static func get_room_type_name(t: int) -> String:
 		RoomType.REASONING: return TranslationServer.translate("ROOM_TYPE_REASONING")
 		RoomType.OFFICE_SITE: return TranslationServer.translate("ROOM_TYPE_OFFICE_SITE")
 		RoomType.DORMITORY: return TranslationServer.translate("ROOM_TYPE_DORMITORY")
+		RoomType.MAINTENANCE: return TranslationServer.translate("ROOM_TYPE_MAINTENANCE")
+		RoomType.CORRIDOR: return TranslationServer.translate("ROOM_TYPE_CORRIDOR")
+		RoomType.COURTYARD: return TranslationServer.translate("ROOM_TYPE_COURTYARD")
 		RoomType.EMPTY_ROOM: return TranslationServer.translate("ROOM_TYPE_EMPTY_ROOM")
 		_: return TranslationServer.translate("UNKNOWN")
 
@@ -250,6 +263,9 @@ func to_dict() -> Dictionary:
 	for r in resources:
 		if r is Dictionary:
 			res_list.append({"resource_type": r.get("resource_type", ResourceType.NONE), "resource_amount": r.get("resource_amount", 0)})
+	var adj_list: Array = []
+	for aid in adjacent_ids:
+		adj_list.append(aid)
 	return {
 		"id": id,
 		"room_name": room_name,
@@ -267,6 +283,11 @@ func to_dict() -> Dictionary:
 		"cleanup_cost": cleanup_cost,
 		"cleanup_time_hours": cleanup_time_hours,
 		"zone_type": zone_type,
+		"unlocked": unlocked,
+		"adjacent_ids": adj_list,
+		"grid_x": grid_x,
+		"grid_y": grid_y,
+		"size_3d": size_3d,
 	}
 
 
@@ -305,4 +326,12 @@ static func from_dict(d: Dictionary) -> RoomInfo:
 	if d.has("cleanup_time_hours"):
 		info.cleanup_time_hours = float(d.get("cleanup_time_hours", -1))
 	info.zone_type = int(d.get("zone_type", 0))
+	info.unlocked = bool(d.get("unlocked", true))
+	if d.has("adjacent_ids") and d.get("adjacent_ids") is Array:
+		info.adjacent_ids.clear()
+		for aid in d.adjacent_ids:
+			info.adjacent_ids.append(str(aid))
+	info.grid_x = int(d.get("grid_x", 0))
+	info.grid_y = int(d.get("grid_y", 0))
+	info.size_3d = str(d.get("size_3d", d.get("3d_size", "")))
 	return info

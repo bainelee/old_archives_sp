@@ -69,7 +69,8 @@ static func consume_construction_cost(game_main: Node2D, room: RoomInfo, zone_ty
 		if key == "cognition":
 			ui.cognition_amount = maxi(0, ui.cognition_amount - amt)
 		elif key == "computation":
-			ui.computation_amount = maxi(0, ui.computation_amount - amt)
+			var cf_before: int = ui.get_computation() if ui.has_method("get_computation") else int(ui.get("computation_amount") or 0)
+			ui.computation_amount = maxi(0, cf_before - amt)
 		elif key == "willpower":
 			ui.will_amount = maxi(0, ui.will_amount - amt)
 		elif key == "permission":
@@ -152,8 +153,11 @@ static func process_overlay(game_main: Node2D, construction_overlay: Node, delta
 			if ui_node and ui_node.get("researchers_in_construction") != null and ui_node.get("researchers_working_in_rooms") != null:
 				ui_node.researchers_in_construction = maxi(0, ui_node.researchers_in_construction - n)
 				ui_node.researchers_working_in_rooms = ui_node.researchers_working_in_rooms + n
+	var had_completion: bool = construction_to_remove.size() > 0
 	for idx in construction_to_remove:
 		construction_rooms.erase(idx)
+	if had_completion:
+		game_main.call("_update_room_info_labels")
 
 	var construction_progress_data: Array = []
 	for room_idx in construction_rooms:

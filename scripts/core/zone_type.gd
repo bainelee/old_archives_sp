@@ -34,7 +34,10 @@ const RT_SERVER_ROOM := 5
 const RT_REASONING := 6
 const RT_OFFICE_SITE := 7
 const RT_DORMITORY := 8
-const RT_EMPTY_ROOM := 9
+const RT_MAINTENANCE := 9
+const RT_CORRIDOR := 10
+const RT_COURTYARD := 11
+const RT_EMPTY_ROOM := 12
 
 
 ## 返回可建设该区域的房间类型数组（RoomType 枚举值）

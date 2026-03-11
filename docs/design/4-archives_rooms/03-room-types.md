@@ -26,6 +26,31 @@
 | 医疗室 | Infirmary |
 | 疗养室 | Recovery Room |
 | 宿舍 | Dormitory |
+| 检修室 | Maintenance Room |
+
+---
+
+## 代码实现状态
+
+`RoomInfo.RoomType` 与 `room_info_loader._room_type_from_string` 中已实现的类型：
+
+| 中文 | RoomType 枚举 | room_info.json 可填值 |
+|------|---------------|------------------------|
+| 核心 | ARCHIVE_CORE | 核心、core |
+| 资料库 | ARCHIVE | 资料库、archive |
+| 图书室 | LIBRARY | 图书室、library |
+| 机房 | LAB | 机房、lab、server room |
+| 教学室 | CLASSROOM | 教学室、classroom |
+| 实验室 | SERVER_ROOM | 实验室、server_room |
+| 推理室 | REASONING | 推理室、reasoning |
+| 事务所遗址 | OFFICE_SITE | 事务所遗址、office_site |
+| 宿舍 | DORMITORY | 宿舍、dormitory |
+| 检修室 | MAINTENANCE | 检修室、maintenance |
+| 通道 | CORRIDOR | 通道、corridor |
+| 庭院 | COURTYARD | 庭院、courtyard |
+| 放映厅、教堂等设计预留 | EMPTY_ROOM | 上表未列之类型 |
+
+新增房间类型时需同时更新：`room_info.gd` 枚举、`get_room_type_name`、`room_info_loader`、`translations.csv` 的 `ROOM_TYPE_XXX`、本表。
 
 ---
 
