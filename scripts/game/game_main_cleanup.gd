@@ -5,8 +5,6 @@ extends RefCounted
 ## 详见 docs/design/2-gameplay/04-room-cleanup-system.md
 ## 解锁：仅 unlocked 房间可选中；清理完成时解锁邻接房间（04-room-unlock-adjacency）
 
-const RoomLayoutHelper = preload("res://scripts/game/room_layout_helper.gd")
-
 const CLEANUP_NONE := 0
 const CLEANUP_SELECTING := 1
 const CLEANUP_CONFIRMING := 2

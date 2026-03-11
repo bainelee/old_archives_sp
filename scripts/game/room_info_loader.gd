@@ -5,7 +5,7 @@ extends RefCounted
 ## 详见 docs/design/4-archives_rooms/04-room-unlock-adjacency.md
 
 const ROOM_INFO_PATH := "res://datas/room_info.json"
-const RoomLayoutHelper = preload("res://scripts/game/room_layout_helper.gd")
+const _RoomInfo := preload("res://scripts/editor/room_info.gd")
 
 
 ## 从 room_info.json 加载房间并转为 RoomInfo 数组
@@ -44,17 +44,17 @@ static func _dict_to_room_info(r: Dictionary) -> RoomInfo:
 	info.size_3d = str(r.get("3d_size", r.get("size_3d", "")))
 	info.grid_x = int(r.get("grid_x", 0))
 	info.grid_y = int(r.get("grid_y", 0))
-	info.clean_status = int(r.get("clean_status", RoomInfo.CleanStatus.UNCLEANED))
+	info.clean_status = int(r.get("clean_status", _RoomInfo.CleanStatus.UNCLEANED))
 	if r.has("room_resources") and r.get("room_resources") is Array:
 		for res_item in r.room_resources:
 			if res_item is Dictionary:
 				var ri: Dictionary = res_item as Dictionary
 				info.resources.append({
-					"resource_type": int(ri.get("type", ri.get("resource_type", RoomInfo.ResourceType.NONE))),
+					"resource_type": int(ri.get("type", ri.get("resource_type", _RoomInfo.ResourceType.NONE))),
 					"resource_amount": int(ri.get("amount", ri.get("resource_amount", 0)))
 				})
-	info.pre_clean_text = RoomInfo.parse_text_field(r.get("pre_clean_text"), "")
-	info.desc = RoomInfo.parse_text_field(r.get("desc"), "")
+	info.pre_clean_text = _RoomInfo.parse_text_field(r.get("pre_clean_text"), "")
+	info.desc = _RoomInfo.parse_text_field(r.get("desc"), "")
 	info.json_room_id = info.id
 	var room_type_str: String = str(r.get("room_type", ""))
 	info.room_type = _room_type_from_string(room_type_str)
@@ -74,16 +74,16 @@ static func _dict_to_room_info(r: Dictionary) -> RoomInfo:
 static func _room_type_from_string(s: String) -> int:
 	var lower: String = s.to_lower()
 	match lower:
-		"核心", "core": return RoomInfo.RoomType.ARCHIVE_CORE
-		"资料库", "archive": return RoomInfo.RoomType.ARCHIVE
-		"图书室", "library": return RoomInfo.RoomType.LIBRARY
-		"机房", "lab", "server room": return RoomInfo.RoomType.LAB
-		"教学室", "classroom": return RoomInfo.RoomType.CLASSROOM
-		"实验室", "server_room": return RoomInfo.RoomType.SERVER_ROOM
-		"推理室", "reasoning": return RoomInfo.RoomType.REASONING
-		"事务所遗址", "office_site": return RoomInfo.RoomType.OFFICE_SITE
-		"宿舍", "dormitory": return RoomInfo.RoomType.DORMITORY
-		"通道", "corridor": return RoomInfo.RoomType.CORRIDOR
-		"检修室", "maintenance": return RoomInfo.RoomType.MAINTENANCE
-		"庭院", "courtyard": return RoomInfo.RoomType.COURTYARD
-		_: return RoomInfo.RoomType.EMPTY_ROOM
+		"核心", "core": return _RoomInfo.RoomType.ARCHIVE_CORE
+		"资料库", "archive": return _RoomInfo.RoomType.ARCHIVE
+		"图书室", "library": return _RoomInfo.RoomType.LIBRARY
+		"机房", "lab", "server room": return _RoomInfo.RoomType.LAB
+		"教学室", "classroom": return _RoomInfo.RoomType.CLASSROOM
+		"实验室", "server_room": return _RoomInfo.RoomType.SERVER_ROOM
+		"推理室", "reasoning": return _RoomInfo.RoomType.REASONING
+		"事务所遗址", "office_site": return _RoomInfo.RoomType.OFFICE_SITE
+		"宿舍", "dormitory": return _RoomInfo.RoomType.DORMITORY
+		"通道", "corridor": return _RoomInfo.RoomType.CORRIDOR
+		"检修室", "maintenance": return _RoomInfo.RoomType.MAINTENANCE
+		"庭院", "courtyard": return _RoomInfo.RoomType.COURTYARD
+		_: return _RoomInfo.RoomType.EMPTY_ROOM

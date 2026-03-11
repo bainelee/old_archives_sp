@@ -5,9 +5,6 @@ extends Node2D
 ## 模块拆分：绘制/存档/清理/建设/已建设产出/镜头/输入 见 game_main_*.gd
 
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
-const GameMainFactorBreakdownHelper = preload("res://scripts/game/game_main_factor_breakdown.gd")
-const GameMainShelterHelper = preload("res://scripts/game/game_main_shelter.gd")
-const GameMainBuiltRoomHelper = preload("res://scripts/game/game_main_built_room.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const GRID_WIDTH := 80
 const GRID_HEIGHT := 60
@@ -198,7 +195,7 @@ func _setup_room_info_labels() -> void:
 		var v: Vector3 = room_info_3d.room_volume
 		var xR: float = v.x
 		var yR: float = v.y
-		var zR: float = v.z
+		var _zR: float = v.z  ## 未用于本次计算（深度方向），加下划线表示刻意未用
 		var x_offset: float = (GRID_SIZE * xR + THICKNESS_IN + THICKNESS_OUT) / 2.0
 		var sz_y: float = GRID_SIZE * yR + THICKNESS_IN + THICKNESS_OUT * 2
 		## 向右、向下偏移，避免被房间边框遮住

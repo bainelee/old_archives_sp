@@ -6,8 +6,6 @@ extends RefCounted
 
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
-const GameMainShelterHelper = preload("res://scripts/game/game_main_shelter.gd")
-const GameMainBuiltRoomHelper = preload("res://scripts/game/game_main_built_room.gd")
 
 
 static func get_breakdown(game_main: Node2D, factor_key: String) -> Dictionary:

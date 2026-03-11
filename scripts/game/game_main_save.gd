@@ -4,7 +4,6 @@ extends RefCounted
 ## 游戏主场景存档收集与加载应用
 ## 纯 I/O 逻辑，与 UI 解耦
 
-const RoomLayoutHelper = preload("res://scripts/game/room_layout_helper.gd")
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 
 const SAVE_KEY_TILES := "tiles"
