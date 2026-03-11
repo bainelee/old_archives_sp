@@ -30,28 +30,35 @@
 ```
 old-archives-sp/
 ├── scenes/
-│   ├── editor/           # 场景编辑器（单独运行，用于编辑地图）
-│   └── game/             # 游戏主场景（主运行入口）
+│   ├── editor/           # 2D 地图编辑器（单独运行，用于编辑地图）
+│   ├── game/             # 游戏主场景、档案馆底板
+│   ├── ui/               # 主菜单、主 UI、时间/庇护/清理等面板
+│   ├── rooms/            # 档案馆房间（3D）、预设框架
+│   └── actors/           # 3D 元件与道具
 ├── scripts/
-│   ├── editor/           # 场景编辑器脚本
-│   └── game/             # 游戏主逻辑
-├── datas/                # 数据文件（.gdignore，未被 Godot 导入）
-│   └── room_info.json    # 房间模板库（ROOM_001 等）
-├── assets/               # 底板纹理、精灵图、UI 素材
-├── resources/            # Godot 资源
+│   ├── editor/           # 地图编辑器脚本
+│   ├── game/             # 游戏主逻辑
+│   ├── core/             # 核心系统（时间、侵蚀、数值、存档、本地化）
+│   ├── ui/               # UI 脚本
+│   ├── rooms/            # 房间逻辑（网格、高亮、标牌）
+│   ├── actors/           # 3D 元件逻辑
+│   └── tools/            # 工具脚本（材质导入、本地化同步）
+├── datas/                # 数据文件（.gdignore，运行时加载）
+│   ├── game_values.json  # 游戏数值
+│   ├── game_base.json    # 新游戏初始资源、人员
+│   ├── room_info.json    # 3D 档案馆房间信息表（v2）
+│   ├── room_info_legacy.json # 2D 地图编辑器模板库（ROOM_001 等）
+│   └── actor_table.json  # 3D 元件表
+├── assets/               # 图标、材质、GLB、精灵图、UI 素材
+├── addons/               # room_items_grid_snap、snappy
+├── translations/         # zh_CN、en 本地化
+├── designs/              # UI 设计索引
 └── docs/                 # 名词解释、设计文档
 ```
 
-- **主场景**：已留空（`run/main_scene=""`），不固定运行入口
-- **运行当前场景**（F6）：进入当前打开的场景；打开场景编辑器则进编辑器，打开游戏主场景则进游戏
-
-### README 中规划的结构（部分实现）
-
-- `scenes/game/` - 游戏主场景 ✓
-- `scripts/game/` - 游戏主逻辑 ✓
-- `scripts/core/` - 核心系统（档案馆核心、庇护、侵蚀等）
-- `scripts/personnel/` - 人员（研究员、调查员、英杰）
-- `scripts/rooms/` - 房间与区域逻辑
+- **主场景**：`run/main_scene="res://scenes/ui/start_menu.tscn"`
+- **运行方式**：F5 启动主菜单 → 新游戏/继续 → `game_main.tscn`；F6 运行当前打开的场景
+- **人员逻辑**：无独立 `scripts/personnel/` 目录，研究员侵蚀等逻辑在 `core/personnel_erosion_core.gd`
 
 ---
 
@@ -73,16 +80,17 @@ old-archives-sp/
 ### 3.3 数据流
 
 ```
-场景编辑器                          存储
-────────────────────────────────────────────────────────────
+2D 场景编辑器                          存储
+────────────────────────────────────────────────────────────────
 地图槽位 (slot_0..4)  ──load──►  _rooms (RoomInfo[])
 _rooms               ──save──►  user://maps/slot_N.json
-_rooms               ──同步──►  datas/room_info.json
-datas/room_info.json ──导入──►  _rooms（从模板导入）
+_rooms               ──同步──►  datas/room_info_legacy.json
+datas/room_info_legacy.json ──导入──►  _rooms（从模板导入）
 ```
 
 - **地图槽位**：`user://maps/slot_0.json` ~ `slot_4.json`，保存底板 + 房间数据
-- **room_info.json**：共享房间模板库；保存地图时根据 `json_room_id` 自动同步；导入模板时反向写入房间
+- **room_info_legacy.json**：2D 编辑器共享房间模板库；保存地图时根据 `json_room_id` 自动同步
+- **room_info.json**（v2）：3D 游戏主场景用，独立于编辑器，见 `docs/design/4-archives_rooms/`
 
 ### 3.4 关键文件
 
@@ -92,7 +100,7 @@ datas/room_info.json ──导入──►  _rooms（从模板导入）
 | `scripts/editor/room_info.gd` | RoomInfo 定义、枚举、序列化 |
 | `scripts/editor/floor_tile_type.gd` | 底板类型、编辑层级、选择模式 |
 | `scripts/editor/map_editor_ruler.gd` | 标尺/网格坐标显示 |
-| `datas/room_info.json` | 房间模板（约 30+ 房间） |
+| `datas/room_info_legacy.json` | 2D 编辑器房间模板（约 30+ 房间） |
 | `.cursor/rules/` | 地图编辑器、房间信息、Git 提交编码规范 |
 
 ---
@@ -115,16 +123,17 @@ datas/room_info.json ──导入──►  _rooms（从模板导入）
 设计文档中标注的待定/未实现项：
 - 底板与 room type 的关联规则
 - 区域多选、复制、粘贴
-- **游戏主逻辑**（运行地图、资源、人员、核心、庇护、侵蚀等）尚未实现
+
+**已实现**：游戏主逻辑（game_main、保存/加载、清理、建设、已建设房间、庇护、侵蚀、研究员系统等）、主菜单、Autoload 单例（LocaleManager、GameTime、ErosionCore、GameValues、PersonnelErosionCore、SaveManager）
 
 ---
 
 ## 6. 新系统开发建议
 
-1. **明确新系统范围**：例如「游戏主场景」「资源与因子系统」「人员（劳动力暂未使用）」等，以便拆分任务。
-2. **复用现有数据**：`room_info.json` 和 `RoomInfo` 可作为游戏运行时的房间数据源。
-3. **主场景**：已切换为游戏主场景；场景编辑器仅能单独运行，游戏运行时不可唤出。
-4. **架构方向**：考虑 Autoload 单例管理资源、人员、庇护等全局状态。
+1. **明确新系统范围**：按功能模块拆分任务，如「劳动力系统」「调查员外派」等。
+2. **复用现有数据**：游戏主场景用 `room_info.json`（v2）；2D 编辑器用 `room_info_legacy.json` 与 `RoomInfo`。
+3. **主场景**：`start_menu.tscn` → 新游戏/继续 → `game_main.tscn`；2D 场景编辑器仅能通过 F6 单独运行。
+4. **架构**：Autoload 单例已实现（LocaleManager、GameTime、ErosionCore、GameValues、PersonnelErosionCore、SaveManager），新系统可在此基础上扩展。
 
 ---
 
