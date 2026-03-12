@@ -5,6 +5,7 @@ extends Node2D
 ## 模块拆分：绘制/存档/清理/建设/已建设产出/镜头/输入 见 game_main_*.gd
 
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
+const _ResearcherLifecycle = preload("res://scripts/game/researcher_lifecycle.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const GRID_WIDTH := 80
 const GRID_HEIGHT := 60
@@ -95,6 +96,8 @@ func _ready() -> void:
 	call_deferred("_setup_room_overlays")
 	call_deferred("_setup_room_info_labels")
 	call_deferred("_update_room_highlights")
+	call_deferred("_setup_researchers")
+	call_deferred("_setup_researcher_lifecycle")
 	queue_redraw()
 
 
@@ -213,6 +216,98 @@ func _setup_room_info_labels() -> void:
 		_room_info_labels[rid] = label
 
 
+func _setup_researchers() -> void:
+	## 在档案馆核心 room_00 生成研究员 3D 实例，数量取自 personnel.researcher
+	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
+	if not archives:
+		return
+	var room_node: Node3D = _find_room_node_in_archives(archives, "room_00")
+	if not room_node:
+		return
+	var room_info_3d: RoomInfo3D = room_node.get_node_or_null("RoomInfo") as RoomInfo3D
+	if not room_info_3d:
+		return
+	var researcher_count: int = 10
+	if PersonnelErosionCore:
+		var personnel: Dictionary = PersonnelErosionCore.get_personnel()
+		researcher_count = int(personnel.get("researcher", 10))
+	else:
+		var ui: Node = get_node_or_null("UIMain")
+		if ui and ui.get("researcher_count") != null:
+			researcher_count = int(ui.researcher_count)
+		if researcher_count <= 0:
+			var base: Dictionary = GameMainSaveHelper._load_game_base()
+			var init_res: Dictionary = base.get("initial_resources", {}) as Dictionary
+			var pers: Dictionary = init_res.get("personnel", {}) as Dictionary
+			researcher_count = int(pers.get("researcher", 10))
+	if researcher_count <= 0:
+		return
+	var existing: Node = room_node.get_node_or_null("ResearchersContainer")
+	if existing:
+		existing.queue_free()
+	var container: Node3D = Node3D.new()
+	container.name = "ResearchersContainer"
+	room_node.add_child(container)
+	var vol: Vector3 = room_info_3d.room_volume
+	const GRID_CELL: float = 0.5
+	var hx: float = vol.x * GRID_CELL * 0.5
+	var hz: float = vol.z * GRID_CELL * 0.5
+	var inset: float = GRID_CELL
+	var x_min: float = -hx + inset
+	var x_max: float = hx - inset
+	var z_min: float = -hz + inset
+	var z_max: float = hz - inset
+	const FLOOR_Y: float = 0.5
+	const MIN_SPACING: float = 0.6
+	var researcher_scene: PackedScene = load("res://scenes/actors/researcher_3d.tscn") as PackedScene
+	if not researcher_scene:
+		return
+	var placed_positions: Array[Vector3] = []
+	for i in researcher_count:
+		var r: Node = researcher_scene.instantiate()
+		if not r.has_method("set_room_bounds"):
+			r.queue_free()
+			continue
+		var researcher: Node3D = r as Node3D
+		if researcher.has_method("set_researcher_id"):
+			researcher.call("set_researcher_id", i)
+		researcher.set_room_bounds(x_min, x_max, z_min, z_max, FLOOR_Y)
+		var pos: Vector3 = _pick_researcher_spawn_pos(x_min, x_max, z_min, z_max, FLOOR_Y, placed_positions, MIN_SPACING)
+		researcher.position = pos
+		placed_positions.append(pos)
+		container.add_child(researcher)
+		if researcher.has_method("set_game_main"):
+			researcher.set_game_main(self)
+		researcher.call("start_idle")
+
+
+func _pick_researcher_spawn_pos(x_min: float, x_max: float, z_min: float, z_max: float, floor_y: float, existing: Array, min_spacing: float) -> Vector3:
+	for attempt in 20:
+		var x: float = randf_range(x_min, x_max)
+		var z: float = randf_range(z_min, z_max)
+		var cand: Vector3 = Vector3(x, floor_y, z)
+		var ok: bool = true
+		for p in existing:
+			var pxz: Vector3 = Vector3(p.x, 0, p.z)
+			var cxz: Vector3 = Vector3(cand.x, 0, cand.z)
+			if pxz.distance_to(cxz) < min_spacing:
+				ok = false
+				break
+		if ok:
+			return cand
+	var fallback_x: float = (x_min + x_max) * 0.5
+	var fallback_z: float = (z_min + z_max) * 0.5
+	return Vector3(fallback_x, floor_y, fallback_z)
+
+
+func _setup_researcher_lifecycle() -> void:
+	var lifecycle: Node = _ResearcherLifecycle.new()
+	lifecycle.name = "ResearcherLifecycle"
+	if lifecycle.has_method("set_game_main"):
+		lifecycle.set_game_main(self)
+	add_child(lifecycle)
+
+
 func _format_room_info_text(room: RoomInfo) -> String:
 	var type_str: String = RoomInfo.get_room_type_name(room.room_type)
 	var unlock_str: String = "已解锁" if room.unlocked else "未解锁"
@@ -299,6 +394,138 @@ func _find_room_node_in_archives(archives: Node3D, room_id: String) -> Node3D:
 	if found:
 		return found
 	return null
+
+
+## 按 researcher_id 查找 Researcher3D 节点。研究员可能被 teleport 到任意房间，故在所有房间的 ResearchersContainer 下查找。
+func get_researcher_3d_by_id(researcher_id: int) -> Node3D:
+	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
+	if not archives or _rooms.is_empty():
+		return null
+	for room in _rooms:
+		var rid: String = room.id if room.id else room.json_room_id
+		if rid.is_empty():
+			continue
+		var room_node: Node3D = _find_room_node_in_archives(archives, rid)
+		if not room_node:
+			continue
+		var container: Node = room_node.get_node_or_null("ResearchersContainer")
+		if not container:
+			continue
+		for i in container.get_child_count():
+			var child: Node = container.get_child(i)
+			var r3d: Node3D = child as Node3D
+			if not r3d:
+				continue
+			if r3d.get("researcher_id") != null and int(r3d.get("researcher_id")) == researcher_id:
+				return r3d
+	return null
+
+
+## 镜头聚焦到指定研究员（UI 可调）
+func focus_camera_on_researcher(researcher_id: int) -> void:
+	GameMainCameraHelper.focus_camera_on_researcher(self, researcher_id)
+
+
+## 研究员详情（供研究员列表面板使用）
+## 返回: id, name, current_state, work_area, living_area, erosion_prob, recovery_prob, cognition_per_hour, info_output
+func get_researcher_detail(researcher_id: int) -> Dictionary:
+	var out: Dictionary = {
+		"id": researcher_id,
+		"name": "",
+		"current_state": "Idle",
+		"work_area": "",
+		"living_area": "",
+		"erosion_prob": 0,
+		"recovery_prob": 0,
+		"cognition_per_hour": 1,
+		"info_output": "—",
+	}
+	out["name"] = "研究员 %d" % researcher_id
+	out["cognition_per_hour"] = PersonnelErosionCore.COGNITION_PER_RESEARCHER_PER_HOUR if PersonnelErosionCore else 1
+
+	var researchers: Array = []
+	if PersonnelErosionCore:
+		researchers = PersonnelErosionCore.get_researchers()
+	var r_dict: Dictionary = researchers[researcher_id] if researcher_id >= 0 and researcher_id < researchers.size() else {}
+	var enriched: Dictionary = GameMainShelterHelper.enrich_researcher_with_rooms(self, r_dict)
+	var work_rid: String = str(enriched.get("work_room_id", ""))
+	var housing_rid: String = str(enriched.get("housing_room_id", ""))
+
+	## work_area / living_area: zone_type + room name
+	var _room_by_id: Callable = func(rid: String) -> RoomInfo:
+		if rid.is_empty():
+			return null
+		for room in _rooms:
+			var r: RoomInfo = room as RoomInfo
+			if (r.id if r.id else r.json_room_id) == rid:
+				return r
+		return null
+	var work_room: RoomInfo = _room_by_id.call(work_rid)
+	var living_room: RoomInfo = _room_by_id.call(housing_rid)
+	if work_room:
+		var zname: String = ZoneTypeScript.get_zone_name(work_room.zone_type) if work_room.zone_type != 0 else tr("ZONE_NONE")
+		out["work_area"] = "%s %s" % [zname, work_room.get_display_name()]
+		if work_room.zone_type == ZoneTypeScript.Type.RESEARCH:
+			out["info_output"] = tr("ZONE_RESEARCH")
+		elif work_room.zone_type == ZoneTypeScript.Type.CREATION:
+			out["info_output"] = tr("ZONE_CREATION")
+		else:
+			out["info_output"] = "—"
+	else:
+		out["work_area"] = "—"
+	if living_room:
+		var zname_l: String = ZoneTypeScript.get_zone_name(living_room.zone_type) if living_room.zone_type != 0 else tr("ZONE_NONE")
+		out["living_area"] = "%s %s" % [zname_l, living_room.get_display_name()]
+	else:
+		out["living_area"] = "—"
+
+	## 侵蚀概率：按庇护等级（07 文档）
+	var shelter_level: int = GameMainShelterHelper.get_shelter_level_for_researcher(self, enriched)
+	if shelter_level <= -5:
+		out["erosion_prob"] = PersonnelErosionCore.EROSION_PROB_EXTREME if PersonnelErosionCore else 80
+	elif shelter_level >= -4 and shelter_level <= -2:
+		out["erosion_prob"] = PersonnelErosionCore.EROSION_PROB_EXPOSED if PersonnelErosionCore else 50
+	elif shelter_level >= -1 and shelter_level <= 1:
+		out["erosion_prob"] = PersonnelErosionCore.EROSION_PROB_WEAK if PersonnelErosionCore else 20
+	else:
+		out["erosion_prob"] = 0
+	if GameMainShelterHelper.has_no_housing(enriched):
+		out["erosion_prob"] = mini(100, out["erosion_prob"] * 2)
+
+	## 治愈概率：无住房 0%，妥善 30%，完美 80%（07 文档）
+	if GameMainShelterHelper.has_no_housing(enriched) or housing_rid.is_empty():
+		out["recovery_prob"] = 0
+	elif r_dict.get("is_eroded", false):
+		var dorm_level: int = GameMainShelterHelper.get_room_shelter_level(self, housing_rid)
+		if dorm_level < 2:
+			out["recovery_prob"] = 0
+		else:
+			out["recovery_prob"] = PersonnelErosionCore.CURE_PROB_ADEQUATE if dorm_level < 5 else PersonnelErosionCore.CURE_PROB_PERFECT
+		if not PersonnelErosionCore:
+			out["recovery_prob"] = 30 if dorm_level < 5 else 80
+
+	## 当前状态：由生命周期阶段 + 是否移动
+	var life_phase: int = _ResearcherLifecycle.get_current_life_phase(self, researcher_id)
+	var r3d: Node3D = get_researcher_3d_by_id(researcher_id)
+	var is_moving: bool = (r3d != null and r3d.has_method("get_is_moving") and r3d.call("get_is_moving")) if r3d else false
+	match life_phase:
+		_ResearcherLifecycle.LifePhase.CLEANUP:
+			out["current_state"] = "Working_Cleanup"
+		_ResearcherLifecycle.LifePhase.CONSTRUCTION:
+			out["current_state"] = "Working_Construction"
+		_ResearcherLifecycle.LifePhase.WORK:
+			out["current_state"] = "Working_ResearchOrCreation"
+		_ResearcherLifecycle.LifePhase.SLEEP, _ResearcherLifecycle.LifePhase.SLEEP_IN_PLACE:
+			out["current_state"] = "Sleeping"
+		_ResearcherLifecycle.LifePhase.RETURN_HOME, _ResearcherLifecycle.LifePhase.MOVE_TO_WORK:
+			out["current_state"] = "Moving"
+		_ResearcherLifecycle.LifePhase.WAIT_AT_HOME:
+			out["current_state"] = "Rest"
+		_ResearcherLifecycle.LifePhase.WANDER_ARCHIVES, _ResearcherLifecycle.LifePhase.WANDER_NO_WORK:
+			out["current_state"] = "Moving" if is_moving else "Idle"
+		_:
+			out["current_state"] = "Moving" if is_moving else "Idle"
+	return out
 
 
 ## 返回 { room_index: int, position: Vector3 }，无命中时 room_index=-1、position 为射线与平面的近似落点
@@ -477,11 +704,11 @@ func _setup_grid() -> void:
 func _load_from_slot(slot: int) -> void:
 	_current_slot = slot
 	var game_state: Variant = SaveManager.load_from_slot(slot)
-	if game_state == null:
-		return
-	if not (game_state is Dictionary):
-		return
-	var d: Dictionary = game_state as Dictionary
+	var d: Dictionary
+	if game_state == null or not (game_state is Dictionary):
+		d = SaveManager.create_new_game_state(tr("DEFAULT_NEW_GAME"))
+	else:
+		d = game_state as Dictionary
 	GameMainSaveHelper.apply_map(self, d)
 	GameMainSaveHelper.apply_time(d)
 	GameMainSaveHelper.apply_resources(self, d)
@@ -532,29 +759,38 @@ func _room_center_to_screen(room_index: int) -> Vector2:
 	return get_viewport().get_canvas_transform() * world_center
 
 
-func _room_center_to_screen_3d(room_index: int) -> Vector2:
-	if room_index < 0 or room_index >= _rooms.size() or not _camera3d:
-		return Vector2.ZERO
+func _get_room_center_3d(room_index: int) -> Vector3:
+	## 获取房间在 3D 场景中的世界坐标中心，供镜头聚焦等使用
+	if room_index < 0 or room_index >= _rooms.size():
+		return Vector3.ZERO
 	var room: RoomInfo = _rooms[room_index]
 	var rid: String = room.id if room.id else room.json_room_id
 	if rid.is_empty():
-		return Vector2.ZERO
+		return Vector3.ZERO
 	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
 	if not archives:
-		return Vector2.ZERO
+		return Vector3.ZERO
 	var room_node: Node3D = _find_room_node_in_archives(archives, rid)
 	if not room_node:
-		return Vector2.ZERO
+		return Vector3.ZERO
 	var room_info_3d: RoomInfo3D = room_node.get_node_or_null("RoomInfo") as RoomInfo3D
 	if not room_info_3d:
-		return Vector2.ZERO
+		return Vector3.ZERO
 	const GRID_SIZE := 0.5
 	const THICKNESS_IN := 0.2
 	const THICKNESS_OUT := 0.4
 	var v: Vector3 = room_info_3d.room_volume
 	var sz_y: float = GRID_SIZE * v.y + THICKNESS_IN + THICKNESS_OUT * 2
 	var local_center: Vector3 = Vector3(0, sz_y / 2.0, 0)
-	var world_center: Vector3 = room_node.global_transform * local_center
+	return room_node.global_transform * local_center
+
+
+func _room_center_to_screen_3d(room_index: int) -> Vector2:
+	if room_index < 0 or room_index >= _rooms.size() or not _camera3d:
+		return Vector2.ZERO
+	var world_center: Vector3 = _get_room_center_3d(room_index)
+	if world_center == Vector3.ZERO:
+		return Vector2.ZERO
 	return _camera3d.unproject_position(world_center)
 
 

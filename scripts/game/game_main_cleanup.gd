@@ -75,8 +75,8 @@ static func is_click_over_cleanup_allowed_ui(game_main: Node2D, mouse_pos: Vecto
 	var btn: Control = game_main.get_node_or_null("UIMain/BottomRightBar/BtnCleanup") as Control
 	if btn and btn.get_global_rect().has_point(mouse_pos):
 		return true
-	var cheat_panel: Control = game_main.get_node_or_null("CheatShelterPanel/Panel") as Control
-	if cheat_panel and cheat_panel.get_global_rect().has_point(mouse_pos):
+	var debug_panel: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control
+	if debug_panel and debug_panel.visible and debug_panel.get_global_rect().has_point(mouse_pos):
 		return true
 	var overlay: Node = game_main.call("_get_cleanup_overlay")
 	if overlay:
@@ -201,9 +201,15 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 		return
 	consume_cleanup_cost(game_main, room)
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
+	var n: int = room.get_cleanup_researcher_count()
+	var free_ids: Array = GameMainShelterHelper.get_free_researcher_ids(game_main)
+	var researcher_ids: Array = []
+	for i in mini(n, free_ids.size()):
+		researcher_ids.append(free_ids[i])
 	cleanup_rooms[cleanup_confirm_room_index] = {
 		"elapsed": 0.0,
-		"total": room.get_cleanup_time_hours()
+		"total": room.get_cleanup_time_hours(),
+		"researcher_ids": researcher_ids
 	}
 	game_main.set("_cleanup_confirm_room_index", -1)
 	exit_mode(game_main)

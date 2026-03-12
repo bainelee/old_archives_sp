@@ -22,8 +22,8 @@ signal build_button_pressed
 @onready var _factor_computation: Control = $TopBar/Content/HBox/Factors/Computation
 @onready var _factor_will: Control = $TopBar/Content/HBox/Factors/Will
 @onready var _factor_permission: Control = $TopBar/Content/HBox/Factors/Permission
-@onready var _pan_speed_slider: HSlider = $DebugPanSpeed/Margin/HBox/PanSpeedSlider
-@onready var _pan_speed_value_label: Label = $DebugPanSpeed/Margin/HBox/Value
+@onready var _pan_speed_slider: HSlider = $DebugInfoPanel/Margin/VBox/PanSpeedRow/PanSpeedSlider
+@onready var _pan_speed_value_label: Label = $DebugInfoPanel/Margin/VBox/PanSpeedRow/Value
 
 ## 资源-因子（使用显式后备变量，避免 Node.get() 对自定义属性解析异常）
 var _cognition_amount: int = 0
@@ -104,6 +104,9 @@ func _ready() -> void:
 	var build_btn: Button = get_node_or_null("BottomRightBar/BtnBuild")
 	if build_btn:
 		build_btn.pressed.connect(_on_build_button_pressed)
+	var btn_researcher_list: Button = get_node_or_null("BarBelowTop/BtnResearcherList")
+	if btn_researcher_list:
+		btn_researcher_list.pressed.connect(_on_researcher_list_button_pressed)
 	if _researcher_hover_area:
 		_researcher_hover_area.mouse_filter = Control.MOUSE_FILTER_STOP
 		_researcher_hover_area.mouse_entered.connect(_on_researcher_hover_entered)
@@ -112,9 +115,10 @@ func _ready() -> void:
 	if _pan_speed_slider:
 		_pan_speed_slider.value_changed.connect(_on_pan_speed_changed)
 		_on_pan_speed_changed(_pan_speed_slider.value)
-	var pan_label: Label = get_node_or_null("DebugPanSpeed/Margin/HBox/Label") as Label
+	var pan_label: Label = get_node_or_null("DebugInfoPanel/Margin/VBox/PanSpeedRow/Label") as Label
 	if pan_label:
 		pan_label.text = tr("LABEL_PAN_SPEED")
+	_setup_shelter_level_debug()
 	var show_ray_btn: CheckButton = get_node_or_null("DebugInfoPanel/Margin/VBox/ShowRayHit") as CheckButton
 	if show_ray_btn:
 		show_ray_btn.toggled.connect(_on_show_ray_hit_toggled)
@@ -132,6 +136,12 @@ func _on_cleanup_button_pressed() -> void:
 
 func _on_build_button_pressed() -> void:
 	build_button_pressed.emit()
+
+
+func _on_researcher_list_button_pressed() -> void:
+	var panel: Node = get_node_or_null("ResearcherListPanel")
+	if panel and panel.has_method("toggle_from_entry"):
+		panel.toggle_from_entry()
 
 
 func _setup_factor_hover() -> void:
@@ -197,6 +207,35 @@ func _on_pan_speed_changed(value: float) -> void:
 	var game_main: Node = get_parent()
 	if game_main:
 		game_main.set("_pan_speed", value)
+
+
+func _setup_shelter_level_debug() -> void:
+	var btn_plus: Button = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/BtnPlus") as Button
+	var btn_minus: Button = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/BtnMinus") as Button
+	var _lbl: Label = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/ValueLabel") as Label
+	if btn_plus:
+		btn_plus.pressed.connect(_on_shelter_debug_plus)
+	if btn_minus:
+		btn_minus.pressed.connect(_on_shelter_debug_minus)
+	_update_shelter_debug_display()
+
+
+func _on_shelter_debug_plus() -> void:
+	if ErosionCore:
+		ErosionCore.shelter_bonus += 1
+	_update_shelter_debug_display()
+
+
+func _on_shelter_debug_minus() -> void:
+	if ErosionCore:
+		ErosionCore.shelter_bonus -= 1
+	_update_shelter_debug_display()
+
+
+func _update_shelter_debug_display() -> void:
+	var lbl: Label = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/ValueLabel") as Label
+	if lbl and ErosionCore:
+		lbl.text = str(ErosionCore.shelter_bonus)
 
 
 func _on_show_ray_hit_toggled(on: bool) -> void:

@@ -7,6 +7,9 @@ extends Node3D
 
 const GRID_CELL_SIZE: float = 0.5
 
+## 材质资源：可在编辑器中调节颜色与透明度
+const MAT_ROOM_GRID: StandardMaterial3D = preload("res://assets/materials/tools_materials/mat_room_reference_grid.tres")
+
 @onready var _mesh_instance: MeshInstance3D = $MeshInstance3D
 
 var _last_volume: Vector3 = Vector3.ZERO
@@ -43,8 +46,6 @@ func _update_grid() -> void:
 
 	var imm: ImmediateMesh = ImmediateMesh.new()
 	imm.surface_begin(Mesh.PRIMITIVE_LINES)
-	var col: Color = Color(0.85, 0.85, 0.9, 0.95)
-	imm.surface_set_color(col)
 
 	var nx: int = int(vol.x)
 	var ny: int = int(vol.y)
@@ -60,15 +61,7 @@ func _update_grid() -> void:
 	imm.surface_end()
 	_last_volume = vol
 	mi.mesh = imm
-
-	var mat: StandardMaterial3D = mi.material_override as StandardMaterial3D
-	if mat == null:
-		mat = StandardMaterial3D.new()
-		mat.vertex_color_use_as_albedo = true
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.albedo_color = col
-		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-		mi.material_override = mat
+	mi.material_override = MAT_ROOM_GRID
 
 
 func _draw_grid_xz(imm: ImmediateMesh, x0: float, y: float, z0: float, x1: float, z1: float, nx: int, nz: int, cell: float) -> void:

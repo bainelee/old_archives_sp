@@ -56,6 +56,48 @@ static func has_no_housing(researcher: Dictionary) -> bool:
 	return not work_rid.is_empty() and housing_rid.is_empty()
 
 
+## 返回当前「空闲」研究员 id 列表（未侵蚀，且未被清理/建设/已建设房间占用），按 id 升序，与 enrich 槽位顺序一致
+static func get_free_researcher_ids(game_main: Node2D) -> Array:
+	var ids: Array = []
+	if not PersonnelErosionCore:
+		return ids
+	var researchers: Array = PersonnelErosionCore.get_researchers()
+	if researchers.is_empty():
+		return ids
+	var work_slots_count: int = _count_work_slots(game_main)
+	for r in researchers:
+		if r.get("is_eroded", false):
+			continue
+		var rid: int = int(r.get("id", 0))
+		if rid >= work_slots_count:
+			ids.append(rid)
+	ids.sort()
+	return ids
+
+
+static func _count_work_slots(game_main: Node2D) -> int:
+	var rooms: Array = game_main.get("_rooms")
+	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
+	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
+	var n: int = 0
+	for room_idx in cleanup_rooms:
+		if room_idx >= 0 and room_idx < rooms.size():
+			n += rooms[room_idx].get_cleanup_researcher_count()
+	for room_idx in construction_rooms:
+		var data: Dictionary = construction_rooms[room_idx]
+		var zt: int = int(data.get("zone_type", 0))
+		if room_idx >= 0 and room_idx < rooms.size():
+			n += rooms[room_idx].get_construction_researcher_count(zt)
+	for room in rooms:
+		var rm: RoomInfo = room as RoomInfo
+		if rm.zone_type == 0 or rm.zone_type == ZoneTypeScript.Type.LIVING:
+			continue
+		if (rm.id if rm.id else rm.json_room_id).is_empty():
+			continue
+		n += rm.get_construction_researcher_count(rm.zone_type)
+	return n
+
+
 ## 根据游戏状态为研究员填充 work_room_id、housing_room_id（动态推算，按 researcher id 顺序分配）
 ## 返回带 work_room_id、housing_room_id 的研究员副本
 static func enrich_researcher_with_rooms(game_main: Node2D, researcher: Dictionary) -> Dictionary:

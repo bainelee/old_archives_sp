@@ -17,17 +17,17 @@ static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> b
 	var top_bar: Control = game_main.get_node_or_null("UIMain/TopBar") as Control
 	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
 		return true
-	var cheat_panel: Control = game_main.get_node_or_null("CheatShelterPanel/Panel") as Control
-	if cheat_panel and cheat_panel.get_global_rect().has_point(mouse_pos):
+	var bar_below_top: Control = game_main.get_node_or_null("UIMain/BarBelowTop") as Control
+	if bar_below_top and bar_below_top.get_global_rect().has_point(mouse_pos):
+		return true
+	var researcher_panel: Control = game_main.get_node_or_null("UIMain/ResearcherListPanel") as Control
+	if researcher_panel and researcher_panel.visible and researcher_panel.get_global_rect().has_point(mouse_pos):
 		return true
 	var bar: Control = game_main.get_node_or_null("UIMain/BottomRightBar") as Control
 	if bar and bar.get_global_rect().has_point(mouse_pos):
 		return true
 	var calamity: Control = game_main.get_node_or_null("UIMain/CalamityBar") as Control
 	if calamity and calamity.get_global_rect().has_point(mouse_pos):
-		return true
-	var debug_pan: Control = game_main.get_node_or_null("UIMain/DebugPanSpeed") as Control
-	if debug_pan and debug_pan.visible and debug_pan.get_global_rect().has_point(mouse_pos):
 		return true
 	var debug_info: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control
 	if debug_info and debug_info.visible and debug_info.get_global_rect().has_point(mouse_pos):
@@ -70,17 +70,15 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 				if GameMainCleanupHelper.is_click_over_cleanup_allowed_ui(game_main, mouse_pos):
 					return
 				if is_click_over_ui_buttons(game_main, mouse_pos):
-					game_main.get_viewport().set_input_as_handled()
-					return
+					return  ## 仅跳过游戏逻辑，不消费事件，让 UI 按钮能接收点击
 			elif in_construction:
 				if GameMainConstructionHelper.is_click_over_construction_allowed_ui(game_main, mouse_pos):
 					return
 				if is_click_over_ui_buttons(game_main, mouse_pos):
-					game_main.get_viewport().set_input_as_handled()
-					return
+					return  ## 同上
 			else:
 				if is_click_over_ui_buttons(game_main, mouse_pos):
-					return
+					return  ## 同上
 
 			var rid: int = -1
 			var camera3d: Camera3D = game_main.get("_camera3d")

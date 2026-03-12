@@ -218,11 +218,16 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 		return
 	consume_construction_cost(game_main, room, zone_type)
 	var n_researchers: int = room.get_construction_researcher_count(zone_type)
+	var free_ids: Array = GameMainShelterHelper.get_free_researcher_ids(game_main)
+	var researcher_ids: Array = []
+	for i in mini(n_researchers, free_ids.size()):
+		researcher_ids.append(free_ids[i])
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
 	construction_rooms[construction_confirm_room_index] = {
 		"elapsed": 0.0,
 		"total": room.get_construction_time_hours(zone_type),
-		"zone_type": zone_type
+		"zone_type": zone_type,
+		"researcher_ids": researcher_ids
 	}
 	var ui_node: Node = game_main.get_node_or_null("UIMain")
 	if ui_node and ui_node.get("researchers_in_construction") != null:

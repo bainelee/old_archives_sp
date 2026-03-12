@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://researcher_3d_001"]
+
+[ext_resource type="Script" path="res://scripts/actors/researcher_3d.gd" id="1_researcher"]
+[ext_resource type="PackedScene" uid="uid://doosnmq1vlo5i" path="res://assets/meshes/characters/test_archives_chara.glb" id="2_glb"]
+[ext_resource type="Script" path="res://scripts/actors/researcher_emoji.gd" id="3_emoji"]
+
+[node name="Researcher3D" type="Node3D"]
+script = ExtResource("1_researcher")
+
+[node name="ModelContainer" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="test_archives_chara" parent="ModelContainer" instance=ExtResource("2_glb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="EmojiAnchor" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 0)
+
+[node name="EmojiHead" type="Sprite3D" parent="EmojiAnchor"]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 0, 0)
+billboard = 2
+script = ExtResource("3_emoji")

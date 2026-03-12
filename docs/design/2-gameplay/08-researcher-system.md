@@ -166,6 +166,54 @@
 | `resources.personnel` | `researcher`、`labor`、`eroded`、`investigator` |
 | `personnel_erosion` | `researchers`（个体数据）、`calamity`、`next_id`、`investigator` |
 
+### 4.6 研究员 3D 可视化（已实现）
+
+| 项目 | 说明 |
+|------|------|
+| 场景 | `scenes/actors/researcher_3d.tscn` |
+| 脚本 | `scripts/actors/researcher_3d.gd` |
+| 模型 | `assets/meshes/characters/test_archives_chara.glb`（纸片风格，无骨骼无动画） |
+| 生成 | 游戏加载时 `game_main._setup_researchers()` 在档案馆核心 room_00 生成 `personnel.researcher` 数量的 3D 实例 |
+
+**行为**：
+- 地面约束：`position.y` 固定为 floor_y（0.5），仅在地面 XZ 平面移动
+- 周期性移动：每 3～8 秒随机选目标，速度上限 2 m/s，Tween 插值移动
+- 防重叠：选目标时距离 ≥ 0.6m；移动中若正在靠近他人则中止本次移动
+- 纸片朝向：仅朝左或朝右（`rotation.y` 为 0 或 PI），斜向移动时不偏转
+- 行走摇摆：移动时 Z 轴正弦摇摆模拟步伐，幅度 1°～3° 随机，频率 1～2.5 Hz
+
+**与 PersonnelErosionCore 的关系**：每个 3D 实例通过 `researcher_id` 与 PersonnelErosionCore 的研究员一一对应；由 ResearcherLifecycle 按游戏时间驱动阶段并调用 `apply_phase` / `teleport_to_room_id`。
+
+### 4.7 研究员生活周期（已实现）
+
+| 项目 | 说明 |
+|------|------|
+| 脚本 | `scripts/game/researcher_lifecycle.gd`（ResearcherLifecycle 节点，挂于 GameMain 下） |
+| 驱动 | 订阅 GameTime.time_updated，按当前小时与 work_room_id / housing_room_id 计算阶段 |
+| 时段 | 工作 8–16、游荡 16–20、回居住区 20–22、睡眠 22–6、前往工作间 6–8；无工作/无住房时仅游荡或原地睡眠 |
+| 优先级 | 清理/建设中的研究员优先阶段 CLEANUP/CONSTRUCTION 并传送到目标房间；分配工作即传送 |
+| 可游荡房间 | room_00（核心）+ 已解锁且已清理的房间 |
+
+### 4.8 研究员头顶 Emoji（已实现）
+
+| 项目 | 说明 |
+|------|------|
+| 资源 | `assets/icons/emoji/icon_emoji_*.png`（idle, walking, happy, good, clean, build, work, confuse, talk, erosion, erosion_danger, no_house, heal） |
+| 节点 | researcher_3d.tscn 下 EmojiAnchor + EmojiHead（Sprite3D），头顶 +1.5，scale 0.4，Billboard |
+| 脚本 | `scripts/actors/researcher_emoji.gd`：0.15s 出现（Y 拉伸）/ 消失（缩小）；按状态选图 |
+| 状态 | 持续 walking；2s 真实时间 clean/build/work；0.8s idle/happy/good；4s 周期随机（含 no_house/eroded/heal 等） |
+| 驱动 | ResearcherLifecycle 在 apply_phase 后调用 Researcher3D.set_emoji_state(flags) |
+
+### 4.9 研究员列表与详情 UI（已实现）
+
+| 项目 | 说明 |
+|------|------|
+| 入口 | TopBar 下方右侧「研究员」按钮，点击展开/关闭面板 |
+| 列表 | 按 id 升序，每行 id + 名称（暂为「研究员 N」）；点击行 → 摄像机聚焦该研究员 + 切到详情 Tab |
+| 详情 | 展示 id、名称、当前状态、工作区、居住区、被侵蚀概率、回复概率、每小时消耗认知、信息产出；返回按钮回列表 |
+| 镜头 | GameMainCameraHelper.focus_camera_on_researcher(game_main, researcher_id)；GameMain.get_researcher_detail(researcher_id) 供详情绑定 |
+| 场景/脚本 | `scenes/ui/researcher_list_panel.tscn`、`scripts/ui/researcher_list_panel.gd` |
+
 ---
 
 ## 5. 待实现 / 待完善
@@ -207,11 +255,14 @@
 | 类型 | 文件 |
 |------|------|
 | 侵蚀核心 | `scripts/core/personnel_erosion_core.gd` |
+| 3D 可视化 | `scripts/actors/researcher_3d.gd`、`scenes/actors/researcher_3d.tscn`、`scripts/actors/researcher_emoji.gd` |
+| 生活周期 | `scripts/game/researcher_lifecycle.gd` |
 | 数值 | `scripts/core/game_values.gd`、`datas/game_values.json` |
-| 游戏主逻辑 | `scripts/game/game_main.gd`、`game_main_cleanup.gd`、`game_main_construction.gd`、`game_main_built_room.gd`、`game_main_save.gd` |
-| UI | `scripts/ui/ui_main.gd`、`scripts/ui/researcher_hover_panel.gd` |
+| 游戏主逻辑 | `scripts/game/game_main.gd`、`game_main_cleanup.gd`、`game_main_construction.gd`、`game_main_built_room.gd`、`game_main_save.gd`、`game_main_camera.gd` |
+| UI | `scripts/ui/ui_main.gd`、`scripts/ui/researcher_hover_panel.gd`、`scripts/ui/researcher_list_panel.gd` |
 | 房间 | `scripts/editor/room_info.gd`（`get_cleanup_researcher_count()`、`get_construction_researcher_count()`） |
 | 区域类型 | `scripts/core/zone_type.gd` |
+| 庇护/空闲 id | `scripts/game/game_main_shelter.gd`（`get_free_researcher_ids()`、`enrich_researcher_with_rooms()`） |
 
 ---
 

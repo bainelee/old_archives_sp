@@ -7,6 +7,9 @@ extends Node3D
 
 const GRID_CELL_SIZE: float = 0.5
 
+## 材质资源：可在编辑器中调节颜色与透明度
+const MAT_ACTOR_BOX_GRID: StandardMaterial3D = preload("res://assets/materials/tools_materials/mat_actor_box_grid.tres")
+
 var _volume: Vector3 = Vector3(2, 2, 2)
 
 @export var volume: Vector3:
@@ -58,10 +61,6 @@ func _update_from_volume() -> void:
 	var imm: ImmediateMesh = ImmediateMesh.new()
 	imm.surface_begin(Mesh.PRIMITIVE_LINES)
 
-	# 线框颜色：黑色
-	var col: Color = Color(0.3, 0.3, 0.3, 0.95)
-	imm.surface_set_color(col)
-
 	var nx: int = int(_volume.x)
 	var ny: int = int(_volume.y)
 	var nz: int = int(_volume.z)
@@ -80,16 +79,7 @@ func _update_from_volume() -> void:
 
 	_last_volume = _volume
 	mi.mesh = imm
-
-	# 确保使用 Vertex Color 材质，线框在 3D 视口中清晰可见
-	var mat: StandardMaterial3D = mi.material_override as StandardMaterial3D
-	if mat == null:
-		mat = StandardMaterial3D.new()
-		mat.vertex_color_use_as_albedo = true
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.albedo_color = col
-		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-		mi.material_override = mat
+	mi.material_override = MAT_ACTOR_BOX_GRID
 
 
 func _draw_grid_xz(imm: ImmediateMesh, x0: float, y: float, z0: float, x1: float, z1: float, nx: int, nz: int, cell: float) -> void:

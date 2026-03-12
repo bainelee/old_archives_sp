@@ -123,6 +123,11 @@ func get_personnel() -> Dictionary:
 	}
 
 
+## 返回研究员列表副本（供空闲 id 计算、UI 等使用），每项含 id、is_eroded 等
+func get_researchers() -> Array:
+	return _researchers.duplicate()
+
+
 func get_calamity_value() -> float:
 	return _calamity_value
 

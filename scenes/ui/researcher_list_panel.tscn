@@ -1,0 +1,246 @@
+[gd_scene load_steps=3 format=3 uid="uid://researcher_list_panel_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/researcher_list_panel.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.12, 0.12, 0.18, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.35, 0.45, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+
+[node name="ResearcherListPanel" type="PanelContainer"]
+custom_minimum_size = Vector2(320, 280)
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -340.0
+offset_top = 88.0
+offset_right = -20.0
+offset_bottom = 368.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ListContainer" type="VBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="ItemList" type="ItemList" parent="Margin/VBox/ListContainer"]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 14
+
+[node name="DetailContainer" type="VBoxContainer" parent="Margin/VBox"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="BackRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnBack" type="Button" parent="Margin/VBox/DetailContainer/BackRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "返回列表"
+
+[node name="DetailScroll" type="ScrollContainer" parent="Margin/VBox/DetailContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="IdRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/IdRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "ID"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/IdRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "—"
+
+[node name="NameRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/NameRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "姓名"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "—"
+
+[node name="StateRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/StateRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "当前状态"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/StateRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "—"
+
+[node name="WorkAreaRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/WorkAreaRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "工作区"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/WorkAreaRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+text = "—"
+
+[node name="LivingAreaRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/LivingAreaRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "生活区"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/LivingAreaRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+text = "—"
+
+[node name="ErosionProbRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/ErosionProbRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "侵蚀概率"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/ErosionProbRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "—"
+
+[node name="RecoveryProbRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/RecoveryProbRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "治愈概率"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/RecoveryProbRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "—"
+
+[node name="CognitionPerHourRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/CognitionPerHourRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "认知/时"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/CognitionPerHourRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "—"
+
+[node name="InfoOutputRow" type="HBoxContainer" parent="Margin/VBox/DetailContainer/DetailScroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/InfoOutputRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(100, 0)
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "信息产出"
+
+[node name="Value" type="Label" parent="Margin/VBox/DetailContainer/DetailScroll/VBox/InfoOutputRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.9, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 2
+text = "—"

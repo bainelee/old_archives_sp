@@ -45,7 +45,29 @@
 
 ---
 
+## 研究员文档速查
+
+| 文档 | 说明 |
+|------|------|
+| [08 - 研究员系统](2-gameplay/08-researcher-system.md) | **统一入口**：设定汇总、占用分类、3D 可视化、待办 |
+| [07 - 研究员侵蚀机制](2-gameplay/07-researcher-erosion.md) | 侵蚀风险、被侵蚀、死亡、治愈、灾厄值、认知危机 |
+| [01 - 游戏数值](0-values/01-game-values.md) | 研究员认知消耗、清理/建设占用、住房 |
+| [04 - 房间清理](2-gameplay/04-room-cleanup-system.md) | 清理时研究员占用 |
+| [05 - 区域建设](2-gameplay/05-zone-construction.md) | 建设时研究员占用 |
+| [06 - 已建设房间](2-gameplay/06-built-room-system.md) | 房间工作占用、住房 |
+| [名词解释：研究员](../名词解释.md#研究员) | 术语定义 |
+
+---
+
 ## 开发变更（近期）
+
+**2025-03 研究员生活周期与 UI**
+
+- 研究员 3D 与 researcher_id 绑定；清理/建设 progress 记录 researcher_ids；空闲 id 列表由 GameMainShelterHelper.get_free_researcher_ids 提供
+- ResearcherLifecycle 按游戏时间驱动阶段（工作 8–16、游荡 16–20、回居住区 20–22、睡眠 22–6、前往工作 6–8）；teleport_to_room_id / apply_phase；可游荡房间 = 核心 + 已清理
+- 研究员列表与详情 UI：TopBar 下入口按钮、id+名称列表、详情 Tab（状态/工作区/居住区/侵蚀与回复概率等）、摄像机聚焦研究员
+- 头顶 Emoji：EmojiAnchor + EmojiHead（Sprite3D），0.15s 进出场动画，按状态与 0.8s/2s/4s 规则显示图标
+- 详见 08-researcher-system §4.6–4.9
 
 **2025-02-25 房间清理与研究员 UI**
 

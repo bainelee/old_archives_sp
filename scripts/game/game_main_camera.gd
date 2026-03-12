@@ -13,6 +13,8 @@ const FOCUS_CELL_SCREEN_SIZE := 50.0
 const CAM3D_DISTANCE_MIN := 5.0
 const CAM3D_DISTANCE_MAX := 75.0
 const CAM3D_ZOOM_FACTOR := 1.1
+## 通常状态点击房间聚焦时的镜头距离（镜头中心对准房间中心）
+const FOCUS_CAM3D_DISTANCE := 16.0
 
 ## 3D 平移范围随镜头距离线性插值：dist=5 时 X±140/Y±40，dist=75 时 X±75/Y±10
 static func _get_cam3d_pan_limits(dist: float) -> Vector2:
@@ -38,27 +40,72 @@ static func setup_camera(game_main: Node2D) -> void:
 
 static func focus_camera_on_room(game_main: Node2D, room_index: int) -> void:
 	var rooms: Array = game_main.get("_rooms")
-	var camera: Camera2D = game_main.get("_camera")
 	var focus_tween: Tween = game_main.get("_focus_tween")
-	var cell_size: int = game_main.get("CELL_SIZE")
 
-	if room_index < 0 or room_index >= rooms.size() or not camera:
+	if room_index < 0 or room_index >= rooms.size():
 		return
 	if focus_tween and focus_tween.is_valid():
 		focus_tween.kill()
+
+	game_main.set("_focus_room_index", room_index)
+
+	var camera3d: Camera3D = game_main.get("_camera3d")
+	if camera3d:
+		## 3D 模式：镜头中心聚焦房间中心，镜头距离固定为 16
+		var room_center: Vector3 = game_main.call("_get_room_center_3d", room_index)
+		if room_center == Vector3.ZERO:
+			return
+		## 镜头沿 -Z 朝向场景，置于房间中心后方 16 单位
+		var target_pos: Vector3 = Vector3(room_center.x, room_center.y, room_center.z + FOCUS_CAM3D_DISTANCE)
+		game_main.set("_camera_distance", FOCUS_CAM3D_DISTANCE)
+		var tween: Tween = game_main.create_tween()
+		tween.set_ease(Tween.EASE_OUT)
+		tween.set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(camera3d, "global_position", target_pos, FOCUS_DURATION)
+		tween.tween_callback(Callable(game_main, "_on_focus_tween_finished"))
+		game_main.set("_focus_tween", tween)
+		return
+
+	## 2D 模式
+	var camera: Camera2D = game_main.get("_camera")
+	var cell_size: int = game_main.get("CELL_SIZE")
+	if not camera:
+		return
 	var room: RoomInfo = rooms[room_index]
-	var target_pos: Vector2 = Vector2(
+	var target_pos_2d: Vector2 = Vector2(
 		(room.rect.position.x + room.rect.size.x / 2.0) * cell_size,
 		(room.rect.position.y + room.rect.size.y / 2.0) * cell_size
 	)
 	var target_zoom: Vector2 = Vector2(FOCUS_CELL_SCREEN_SIZE / float(cell_size), FOCUS_CELL_SCREEN_SIZE / float(cell_size))
-	game_main.set("_focus_room_index", room_index)
+	var tween_2d: Tween = game_main.create_tween()
+	tween_2d.set_ease(Tween.EASE_OUT)
+	tween_2d.set_trans(Tween.TRANS_QUAD)
+	tween_2d.set_parallel(true)
+	tween_2d.tween_property(camera, "position", target_pos_2d, FOCUS_DURATION)
+	tween_2d.tween_property(camera, "zoom", target_zoom, FOCUS_DURATION)
+	tween_2d.tween_callback(Callable(game_main, "_on_focus_tween_finished"))
+	game_main.set("_focus_tween", tween_2d)
+
+
+## 3D 镜头聚焦到指定研究员位置（与房间聚焦相同：镜头在目标后方 FOCUS_CAM3D_DISTANCE，0.5s 缓动）
+static func focus_camera_on_researcher(game_main: Node2D, researcher_id: int) -> void:
+	var focus_tween: Tween = game_main.get("_focus_tween")
+	if focus_tween and focus_tween.is_valid():
+		focus_tween.kill()
+
+	var camera3d: Camera3D = game_main.get("_camera3d")
+	if not camera3d:
+		return
+	var r3d: Node3D = game_main.call("get_researcher_3d_by_id", researcher_id) as Node3D
+	if not r3d:
+		return
+	var target_world: Vector3 = r3d.global_position
+	var target_pos: Vector3 = Vector3(target_world.x, target_world.y, target_world.z + FOCUS_CAM3D_DISTANCE)
+	game_main.set("_camera_distance", FOCUS_CAM3D_DISTANCE)
 	var tween: Tween = game_main.create_tween()
 	tween.set_ease(Tween.EASE_OUT)
 	tween.set_trans(Tween.TRANS_QUAD)
-	tween.set_parallel(true)
-	tween.tween_property(camera, "position", target_pos, FOCUS_DURATION)
-	tween.tween_property(camera, "zoom", target_zoom, FOCUS_DURATION)
+	tween.tween_property(camera3d, "global_position", target_pos, FOCUS_DURATION)
 	tween.tween_callback(Callable(game_main, "_on_focus_tween_finished"))
 	game_main.set("_focus_tween", tween)
 
