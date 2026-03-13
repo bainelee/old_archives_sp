@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/room_info.schema.json",
+  "title": "RoomInfo3DConfig",
+  "type": "object",
+  "description": "3D 档案馆房间数据（room_info.json, version=2）。",
+  "additionalProperties": false,
+  "required": ["source", "version", "rooms"],
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "数据来源说明。"
+    },
+    "version": {
+      "type": "integer",
+      "description": "room_info 结构版本。",
+      "minimum": 1
+    },
+    "rooms": {
+      "type": "array",
+      "description": "房间列表。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "clean_status",
+          "room_name",
+          "3d_size",
+          "grid_x",
+          "grid_y",
+          "room_type",
+          "items_in_room",
+          "room_resources",
+          "pre_clean_text",
+          "desc"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "房间唯一 ID（如 room_00, room_hall_00）。"
+          },
+          "clean_status": {
+            "type": "integer",
+            "enum": [0, 1],
+            "description": "清理状态：0=未清理，1=已清理。"
+          },
+          "room_name": {
+            "type": "string",
+            "description": "房间显示名称（中文原文）。"
+          },
+          "3d_size": {
+            "type": "string",
+            "enum": ["base", "long", "tall", "small", "small_tall"],
+            "description": "3D 房间体量类型。"
+          },
+          "grid_x": {
+            "type": "integer",
+            "description": "房间网格 X 坐标。"
+          },
+          "grid_y": {
+            "type": "integer",
+            "description": "房间网格 Y 坐标。"
+          },
+          "room_type": {
+            "type": "string",
+            "description": "房间类型名称（中文）。"
+          },
+          "items_in_room": {
+            "type": "array",
+            "description": "房间内物件配置。",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "default": []
+          },
+          "room_resources": {
+            "type": "array",
+            "description": "房间资源存量列表。",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "amount"],
+              "properties": {
+                "type": {
+                  "type": "integer",
+                  "description": "资源类型（映射 RoomInfo.ResourceType）。"
+                },
+                "amount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "资源存量。"
+                }
+              }
+            },
+            "default": []
+          },
+          "pre_clean_text": {
+            "type": "string",
+            "description": "清理前描述文案。"
+          },
+          "desc": {
+            "description": "房间描述文案。支持字符串或字符串数组（数组按换行拼接）。",
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -52,6 +52,9 @@ func _get_game_main() -> Node2D:
 
 
 func _on_time_updated() -> void:
+	## 防御性守卫：暂停时不应推进研究员生命周期，防止 time_updated 从其他路径误触发时仍执行
+	if not GameTime or not GameTime.is_flowing:
+		return
 	var gm: Node2D = _get_game_main()
 	if not gm:
 		return

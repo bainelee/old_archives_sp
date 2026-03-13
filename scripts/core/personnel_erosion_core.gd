@@ -3,41 +3,47 @@ extends Node
 ## 实现侵蚀风险、被侵蚀状态、死亡、治愈、灾厄值等逻辑
 ## 详见 docs/design/2-gameplay/07-researcher-erosion.md
 
+const _GameValuesRef := preload("res://scripts/core/game_values_ref.gd")
+
 ## 庇护等级对应的每日侵蚀概率（%）
-const EROSION_PROB_EXTREME := 80  ## 绝境 ≤-5
-const EROSION_PROB_EXPOSED := 50  ## 暴露 -4~-2
-const EROSION_PROB_WEAK := 20     ## 薄弱 -1~1
+var EROSION_PROB_EXTREME := 80  ## 绝境 ≤-5
+var EROSION_PROB_EXPOSED := 50  ## 暴露 -4~-2
+var EROSION_PROB_WEAK := 20     ## 薄弱 -1~1
 
 ## 7 天内超过此侵蚀风险数则被侵蚀
-const EROSION_RISK_THRESHOLD := 5
+var EROSION_RISK_THRESHOLD := 5
 
 ## 治愈周期（天）
-const CURE_INTERVAL_DAYS := 3
+var CURE_INTERVAL_DAYS := 3
 ## 治愈概率
-const CURE_PROB_ADEQUATE := 30   ## 妥善 2~4
-const CURE_PROB_PERFECT := 80    ## 完美 ≥5
+var CURE_PROB_ADEQUATE := 30   ## 妥善 2~4
+var CURE_PROB_PERFECT := 80    ## 完美 ≥5
 
 ## 治愈后免疫天数
-const IMMUNITY_DAYS := 7
+var IMMUNITY_DAYS := 7
 
 ## 死亡概率曲线：第 16 周 50%，第 20 周 100%
 ## P(day) = min(1, (day/140)^3.1)，约满足 (112/140)^3.1≈0.5
-const DEATH_DAYS_HALF := 112   ## 50% 死亡
-const DEATH_DAYS_FULL := 140   ## 100% 死亡
-const DEATH_CURVE_EXP := 3.1
+var DEATH_DAYS_HALF := 112   ## 50% 死亡
+var DEATH_DAYS_FULL := 140   ## 100% 死亡
+var DEATH_CURVE_EXP := 3.1
 
 ## 每个被侵蚀研究员每小时增加的灾厄值
-const CALAMITY_PER_ERODED_PER_HOUR := 1
+var CALAMITY_PER_ERODED_PER_HOUR := 1.0
 ## 灾厄值上限
-const CALAMITY_MAX := 30000
+var CALAMITY_MAX := 30000
+
+## 住房联动（housing_linkage）：无住房侵蚀倍率、无住房治愈跳过
+var _no_housing_erosion_mult: float = 2.0
+var _no_housing_skip_cure: bool = true
 
 ## 每人每天消耗认知（与设计 §1 一致，按小时结算：1/人/小时 = 24/人/天）
-const COGNITION_PER_RESEARCHER_PER_DAY := 24
-const COGNITION_PER_RESEARCHER_PER_HOUR := 1
+var COGNITION_PER_RESEARCHER_PER_DAY := 24
+var COGNITION_PER_RESEARCHER_PER_HOUR := 1
 ## 认知危机标记上限
-const COGNITION_CRISIS_MAX := 3
+var COGNITION_CRISIS_MAX := 3
 ## 认知失能研究员每天增加的灾厄值
-const CALAMITY_PER_IMPAIRED_PER_DAY := 10
+var CALAMITY_PER_IMPAIRED_PER_DAY := 10
 
 signal personnel_updated()
 signal calamity_updated(new_value: float)
@@ -62,8 +68,41 @@ var _cognition_crisis_added_today: Dictionary = {}
 
 
 func _ready() -> void:
+	_apply_config()
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv and gv.has_signal("config_reloaded"):
+		gv.config_reloaded.connect(_apply_config)
 	if GameTime:
 		GameTime.time_updated.connect(_on_time_updated)
+
+
+func _apply_config() -> void:
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv == null:
+		return
+	if gv.has_method("ensure_loaded"):
+		gv.ensure_loaded()
+	EROSION_PROB_EXTREME = int(gv.get_erosion_prob_extreme())
+	EROSION_PROB_EXPOSED = int(gv.get_erosion_prob_exposed())
+	EROSION_PROB_WEAK = int(gv.get_erosion_prob_weak())
+	EROSION_RISK_THRESHOLD = int(gv.get_erosion_risk_threshold_per_7_days())
+	CURE_INTERVAL_DAYS = int(gv.get_erosion_cure_interval_days())
+	CURE_PROB_ADEQUATE = int(gv.get_erosion_cure_prob_adequate())
+	CURE_PROB_PERFECT = int(gv.get_erosion_cure_prob_perfect())
+	IMMUNITY_DAYS = int(gv.get_erosion_immunity_days())
+	DEATH_DAYS_HALF = int(gv.get_erosion_death_days_half())
+	DEATH_DAYS_FULL = int(gv.get_erosion_death_days_full())
+	DEATH_CURVE_EXP = float(gv.get_erosion_death_curve_exponent())
+	CALAMITY_PER_ERODED_PER_HOUR = float(gv.get_calamity_per_eroded_per_hour())
+	CALAMITY_MAX = int(gv.get_calamity_max_value())
+	COGNITION_PER_RESEARCHER_PER_HOUR = int(gv.get_researcher_cognition_per_hour())
+	COGNITION_PER_RESEARCHER_PER_DAY = int(gv.get_researcher_cognition_per_day())
+	COGNITION_CRISIS_MAX = int(gv.get_cognition_crisis_max_stacks())
+	CALAMITY_PER_IMPAIRED_PER_DAY = int(gv.get_calamity_per_impaired_per_day())
+	if gv.has_method("get_no_housing_erosion_probability_multiplier"):
+		_no_housing_erosion_mult = float(gv.get_no_housing_erosion_probability_multiplier())
+	if gv.has_method("should_no_housing_skip_cure_for_eroded"):
+		_no_housing_skip_cure = bool(gv.should_no_housing_skip_cure_for_eroded())
 
 
 ## 从 personnel 字典初始化（researcher 总数，eroded 数量）
@@ -255,7 +294,7 @@ func _run_daily_logic(day: int) -> void:
 		if not r.get("is_eroded", false):
 			continue
 		var info: Dictionary = _get_shelter_info(r)
-		if info.get("has_no_housing", false):
+		if info.get("has_no_housing", false) and _no_housing_skip_cure:
 			continue
 		var dorm_level: int = int(info.get("shelter_level", _fallback_erosion()))
 		if dorm_level < 2:
@@ -284,7 +323,7 @@ func _run_daily_logic(day: int) -> void:
 		var shelter_level: int = int(info.get("shelter_level", _fallback_erosion()))
 		var erosion_prob: int = _erosion_prob_for_level(shelter_level)
 		if info.get("has_no_housing", false):
-			erosion_prob = mini(100, erosion_prob * 2)
+			erosion_prob = mini(100, int(roundf(erosion_prob * _no_housing_erosion_mult)))
 		if erosion_prob > 0 and randi_range(1, 100) <= erosion_prob:
 			r["erosion_risk"] = int(r.get("erosion_risk", 0)) + 1
 	# 5. 每 7 天结束时结算侵蚀风险（day 8/15/22... = 第 7/14/21 天刚结束）

@@ -355,11 +355,15 @@ func _pick_researcher_spawn_pos(x_min: float, x_max: float, z_min: float, z_max:
 
 
 func _setup_researcher_lifecycle() -> void:
+	var sim_root: Node = get_node_or_null("SimulationRoot")
+	if not sim_root:
+		push_warning("SimulationRoot not found, ResearcherLifecycle will be added to GameMain")
+		sim_root = self
 	var lifecycle: Node = _ResearcherLifecycle.new()
 	lifecycle.name = "ResearcherLifecycle"
 	if lifecycle.has_method("set_game_main"):
 		lifecycle.set_game_main(self)
-	add_child(lifecycle)
+	sim_root.add_child(lifecycle)
 
 
 func _format_room_info_text(room: RoomInfo) -> String:
@@ -846,10 +850,6 @@ func _draw() -> void:
 	if _camera3d:
 		return
 	GameMainDrawHelper.draw_all(self, self)
-
-
-func _input(event: InputEvent) -> void:
-	GameMainInputHelper.process_input(self, event)
 
 
 func _room_center_to_screen(room_index: int) -> Vector2:

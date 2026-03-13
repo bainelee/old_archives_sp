@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/shelter_system.schema.json",
+  "title": "ShelterSystemConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "shelter"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "庇护系统配置版本。变更字段语义时递增。",
+      "minimum": 1,
+      "default": 1
+    },
+    "shelter": {
+      "type": "object",
+      "description": "档案馆核心庇护参数配置。",
+      "additionalProperties": false,
+      "required": ["level_min", "level_max", "initial_level", "energy_per_room_max", "energy_levels", "room_types_no_shelter"],
+      "properties": {
+        "level_min": {
+          "type": "integer",
+          "description": "庇护等级最小值。",
+          "minimum": 1,
+          "default": 1
+        },
+        "level_max": {
+          "type": "integer",
+          "description": "庇护等级最大值。",
+          "minimum": 1,
+          "default": 5
+        },
+        "initial_level": {
+          "type": "integer",
+          "description": "新游戏默认庇护等级。",
+          "minimum": 1,
+          "default": 1
+        },
+        "energy_per_room_max": {
+          "type": "integer",
+          "description": "单房间可分配的庇护能量上限。",
+          "minimum": 0,
+          "default": 5
+        },
+        "energy_levels": {
+          "type": "array",
+          "description": "各等级核心每小时产出的 CF 与能量上限。",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["level", "cf_per_hour", "energy_cap"],
+            "properties": {
+              "level": {
+                "type": "integer",
+                "description": "庇护等级。",
+                "minimum": 1
+              },
+              "cf_per_hour": {
+                "type": "integer",
+                "description": "该等级每小时可消耗的计算因子（CF）。",
+                "minimum": 0
+              },
+              "energy_cap": {
+                "type": "integer",
+                "description": "该等级的总庇护能量上限。",
+                "minimum": 0
+              },
+              "cf_per_day": {
+                "type": "integer",
+                "description": "可选字段：该等级每日 CF 上限，存在时将额外限制可分配能量。",
+                "minimum": 0
+              }
+            }
+          },
+          "default": []
+        },
+        "room_types_no_shelter": {
+          "type": "array",
+          "description": "不参与庇护分配的房间类型 ID（RoomInfo.RoomType）。",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "default": []
+        }
+      }
+    }
+  }
+}

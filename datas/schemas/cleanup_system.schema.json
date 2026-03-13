@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/cleanup_system.schema.json",
+  "title": "CleanupSystemConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "cleanup"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "清理系统配置版本。变更字段语义时递增。",
+      "minimum": 1,
+      "default": 1
+    },
+    "cleanup": {
+      "type": "array",
+      "description": "按房间单位区间定义清理成本、研究员占用与耗时。",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["units_min", "units_max", "researchers", "info", "hours"],
+        "properties": {
+          "units_min": {
+            "type": "integer",
+            "description": "该配置生效的最小房间单位数。",
+            "minimum": 1
+          },
+          "units_max": {
+            "type": "integer",
+            "description": "该配置生效的最大房间单位数。",
+            "minimum": 1
+          },
+          "researchers": {
+            "type": "integer",
+            "description": "清理此区间房间时占用的研究员数量。",
+            "minimum": 0
+          },
+          "info": {
+            "type": "integer",
+            "description": "清理此区间房间时消耗的信息资源。",
+            "minimum": 0
+          },
+          "hours": {
+            "type": "number",
+            "description": "清理此区间房间所需的游戏小时数。",
+            "minimum": 0
+          }
+        }
+      },
+      "default": []
+    }
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/construction_system.schema.json",
+  "title": "ConstructionSystemConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "construction", "production", "zone_extensions"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "建设系统配置版本。变更字段语义时递增。",
+      "minimum": 1,
+      "default": 1
+    },
+    "construction": {
+      "type": "object",
+      "description": "按 zone_type 配置建设成本与耗时。键名采用字符串数字（1,2,3,4...）。",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["researchers", "info", "permission", "hours_per_unit"],
+        "properties": {
+          "researchers": {
+            "type": "integer",
+            "description": "建设该区域时占用研究员数量。",
+            "minimum": 0
+          },
+          "info": {
+            "type": "integer",
+            "description": "建设该区域时消耗的信息资源。",
+            "minimum": 0
+          },
+          "permission": {
+            "type": "integer",
+            "description": "建设该区域时消耗的权限资源。",
+            "minimum": 0
+          },
+          "hours_per_unit": {
+            "type": "number",
+            "description": "每个房间单位需要的建设小时数。",
+            "minimum": 0
+          }
+        }
+      },
+      "default": {}
+    },
+    "production": {
+      "type": "object",
+      "description": "已建设房间生产推进时使用的运行时控制参数。",
+      "additionalProperties": false,
+      "required": ["creation_pause_check_hours", "max_hours_per_frame"],
+      "properties": {
+        "creation_pause_check_hours": {
+          "type": "integer",
+          "description": "造物区暂停判断所需的可维持小时数阈值（默认按 24h 检查）。",
+          "minimum": 1,
+          "default": 24
+        },
+        "max_hours_per_frame": {
+          "type": "integer",
+          "description": "单帧最多推进多少游戏小时，避免大 delta 造成瞬时资源异常。",
+          "minimum": 1,
+          "default": 24
+        }
+      }
+    },
+    "zone_extensions": {
+      "type": "object",
+      "description": "未实现区域（5-医疗, 6-娱乐, 7-宗教, 8-奇观）的预留契约。",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["zone_name", "enabled", "researchers", "hours_per_unit", "cost", "operation"],
+        "properties": {
+          "zone_name": {
+            "type": "string",
+            "description": "区域标识名称（medical/entertainment/religion/wonder）。"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "是否在游戏中启用该区域。启用前建议同时完善 room_type 映射与玩法逻辑。",
+            "default": false
+          },
+          "researchers": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "建设/运维该区域的研究员占用基数。"
+          },
+          "hours_per_unit": {
+            "type": "number",
+            "minimum": 0,
+            "description": "每单位建设耗时。"
+          },
+          "cost": {
+            "type": "object",
+            "description": "建设成本（键名为资源名）。",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "operation": {
+            "type": "object",
+            "description": "运行期资源消耗/产出契约（未来逻辑接入）。",
+            "additionalProperties": false,
+            "required": ["consume", "produce"],
+            "properties": {
+              "consume": {
+                "type": "object",
+                "description": "每小时消耗资源定义。",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "produce": {
+                "type": "object",
+                "description": "每小时产出资源定义。",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "default": {}
+    }
+  }
+}

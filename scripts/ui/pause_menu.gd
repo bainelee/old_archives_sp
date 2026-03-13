@@ -66,7 +66,8 @@ func show_menu() -> void:
 
 func hide_menu() -> void:
 	visible = false
-	get_tree().paused = false
+	## 关闭菜单时根据时间是否在流逝决定 tree.paused，避免时间暂停时恢复游戏逻辑
+	get_tree().paused = not (GameTime and GameTime.is_flowing)
 
 
 func _on_resume() -> void:

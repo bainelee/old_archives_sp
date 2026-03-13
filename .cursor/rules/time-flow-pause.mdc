@@ -1,0 +1,48 @@
+---
+description: 游戏时间流逝与暂停规范，防止研究员等时间驱动逻辑在暂停时仍执行
+globs:
+  - "scripts/core/game_time.gd"
+  - "scripts/game/researcher_lifecycle.gd"
+  - "scripts/actors/researcher*.gd"
+  - "scripts/core/personnel_erosion_core.gd"
+  - "scripts/ui/pause_menu.gd"
+  - "scripts/ui/ui_main.gd"
+alwaysApply: false
+---
+
+# 时间流逝与暂停规范
+
+当 `GameTime.is_flowing == false` 时，游戏时间视为暂停，**所有**动态逻辑（研究员、emoji、侵蚀、产出等）必须停止。
+
+## 主机制：get_tree().paused（与 is_flowing 解耦）
+
+`tree.paused` 与 `is_flowing` 分离：清理/建设模式会设 `is_flowing=false` 但需保持输入可用（房间选择、右键退出），故不在 `is_flowing` setter 中统一设置 `tree.paused`。
+
+| 位置 | 逻辑 |
+|------|------|
+| `game_time.gd` | `is_flowing` setter 不设置 `tree.paused` |
+| `time_panel.gd` | 用户点击播放/暂停时：`get_tree().paused = not GameTime.is_flowing` |
+| `game_main_save.gd` | 读档恢复 `is_flowing=false` 时：`tree.paused = true` |
+| `game_main_cleanup.gd` | 进入：`tree.paused = false` + `SimulationRoot.process_mode = DISABLED`；退出：恢复 `tree.paused` + `SimulationRoot.process_mode = INHERIT` |
+| `game_main_construction.gd` | 同上 |
+| `pause_menu.gd` | `show_menu`：`tree.paused = true`；`hide_menu`：`tree.paused = not GameTime.is_flowing` |
+| `ui_main.gd` | `process_mode = PROCESS_MODE_ALWAYS`，时间面板在 tree 暂停时可点击 |
+
+## 补充守卫（防遗漏）
+
+以下位置保留 `is_flowing` 守卫，作为双重保障：
+
+| 模块 | 守卫位置 |
+|------|----------|
+| `researcher_lifecycle.gd` | `_on_time_updated` 入口 |
+| `researcher_3d.gd` | `start_idle`、`_schedule_next_move` |
+| `game_time.gd` | `_process` 中 `if not is_flowing: return` |
+
+## SimulationRoot 结构
+
+`SimulationRoot` 仅包含 `ResearcherLifecycle`（研究员生命周期逻辑）。`ArchivesBase0` 保持挂于 `GameMain` 下，以便清理/建设模式下房间射线检测（Area3D）仍可命中。研究员暂停由 `is_flowing` + `flowing_changed` 控制。
+
+## 历史问题
+
+- 曾因分散修复、信号连接时机、子节点 process_mode 等导致部分动态逻辑（如 emoji 周期）在暂停时仍执行。
+- 解决：引入 SimulationRoot 结构，用单一 process_mode 开关控制模拟子树；清理/建设时 tree 不暂停以保留输入，仅 SimulationRoot 禁用。

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "erosion_probability": {
+    "extreme": 80,
+    "exposed": 50,
+    "weak": 20
+  },
+  "risk": {
+    "threshold_per_7_days": 5
+  },
+  "cure": {
+    "interval_days": 3,
+    "immunity_days": 7,
+    "probability": {
+      "adequate": 30,
+      "perfect": 80
+    }
+  },
+  "death_curve": {
+    "half_days": 112,
+    "full_days": 140,
+    "exponent": 3.1
+  },
+  "calamity": {
+    "per_eroded_per_hour": 1,
+    "max_value": 30000
+  }
+}

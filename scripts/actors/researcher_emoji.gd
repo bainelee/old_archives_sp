@@ -2,6 +2,9 @@ extends Sprite3D
 ## Phase 5: 研究员头顶表情。由 Researcher3D.set_emoji_state(flags) 驱动。
 ## 显示/隐藏 0.15s 缓动；0.8s/2s 事件表情；4s 周期随机表情。
 
+## 调试：暂停时研究员 emoji/移动 问题，输出 [ResearcherPause] 日志
+const RESEARCHER_PAUSE_DEBUG := false
+
 const BASE_SCALE: float = 0.8
 const TWEEN_SHOW_DURATION: float = 0.15
 const TWEEN_HIDE_DURATION: float = 0.15
@@ -37,6 +40,58 @@ func _ready() -> void:
 	visible = false
 	_stop_tweens()
 	_ensure_timers()
+	if GameTime and not GameTime.flowing_changed.is_connected(_on_flowing_changed):
+		GameTime.flowing_changed.connect(_on_flowing_changed)
+	_update_timers_for_flowing()
+
+
+func _exit_tree() -> void:
+	## 不在 _exit_tree 中 disconnect：父 researcher_3d reparent 时本节点随之 _exit_tree，disconnect 会导致连接丢失。
+	## 节点 freed 时引擎会清理连接。
+	pass
+
+
+## 供 Researcher3D.force_sync_flowing_state 调用，强制同步 Timer/Tween 暂停状态
+func sync_timers_for_flowing() -> void:
+	_update_timers_for_flowing()
+
+
+func _on_flowing_changed(_is_flowing: bool) -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var pid: int = _get_parent_researcher_id()
+		var flowing: bool = GameTime != null and GameTime.is_flowing
+		var short_p: bool = _short_timer.paused if _short_timer else false
+		var long_p: bool = _long_timer.paused if _long_timer else false
+		var periodic_p: bool = _periodic_timer.paused if _periodic_timer else false
+		var my_path: String = str(get_path()) if is_inside_tree() else "not_in_tree"
+		var parent_path: String = str(get_parent().get_path()) if get_parent() else ""
+		print("[ResearcherPause] emoji_flowing parent_id=%d path=%s parent=%s is_flowing=%s short=%s long=%s periodic=%s" % [
+			pid, my_path, parent_path, flowing, short_p, long_p, periodic_p])
+	_update_timers_for_flowing()
+
+
+## 游戏时间暂停时暂停本节点 Timers/Tweens，恢复时取消暂停
+func _update_timers_for_flowing() -> void:
+	var paused: bool = GameTime != null and not GameTime.is_flowing
+	if _short_timer:
+		_short_timer.paused = paused
+	if _long_timer:
+		_long_timer.paused = paused
+	if _periodic_timer:
+		_periodic_timer.paused = paused
+	if _show_tween and _show_tween.is_valid():
+		if paused:
+			_show_tween.pause()
+		else:
+			## 仅对未完成的 Tween 调用 play()，避免 "Can't play finished Tween" 报错
+			if _show_tween.get_total_elapsed_time() < TWEEN_SHOW_DURATION - 0.001:
+				_show_tween.play()
+	if _hide_tween and _hide_tween.is_valid():
+		if paused:
+			_hide_tween.pause()
+		else:
+			if _hide_tween.get_total_elapsed_time() < TWEEN_HIDE_DURATION - 0.001:
+				_hide_tween.play()
 
 
 func _load_textures() -> void:
@@ -79,6 +134,11 @@ func _stop_tweens() -> void:
 ## 由 Researcher3D 或生命周期调用。flags: is_walking, phase (Researcher3D.Phase),
 ## no_house, eroded, healing, got_housing, recovered_erosion
 func set_emoji_state(flags: Dictionary) -> void:
+	## 仅在暂停时记录（正常情况下 ResearcherLifecycle 不调用），避免 time_updated 每帧刷屏
+	if RESEARCHER_PAUSE_DEBUG and GameTime and not GameTime.is_flowing:
+		var pid: int = _get_parent_researcher_id()
+		var dbg_phase: int = int(flags.get("phase", -1))
+		print("[ResearcherPause] set_emoji id=%d phase=%d is_flowing=false ANOMALY" % [pid, dbg_phase])
 	_current_flags = flags
 	var is_walking: bool = bool(flags.get("is_walking", false))
 	var phase: int = int(flags.get("phase", Researcher3D.Phase.WANDER))
@@ -232,6 +292,16 @@ func _stop_periodic() -> void:
 		_periodic_timer.stop()
 
 
+func _get_parent_researcher_id() -> int:
+	var anchor: Node = get_parent()
+	if not anchor:
+		return -1
+	var r3d: Node = anchor.get_parent()
+	if r3d and "researcher_id" in r3d:
+		return int(r3d.researcher_id)
+	return -1
+
+
 func _start_periodic_if_needed() -> void:
 	if _periodic_timer.is_stopped() and not _continuous_walking:
 		_periodic_timer.wait_time = PERIODIC_INTERVAL + randf_range(-PERIODIC_JITTER, PERIODIC_JITTER)
@@ -239,16 +309,37 @@ func _start_periodic_if_needed() -> void:
 
 
 func _on_short_timer_timeout() -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var pid: int = _get_parent_researcher_id()
+		var flowing: bool = GameTime != null and GameTime.is_flowing
+		var dbg_phase: int = int(_current_flags.get("phase", -1))
+		print("[ResearcherPause] emoji_timeout type=short id=%d is_flowing=%s phase=%d ABORT=%d" % [pid, flowing, dbg_phase, 0 if flowing else 1])
+	if GameTime and not GameTime.is_flowing:
+		return
 	_hide_with_tween()
 	_start_periodic_if_needed()
 
 
 func _on_long_timer_timeout() -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var pid: int = _get_parent_researcher_id()
+		var flowing: bool = GameTime != null and GameTime.is_flowing
+		var dbg_phase: int = int(_current_flags.get("phase", -1))
+		print("[ResearcherPause] emoji_timeout type=long id=%d is_flowing=%s phase=%d ABORT=%d" % [pid, flowing, dbg_phase, 0 if flowing else 1])
+	if GameTime and not GameTime.is_flowing:
+		return
 	_hide_with_tween()
 	_start_periodic_if_needed()
 
 
 func _on_periodic_timer_timeout() -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var pid: int = _get_parent_researcher_id()
+		var flowing: bool = GameTime != null and GameTime.is_flowing
+		var dbg_phase: int = int(_current_flags.get("phase", -1))
+		print("[ResearcherPause] emoji_timeout type=periodic id=%d is_flowing=%s phase=%d ABORT=%d" % [pid, flowing, dbg_phase, 0 if flowing else 1])
+	if GameTime and not GameTime.is_flowing:
+		return
 	if _is_showing or _continuous_walking:
 		return
 	var phase: int = int(_current_flags.get("phase", Researcher3D.Phase.WANDER))

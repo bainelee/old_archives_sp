@@ -2,52 +2,16 @@
   "description": "游戏数值数据，运行时从 res://datas/game_values.json 加载。设计来源：docs/design/0-values/01-game-values.md。数据键名与 00-project-keywords.md 一致。",
   "_fields_comment": {
     "factor_caps": "四种因子的储藏上限，达到后不再获得；键名：cognition/computation/willpower/permission",
-    "researcher_cognition": "研究员认知消耗：每小时每人消耗 1",
-    "shelter": "档案馆核心庇护能量：energy_levels 按等级 cf/h、cf_per_day（可选，日 CF 上限）、energy_cap；energy_per_room_max 每房庇护上限；room_types_no_shelter 不参与分配的房间类型",
-    "cleanup": "房间清理需求",
-    "construction": "建设区域需求，键为 zone_type（1=研究区 2=造物区 3=事务所 4=生活区）",
-    "housing": "住房相关",
     "research_output": "研究区产出，键为 room_type（0=图书室 1=机房 2=教学室 3=资料库）",
     "creation_output": "造物区产出，键为 room_type（5=实验室 6=推理室）",
-    "remodel": "空房间改造消耗"
+    "remodel": "空房间改造消耗",
+    "_moved_to_split_configs": "researcher_cognition/cleanup/construction/housing/shelter 已迁移到独立 json：researcher_system/cleanup_system/construction_system/shelter_system"
   },
   "factor_caps": {
     "cognition": 6000,
     "computation": 60000,
     "willpower": 6000,
     "permission": 6000
-  },
-  "researcher_cognition": {
-    "consumption_per_researcher_per_hour": 1
-  },
-  "shelter": {
-    "level_min": 1,
-    "level_max": 5,
-    "initial_level": 1,
-    "energy_per_room_max": 5,
-    "energy_levels": [
-      {"level": 1, "cf_per_hour": 30, "energy_cap": 30},
-      {"level": 2, "cf_per_hour": 60, "energy_cap": 60},
-      {"level": 3, "cf_per_hour": 120, "energy_cap": 120},
-      {"level": 4, "cf_per_hour": 240, "energy_cap": 240},
-      {"level": 5, "cf_per_hour": 480, "energy_cap": 480}
-    ],
-    "room_types_no_shelter": [4, 9, 10]
-  },
-  "cleanup": [
-    {"units_min": 3, "units_max": 5, "researchers": 2, "info": 20, "hours": 3},
-    {"units_min": 6, "units_max": 7, "researchers": 3, "info": 40, "hours": 5}
-  ],
-  "construction": {
-    "1": {"researchers": 2, "info": 100, "permission": 60, "hours_per_unit": 2},
-    "2": {"researchers": 2, "info": 100, "permission": 60, "hours_per_unit": 2},
-    "3": {"researchers": 2, "info": 100, "permission": 120, "hours_per_unit": 2},
-    "4": {"researchers": 1, "info": 50, "permission": 0, "hours_per_unit": 1}
-  },
-  "housing": {
-    "dormitory_units": 3,
-    "housing_per_dormitory": 4,
-    "housing_per_researcher": 1
   },
   "research_output": {
     "0": {"resource": "cognition", "per_unit_per_hour": 5},

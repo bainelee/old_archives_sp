@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "shelter": {
+    "level_min": 1,
+    "level_max": 5,
+    "initial_level": 1,
+    "energy_per_room_max": 5,
+    "energy_levels": [
+      {
+        "level": 1,
+        "cf_per_hour": 30,
+        "energy_cap": 30
+      },
+      {
+        "level": 2,
+        "cf_per_hour": 60,
+        "energy_cap": 60
+      },
+      {
+        "level": 3,
+        "cf_per_hour": 120,
+        "energy_cap": 120
+      },
+      {
+        "level": 4,
+        "cf_per_hour": 240,
+        "energy_cap": 240
+      },
+      {
+        "level": 5,
+        "cf_per_hour": 480,
+        "energy_cap": 480
+      }
+    ],
+    "room_types_no_shelter": [4, 9, 10]
+  }
+}

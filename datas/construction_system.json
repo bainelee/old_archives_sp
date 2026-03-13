@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "construction": {
+    "1": {
+      "researchers": 2,
+      "info": 100,
+      "permission": 60,
+      "hours_per_unit": 2
+    },
+    "2": {
+      "researchers": 2,
+      "info": 100,
+      "permission": 60,
+      "hours_per_unit": 2
+    },
+    "3": {
+      "researchers": 2,
+      "info": 100,
+      "permission": 120,
+      "hours_per_unit": 2
+    },
+    "4": {
+      "researchers": 1,
+      "info": 50,
+      "permission": 0,
+      "hours_per_unit": 1
+    }
+  },
+  "production": {
+    "creation_pause_check_hours": 24,
+    "max_hours_per_frame": 24
+  },
+  "zone_extensions": {
+    "5": {
+      "zone_name": "medical",
+      "enabled": false,
+      "researchers": 2,
+      "hours_per_unit": 2,
+      "cost": {
+        "info": 120,
+        "permission": 80
+      },
+      "operation": {
+        "consume": {},
+        "produce": {}
+      }
+    },
+    "6": {
+      "zone_name": "entertainment",
+      "enabled": false,
+      "researchers": 2,
+      "hours_per_unit": 2,
+      "cost": {
+        "info": 120,
+        "permission": 80
+      },
+      "operation": {
+        "consume": {},
+        "produce": {}
+      }
+    },
+    "7": {
+      "zone_name": "religion",
+      "enabled": false,
+      "researchers": 2,
+      "hours_per_unit": 2,
+      "cost": {
+        "info": 120,
+        "permission": 80
+      },
+      "operation": {
+        "consume": {},
+        "produce": {}
+      }
+    },
+    "8": {
+      "zone_name": "wonder",
+      "enabled": false,
+      "researchers": 3,
+      "hours_per_unit": 3,
+      "cost": {
+        "info": 200,
+        "permission": 150
+      },
+      "operation": {
+        "consume": {},
+        "produce": {}
+      }
+    }
+  }
+}

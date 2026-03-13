@@ -178,6 +178,13 @@ static func enter_selecting_zone_mode(game_main: Node2D) -> void:
 	if GameTime:
 		game_main.set("_time_was_flowing_before_construction", GameTime.is_flowing)
 		GameTime.is_flowing = false
+	for node in game_main.get_tree().get_nodes_in_group("researcher"):
+		if node.has_method("force_sync_flowing_state"):
+			node.call("force_sync_flowing_state")
+	game_main.get_tree().paused = false
+	var sim_root: Node = game_main.get_node_or_null("SimulationRoot")
+	if sim_root:
+		sim_root.process_mode = Node.PROCESS_MODE_DISABLED
 	var overlay: Node = game_main.call("_get_construction_overlay")
 	if overlay and overlay.has_method("show_construction_selecting_ui"):
 		overlay.show_construction_selecting_ui()
@@ -201,6 +208,13 @@ static func exit_mode(game_main: Node2D) -> void:
 		ui.set_construction_blocking(false)
 	if GameTime and game_main.get("_time_was_flowing_before_construction"):
 		GameTime.is_flowing = true
+	for node in game_main.get_tree().get_nodes_in_group("researcher"):
+		if node.has_method("force_sync_flowing_state"):
+			node.call("force_sync_flowing_state")
+	game_main.get_tree().paused = not (GameTime and GameTime.is_flowing)
+	var sim_root: Node = game_main.get_node_or_null("SimulationRoot")
+	if sim_root:
+		sim_root.process_mode = Node.PROCESS_MODE_INHERIT
 	game_main.queue_redraw()
 
 

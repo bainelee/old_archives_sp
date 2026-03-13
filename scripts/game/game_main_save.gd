@@ -214,6 +214,9 @@ static func apply_time(d: Dictionary) -> void:
 		GameTime.set_total_hours(float(t.get("total_game_hours", 0)))
 		GameTime.is_flowing = bool(t.get("is_flowing", true))
 		GameTime.speed_multiplier = float(t.get("speed_multiplier", 1.0))
+		## 读档恢复暂停状态时同步 tree.paused
+		if not GameTime.is_flowing and GameTime.is_inside_tree():
+			GameTime.get_tree().paused = true
 
 
 static func apply_resources(game_main: Node2D, d: Dictionary) -> void:

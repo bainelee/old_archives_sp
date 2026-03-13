@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "cleanup": [
+    {
+      "units_min": 3,
+      "units_max": 5,
+      "researchers": 2,
+      "info": 20,
+      "hours": 3
+    },
+    {
+      "units_min": 6,
+      "units_max": 7,
+      "researchers": 3,
+      "info": 40,
+      "hours": 5
+    }
+  ]
+}

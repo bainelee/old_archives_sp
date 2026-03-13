@@ -12,16 +12,32 @@
 
 | 文件 | 内容 | 加载器 |
 |------|------|--------|
-| `datas/game_values.json` | 消耗、产出、建设、清理、住房、改造 | GameValues (Autoload) |
+| `datas/game_values.json` | 基础经济与产出、改造 | GameValues (Autoload) |
+| `datas/time_system.json` | 时间推进、日历、倍速 | GameValues -> GameTime |
+| `datas/cleanup_system.json` | 清理需求 | GameValues |
+| `datas/construction_system.json` | 建设需求、生产推进阈值 | GameValues |
+| `datas/researcher_system.json` | 研究员认知/危机/住房 | GameValues |
+| `datas/erosion_system.json` | 侵蚀、治愈、死亡、灾厄 | GameValues |
+| `datas/shelter_system.json` | 庇护等级、分配参数 | GameValues |
 | `datas/game_base.json` | 新游戏开局资源默认值 | SaveManager |
 
-`docs/design/0-values/01-game-values.md` 为设计文档，**不打包进游戏**，游戏逻辑以 `game_values.json` 为唯一运行时数据源。
+`docs/design/0-values/01-game-values.md` 为设计文档，**不打包进游戏**。字段解释以 `datas/schemas/*.schema.json` 为准，完整索引见 `00-data-driven-index.md`。
 
 ### 1.2 GameValues Autoload
 
 - **路径**：`scripts/core/game_values.gd`
 - **时机**：`_ready()` 时加载 JSON，之后所有 `get_*` 从内存读取
-- **接口**：提供 `get_researcher_cognition_per_hour()`、`get_construction_cost()`、`get_cleanup_for_units()` 等
+- **接口**：提供 `get_researcher_cognition_per_hour()`、`get_construction_cost()`、`get_cleanup_for_units()`、`get_time_real_seconds_per_game_hour()` 等
+- **Phase 2 契约说明**：`researcher_system.recruitment/housing_linkage`、`construction_system.zone_extensions` 已进入数据层；逻辑接入按系统迭代推进
+- **Phase 2.5 访问层**：已提供只读 getter（如 `get_recruitment_config()`、`get_housing_linkage_config()`、`get_zone_extension_config()`），方便后续逻辑模块无缝接入
+- **Phase 2.6 逻辑接入**：`construction_overlay.gd` 已根据 `zone_extensions.enabled` 过滤 5–8 区按钮；招募 UI 待实现后接入 `recruitment.enabled`
+
+### 1.3 Autoload 依赖顺序
+
+- **PersonnelErosionCore**、**GameTime** 在 `_ready()` 中从 GameValues 读取配置，故 GameValues 须已就绪。
+- 当前 `project.godot` 顺序：LocaleManager → GameTime → ErosionCore → **GameValues** → PersonnelErosionCore → SaveManager。
+- GameTime 早于 GameValues，依赖 `GameValues.ensure_loaded()` 触发首次加载；PersonnelErosionCore 晚于 GameValues，直接读取即可。
+- 调整 autoload 顺序时，确保 **PersonnelErosionCore 在 GameValues 之后**。
 
 ---
 
@@ -70,16 +86,28 @@ if gv:
 
 - **条件**：`OS.has_feature("editor_runtime")` 为 true（从编辑器 F5 运行）
 - **间隔**：2 秒
-- **机制**：比较 `game_values.json` 内容 hash，变化则重新解析并替换 `_data`
+- **机制**：比较各配置文件内容 hash，变化则调用 `reload()`，重新解析并替换内存数据
 - **导出后**：不启用，因 `res://` 已打包进 PCK 无法修改
 
-### 3.3 数值同步子代理
+### 3.3 热重载后配置刷新（config_reloaded）
+
+- **信号**：`GameValues.reload()` 成功后发出 `config_reloaded`
+- **连接方**：PersonnelErosionCore、GameTime、construction_overlay 已连接该信号，热重载后自动刷新各自缓存的配置
+- **按需读取**：zone_type、room_info、construction_hover_panel 等每次调用 getter 时从 GameValues 取数，热重载后下次调用即生效，无需特殊处理
+
+### 3.4 运行时轻量校验（开发期）
+
+- `GameValues` 在加载各 `datas/*.json` 后，会执行轻量结构校验（必填键与基础类型）。
+- 校验只在 `editor_runtime` 下输出 `push_warning`，不会阻断游戏运行。
+- warning 会标注类似 `time_system.calendar`、`game_values.creation_output.5` 的路径，便于快速定位配置问题。
+
+### 3.5 数值同步子代理
 
 当用户表示「调整数值」「我调整了数值」等时，按 `.cursor/subagents/game-values-sync.md` 执行全量同步：
 
-- 更新 `datas/game_values.json`、`datas/game_base.json`
+- 更新 `datas/game_values.json`、`datas/game_base.json` 及拆分后的系统配置文件
 - 同步 `docs/design/0-values/01-game-values.md` 及相关设计文档
-- 确保脚本中的数值引用与 JSON 一致（脚本已全部改为引用，无需同步硬编码）
+- 确保脚本中的数值引用与 JSON 一致（避免新增硬编码）
 
 ---
 

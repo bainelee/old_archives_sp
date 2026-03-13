@@ -4,14 +4,9 @@
 
 ## game_values.json
 
-游戏数值数据，供 `GameValues`（Autoload）运行时加载。设计来源为 `docs/design/0-values/01-game-values.md`；该设计文档不打包进游戏，故游戏逻辑应读取本 JSON 作为唯一数据源。
+基础经济与产出数据，供 `GameValues`（Autoload）运行时加载。设计来源为 `docs/design/0-values/01-game-values.md`；该设计文档不打包进游戏。
 
 - `factor_caps`：四种因子储藏上限（cognition/computation/willpower/permission），达上限后不再获得
-- `researcher_cognition`：研究员认知消耗（每小时每人）
-- `shelter`：档案馆核心庇护等级、范围档位、消耗倍率
-- `cleanup`：房间清理需求（按房间单位，支持 `units_min`/`units_max`）
-- `construction`：建设区域需求（按 zone_type）
-- `housing`：住房相关（宿舍单位、住房数量）
 - `research_output`：研究区产出（按 room_type）
 - `creation_output`：造物区产出（按 room_type）
 - `remodel`：空房间改造消耗
@@ -24,7 +19,18 @@
 - **编辑器 F5 运行**：保存后约 2 秒内自动检测并重载
 - **手动**：调用 `GameValues.reload()` 可立即生效
 
-详见 [02 - 游戏数值运行时系统](../docs/design/0-values/02-game-values-runtime.md)。
+详见 [00 - 数据驱动配置索引](../docs/design/0-values/00-data-driven-index.md) 与 [02 - 游戏数值运行时系统](../docs/design/0-values/02-game-values-runtime.md)。
+
+## 拆分后的系统配置（Phase 1）
+
+- `time_system.json`：时间推进、日历与倍速参数
+- `cleanup_system.json`：清理成本/耗时/研究员占用参数
+- `construction_system.json`：建设参数与生产推进阈值
+- `researcher_system.json`：研究员认知/危机/住房参数
+- `erosion_system.json`：侵蚀、治愈、死亡、灾厄参数
+- `shelter_system.json`：庇护等级与房间分配参数
+
+各字段解释以 `datas/schemas/*.schema.json` 的 `description` 为准。
 
 ## game_base.json
 
@@ -36,6 +42,8 @@
 - `initial_time.total_game_hours`：开局游戏内小时数（通常为 0）
 
 `_fields_comment` 为字段中英对照，加载时需跳过（以 `_` 开头的键仅作说明用）。所有数值为整数。
+
+对应 schema：`datas/schemas/game_base.schema.json`
 
 ## room_info.json（新版本，v2）
 
@@ -67,6 +75,10 @@
 - **items_in_room**：房间内道具，`item_position` 为格子坐标 [x, y, z]
 - **room_resources**：`type` 对应 RoomInfo.ResourceType 枚举，`amount` 为数量
 
+对应 schema：`datas/schemas/room_info.schema.json`
+
 ## room_info_legacy.json（旧版，2D 地图编辑器用）
 
 2D 地图编辑器模板库，从地图槽位导出。编辑器保存/导入模板、本地化同步脚本均引用此文件。每个房间 `id` 为 ROOM_XXX 格式。
+
+对应 schema：`datas/schemas/room_info_legacy.schema.json`

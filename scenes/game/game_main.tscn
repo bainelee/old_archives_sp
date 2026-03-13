@@ -8,9 +8,13 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/cleanup_overlay.tscn" id="7_cleanup"]
 [ext_resource type="PackedScene" path="res://scenes/ui/construction_overlay.tscn" id="8_construction"]
 [ext_resource type="PackedScene" path="res://scenes/ui/test_figma_page.tscn" id="9_test_figma"]
+[ext_resource type="Script" uid="uid://byid0yvkr2jei" path="res://scripts/game/game_main_input_handler.gd" id="10_input_handler"]
 
 [node name="GameMain" type="Node2D" unique_id=857920342]
 script = ExtResource("1_game_main")
+
+[node name="GameMainInputHandler" type="Node" parent="." unique_id=900000002]
+script = ExtResource("10_input_handler")
 
 [node name="UIMain" parent="." unique_id=2043499112 instance=ExtResource("3_ui_main")]
 
@@ -25,6 +29,8 @@ script = ExtResource("1_game_main")
 [node name="TestFigmaPage" parent="." unique_id=1564220616 instance=ExtResource("9_test_figma")]
 
 [node name="ArchivesBase0" parent="." unique_id=1866609128 instance=ExtResource("2_archives")]
+
+[node name="SimulationRoot" type="Node" parent="." unique_id=900000001]
 
 [node name="game_main_camera" type="Camera3D" parent="." unique_id=787419857]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.94, 30)

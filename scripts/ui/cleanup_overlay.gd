@@ -23,6 +23,8 @@ const PROGRESS_RING_RADIUS := 40.0
 
 
 func _ready() -> void:
+	## 清理模式时 is_flowing=false 会触发 tree.paused，覆盖层需 ALWAYS 以便用户可操作
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 11
 	_progress_rings_container = get_node_or_null("ProgressRingsContainer") as Control
 	_confirm_container.visible = false
@@ -151,5 +153,22 @@ func hide_progress() -> void:
 
 
 func _process(_delta: float) -> void:
-	for ring in _progress_rings.values():
-		ring.queue_redraw()
+	## 每帧从 3D 场景重算房间在屏幕上的位置，使镜头平移/缩放时（含暂停时）进度条、确认按钮、悬停面板仍正确跟随
+	var gm: Node2D = get_parent() as Node2D
+	var vp: Viewport = get_viewport() if gm else null
+	if _hover_panel.visible and vp and has_method("update_hover_position"):
+		update_hover_position(vp.get_mouse_position(), vp.get_visible_rect().size)
+	if gm and gm.has_method("_room_center_to_screen"):
+		if _confirm_container.visible:
+			var confirm_idx: int = int(gm.get("_cleanup_confirm_room_index"))
+			if confirm_idx >= 0:
+				var pos: Vector2 = gm.call("_room_center_to_screen", confirm_idx)
+				_confirm_container.position = pos - Vector2(CONFIRM_SIZE / 2.0, CONFIRM_SIZE / 2.0)
+		for rid in _progress_rings:
+			var pos: Vector2 = gm.call("_room_center_to_screen", rid)
+			var r: Control = _progress_rings[rid]
+			r.position = pos - Vector2(PROGRESS_RING_RADIUS, PROGRESS_RING_RADIUS)
+			r.queue_redraw()
+	else:
+		for ring in _progress_rings.values():
+			ring.queue_redraw()

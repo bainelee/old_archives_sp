@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/erosion_system.schema.json",
+  "title": "ErosionSystemConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "erosion_probability", "risk", "cure", "death_curve", "calamity"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "侵蚀系统配置版本。变更字段语义时递增。",
+      "minimum": 1,
+      "default": 1
+    },
+    "erosion_probability": {
+      "type": "object",
+      "description": "不同庇护等级区间下的每日侵蚀概率（百分比）。",
+      "additionalProperties": false,
+      "required": ["extreme", "exposed", "weak"],
+      "properties": {
+        "extreme": {
+          "type": "integer",
+          "description": "绝境（<= -5）时的每日侵蚀概率（%）。",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 80
+        },
+        "exposed": {
+          "type": "integer",
+          "description": "暴露（-4 到 -2）时的每日侵蚀概率（%）。",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50
+        },
+        "weak": {
+          "type": "integer",
+          "description": "薄弱（-1 到 1）时的每日侵蚀概率（%）。",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 20
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["threshold_per_7_days"],
+      "properties": {
+        "threshold_per_7_days": {
+          "type": "integer",
+          "description": "7 天结算时，侵蚀风险大于该阈值则转为被侵蚀。",
+          "minimum": 0,
+          "default": 5
+        }
+      }
+    },
+    "cure": {
+      "type": "object",
+      "description": "被侵蚀研究员的治愈参数。",
+      "additionalProperties": false,
+      "required": ["interval_days", "immunity_days", "probability"],
+      "properties": {
+        "interval_days": {
+          "type": "integer",
+          "description": "治愈判定周期（天）。",
+          "minimum": 1,
+          "default": 3
+        },
+        "immunity_days": {
+          "type": "integer",
+          "description": "治愈后免疫侵蚀的持续天数。",
+          "minimum": 0,
+          "default": 7
+        },
+        "probability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["adequate", "perfect"],
+          "properties": {
+            "adequate": {
+              "type": "integer",
+              "description": "妥善庇护时的治愈概率（%）。",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 30
+            },
+            "perfect": {
+              "type": "integer",
+              "description": "完美庇护时的治愈概率（%）。",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 80
+            }
+          }
+        }
+      }
+    },
+    "death_curve": {
+      "type": "object",
+      "description": "被侵蚀研究员死亡概率曲线参数。",
+      "additionalProperties": false,
+      "required": ["half_days", "full_days", "exponent"],
+      "properties": {
+        "half_days": {
+          "type": "integer",
+          "description": "达到约 50% 死亡概率所需天数。",
+          "minimum": 1,
+          "default": 112
+        },
+        "full_days": {
+          "type": "integer",
+          "description": "达到 100% 死亡概率的参考天数。",
+          "minimum": 1,
+          "default": 140
+        },
+        "exponent": {
+          "type": "number",
+          "description": "死亡概率曲线指数（越大越后置陡增）。",
+          "minimum": 0.1,
+          "default": 3.1
+        }
+      }
+    },
+    "calamity": {
+      "type": "object",
+      "description": "侵蚀系统对灾厄值的影响参数。",
+      "additionalProperties": false,
+      "required": ["per_eroded_per_hour", "max_value"],
+      "properties": {
+        "per_eroded_per_hour": {
+          "type": "number",
+          "description": "每名被侵蚀研究员每小时增加的灾厄值。",
+          "minimum": 0,
+          "default": 1
+        },
+        "max_value": {
+          "type": "number",
+          "description": "灾厄值上限。",
+          "minimum": 0,
+          "default": 30000
+        }
+      }
+    }
+  }
+}

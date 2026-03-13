@@ -26,7 +26,8 @@ static func get_creation_zone_24h_consumption(room: RoomInfo) -> int:
 		return 0
 	var gv: Node = _GameValuesRef.get_singleton()
 	var consume_per_unit: int = gv.get_creation_consume_per_unit_per_hour(room.room_type) if gv else 5
-	return get_room_units(room) * consume_per_unit * 24
+	var pause_hours: int = gv.get_creation_pause_check_hours() if gv else 24
+	return get_room_units(room) * consume_per_unit * pause_hours
 
 
 ## 造物区是否暂停研究：玩家意志不足 24h 消耗
@@ -40,13 +41,13 @@ static func is_creation_zone_paused(room: RoomInfo, ui: Node) -> bool:
 	return have < need
 
 
-const MAX_HOURS_PER_FRAME := 24  ## 单帧上限，与因子面板前实现一致，避免 delta 尖峰导致意志等因子瞬间耗尽
-
 static func process_production(game_main: Node2D, game_hours_delta: float) -> void:
 	var rooms: Array = game_main.get("_rooms")
 	var accumulator: float = game_main.get("_built_room_production_accumulator")
 	accumulator += game_hours_delta
-	var hours_to_process: int = mini(int(accumulator), MAX_HOURS_PER_FRAME)
+	var gv: Node = _GameValuesRef.get_singleton()
+	var max_hours_per_frame: int = gv.get_production_max_hours_per_frame() if gv else 24
+	var hours_to_process: int = mini(int(accumulator), max_hours_per_frame)
 	if hours_to_process <= 0:
 		game_main.set("_built_room_production_accumulator", accumulator)
 		return

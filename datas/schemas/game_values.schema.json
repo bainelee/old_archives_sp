@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/game_values.schema.json",
+  "title": "GameValuesConfig",
+  "type": "object",
+  "description": "基础经济与产出配置。核心循环的时间/侵蚀/庇护/清理/建设已拆分到独立配置文件。",
+  "additionalProperties": true,
+  "required": ["factor_caps", "research_output", "creation_output", "remodel"],
+  "properties": {
+    "factor_caps": {
+      "type": "object",
+      "description": "四种因子的储藏上限。",
+      "additionalProperties": false,
+      "required": ["cognition", "computation", "willpower", "permission"],
+      "properties": {
+        "cognition": { "type": "integer", "minimum": 0, "description": "认知上限。", "default": 6000 },
+        "computation": { "type": "integer", "minimum": 0, "description": "计算上限。", "default": 60000 },
+        "willpower": { "type": "integer", "minimum": 0, "description": "意志上限。", "default": 6000 },
+        "permission": { "type": "integer", "minimum": 0, "description": "权限上限。", "default": 6000 }
+      }
+    },
+    "research_output": {
+      "type": "object",
+      "description": "研究区每单位每小时产出配置（按 room_type）。键名为 room_type 的字符串数字。",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resource", "per_unit_per_hour"],
+        "properties": {
+          "resource": {
+            "type": "string",
+            "enum": ["cognition", "computation", "willpower", "permission"],
+            "description": "该房间类型产出的资源键名。"
+          },
+          "per_unit_per_hour": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "每单位每小时产出数值。"
+          }
+        }
+      },
+      "examples": [
+        {
+          "0": { "resource": "cognition", "per_unit_per_hour": 5 },
+          "1": { "resource": "computation", "per_unit_per_hour": 5 }
+        }
+      ]
+    },
+    "creation_output": {
+      "type": "object",
+      "description": "造物区每单位每小时消耗/产出配置（按 room_type）。键名为 room_type 的字符串数字。",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "consume",
+          "consume_per_unit_per_hour",
+          "produce",
+          "produce_per_unit_per_hour"
+        ],
+        "properties": {
+          "consume": {
+            "type": "string",
+            "enum": ["willpower", "cognition", "computation", "permission", "info", "truth"],
+            "description": "每小时消耗的资源键名。"
+          },
+          "consume_per_unit_per_hour": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "每单位每小时消耗值。"
+          },
+          "produce": {
+            "type": "string",
+            "enum": ["permission", "info", "truth", "cognition", "computation", "willpower"],
+            "description": "每小时产出的资源键名。"
+          },
+          "produce_per_unit_per_hour": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "每单位每小时产出值。"
+          }
+        }
+      },
+      "examples": [
+        {
+          "5": {
+            "consume": "willpower",
+            "consume_per_unit_per_hour": 5,
+            "produce": "permission",
+            "produce_per_unit_per_hour": 5
+          }
+        }
+      ]
+    },
+    "remodel": {
+      "type": "object",
+      "description": "空房间改造的基础资源消耗。",
+      "additionalProperties": false,
+      "required": ["info", "permission", "willpower"],
+      "properties": {
+        "info": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "改造所需信息。"
+        },
+        "permission": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "改造所需权限。"
+        },
+        "willpower": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "改造所需意志。"
+        }
+      }
+    },
+    "_fields_comment": {
+      "type": "object",
+      "description": "注释字段，运行时忽略。"
+    }
+  }
+}

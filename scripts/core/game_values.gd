@@ -1,14 +1,30 @@
 extends Node
 ## 游戏数值加载器（Autoload: GameValues）
-## 运行时从 res://datas/game_values.json 加载数值，供消耗、产出、建设等逻辑调用。
+## 运行时从 res://datas/*.json 加载数值，供消耗、产出、建设等逻辑调用。
 ## 数据来源与设计文档对应：docs/design/0-values/01-game-values.md（该文档不打包进游戏）。
 ## 修改 JSON 后：重启游戏会生效；或调用 reload() 手动重载；开发时每 2 秒自动检测文件变化并重载。
+## 热重载后发出 config_reloaded 信号，缓存型模块可连接以刷新配置。
+
+signal config_reloaded()
 
 const GAME_VALUES_PATH := "res://datas/game_values.json"
+const TIME_SYSTEM_PATH := "res://datas/time_system.json"
+const CLEANUP_SYSTEM_PATH := "res://datas/cleanup_system.json"
+const CONSTRUCTION_SYSTEM_PATH := "res://datas/construction_system.json"
+const RESEARCHER_SYSTEM_PATH := "res://datas/researcher_system.json"
+const EROSION_SYSTEM_PATH := "res://datas/erosion_system.json"
+const SHELTER_SYSTEM_PATH := "res://datas/shelter_system.json"
 const AUTO_RELOAD_INTERVAL := 2.0  ## 开发时自动检测间隔（秒）
 
-var _data: Dictionary = {}
-var _loaded_file_hash: int = 0
+var _data: Dictionary = {}  ## base: game_values.json
+var _time_data: Dictionary = {}
+var _cleanup_data: Dictionary = {}
+var _construction_data: Dictionary = {}
+var _researcher_data: Dictionary = {}
+var _erosion_data: Dictionary = {}
+var _shelter_data: Dictionary = {}
+
+var _loaded_file_hashes: Dictionary = {}
 
 
 func _ready() -> void:
@@ -19,24 +35,40 @@ func _ready() -> void:
 func _load(force: bool = false) -> bool:
 	if not force and not _data.is_empty():
 		return true
-	var file := FileAccess.open(GAME_VALUES_PATH, FileAccess.READ)
-	if file == null:
-		push_error(tr("ERROR_GAME_VALUES_OPEN") % GAME_VALUES_PATH)
+	_data = _load_json_dict(GAME_VALUES_PATH, true)
+	if _data.is_empty():
 		return false
+	_time_data = _load_json_dict(TIME_SYSTEM_PATH)
+	_cleanup_data = _load_json_dict(CLEANUP_SYSTEM_PATH)
+	_construction_data = _load_json_dict(CONSTRUCTION_SYSTEM_PATH)
+	_researcher_data = _load_json_dict(RESEARCHER_SYSTEM_PATH)
+	_erosion_data = _load_json_dict(EROSION_SYSTEM_PATH)
+	_shelter_data = _load_json_dict(SHELTER_SYSTEM_PATH)
+	_validate_loaded_configs()
+	return true
+
+
+func _load_json_dict(path: String, required: bool = false) -> Dictionary:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		if required:
+			push_error(tr("ERROR_GAME_VALUES_OPEN") % path)
+		return {}
 	var content: String = file.get_as_text()
 	file.close()
-	_loaded_file_hash = content.hash()
+	_loaded_file_hashes[path] = content.hash()
 	var json := JSON.new()
 	var err := json.parse(content)
 	if err != OK:
-		push_error(tr("ERROR_GAME_VALUES_JSON") % json.get_error_message())
-		return false
+		if required:
+			push_error(tr("ERROR_GAME_VALUES_JSON") % json.get_error_message())
+		return {}
 	var raw: Variant = json.get_data()
 	if not (raw is Dictionary):
-		push_error(tr("ERROR_GAME_VALUES_ROOT"))
-		return false
-	_data = _filter_comment_keys(raw as Dictionary)
-	return true
+		if required:
+			push_error(tr("ERROR_GAME_VALUES_ROOT"))
+		return {}
+	return _filter_comment_keys(raw as Dictionary)
 
 
 ## 过滤以 _ 开头的说明用键
@@ -61,8 +93,17 @@ func ensure_loaded() -> bool:
 ## 强制重新加载 JSON，修改 game_values.json 后调用可立即生效
 func reload() -> bool:
 	_data = {}
-	_loaded_file_hash = 0
-	return _load()
+	_time_data = {}
+	_cleanup_data = {}
+	_construction_data = {}
+	_researcher_data = {}
+	_erosion_data = {}
+	_shelter_data = {}
+	_loaded_file_hashes.clear()
+	var ok: bool = _load()
+	if ok:
+		config_reloaded.emit()
+	return ok
 
 
 func _start_auto_reload_timer() -> void:
@@ -78,13 +119,137 @@ func _start_auto_reload_timer() -> void:
 
 
 func _check_for_reload() -> void:
-	var file := FileAccess.open(GAME_VALUES_PATH, FileAccess.READ)
-	if file == null:
+	for path in _all_config_paths():
+		var file := FileAccess.open(path, FileAccess.READ)
+		if file == null:
+			continue
+		var content: String = file.get_as_text()
+		file.close()
+		if int(_loaded_file_hashes.get(path, -1)) != content.hash():
+			reload()
+			return
+
+
+func _all_config_paths() -> Array:
+	return [
+		GAME_VALUES_PATH,
+		TIME_SYSTEM_PATH,
+		CLEANUP_SYSTEM_PATH,
+		CONSTRUCTION_SYSTEM_PATH,
+		RESEARCHER_SYSTEM_PATH,
+		EROSION_SYSTEM_PATH,
+		SHELTER_SYSTEM_PATH,
+	]
+
+
+func _validate_loaded_configs() -> void:
+	# 运行时只做轻量结构校验：开发环境给出 warning，发布环境不影响性能。
+	if not OS.has_feature("editor_runtime"):
 		return
-	var content: String = file.get_as_text()
-	file.close()
-	if content.hash() != _loaded_file_hash:
-		reload()
+	_validate_required_keys(_data, "game_values", ["factor_caps", "research_output", "creation_output", "remodel"])
+	_validate_required_keys(_time_data, "time_system", ["version", "time", "calendar", "speed_presets", "speed_range"])
+	_validate_required_keys(_cleanup_data, "cleanup_system", ["version", "cleanup"])
+	_validate_required_keys(_construction_data, "construction_system", ["version", "construction", "production", "zone_extensions"])
+	_validate_required_keys(_researcher_data, "researcher_system", ["version", "cognition", "housing", "housing_linkage", "recruitment"])
+	_validate_required_keys(_erosion_data, "erosion_system", ["version", "erosion_probability", "risk", "cure", "death_curve", "calamity"])
+	_validate_required_keys(_shelter_data, "shelter_system", ["version", "shelter"])
+
+	_validate_type(_time_data.get("time", null), "Dictionary", "time_system.time")
+	_validate_type(_time_data.get("calendar", null), "Dictionary", "time_system.calendar")
+	_validate_type(_time_data.get("speed_presets", null), "Dictionary", "time_system.speed_presets")
+	_validate_type(_time_data.get("speed_range", null), "Dictionary", "time_system.speed_range")
+
+	_validate_type(_cleanup_data.get("cleanup", null), "Array", "cleanup_system.cleanup")
+	_validate_type(_construction_data.get("construction", null), "Dictionary", "construction_system.construction")
+	_validate_type(_construction_data.get("production", null), "Dictionary", "construction_system.production")
+	_validate_type(_construction_data.get("zone_extensions", null), "Dictionary", "construction_system.zone_extensions")
+	_validate_type(_researcher_data.get("cognition", null), "Dictionary", "researcher_system.cognition")
+	_validate_type(_researcher_data.get("housing", null), "Dictionary", "researcher_system.housing")
+	_validate_type(_researcher_data.get("housing_linkage", null), "Dictionary", "researcher_system.housing_linkage")
+	_validate_type(_researcher_data.get("recruitment", null), "Dictionary", "researcher_system.recruitment")
+	_validate_type(_erosion_data.get("erosion_probability", null), "Dictionary", "erosion_system.erosion_probability")
+	_validate_type(_shelter_data.get("shelter", null), "Dictionary", "shelter_system.shelter")
+
+	_validate_factor_caps()
+	_validate_outputs()
+
+
+func _validate_required_keys(data: Dictionary, root_name: String, keys: Array) -> void:
+	for key in keys:
+		if not data.has(key):
+			_warn_config("%s.%s 缺失（将使用运行时 fallback）" % [root_name, str(key)])
+
+
+func _validate_type(value: Variant, expected_type: String, path: String) -> void:
+	match expected_type:
+		"Dictionary":
+			if not (value is Dictionary):
+				_warn_config("%s 类型应为 Dictionary" % path)
+		"Array":
+			if not (value is Array):
+				_warn_config("%s 类型应为 Array" % path)
+		"String":
+			if not (value is String):
+				_warn_config("%s 类型应为 String" % path)
+		"Number":
+			if not (value is int or value is float):
+				_warn_config("%s 类型应为 Number" % path)
+		_:
+			pass
+
+
+func _validate_factor_caps() -> void:
+	var caps: Variant = _data.get("factor_caps", {})
+	if not (caps is Dictionary):
+		_warn_config("game_values.factor_caps 类型应为 Dictionary")
+		return
+	var d: Dictionary = caps
+	for factor_key in ["cognition", "computation", "willpower", "permission"]:
+		if not d.has(factor_key):
+			_warn_config("game_values.factor_caps.%s 缺失" % factor_key)
+		elif not _is_int_or_whole_float(d[factor_key]):
+			_warn_config("game_values.factor_caps.%s 应为整数" % factor_key)
+
+
+func _validate_outputs() -> void:
+	var research: Variant = _data.get("research_output", {})
+	if not (research is Dictionary):
+		_warn_config("game_values.research_output 类型应为 Dictionary")
+	else:
+		for k in (research as Dictionary).keys():
+			var cfg: Variant = (research as Dictionary).get(k, null)
+			if not (cfg is Dictionary):
+				_warn_config("game_values.research_output.%s 类型应为 Dictionary" % str(k))
+				continue
+			if not (cfg as Dictionary).has("resource") or not (cfg as Dictionary).has("per_unit_per_hour"):
+				_warn_config("game_values.research_output.%s 缺少 resource/per_unit_per_hour" % str(k))
+	var creation: Variant = _data.get("creation_output", {})
+	if not (creation is Dictionary):
+		_warn_config("game_values.creation_output 类型应为 Dictionary")
+	else:
+		for k in (creation as Dictionary).keys():
+			var cfg: Variant = (creation as Dictionary).get(k, null)
+			if not (cfg is Dictionary):
+				_warn_config("game_values.creation_output.%s 类型应为 Dictionary" % str(k))
+				continue
+			var cd: Dictionary = cfg
+			for req in ["consume", "consume_per_unit_per_hour", "produce", "produce_per_unit_per_hour"]:
+				if not cd.has(req):
+					_warn_config("game_values.creation_output.%s 缺少 %s" % [str(k), req])
+
+
+## JSON 解析后数字可能为 float，此处接受 int 或整型 float
+func _is_int_or_whole_float(v: Variant) -> bool:
+	if v is int:
+		return true
+	if v is float:
+		var f: float = v
+		return is_equal_approx(floorf(f), f)
+	return false
+
+
+func _warn_config(message: String) -> void:
+	push_warning("[GameValues Validation] %s" % message)
 
 
 ## --- 因子储藏上限 ---
@@ -96,21 +261,37 @@ func get_factor_cap(factor_key: String) -> int:
 
 ## --- 研究员认知消耗 ---
 func get_researcher_cognition_per_hour() -> int:
+	var from_new: int = int(_researcher_data.get("cognition", {}).get("consumption_per_researcher_per_hour", 0))
+	if from_new > 0:
+		return from_new
 	return int(_data.get("researcher_cognition", {}).get("consumption_per_researcher_per_hour", 1))
+
+
+func get_researcher_cognition_per_day() -> int:
+	var from_new: int = int(_researcher_data.get("cognition", {}).get("consumption_per_researcher_per_day", 0))
+	if from_new > 0:
+		return from_new
+	return 24
 
 
 ## --- 庇护能量 ---
 ## 核心能耗等级 1～5，1 CF/h = 1 庇护能量
 func get_shelter_level_min() -> int:
+	if not _shelter_data.is_empty():
+		return int(_shelter_data.get("shelter", {}).get("level_min", 1))
 	return int(_data.get("shelter", {}).get("level_min", 1))
 
 
 func get_shelter_level_max() -> int:
+	if not _shelter_data.is_empty():
+		return int(_shelter_data.get("shelter", {}).get("level_max", 5))
 	return int(_data.get("shelter", {}).get("level_max", 5))
 
 
 ## 返回 energy_levels 数组：{"level", "cf_per_hour", "energy_cap"}
 func get_shelter_energy_levels() -> Array:
+	if not _shelter_data.is_empty():
+		return _shelter_data.get("shelter", {}).get("energy_levels", [])
 	return _data.get("shelter", {}).get("energy_levels", [])
 
 
@@ -131,17 +312,23 @@ func get_shelter_cf_and_cap_for_level(level: int) -> Dictionary:
 
 ## 每个房间由核心提供的庇护能量上限（与侵蚀无关）
 func get_shelter_energy_per_room_max() -> int:
+	if not _shelter_data.is_empty():
+		return int(_shelter_data.get("shelter", {}).get("energy_per_room_max", 5))
 	return int(_data.get("shelter", {}).get("energy_per_room_max", 5))
 
 
 ## 不参与庇护分配的房间类型（RoomInfo.RoomType 枚举值）
 func get_shelter_room_types_no_shelter() -> Array:
+	if not _shelter_data.is_empty():
+		return _shelter_data.get("shelter", {}).get("room_types_no_shelter", [4, 9, 10])
 	return _data.get("shelter", {}).get("room_types_no_shelter", [4, 9, 10])
 
 
 ## --- 房间清理 ---
 ## 返回 [{units或units_min/units_max, researchers, info, hours}, ...]
 func get_cleanup_configs() -> Array:
+	if not _cleanup_data.is_empty():
+		return _cleanup_data.get("cleanup", [])
 	return _data.get("cleanup", [])
 
 
@@ -168,7 +355,9 @@ func get_cleanup_for_units(units: int) -> Variant:
 ## --- 建设区域 ---
 ## zone_type: ZoneType.Type 枚举值（1=研究区 2=造物区 3=事务所 4=生活区）
 func get_construction_config(zone_type: int) -> Dictionary:
-	var construction: Dictionary = _data.get("construction", {})
+	var construction: Dictionary = _construction_data.get("construction", {})
+	if construction.is_empty():
+		construction = _data.get("construction", {})
 	return construction.get(str(zone_type), {})
 
 
@@ -194,11 +383,54 @@ func get_construction_hours_per_unit(zone_type: int) -> float:
 
 ## --- 住房 ---
 func get_housing_per_dormitory() -> int:
+	var from_new: int = int(_researcher_data.get("housing", {}).get("housing_per_dormitory", 0))
+	if from_new > 0:
+		return from_new
 	return int(_data.get("housing", {}).get("housing_per_dormitory", 4))
 
 
 func get_dormitory_units() -> int:
+	var from_new: int = int(_researcher_data.get("housing", {}).get("dormitory_units", 0))
+	if from_new > 0:
+		return from_new
 	return int(_data.get("housing", {}).get("dormitory_units", 3))
+
+
+## --- Phase 2.5 researcher contracts (read-only) ---
+func get_recruitment_config() -> Dictionary:
+	return (_researcher_data.get("recruitment", {}) as Dictionary).duplicate(true)
+
+
+func is_recruitment_enabled() -> bool:
+	return bool(_researcher_data.get("recruitment", {}).get("enabled", false))
+
+
+func get_recruitment_base_batch_size() -> int:
+	return int(_researcher_data.get("recruitment", {}).get("base_batch_size", 20))
+
+
+func get_recruitment_base_progress_per_day() -> float:
+	return float(_researcher_data.get("recruitment", {}).get("base_progress_per_day", 1.0))
+
+
+func get_recruitment_housing_shortage_batch_penalty() -> int:
+	return int(_researcher_data.get("recruitment", {}).get("housing_shortage_batch_penalty_per_person", 1))
+
+
+func get_recruitment_min_batch_size() -> int:
+	return int(_researcher_data.get("recruitment", {}).get("min_batch_size", 1))
+
+
+func get_housing_linkage_config() -> Dictionary:
+	return (_researcher_data.get("housing_linkage", {}) as Dictionary).duplicate(true)
+
+
+func get_no_housing_erosion_probability_multiplier() -> float:
+	return float(_researcher_data.get("housing_linkage", {}).get("no_housing_erosion_probability_multiplier", 2.0))
+
+
+func should_no_housing_skip_cure_for_eroded() -> bool:
+	return bool(_researcher_data.get("housing_linkage", {}).get("no_housing_skip_cure_for_eroded", true))
 
 
 ## --- 研究区产出 ---
@@ -243,3 +475,118 @@ func get_creation_produce_per_unit_per_hour(room_type: int) -> int:
 func get_remodel_cost() -> Dictionary:
 	return (_data.get("remodel", {})).duplicate()
 
+
+## --- Time system ---
+func get_time_real_seconds_per_game_hour() -> float:
+	return float(_time_data.get("time", {}).get("real_seconds_per_game_hour", 3.0))
+
+
+func get_time_hours_per_day() -> int:
+	return int(_time_data.get("calendar", {}).get("hours_per_day", 24))
+
+
+func get_time_days_per_week() -> int:
+	return int(_time_data.get("calendar", {}).get("days_per_week", 7))
+
+
+func get_time_days_per_month() -> int:
+	return int(_time_data.get("calendar", {}).get("days_per_month", 30))
+
+
+func get_time_months_per_year() -> int:
+	return int(_time_data.get("calendar", {}).get("months_per_year", 12))
+
+
+func get_time_speed_preset(preset_name: String) -> float:
+	return float(_time_data.get("speed_presets", {}).get(preset_name, 1.0))
+
+
+func get_time_speed_min() -> float:
+	return float(_time_data.get("speed_range", {}).get("min", 1.0))
+
+
+func get_time_speed_max() -> float:
+	return float(_time_data.get("speed_range", {}).get("max", 96.0))
+
+
+## --- Construction production runtime ---
+func get_creation_pause_check_hours() -> int:
+	return int(_construction_data.get("production", {}).get("creation_pause_check_hours", 24))
+
+
+func get_production_max_hours_per_frame() -> int:
+	return int(_construction_data.get("production", {}).get("max_hours_per_frame", 24))
+
+
+## --- Phase 2.5 zone extension contracts (read-only) ---
+func get_zone_extension_configs() -> Dictionary:
+	return (_construction_data.get("zone_extensions", {}) as Dictionary).duplicate(true)
+
+
+func get_zone_extension_config(zone_type: int) -> Dictionary:
+	return (_construction_data.get("zone_extensions", {}).get(str(zone_type), {}) as Dictionary).duplicate(true)
+
+
+func is_zone_extension_enabled(zone_type: int) -> bool:
+	return bool(_construction_data.get("zone_extensions", {}).get(str(zone_type), {}).get("enabled", false))
+
+
+## --- Erosion runtime ---
+func get_erosion_prob_extreme() -> int:
+	return int(_erosion_data.get("erosion_probability", {}).get("extreme", 80))
+
+
+func get_erosion_prob_exposed() -> int:
+	return int(_erosion_data.get("erosion_probability", {}).get("exposed", 50))
+
+
+func get_erosion_prob_weak() -> int:
+	return int(_erosion_data.get("erosion_probability", {}).get("weak", 20))
+
+
+func get_erosion_risk_threshold_per_7_days() -> int:
+	return int(_erosion_data.get("risk", {}).get("threshold_per_7_days", 5))
+
+
+func get_erosion_cure_interval_days() -> int:
+	return int(_erosion_data.get("cure", {}).get("interval_days", 3))
+
+
+func get_erosion_cure_prob_adequate() -> int:
+	return int(_erosion_data.get("cure", {}).get("probability", {}).get("adequate", 30))
+
+
+func get_erosion_cure_prob_perfect() -> int:
+	return int(_erosion_data.get("cure", {}).get("probability", {}).get("perfect", 80))
+
+
+func get_erosion_immunity_days() -> int:
+	return int(_erosion_data.get("cure", {}).get("immunity_days", 7))
+
+
+func get_erosion_death_days_half() -> int:
+	return int(_erosion_data.get("death_curve", {}).get("half_days", 112))
+
+
+func get_erosion_death_days_full() -> int:
+	return int(_erosion_data.get("death_curve", {}).get("full_days", 140))
+
+
+func get_erosion_death_curve_exponent() -> float:
+	return float(_erosion_data.get("death_curve", {}).get("exponent", 3.1))
+
+
+func get_calamity_per_eroded_per_hour() -> float:
+	return float(_erosion_data.get("calamity", {}).get("per_eroded_per_hour", 1.0))
+
+
+func get_calamity_max_value() -> int:
+	return int(_erosion_data.get("calamity", {}).get("max_value", 30000))
+
+
+func get_cognition_crisis_max_stacks() -> int:
+	return int(_researcher_data.get("cognition", {}).get("crisis", {}).get("max_stacks", 3))
+
+
+func get_calamity_per_impaired_per_day() -> int:
+	return int(_researcher_data.get("cognition", {}).get("crisis", {}).get("calamity_per_impaired_per_day", 10))

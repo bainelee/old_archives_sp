@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/room_info_legacy.schema.json",
+  "title": "RoomInfoLegacyConfig",
+  "type": "object",
+  "description": "2D 编辑器模板房间数据（room_info_legacy.json）。",
+  "additionalProperties": true,
+  "properties": {
+    "rooms": {
+      "type": "array",
+      "description": "旧版房间模板列表（ROOM_XXX）。",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string", "description": "模板房间 ID（如 ROOM_001）。" },
+          "room_name": { "type": "string", "description": "房间名称。" },
+          "size": { "type": "string", "description": "房间尺寸文本（如 3×5）。" },
+          "room_type_id": { "type": "integer", "description": "房间类型枚举 ID。" },
+          "resources": {
+            "type": "array",
+            "description": "旧版资源列表。",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "pre_clean_text": {
+            "description": "清理前文案（字符串或字符串数组）。",
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          },
+          "desc": {
+            "description": "描述文案（字符串或字符串数组）。",
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

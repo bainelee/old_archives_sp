@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/game_base.schema.json",
+  "title": "GameBaseConfig",
+  "type": "object",
+  "description": "新游戏初始资源与时间配置。",
+  "additionalProperties": true,
+  "required": ["initial_resources", "initial_time"],
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "配置文件的人类可读说明。"
+    },
+    "_fields_comment": {
+      "type": "object",
+      "description": "字段说明注释对象（运行时忽略）。"
+    },
+    "initial_resources": {
+      "type": "object",
+      "description": "新游戏开局资源。",
+      "additionalProperties": false,
+      "required": ["factors", "currency", "personnel"],
+      "properties": {
+        "factors": {
+          "type": "object",
+          "description": "四种因子初始值。",
+          "additionalProperties": false,
+          "required": ["cognition", "computation", "willpower", "permission"],
+          "properties": {
+            "cognition": { "type": "integer", "minimum": 0, "description": "初始认知。" },
+            "computation": { "type": "integer", "minimum": 0, "description": "初始计算。" },
+            "willpower": { "type": "integer", "minimum": 0, "description": "初始意志。" },
+            "permission": { "type": "integer", "minimum": 0, "description": "初始权限。" }
+          }
+        },
+        "currency": {
+          "type": "object",
+          "description": "货币类资源初始值。",
+          "additionalProperties": false,
+          "required": ["info", "truth"],
+          "properties": {
+            "info": { "type": "integer", "minimum": 0, "description": "初始信息。" },
+            "truth": { "type": "integer", "minimum": 0, "description": "初始真相。" }
+          }
+        },
+        "personnel": {
+          "type": "object",
+          "description": "人员初始值。",
+          "additionalProperties": false,
+          "required": ["researcher", "labor", "eroded", "investigator"],
+          "properties": {
+            "researcher": { "type": "integer", "minimum": 0, "description": "初始研究员数量。" },
+            "labor": { "type": "integer", "minimum": 0, "description": "初始劳动力（预留字段）。" },
+            "eroded": { "type": "integer", "minimum": 0, "description": "初始被侵蚀人数。" },
+            "investigator": { "type": "integer", "minimum": 0, "description": "初始调查员数量。" }
+          }
+        }
+      }
+    },
+    "initial_time": {
+      "type": "object",
+      "description": "新游戏开局时间。",
+      "additionalProperties": false,
+      "required": ["total_game_hours"],
+      "properties": {
+        "total_game_hours": {
+          "type": "number",
+          "minimum": 0,
+          "description": "开局总游戏小时数。"
+        }
+      }
+    },
+    "prologue_room_ids": {
+      "type": "array",
+      "description": "序章阶段默认可访问房间 ID 列表。",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  }
+}

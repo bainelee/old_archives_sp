@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/researcher_system.schema.json",
+  "title": "ResearcherSystemConfig",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "cognition", "housing", "housing_linkage", "recruitment"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "研究员系统配置版本。变更字段语义时递增。",
+      "minimum": 1,
+      "default": 1
+    },
+    "cognition": {
+      "type": "object",
+      "description": "研究员认知消耗与认知危机参数。",
+      "additionalProperties": false,
+      "required": ["consumption_per_researcher_per_hour", "consumption_per_researcher_per_day", "crisis"],
+      "properties": {
+        "consumption_per_researcher_per_hour": {
+          "type": "integer",
+          "description": "每名研究员每游戏小时消耗的认知值。",
+          "minimum": 0,
+          "default": 1
+        },
+        "consumption_per_researcher_per_day": {
+          "type": "integer",
+          "description": "每名研究员每天消耗的认知值（用于日结算与校验）。",
+          "minimum": 0,
+          "default": 24
+        },
+        "crisis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["max_stacks", "calamity_per_impaired_per_day"],
+          "properties": {
+            "max_stacks": {
+              "type": "integer",
+              "description": "认知危机的最大层数；达到后视为认知失能。",
+              "minimum": 1,
+              "default": 3
+            },
+            "calamity_per_impaired_per_day": {
+              "type": "integer",
+              "description": "每名认知失能研究员每天增加的灾厄值。",
+              "minimum": 0,
+              "default": 10
+            }
+          }
+        }
+      }
+    },
+    "housing": {
+      "type": "object",
+      "description": "研究员住房系统参数。",
+      "additionalProperties": false,
+      "required": ["dormitory_units", "housing_per_dormitory", "housing_per_researcher"],
+      "properties": {
+        "dormitory_units": {
+          "type": "integer",
+          "description": "宿舍房间达到多少单位后视为有效住房区域。",
+          "minimum": 1,
+          "default": 3
+        },
+        "housing_per_dormitory": {
+          "type": "integer",
+          "description": "每个宿舍生活区提供的住房数量。",
+          "minimum": 0,
+          "default": 4
+        },
+        "housing_per_researcher": {
+          "type": "integer",
+          "description": "每名研究员占用的住房数量。",
+          "minimum": 1,
+          "default": 1
+        }
+      }
+    },
+    "housing_linkage": {
+      "type": "object",
+      "description": "住房与侵蚀/治愈的联动参数（Phase 2 契约，逻辑可逐步接入）。",
+      "additionalProperties": false,
+      "required": ["no_housing_erosion_probability_multiplier", "no_housing_skip_cure_for_eroded"],
+      "properties": {
+        "no_housing_erosion_probability_multiplier": {
+          "type": "number",
+          "minimum": 1,
+          "description": "无住房且在岗研究员的侵蚀概率倍率。",
+          "default": 2.0
+        },
+        "no_housing_skip_cure_for_eroded": {
+          "type": "boolean",
+          "description": "无住房的被侵蚀研究员是否跳过治愈判定。",
+          "default": true
+        }
+      }
+    },
+    "recruitment": {
+      "type": "object",
+      "description": "招募系统参数（Phase 2 契约）。",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "base_batch_size",
+        "base_progress_per_day",
+        "housing_shortage_batch_penalty_per_person",
+        "min_batch_size"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "是否启用招募系统。",
+          "default": false
+        },
+        "base_batch_size": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "每轮招募完成时的基础新增研究员数量。",
+          "default": 20
+        },
+        "base_progress_per_day": {
+          "type": "number",
+          "minimum": 0,
+          "description": "每日累积的基础招募进度。",
+          "default": 1.0
+        },
+        "housing_shortage_batch_penalty_per_person": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "每名无住房研究员对招募批次造成的扣减值。",
+          "default": 1
+        },
+        "min_batch_size": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "住房惩罚后招募批次最小值。",
+          "default": 1
+        }
+      }
+    }
+  }
+}

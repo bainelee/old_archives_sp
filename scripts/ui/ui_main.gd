@@ -97,6 +97,8 @@ var investigator_count: int = 0:
 
 
 func _ready() -> void:
+	## 暂停时保持可点击，以便用户可通过时间面板播放按钮恢复时间
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_refresh_all()
 	var btn: Button = get_node_or_null("BottomRightBar/BtnCleanup")
 	if btn:

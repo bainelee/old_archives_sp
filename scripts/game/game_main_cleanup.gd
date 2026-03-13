@@ -2,6 +2,9 @@ class_name GameMainCleanupHelper
 extends RefCounted
 
 ## 清理房间模式逻辑 - 选择、确认、进度、消耗
+
+## 调试：暂停时研究员 emoji/移动 问题，输出 [ResearcherPause] 日志
+const RESEARCHER_PAUSE_DEBUG := false
 ## 详见 docs/design/2-gameplay/04-room-cleanup-system.md
 ## 解锁：仅 unlocked 房间可选中；清理完成时解锁邻接房间（04-room-unlock-adjacency）
 
@@ -151,9 +154,21 @@ static func process_overlay(game_main: Node2D, overlay: Node, delta: float) -> v
 
 
 static func enter_selecting_mode(game_main: Node2D) -> void:
-	game_main.set("_time_was_flowing_before_cleanup", GameTime.is_flowing if GameTime else false)
+	var was_flowing: bool = GameTime.is_flowing if GameTime else false
+	game_main.set("_time_was_flowing_before_cleanup", was_flowing)
+	var will_set: bool = GameTime != null and GameTime.is_flowing
+	if RESEARCHER_PAUSE_DEBUG:
+		print("[ResearcherPause] enter_cleanup is_flowing_before=%s will_set=%s" % [was_flowing, will_set])
 	if GameTime and GameTime.is_flowing:
 		GameTime.is_flowing = false
+	## 强制同步所有研究员的暂停状态，弥补 flowing_changed 可能未到达部分节点（如 reparent 后连接顺序变化）的情况
+	for node in game_main.get_tree().get_nodes_in_group("researcher"):
+		if node.has_method("force_sync_flowing_state"):
+			node.call("force_sync_flowing_state")
+	game_main.get_tree().paused = false
+	var sim_root: Node = game_main.get_node_or_null("SimulationRoot")
+	if sim_root:
+		sim_root.process_mode = Node.PROCESS_MODE_DISABLED
 	game_main.set("_cleanup_mode", CLEANUP_SELECTING)
 	game_main.set("_cleanup_confirm_room_index", -1)
 	game_main.call("_clear_room_selection")
@@ -183,6 +198,13 @@ static func exit_mode(game_main: Node2D) -> void:
 		ui.set_cleanup_blocking(false)
 	if GameTime and game_main.get("_time_was_flowing_before_cleanup"):
 		GameTime.is_flowing = true
+	for node in game_main.get_tree().get_nodes_in_group("researcher"):
+		if node.has_method("force_sync_flowing_state"):
+			node.call("force_sync_flowing_state")
+	game_main.get_tree().paused = not (GameTime and GameTime.is_flowing)
+	var sim_root: Node = game_main.get_node_or_null("SimulationRoot")
+	if sim_root:
+		sim_root.process_mode = Node.PROCESS_MODE_INHERIT
 	overlay.hide_hover()
 	overlay.hide_confirm()
 	game_main.call("_update_room_overlays")

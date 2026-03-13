@@ -74,6 +74,9 @@ func _on_time_updated() -> void:
 
 func _on_play_pause_pressed() -> void:
 	GameTime.toggle_flow()
+	## 仅时间面板暂停时设置 tree.paused，与清理/建设模式解耦
+	if GameTime and is_inside_tree():
+		get_tree().paused = not GameTime.is_flowing
 
 
 func _on_play_pause_mouse_entered() -> void:

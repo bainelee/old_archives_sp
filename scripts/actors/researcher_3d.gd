@@ -1,6 +1,9 @@
 class_name Researcher3D
 extends Node3D
 
+## 调试：暂停时研究员 emoji/移动 问题，输出 [ResearcherPause] 日志
+const RESEARCHER_PAUSE_DEBUG := false
+
 ## 可复用研究员 3D 角色：纸片风格，无骨骼无动画。
 ## 在房间地面上进行周期性、随机、短暂移动，会转身，尽量避免与其他研究员重叠。
 ## 地面约束：position.y 固定为 floor_y，所有移动仅在 XZ 平面进行。
@@ -128,15 +131,19 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	if GameTime:
-		if GameTime.flowing_changed.is_connected(_on_game_time_flowing_changed):
-			GameTime.flowing_changed.disconnect(_on_game_time_flowing_changed)
-		if GameTime.speed_changed.is_connected(_on_game_time_speed_changed):
-			GameTime.speed_changed.disconnect(_on_game_time_speed_changed)
+	## 不在 _exit_tree 中 disconnect flowing_changed/speed_changed：reparent（跨房间移动）会触发 _exit_tree，
+	## 导致连接被意外断开、后续 flowing_changed 无法送达。节点 freed 时引擎会清理连接。
 	stop_idle()
 
 
 func _on_game_time_flowing_changed(_is_flowing: bool) -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var idle_paused: bool = _idle_timer.paused if _idle_timer else false
+		var tween_valid: bool = _move_tween != null and _move_tween.is_valid()
+		var my_path: String = str(get_path()) if is_inside_tree() else "not_in_tree"
+		var parent_path: String = str(get_parent().get_path()) if get_parent() else ""
+		print("[ResearcherPause] r3d_flowing id=%d path=%s parent=%s room=%s is_flowing=%s idletimer_paused=%s movetween_valid=%s" % [
+			researcher_id, my_path, parent_path, _current_room_id, GameTime.is_flowing if GameTime else false, idle_paused, tween_valid])
 	_update_process_mode_for_flowing()
 
 
@@ -159,12 +166,36 @@ func _scaled_duration(real_sec: float) -> float:
 	return real_sec / GameTime.speed_multiplier
 
 
+## 供外部（如进入清理/建设模式时）强制同步暂停状态，弥补 flowing_changed 可能未到达部分研究员的情况
+func force_sync_flowing_state() -> void:
+	_update_process_mode_for_flowing()
+	var emoji: Node = get_node_or_null("EmojiAnchor/EmojiHead")
+	if emoji and emoji.has_method("sync_timers_for_flowing"):
+		emoji.call("sync_timers_for_flowing")
+
+
 ## 游戏时间暂停时禁用本节点处理（Timer/Tween/_process 均暂停），恢复时启用
 func _update_process_mode_for_flowing() -> void:
 	if GameTime and not GameTime.is_flowing:
 		process_mode = Node.PROCESS_MODE_DISABLED
+		## 显式暂停 Timer 和 Tween，确保子节点（含 researcher_emoji）在部分 Godot 配置下不再推进
+		if _idle_timer:
+			_idle_timer.paused = true
+		if _move_tween and _move_tween.is_valid():
+			_move_tween.pause()
+		if _stairs_timer:
+			_stairs_timer.paused = true
 	else:
 		process_mode = Node.PROCESS_MODE_INHERIT
+		if _idle_timer:
+			_idle_timer.paused = false
+		if _move_tween and _move_tween.is_valid():
+			_move_tween.play()
+		if _stairs_timer:
+			_stairs_timer.paused = false
+		## 恢复时若处于 idle 且未在移动中，补调度（处理加载暂停存档时 start_idle 在暂停状态下被调用、Timer 从未启动的情况）
+		if _is_idle_active and not _is_moving:
+			_schedule_next_move()
 
 
 func _process(_delta: float) -> void:
@@ -326,6 +357,9 @@ func start_idle() -> void:
 		_idle_timer.one_shot = true
 		_idle_timer.timeout.connect(_on_idle_timer_timeout)
 		add_child(_idle_timer)
+	## 暂停时不启动 Timer，避免加载暂停存档时 start_idle 在 _update_process_mode 之后调用导致计时器漏停
+	if GameTime and not GameTime.is_flowing:
+		return
 	_schedule_next_move()
 
 
@@ -343,6 +377,8 @@ func stop_idle() -> void:
 func _schedule_next_move() -> void:
 	if not _is_idle_active or not _idle_timer:
 		return
+	if GameTime and not GameTime.is_flowing:
+		return
 	if not is_inside_tree():
 		call_deferred("_schedule_next_move")
 		return
@@ -351,12 +387,22 @@ func _schedule_next_move() -> void:
 
 
 func _on_idle_timer_timeout() -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var flowing: bool = GameTime != null and GameTime.is_flowing
+		print("[ResearcherPause] idle_timeout id=%d is_flowing=%s ABORT=%d" % [researcher_id, flowing, 0 if flowing else 1])
+	if GameTime and not GameTime.is_flowing:
+		return
 	if not _is_idle_active:
 		return
 	_try_move_to_random_target()
 
 
 func _try_move_to_random_target() -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var flowing: bool = GameTime != null and GameTime.is_flowing
+		print("[ResearcherPause] try_move id=%d is_flowing=%s ABORT=%d" % [researcher_id, flowing, 0 if flowing else 1])
+	if GameTime and not GameTime.is_flowing:
+		return
 	var gm: Node = _get_game_main()
 	if gm and gm.has_method("get_wanderable_room_ids") and randf() < WANDER_CROSS_ROOM_CHANCE:
 		var room_a: RoomInfo = gm.get_room_info_by_id(_current_room_id) if gm.has_method("get_room_info_by_id") else null
@@ -455,6 +501,9 @@ func _move_to(target: Vector3, duration: float) -> void:
 
 
 func _on_move_tween_finished() -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var flowing: bool = GameTime != null and GameTime.is_flowing
+		print("[ResearcherPause] move_finished id=%d is_flowing=%s ABORT=%d" % [researcher_id, flowing, 0 if flowing else 1])
 	_is_moving = false
 	var model: Node3D = get_node_or_null("ModelContainer") as Node3D
 	if model:
@@ -462,6 +511,8 @@ func _on_move_tween_finished() -> void:
 	if _move_tween and _move_tween.is_valid():
 		_move_tween.finished.disconnect(_on_move_tween_finished)
 	_move_tween = null
+	if GameTime and not GameTime.is_flowing:
+		return
 	if not _pending_room_cross_target_id.is_empty() and not _pending_cross_is_vertical:
 		_complete_horizontal_room_cross()
 		return
@@ -469,6 +520,11 @@ func _on_move_tween_finished() -> void:
 
 
 func _on_stairs_timer_timeout() -> void:
+	if RESEARCHER_PAUSE_DEBUG:
+		var flowing: bool = GameTime != null and GameTime.is_flowing
+		print("[ResearcherPause] stairs_timeout id=%d is_flowing=%s ABORT=%d" % [researcher_id, flowing, 0 if flowing else 1])
+	if GameTime and not GameTime.is_flowing:
+		return
 	if _pending_room_cross_target_id.is_empty() or not _pending_cross_is_vertical:
 		_schedule_next_move()
 		return
