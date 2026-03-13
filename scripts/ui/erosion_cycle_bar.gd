@@ -35,6 +35,11 @@ func _ready() -> void:
 	_refresh_segments()
 
 
+func _exit_tree() -> void:
+	if GameTime and GameTime.time_updated.is_connected(_on_time_updated):
+		GameTime.time_updated.disconnect(_on_time_updated)
+
+
 func _on_time_updated() -> void:
 	_update_scroll()
 	queue_redraw()

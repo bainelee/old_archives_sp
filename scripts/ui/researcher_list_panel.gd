@@ -27,6 +27,11 @@ func _ready() -> void:
 	if GameTime:
 		GameTime.time_updated.connect(_on_time_updated)
 	_refresh_list()
+
+
+func _exit_tree() -> void:
+	if GameTime and GameTime.time_updated.is_connected(_on_time_updated):
+		GameTime.time_updated.disconnect(_on_time_updated)
 	_list_container.visible = true
 	_detail_container.visible = false
 	hide()

@@ -20,6 +20,68 @@ static func get_grid_size(size_id: String) -> Vector2i:
 	return SIZE_TO_GRID.get(size_id, Vector2i(1, 1))
 
 
+## 两矩形邻接类型："horizontal"（X 方向共边）| "vertical"（Y 方向共边）| ""
+## 若未邻接返回空串。horizontal = 左右门；vertical = 楼梯传送
+static func get_adjacency_type(room_a: RoomInfo, room_b: RoomInfo) -> String:
+	var gx_a: int = room_a.grid_x
+	var gy_a: int = room_a.grid_y
+	var size_a: String = (room_a.size_3d if room_a.size_3d else "base").to_lower()
+	var sz_a: Vector2i = get_grid_size(size_a)
+	var ax1: int = gx_a
+	var ay1: int = gy_a
+	var aw: int = sz_a.x
+	var ah: int = sz_a.y
+	var ax2: int = ax1 + aw
+	var ay2: int = ay1 + ah
+	var gx_b: int = room_b.grid_x
+	var gy_b: int = room_b.grid_y
+	var size_b: String = (room_b.size_3d if room_b.size_3d else "base").to_lower()
+	var sz_b: Vector2i = get_grid_size(size_b)
+	var bx1: int = gx_b
+	var by1: int = gy_b
+	var bw: int = sz_b.x
+	var bh: int = sz_b.y
+	var bx2: int = bx1 + bw
+	var by2: int = by1 + bh
+	if not rects_adjacent(ax1, ay1, aw, ah, bx1, by1, bw, bh):
+		return ""
+	if ax2 == bx1 or bx2 == ax1:
+		return "horizontal"
+	if ay2 == by1 or by2 == ay1:
+		return "vertical"
+	return ""
+
+
+## 返回 room_a 通往 room_b 时使用的门："left" | "right"（仅 horizontal 邻接有效）
+## B 在 A 右侧 → right；B 在 A 左侧 → left
+static func get_door_side_to_adjacent(room_a: RoomInfo, room_b: RoomInfo) -> String:
+	var gx_a: int = room_a.grid_x
+	var gy_a: int = room_a.grid_y
+	var size_a: String = (room_a.size_3d if room_a.size_3d else "base").to_lower()
+	var sz_a: Vector2i = get_grid_size(size_a)
+	var ax1: int = gx_a
+	var ay1: int = gy_a
+	var aw: int = sz_a.x
+	var ah: int = sz_a.y
+	var ax2: int = ax1 + aw
+	var gx_b: int = room_b.grid_x
+	var gy_b: int = room_b.grid_y
+	var size_b: String = (room_b.size_3d if room_b.size_3d else "base").to_lower()
+	var sz_b: Vector2i = get_grid_size(size_b)
+	var bx1: int = gx_b
+	var by1: int = gy_b
+	var bw: int = sz_b.x
+	var bh: int = sz_b.y
+	var bx2: int = bx1 + bw
+	if not rects_adjacent(ax1, ay1, aw, ah, bx1, by1, bw, bh):
+		return "right"
+	if ax2 == bx1:
+		return "right"
+	if bx2 == ax1:
+		return "left"
+	return "right"
+
+
 ## 两矩形是否共边（邻接）
 ## A: [ax1, ax2) × [ay1, ay2), B: [bx1, bx2) × [by1, by2)
 ## 共边 = 不重叠 且 边界相邻（共享一条边）

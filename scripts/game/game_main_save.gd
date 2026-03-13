@@ -30,6 +30,7 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 	var cell_size: int = game_main.get("CELL_SIZE")
 	var rooms: Array = game_main.get("_rooms")
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
+	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
 
 	var map_name: String = "存档"
 	## 不再保存 tiles（2D 网格），archives 模式仅使用 rooms
@@ -43,6 +44,16 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 			rd["zone_building_elapsed"] = data.get("elapsed", 0.0)
 			rd["zone_building_total"] = data.get("total", 1.0)
 			rd["zone_building_zone_type"] = data.get("zone_type", 0)
+			var ids: Array = data.get("researcher_ids", [])
+			if not ids.is_empty():
+				rd["zone_building_researcher_ids"] = ids
+		if cleanup_rooms.has(i):
+			var data: Dictionary = cleanup_rooms[i]
+			rd["cleanup_elapsed"] = data.get("elapsed", 0.0)
+			rd["cleanup_total"] = data.get("total", 1.0)
+			var ids: Array = data.get("researcher_ids", [])
+			if not ids.is_empty():
+				rd["cleanup_researcher_ids"] = ids
 		rooms_data.append(rd)
 	var next_room_id: int = 1
 	for room in rooms:
@@ -81,6 +92,16 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 	}
 	if PersonnelErosionCore:
 		state[KEY_PERSONNEL_EROSION] = PersonnelErosionCore.to_save_dict()
+	## 研究员 3D 位置：id, room_id, position
+	var researchers_3d: Array = []
+	var researcher_count: int = int(resources.get("personnel", {}).get("researcher", 0))
+	for i in researcher_count:
+		var r3d: Node3D = game_main.get_researcher_3d_by_id(i) if game_main.has_method("get_researcher_3d_by_id") else null
+		if r3d and r3d.has_method("get_current_room_id"):
+			var rid: String = r3d.get_current_room_id()
+			var pos: Vector3 = r3d.position
+			researchers_3d.append({"id": i, "room_id": rid, "pos": [pos.x, pos.y, pos.z]})
+	state["researchers_3d"] = researchers_3d
 	return state
 
 
@@ -144,8 +165,10 @@ static func apply_map(game_main: Node2D, d: Dictionary) -> void:
 
 	var rooms: Array = game_main.get("_rooms")
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
+	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
 	rooms.clear()
 	construction_rooms.clear()
+	cleanup_rooms.clear()
 	var rooms_data: Array = m.get(SAVE_KEY_ROOMS, []) as Array
 	for i in rooms_data.size():
 		var room_dict: Variant = rooms_data[i]
@@ -158,11 +181,26 @@ static func apply_map(game_main: Node2D, d: Dictionary) -> void:
 				var el: float = float(elapsed)
 				var tot: float = float(total_val)
 				if el < tot and tot > 0:
-					construction_rooms[i] = {
+					var cdata: Dictionary = {
 						"elapsed": el,
 						"total": tot,
 						"zone_type": int(rd.get("zone_building_zone_type", 0))
 					}
+					var cids: Variant = rd.get("zone_building_researcher_ids", null)
+					if cids is Array and not (cids as Array).is_empty():
+						cdata["researcher_ids"] = (cids as Array).duplicate()
+					construction_rooms[i] = cdata
+			var celapsed: Variant = rd.get("cleanup_elapsed", null)
+			var ctotal: Variant = rd.get("cleanup_total", null)
+			if celapsed != null and ctotal != null:
+				var cel: float = float(celapsed)
+				var ctot: float = float(ctotal)
+				if cel < ctot and ctot > 0:
+					var cpdata: Dictionary = {"elapsed": cel, "total": ctot}
+					var cpids: Variant = rd.get("cleanup_researcher_ids", null)
+					if cpids is Array and not (cpids as Array).is_empty():
+						cpdata["researcher_ids"] = (cpids as Array).duplicate()
+					cleanup_rooms[i] = cpdata
 	ensure_layout_and_prologue(game_main)
 	game_main.call("_sync_researchers_working_in_rooms_to_ui")
 

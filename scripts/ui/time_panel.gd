@@ -35,6 +35,16 @@ func _ready() -> void:
 	_btn_96x.pressed.connect(_on_96x_pressed)
 
 
+func _exit_tree() -> void:
+	if GameTime:
+		if GameTime.flowing_changed.is_connected(_on_flowing_changed):
+			GameTime.flowing_changed.disconnect(_on_flowing_changed)
+		if GameTime.speed_changed.is_connected(_on_speed_changed):
+			GameTime.speed_changed.disconnect(_on_speed_changed)
+		if GameTime.time_updated.is_connected(_on_time_updated):
+			GameTime.time_updated.disconnect(_on_time_updated)
+
+
 func _process(delta: float) -> void:
 	if GameTime.is_flowing:
 		_indicator_rotation += 120.0 * delta  # 度/秒

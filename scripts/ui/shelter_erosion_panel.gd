@@ -43,6 +43,13 @@ func _ready() -> void:
 	_popup.mouse_exited.connect(_on_popup_mouse_exited)
 
 
+func _exit_tree() -> void:
+	if GameTime and GameTime.time_updated.is_connected(_on_time_updated):
+		GameTime.time_updated.disconnect(_on_time_updated)
+	if ErosionCore and ErosionCore.erosion_changed.is_connected(_on_erosion_changed):
+		ErosionCore.erosion_changed.disconnect(_on_erosion_changed)
+
+
 func _reparent_popup_to_canvas_layer() -> void:
 	var canvas: CanvasLayer = null
 	var node: Node = self

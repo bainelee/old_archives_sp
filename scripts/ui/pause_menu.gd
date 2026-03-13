@@ -158,6 +158,12 @@ func _on_settings() -> void:
 
 func _on_quit() -> void:
 	get_tree().paused = false
+	## 退出前自动保存到当前槽位，确保进度不丢失
+	var game_main: Node = get_parent()
+	if game_main and game_main.has_method("collect_game_state") and game_main.get("_current_slot") != null:
+		var slot: int = int(game_main.get("_current_slot"))
+		var game_state: Dictionary = game_main.collect_game_state()
+		SaveManager.save_to_slot(slot, game_state)
 	get_tree().change_scene_to_file(START_MENU_SCENE)
 
 

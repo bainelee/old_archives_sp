@@ -38,6 +38,11 @@ func _ready() -> void:
 	_on_time_updated()
 
 
+func _exit_tree() -> void:
+	if GameTime and GameTime.time_updated.is_connected(_on_time_updated):
+		GameTime.time_updated.disconnect(_on_time_updated)
+
+
 func set_game_main(gm: Node2D) -> void:
 	_game_main = gm
 
@@ -175,19 +180,23 @@ func _update_all_researchers(game_main: Node2D) -> void:
 
 		# Phase 5: 表情状态（is_walking = 移动中或处于 RETURN_HOME/MOVE_TO_WORK）
 		var is_walking: bool = (r3d.has_method("get_is_moving") and r3d.get_is_moving()) or phase == LifePhase.RETURN_HOME or phase == LifePhase.MOVE_TO_WORK
-		var no_house: bool = GameMainShelterHelper.has_no_housing(enriched)
+		## no_house：emoji 用「无住房」= 只要无住房即显示，不限定有工作（侵蚀逻辑的 has_no_housing 仍为「有工作但无住房」）
+		var no_house: bool = not has_housing
 		var eroded: bool = bool(researcher_dict.get("is_eroded", false))
 		var healing: bool = has_housing and eroded
 		var got_housing: bool = has_housing and not _last_had_housing.get(id, false)
 		var recovered_erosion: bool = not eroded and _last_was_eroded.get(id, false)
 		_last_had_housing[id] = has_housing
 		_last_was_eroded[id] = eroded
+		var shelter_level: int = GameMainShelterHelper.get_shelter_level_for_researcher(game_main, enriched)
+		var unsheltered: bool = (shelter_level < 2)
 		var emoji_flags: Dictionary = {
 			"is_walking": is_walking,
 			"phase": api_phase,
 			"no_house": no_house,
 			"eroded": eroded,
 			"healing": healing,
+			"unsheltered": unsheltered,
 			"got_housing": got_housing,
 			"recovered_erosion": recovered_erosion,
 		}

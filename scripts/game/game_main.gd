@@ -65,6 +65,9 @@ var _built_room_production_accumulator: float = 0.0
 var _shelter_level: int = 1
 var _shelter_accumulator: float = 0.0
 
+## 读档时待应用的研究员 3D 位置 [{id, room_id, pos}]，由 _setup_researchers 应用后清空
+var _pending_researchers_3d: Array = []
+
 const _CURSOR_IMAGE_PATH := "res://assets/icons/icon_game_cursor_0.png"
 
 func _reset_cursor_to_standard() -> void:
@@ -75,6 +78,12 @@ func _reset_cursor_to_standard() -> void:
 	else:
 		Input.set_custom_mouse_cursor(null)
 		DisplayServer.cursor_set_shape(DisplayServer.CURSOR_ARROW)
+
+
+func _exit_tree() -> void:
+	## 切场景前断开 Autoload 连接，避免对已释放节点的回调导致崩溃
+	if PersonnelErosionCore and PersonnelErosionCore.personnel_updated.is_connected(Callable(self, "_on_personnel_updated")):
+		PersonnelErosionCore.personnel_updated.disconnect(Callable(self, "_on_personnel_updated"))
 
 
 func _ready() -> void:
@@ -276,9 +285,54 @@ func _setup_researchers() -> void:
 		researcher.position = pos
 		placed_positions.append(pos)
 		container.add_child(researcher)
+		if researcher.has_method("set_current_room_id"):
+			researcher.set_current_room_id("room_00")
 		if researcher.has_method("set_game_main"):
 			researcher.set_game_main(self)
 		researcher.call("start_idle")
+	## 必须在 _setup_researcher_lifecycle 之前应用，否则 lifecycle 的 apply_phase 会触发 teleport tween，tween 完成后会覆盖我们的放置
+	_apply_pending_researchers_3d()
+
+
+func _apply_pending_researchers_3d() -> void:
+	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
+	if not archives:
+		_pending_researchers_3d.clear()
+		return
+	for entry in _pending_researchers_3d:
+		if not (entry is Dictionary):
+			continue
+		var e: Dictionary = entry as Dictionary
+		var rid: int = int(e.get("id", -1))
+		var room_id: String = str(e.get("room_id", ""))
+		if room_id.is_empty():
+			room_id = "room_00"  ## 兼容旧存档：room_id 为空时默认为档案馆核心
+		var pos_arr: Variant = e.get("pos", null)
+		if rid < 0 or pos_arr == null or not (pos_arr is Array):
+			continue
+		var parr: Array = pos_arr as Array
+		if parr.size() < 3:
+			continue
+		var pos: Vector3 = Vector3(float(parr[0]), float(parr[1]), float(parr[2]))
+		## 若直接 room_id 找不到节点，尝试从 _rooms 匹配 id/json_room_id 得到可用的场景节点名
+		var resolved_id: String = room_id
+		if _find_room_node_in_archives(archives, room_id) == null:
+			for room in _rooms:
+				var r: RoomInfo = room as RoomInfo
+				if not r:
+					continue
+				if (r.id == room_id or r.json_room_id == room_id) and not r.id.is_empty():
+					if _find_room_node_in_archives(archives, r.id) != null:
+						resolved_id = r.id
+						break
+				if (r.id == room_id or r.json_room_id == room_id) and not r.json_room_id.is_empty():
+					if _find_room_node_in_archives(archives, r.json_room_id) != null:
+						resolved_id = r.json_room_id
+						break
+		var r3d: Node3D = get_researcher_3d_by_id(rid)
+		if r3d and r3d.has_method("place_in_room"):
+			r3d.call("place_in_room", resolved_id, pos)
+	_pending_researchers_3d.clear()
 
 
 func _pick_researcher_spawn_pos(x_min: float, x_max: float, z_min: float, z_max: float, floor_y: float, existing: Array, min_spacing: float) -> Vector3:
@@ -394,6 +448,58 @@ func _find_room_node_in_archives(archives: Node3D, room_id: String) -> Node3D:
 	if found:
 		return found
 	return null
+
+
+## 获取房间门位通过点 world 坐标（供研究员跨房间行走用）
+## door_side: "left" | "right" 对应 researcher_can_move_to / researcher_can_move_to2，或回退到 3ditem_door_left_0 / 3ditem_door_right_0
+func get_room_door_passage_position(room_id: String, door_side: String) -> Vector3:
+	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
+	if not archives:
+		return Vector3.ZERO
+	var room_node: Node3D = _find_room_node_in_archives(archives, room_id) as Node3D
+	if not room_node:
+		return Vector3.ZERO
+	var node_name: String = "researcher_can_move_to" if door_side == "left" else "researcher_can_move_to2"
+	var marker: Node3D = room_node.get_node_or_null(node_name) as Node3D
+	if marker:
+		return marker.global_position
+	## 档案馆房间没有 researcher_can_move_to 节点时，回退到门的位置（供研究员穿越门跨房间）
+	var door_name: String = "3ditem_door_left_0" if door_side == "left" else "3ditem_door_right_0"
+	var door: Node3D = room_node.get_node_or_null("RoomItems/doors/" + door_name) as Node3D
+	if door:
+		return door.global_position
+	return Vector3.ZERO
+
+
+## 按 room_id 获取 RoomInfo
+func get_room_info_by_id(room_id: String) -> RoomInfo:
+	if room_id.is_empty():
+		return null
+	for room in _rooms:
+		var r: RoomInfo = room as RoomInfo
+		if not r:
+			continue
+		var rid: String = r.id if r.id else r.json_room_id
+		if rid == room_id:
+			return r
+	return null
+
+
+## 可闲逛房间：room_00 + 所有已解锁且已清理的房间（与 ResearcherLifecycle._build_wanderable_room_list 一致）
+func get_wanderable_room_ids() -> Array[String]:
+	var out: Array[String] = ["room_00"]
+	for room in _rooms:
+		var r: RoomInfo = room as RoomInfo
+		if not r:
+			continue
+		if not r.unlocked or r.clean_status != RoomInfo.CleanStatus.CLEANED:
+			continue
+		var rid: String = r.id if r.id else r.json_room_id
+		if rid.is_empty():
+			continue
+		if rid != "room_00":
+			out.append(rid)
+	return out
 
 
 ## 按 researcher_id 查找 Researcher3D 节点。研究员可能被 teleport 到任意房间，故在所有房间的 ResearchersContainer 下查找。
@@ -709,6 +815,7 @@ func _load_from_slot(slot: int) -> void:
 		d = SaveManager.create_new_game_state(tr("DEFAULT_NEW_GAME"))
 	else:
 		d = game_state as Dictionary
+	_pending_researchers_3d = d.get("researchers_3d", [])
 	GameMainSaveHelper.apply_map(self, d)
 	GameMainSaveHelper.apply_time(d)
 	GameMainSaveHelper.apply_resources(self, d)
@@ -913,18 +1020,30 @@ func _register_cognition_provider(ui: Node) -> void:
 	if not PersonnelErosionCore:
 		return
 	if ui.has_method("get_cognition"):
+		var weak_ui: WeakRef = weakref(ui)
 		PersonnelErosionCore.register_cognition_provider(
-			func() -> int: return ui.get_cognition(),
-			func(amt: int) -> void: ui.cognition_amount = maxi(0, amt)
+			func() -> int:
+				var u: Node = weak_ui.get_ref()
+				if u == null:
+					return 0
+				return u.get_cognition(),
+			func(amt: int) -> void:
+				var u: Node = weak_ui.get_ref()
+				if u != null:
+					u.cognition_amount = maxi(0, amt)
 		)
 
 
 func _ensure_shelter_resolver_registered() -> void:
 	if not PersonnelErosionCore:
 		return
+	var weak_gm: WeakRef = weakref(self)
 	PersonnelErosionCore.register_shelter_resolver(func(r: Dictionary) -> Dictionary:
-		var enriched: Dictionary = GameMainShelterHelper.enrich_researcher_with_rooms(self, r)
-		var level: int = GameMainShelterHelper.get_shelter_level_for_researcher(self, enriched)
+		var gm: Node2D = weak_gm.get_ref()
+		if gm == null:
+			return {"shelter_level": 1, "has_no_housing": false}
+		var enriched: Dictionary = GameMainShelterHelper.enrich_researcher_with_rooms(gm, r)
+		var level: int = GameMainShelterHelper.get_shelter_level_for_researcher(gm, enriched)
 		var no_housing: bool = GameMainShelterHelper.has_no_housing(enriched)
 		return {"shelter_level": level, "has_no_housing": no_housing}
 	)
