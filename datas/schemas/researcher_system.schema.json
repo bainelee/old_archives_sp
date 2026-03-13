@@ -53,19 +53,19 @@
     },
     "housing": {
       "type": "object",
-      "description": "研究员住房系统参数。",
+      "description": "研究员住房系统参数。每 living_units_per_batch 单位居住区提供 housing_per_batch 住房。",
       "additionalProperties": false,
-      "required": ["dormitory_units", "housing_per_dormitory", "housing_per_researcher"],
+      "required": ["living_units_per_batch", "housing_per_batch", "housing_per_researcher"],
       "properties": {
-        "dormitory_units": {
+        "living_units_per_batch": {
           "type": "integer",
-          "description": "宿舍房间达到多少单位后视为有效住房区域。",
+          "description": "居住区每多少单位提供一批住房。",
           "minimum": 1,
-          "default": 3
+          "default": 2
         },
-        "housing_per_dormitory": {
+        "housing_per_batch": {
           "type": "integer",
-          "description": "每个宿舍生活区提供的住房数量。",
+          "description": "每批提供的住房数量。住房总数 = room_units / living_units_per_batch * housing_per_batch。",
           "minimum": 0,
           "default": 4
         },

@@ -7,8 +7,12 @@
 ### 数据文件（权威数据源，需优先更新）
 | 文件 | 内容 |
 |------|------|
-| `datas/game_values.json` | 运行时数值（消耗、产出、建设、清理、住房、改造） |
+| `datas/game_values.json` | 基础经济与产出 |
 | `datas/game_base.json` | 新游戏开局资源默认值 |
+| `datas/cleanup_system.json` | 清理成本、耗时、研究员占用 |
+| `datas/construction_system.json` | 建设成本、耗时、生产推进 |
+| `datas/researcher_system.json` | 认知、住房、housing_linkage、recruitment |
+| `datas/room_size_config.json` | 房间尺寸类型→单位映射 |
 
 ### 设计文档（需与数据文件一致）
 | 文件 | 内容 |

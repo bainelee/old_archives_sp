@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "cognition": {
     "consumption_per_researcher_per_hour": 1,
     "consumption_per_researcher_per_day": 24,
@@ -9,8 +9,8 @@
     }
   },
   "housing": {
-    "dormitory_units": 3,
-    "housing_per_dormitory": 4,
+    "living_units_per_batch": 2,
+    "housing_per_batch": 4,
     "housing_per_researcher": 1
   },
   "housing_linkage": {

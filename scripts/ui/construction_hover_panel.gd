@@ -48,8 +48,7 @@ func _get_output_text(room: RoomInfo, zone_type: int) -> String:
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
 		return tr("OUTPUT_NONE")
-	var area: int = room.rect.size.x * room.rect.size.y
-	var units: int = maxi(1, int(ceil(float(area) / 5.0)))
+	var units: int = room.get_room_units()
 	if zone_type == 1:  ## RESEARCH
 		var amt: int = gv.get_research_output_per_unit_per_hour(room.room_type)
 		if amt <= 0:
@@ -69,7 +68,8 @@ func _get_output_text(room: RoomInfo, zone_type: int) -> String:
 			_:
 				return tr("OUTPUT_NONE")
 	elif zone_type == 4:  ## LIVING
-		return tr("LABEL_HOUSING") % gv.get_housing_per_dormitory()
+		var housing: int = gv.get_housing_for_room_units(units) if gv.has_method("get_housing_for_room_units") else 4
+		return tr("LABEL_HOUSING") % housing
 	return tr("OUTPUT_NONE")
 
 
@@ -79,8 +79,7 @@ func _get_consume_text(room: RoomInfo, zone_type: int) -> String:
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
 		return tr("OUTPUT_NONE")
-	var area: int = room.rect.size.x * room.rect.size.y
-	var units: int = maxi(1, int(ceil(float(area) / 5.0)))
+	var units: int = room.get_room_units()
 	var consume_per_unit: int = gv.get_creation_consume_per_unit_per_hour(room.room_type)
 	return tr("LABEL_WILL_H") % (consume_per_unit * units)
 

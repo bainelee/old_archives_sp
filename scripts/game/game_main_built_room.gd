@@ -16,8 +16,7 @@ static func is_research_zone_room(room: RoomInfo) -> bool:
 
 
 static func get_room_units(room: RoomInfo) -> int:
-	var area: int = room.rect.size.x * room.rect.size.y
-	return maxi(1, int(ceil(float(area) / 5.0)))
+	return room.get_room_units()
 
 
 ## 造物区 24 小时消耗量（意志）

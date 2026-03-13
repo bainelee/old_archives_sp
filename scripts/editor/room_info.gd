@@ -103,8 +103,17 @@ func get_size() -> Vector2i:
 	return Vector2i(rect.size.x, rect.size.y)
 
 
-## 房间单位数（5 格 = 1 单位，如 5×3=15 格 = 3 单位）
+## 房间单位数（公开）：优先按 size_3d 查 room_size_config，无 size_3d 时回退 rect 面积/5
+func get_room_units() -> int:
+	return _get_room_units()
+
+
 func _get_room_units() -> int:
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv and gv.has_method("get_room_units_for_size") and not size_3d.is_empty():
+		var u: int = gv.get_room_units_for_size(size_3d)
+		if u >= 1:
+			return u
 	var area: int = rect.size.x * rect.size.y
 	return maxi(1, int(ceil(float(area) / 5.0)))
 

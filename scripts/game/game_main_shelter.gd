@@ -132,7 +132,6 @@ static func enrich_researcher_with_rooms(game_main: Node2D, researcher: Dictiona
 
 	var housing_slots: Array[String] = []
 	var gv: Node = _GameValuesRef.get_singleton()
-	var housing_per_dorm: int = gv.get_housing_per_dormitory() if gv else 4
 	for room in rooms:
 		var rm: RoomInfo = room as RoomInfo
 		if rm.zone_type != ZoneTypeScript.Type.LIVING:
@@ -140,7 +139,9 @@ static func enrich_researcher_with_rooms(game_main: Node2D, researcher: Dictiona
 		var rid_str: String = rm.id if rm.id else rm.json_room_id
 		if rid_str.is_empty():
 			continue
-		for _j in housing_per_dorm:
+		var room_units: int = rm.get_room_units()
+		var housing_count: int = gv.get_housing_for_room_units(room_units) if gv else (room_units * 2)
+		for _j in housing_count:
 			housing_slots.append(rid_str)
 
 	r["work_room_id"] = work_slots[researcher_id] if researcher_id < work_slots.size() else ""

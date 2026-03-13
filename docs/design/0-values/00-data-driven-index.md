@@ -19,6 +19,7 @@
 | `datas/researcher_system.json` | 研究员认知消耗、认知危机、住房参数 | `scripts/core/game_values.gd` -> `scripts/core/personnel_erosion_core.gd` / `scripts/game/game_main_shelter.gd` |
 | `datas/erosion_system.json` | 侵蚀概率、治愈、死亡曲线、灾厄参数 | `scripts/core/game_values.gd` -> `scripts/core/personnel_erosion_core.gd` |
 | `datas/shelter_system.json` | 庇护等级、能量上限、每级能量配置、不参与房型 | `scripts/core/game_values.gd` -> `scripts/game/game_main_shelter.gd` |
+| `datas/room_size_config.json` | 房间尺寸类型（size_3d）→ volum、单位映射 | `scripts/core/game_values.gd` -> `scripts/editor/room_info.gd` |
 | `datas/room_info.json` | 3D 房间清单、文案、资源与布局 | `scripts/game/room_info_loader.gd` |
 | `datas/room_info_legacy.json` | 2D 编辑器模板房间数据 | `scripts/editor/map_editor_map_io.gd` / 工具脚本 |
 
@@ -36,6 +37,7 @@
 | `datas/schemas/researcher_system.schema.json` | `datas/researcher_system.json` | 研究员基础参数 |
 | `datas/schemas/erosion_system.schema.json` | `datas/erosion_system.json` | 侵蚀参数 |
 | `datas/schemas/shelter_system.schema.json` | `datas/shelter_system.json` | 庇护参数 |
+| `datas/schemas/room_size_config.schema.json` | `datas/room_size_config.json` | 房间尺寸→单位 |
 | `datas/schemas/room_info.schema.json` | `datas/room_info.json` | 3D 房间数据 |
 | `datas/schemas/room_info_legacy.schema.json` | `datas/room_info_legacy.json` | 2D 旧版模板数据 |
 

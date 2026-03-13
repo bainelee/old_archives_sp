@@ -14,6 +14,7 @@ const CONSTRUCTION_SYSTEM_PATH := "res://datas/construction_system.json"
 const RESEARCHER_SYSTEM_PATH := "res://datas/researcher_system.json"
 const EROSION_SYSTEM_PATH := "res://datas/erosion_system.json"
 const SHELTER_SYSTEM_PATH := "res://datas/shelter_system.json"
+const ROOM_SIZE_CONFIG_PATH := "res://datas/room_size_config.json"
 const AUTO_RELOAD_INTERVAL := 2.0  ## 开发时自动检测间隔（秒）
 
 var _data: Dictionary = {}  ## base: game_values.json
@@ -23,6 +24,7 @@ var _construction_data: Dictionary = {}
 var _researcher_data: Dictionary = {}
 var _erosion_data: Dictionary = {}
 var _shelter_data: Dictionary = {}
+var _room_size_data: Dictionary = {}
 
 var _loaded_file_hashes: Dictionary = {}
 
@@ -44,6 +46,7 @@ func _load(force: bool = false) -> bool:
 	_researcher_data = _load_json_dict(RESEARCHER_SYSTEM_PATH)
 	_erosion_data = _load_json_dict(EROSION_SYSTEM_PATH)
 	_shelter_data = _load_json_dict(SHELTER_SYSTEM_PATH)
+	_room_size_data = _load_json_dict(ROOM_SIZE_CONFIG_PATH)
 	_validate_loaded_configs()
 	return true
 
@@ -99,6 +102,7 @@ func reload() -> bool:
 	_researcher_data = {}
 	_erosion_data = {}
 	_shelter_data = {}
+	_room_size_data = {}
 	_loaded_file_hashes.clear()
 	var ok: bool = _load()
 	if ok:
@@ -139,6 +143,7 @@ func _all_config_paths() -> Array:
 		RESEARCHER_SYSTEM_PATH,
 		EROSION_SYSTEM_PATH,
 		SHELTER_SYSTEM_PATH,
+		ROOM_SIZE_CONFIG_PATH,
 	]
 
 
@@ -381,19 +386,44 @@ func get_construction_hours_per_unit(zone_type: int) -> float:
 	return float(cfg.get("hours_per_unit", 2.0))
 
 
+## --- 房间尺寸 ---
+## 根据 size_3d 查表返回房间单位数，未知尺寸返回 -1（调用方需 fallback）
+func get_room_units_for_size(size_id: String) -> int:
+	if size_id.is_empty():
+		return -1
+	var sizes: Dictionary = _room_size_data.get("sizes", {})
+	var entry: Variant = sizes.get(size_id.to_lower(), sizes.get(size_id, null))
+	if entry is Dictionary:
+		return int((entry as Dictionary).get("units", -1))
+	return -1
+
+
 ## --- 住房 ---
+## 每 N 单位居住区提供 M 住房；公式 housing = (room_units / living_units_per_batch) * housing_per_batch
+func get_living_units_per_batch() -> int:
+	return int(_researcher_data.get("housing", {}).get("living_units_per_batch", 2))
+
+
+func get_housing_per_batch() -> int:
+	return int(_researcher_data.get("housing", {}).get("housing_per_batch", 4))
+
+
+## 根据房间单位数返回住房槽数（兼容旧调用，现由 get_housing_for_room_units 替代）
 func get_housing_per_dormitory() -> int:
-	var from_new: int = int(_researcher_data.get("housing", {}).get("housing_per_dormitory", 0))
-	if from_new > 0:
-		return from_new
-	return int(_data.get("housing", {}).get("housing_per_dormitory", 4))
+	return get_housing_per_batch()
+
+
+func get_housing_for_room_units(units: int) -> int:
+	var batch: int = get_living_units_per_batch()
+	var per_batch: int = get_housing_per_batch()
+	if batch <= 0:
+		return 0
+	## 每 batch 单位提供 per_batch 住房，比例计算（1 单位 = 2 住房）
+	return maxi(0, int((float(units) / float(batch)) * per_batch))
 
 
 func get_dormitory_units() -> int:
-	var from_new: int = int(_researcher_data.get("housing", {}).get("dormitory_units", 0))
-	if from_new > 0:
-		return from_new
-	return int(_data.get("housing", {}).get("dormitory_units", 3))
+	return get_living_units_per_batch()
 
 
 ## --- Phase 2.5 researcher contracts (read-only) ---

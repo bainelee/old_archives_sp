@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "sizes": {
+    "base": {
+      "volume": [20, 10, 10],
+      "units": 2
+    },
+    "tall": {
+      "volume": [20, 22, 10],
+      "units": 4
+    },
+    "small": {
+      "volume": [9, 10, 10],
+      "units": 1
+    },
+    "small_tall": {
+      "volume": [9, 22, 10],
+      "units": 2
+    },
+    "long": {
+      "volume": [42, 10, 10],
+      "units": 4
+    }
+  }
+}
