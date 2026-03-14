@@ -13,6 +13,7 @@ Godot 4.6 项目：场景编辑器 + 2D 基地建设游戏。
   - **数值同步**：用户说「调整数值」「我调整了数值」等时，按 `.cursor/subagents/game-values-sync.md` 全量同步 `datas/game_values.json`、`game_base.json`、`docs/design/*.md` 及脚本硬编码
 - **术语对照**：[docs/settings/00-project-keywords.md](docs/settings/00-project-keywords.md)
 - **详情**：[docs/design/00-project-overview.md](docs/design/00-project-overview.md)
+- **test_figma_page UI 组件**：`ResourceProgressBar`、`ResourceBlock`、`CorrosionNumber`、`ForecastWarning`；ForecastWarning 用 `handles: Array[Vector3]` 配置 handle（x=距今天数 y=侵蚀等级 0–4 z=警示），84天→最左，handle 贴图三尺寸用 `tex.get_size()` 防拉伸，清除子节点须先 `remove_child` 再 `queue_free`
 
 # Memorix — Automatic Memory Rules
 

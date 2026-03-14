@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://ycnch3ptmkb4" path="res://scripts/ui/test_figma_page.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/resource_block.tscn" id="5_rb"]
 [ext_resource type="PackedScene" uid="uid://52yph6wsc3mo" path="res://scenes/ui/corrosion_number.tscn" id="6_cn"]
+[ext_resource type="PackedScene" uid="uid://dttradv3t4x01" path="res://scenes/ui/forecast_warning.tscn" id="7_fw"]
 [ext_resource type="Texture2D" uid="uid://b2raq0wagxb0u" path="res://assets/ui/buttons/button_disabled_36x36.png" id="tex_btn36_disabled"]
 [ext_resource type="Texture2D" uid="uid://d3bxnb7dd5jnj" path="res://assets/ui/buttons/button_nor_36x36.png" id="tex_btn36_nor"]
 [ext_resource type="Texture2D" uid="uid://4yovmrbqt2ae" path="res://assets/ui/buttons/button_press_36x36.png" id="tex_btn36_press"]
@@ -12,7 +13,6 @@
 [ext_resource type="Texture2D" uid="uid://dp65tm6a4phxx" path="res://assets/ui/buttons/button_48x32_press.png" id="tex_btn48_press"]
 [ext_resource type="Texture2D" uid="uid://dlr0htjrtpx5m" path="res://assets/ui/resource_block/animation_icon_convert_to_nor.png" id="tex_convert"]
 [ext_resource type="Texture2D" uid="uid://cxmv0is25he8o" path="res://assets/ui/topbar/delimiter_topbar.png" id="tex_delimiter"]
-[ext_resource type="Texture2D" uid="uid://df3x8ju1nvgrh" path="res://assets/ui/forecast_warning/background_corrosion_forecast.png" id="tex_forecast_bg"]
 [ext_resource type="Texture2D" uid="uid://df3t112oybbdd" path="res://assets/icons/icon_cognition.png" id="tex_icon_cognition"]
 [ext_resource type="Texture2D" uid="uid://cxudy850vc8kf" path="res://assets/icons/icon_computing_power_white.png" id="tex_icon_computing"]
 [ext_resource type="Texture2D" uid="uid://bmv8dxgvdbv80" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="tex_icon_frame_blue"]
@@ -444,24 +444,12 @@ text = "CORROSION IN 90 DAYS:"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="ForecastWarning" type="Control" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=668966585]
+[node name="ForecastWarning" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1847355304 instance=ExtResource("7_fw")]
 layout_mode = 1
-anchors_preset = 0
 offset_left = 644.0
 offset_top = 8.0
 offset_right = 910.0
 offset_bottom = 40.0
-
-[node name="Background" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/ForecastWarning" unique_id=1235424712]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("tex_forecast_bg")
-expand_mode = 1
-stretch_mode = 5
 
 [node name="CorrosionNumber" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=93928547 instance=ExtResource("6_cn")]
 layout_mode = 1
@@ -596,9 +584,9 @@ offset_bottom = 44.0
 
 [node name="Hour" type="Label" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/TimeLabels" unique_id=1210045986]
 layout_mode = 1
-offset_top = 5.0
+offset_top = -2.0
 offset_right = 82.0
-offset_bottom = 25.0
+offset_bottom = 21.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "HOUR:16"
@@ -606,9 +594,9 @@ text = "HOUR:16"
 [node name="Day" type="Label" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/TimeLabels" unique_id=283941792]
 layout_mode = 1
 offset_left = 82.0
-offset_top = 5.0
+offset_top = -2.0
 offset_right = 148.0
-offset_bottom = 25.0
+offset_bottom = 21.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "DAY:29"
@@ -616,9 +604,9 @@ text = "DAY:29"
 [node name="Week" type="Label" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/TimeLabels" unique_id=1895454682]
 layout_mode = 1
 offset_left = 148.0
-offset_top = 5.0
+offset_top = -2.0
 offset_right = 240.0
-offset_bottom = 25.0
+offset_bottom = 21.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "WEEK:2199"
