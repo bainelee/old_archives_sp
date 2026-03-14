@@ -1,7 +1,7 @@
 {
   "version": 1,
   "time": {
-    "real_seconds_per_game_hour": 3.0
+    "real_seconds_per_game_hour": 1.0
   },
   "calendar": {
     "hours_per_day": 24,

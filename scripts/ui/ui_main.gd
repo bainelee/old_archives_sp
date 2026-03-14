@@ -9,8 +9,6 @@ signal build_button_pressed
 @onready var _topbar_figma: Node = $TopBar/TopbarFigma
 @onready var _researcher_hover_panel: PanelContainer = $ResearcherHoverPanel
 @onready var _factor_hover_panel: PanelContainer = $FactorHoverPanel
-@onready var _pan_speed_slider: HSlider = $DebugInfoPanel/Margin/VBox/PanSpeedRow/PanSpeedSlider
-@onready var _pan_speed_value_label: Label = $DebugInfoPanel/Margin/VBox/PanSpeedRow/Value
 
 ## 资源-因子（使用显式后备变量，避免 Node.get() 对自定义属性解析异常）
 var _cognition_amount: int = 0
@@ -86,6 +84,8 @@ var investigator_count: int:
 func _ready() -> void:
 	## 暂停时保持可点击，以便用户可通过时间面板播放按钮恢复时间
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if _topbar_figma and _topbar_figma.has_method("set_ui_root"):
+		_topbar_figma.set_ui_root(self)
 	_refresh_all()
 	var btn: Button = get_node_or_null("BottomRightBar/BtnCleanup")
 	if btn:
@@ -100,25 +100,6 @@ func _ready() -> void:
 		_topbar_figma.block_hovered.connect(_on_topbar_block_hovered)
 	if _topbar_figma and _topbar_figma.has_signal("block_unhovered"):
 		_topbar_figma.block_unhovered.connect(_on_topbar_block_unhovered)
-	if _pan_speed_slider:
-		_pan_speed_slider.value_changed.connect(_on_pan_speed_changed)
-		_on_pan_speed_changed(_pan_speed_slider.value)
-	var pan_label: Label = get_node_or_null("DebugInfoPanel/Margin/VBox/PanSpeedRow/Label") as Label
-	if pan_label:
-		pan_label.text = tr("LABEL_PAN_SPEED")
-	_setup_shelter_level_debug()
-	var btn_96x: Button = get_node_or_null("DebugInfoPanel/Margin/VBox/Speed96xRow/BtnSet96x") as Button
-	if btn_96x:
-		btn_96x.pressed.connect(_on_speed_96x_pressed)
-	var show_ray_btn: CheckButton = get_node_or_null("DebugInfoPanel/Margin/VBox/ShowRayHit") as CheckButton
-	if show_ray_btn:
-		show_ray_btn.toggled.connect(_on_show_ray_hit_toggled)
-	var hover_locked_btn: CheckButton = get_node_or_null("DebugInfoPanel/Margin/VBox/HoverLockedRooms") as CheckButton
-	if hover_locked_btn:
-		hover_locked_btn.toggled.connect(_on_hover_locked_rooms_toggled)
-	var show_room_info_btn: CheckButton = get_node_or_null("DebugInfoPanel/Margin/VBox/ShowRoomInfo") as CheckButton
-	if show_room_info_btn:
-		show_room_info_btn.toggled.connect(_on_show_room_info_toggled)
 
 
 func _on_cleanup_button_pressed() -> void:
@@ -169,66 +150,6 @@ func _on_topbar_block_hovered(block_id: String) -> void:
 func _on_topbar_block_unhovered(_block_id: String) -> void:
 	## 不立即隐藏，由 _process 判断鼠标是否离开区域与面板
 	pass
-
-
-func _on_pan_speed_changed(value: float) -> void:
-	if _pan_speed_value_label:
-		_pan_speed_value_label.text = "%.2f" % value
-	var game_main: Node = get_parent()
-	if game_main:
-		game_main.set("_pan_speed", value)
-
-
-func _setup_shelter_level_debug() -> void:
-	var btn_plus: Button = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/BtnPlus") as Button
-	var btn_minus: Button = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/BtnMinus") as Button
-	var _lbl: Label = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/ValueLabel") as Label
-	if btn_plus:
-		btn_plus.pressed.connect(_on_shelter_debug_plus)
-	if btn_minus:
-		btn_minus.pressed.connect(_on_shelter_debug_minus)
-	_update_shelter_debug_display()
-
-
-func _on_shelter_debug_plus() -> void:
-	if ErosionCore:
-		ErosionCore.shelter_bonus += 1
-	_update_shelter_debug_display()
-
-
-func _on_shelter_debug_minus() -> void:
-	if ErosionCore:
-		ErosionCore.shelter_bonus -= 1
-	_update_shelter_debug_display()
-
-
-func _on_speed_96x_pressed() -> void:
-	if GameTime:
-		GameTime.set_speed_96x()
-
-
-func _update_shelter_debug_display() -> void:
-	var lbl: Label = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/ValueLabel") as Label
-	if lbl and ErosionCore:
-		lbl.text = str(ErosionCore.shelter_bonus)
-
-
-func _on_show_ray_hit_toggled(on: bool) -> void:
-	var game_main: Node = get_parent()
-	if game_main and game_main.has_method("set_debug_show_ray_hit"):
-		game_main.set_debug_show_ray_hit(on)
-
-
-func _on_hover_locked_rooms_toggled(on: bool) -> void:
-	var game_main: Node = get_parent()
-	if game_main and game_main.has_method("set_debug_hover_locked_rooms"):
-		game_main.set_debug_hover_locked_rooms(on)
-
-
-func _on_show_room_info_toggled(on: bool) -> void:
-	var game_main: Node = get_parent()
-	if game_main and game_main.has_method("set_debug_show_room_info"):
-		game_main.set_debug_show_room_info(on)
 
 
 func _process(_delta: float) -> void:
@@ -370,28 +291,12 @@ func get_permission() -> int:
 	return _permission_amount
 
 
-## 安全转换因子值为 int：防止 "60000/60000" 等字符串被误解析，或浮点/类型错误。
-## 注意：UI 中的 "库存 X / Y" 格式，斜杠为显示用字符，不是除法运算。
-static func _safe_factor_int(v: Variant, default_val: int = 0) -> int:
-	if v is int:
-		return int(v)
-	if v is float:
-		return int(v)
-	if v is String:
-		var s: String = v
-		if "/" in s:
-			var parts: PackedStringArray = s.split("/", true, 1)
-			s = parts[0].strip_edges() if parts.size() > 0 else ""
-		return int(s) if s.is_valid_int() else default_val
-	return default_val
-
-
 ## 便捷：一次性更新所有数据（供游戏状态层调用）
 func set_resources(factors: Dictionary, currency: Dictionary, personnel: Dictionary) -> void:
-	cognition_amount = _safe_factor_int(factors.get("cognition", 0), 0)
-	computation_amount = _safe_factor_int(factors.get("computation", 0), 0)
-	will_amount = _safe_factor_int(factors.get("willpower", 0), 0)
-	permission_amount = _safe_factor_int(factors.get("permission", 0), 0)
+	cognition_amount = UIUtils.safe_int(factors.get("cognition", 0), 0)
+	computation_amount = UIUtils.safe_int(factors.get("computation", 0), 0)
+	will_amount = UIUtils.safe_int(factors.get("willpower", 0), 0)
+	permission_amount = UIUtils.safe_int(factors.get("permission", 0), 0)
 	info_amount = int(currency.get("info", 0))
 	truth_amount = int(currency.get("truth", 0))
 	researcher_count = int(personnel.get("researcher", 0))

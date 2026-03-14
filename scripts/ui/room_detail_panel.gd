@@ -129,19 +129,7 @@ func _add_creation_zone_info(room: RoomInfo) -> void:
 
 
 func _add_zone_op_line(label_text: String, value: String, value_color: Color) -> void:
-	var h: HBoxContainer = HBoxContainer.new()
-	h.add_theme_constant_override("separation", 12)
-	var lbl: Label = Label.new()
-	lbl.text = label_text + tr("LABEL_SUFFIX")
-	lbl.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
-	lbl.add_theme_font_size_override("font_size", 13)
-	var val: Label = Label.new()
-	val.text = value
-	val.add_theme_color_override("font_color", value_color)
-	val.add_theme_font_size_override("font_size", 13)
-	val.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	h.add_child(lbl)
-	h.add_child(val)
+	var h: HBoxContainer = LabelValueRow.create_row(label_text, value, value_color)
 	_zone_op_content.add_child(h)
 
 

@@ -12,14 +12,14 @@
 
 - **入口场景**：`scenes/ui/ui_main.tscn`，挂载于 CanvasLayer（layer=10）
 - **根节点**：TopBar（PanelContainer），全屏宽度，高度 48px
-- **布局**：横向 HBox，顺序：**左侧资源** | Spacer | **TimePanel** | Spacer | **右侧信息** | **ShelterErosionPanel**
+- **布局**：横向 HBox，顺序：**左侧资源** | Spacer | **TimeControlBar** | Spacer | **右侧信息** | **ShelterErosionPanel**
 
 ### 1.2 TopBar 分区
 
 | 区域 | 内容 | 说明 |
 |------|------|------|
 | 左侧 | 因子 + 货币 | 认知/计算/意志/权限；信息/真相 |
-| 中间 | TimePanel | 时间控制与显示，通过 Spacer 居中 |
+| 中间 | TimeControlBar | 时间控制与显示（`time_control_bar.tscn`），通过 Spacer 居中 |
 | 右侧 | 人员 + ShelterErosionPanel | 研究员（劳动力暂未使用）、调查员；庇护与侵蚀面板 |
 
 ### 1.3 视觉规范
@@ -34,19 +34,17 @@
 
 ## 2. 可复用组件
 
-### 2.1 TimePanel
+### 2.1 TimeControlBar（主 TopBar 使用）
 
 | 项目 | 说明 |
 |------|------|
-| 场景 | `scenes/ui/time_panel.tscn` |
-| 脚本 | `scripts/ui/time_panel.gd`、`scripts/ui/time_indicator.gd` |
-| 布局顺序 | 播放/暂停 → 1x → 2x → 6x → 96x → 时间文本 |
+| 场景 | `scenes/ui/time_control_bar.tscn` |
+| 脚本 | `scripts/ui/time_control_bar.gd` |
+| 布局 | 暂停/1x/2x/6x 按钮 + 时/天/周 显示 |
 | 数据源 | GameTime Autoload |
-| 倍速 | 1x / 2x / 6x / 96x |
-| 时间格式 | `xx时 第XX天 第XX周`（format_time_short） |
-| 时间比例 | 3 秒现实 = 1 游戏小时 |
+| 倍速 | 1x / 2x / 6x；96x 在 DebugInfoPanel |
 
-**TimeIndicator**：时间流动时旋转的箭头图元，半径 `min(size)*0.32`，`pivot_offset=size/2` 绕中心旋转。
+**TimePanel**（`time_panel.tscn`）：备用实现，含 TimeIndicator 旋转动画，当前主 TopBar 使用 TimeControlBar。
 
 **播放/暂停**：流逝时显示 ▶，暂停时显示 ⏸；悬停时显示「将要切换到的」图标。
 

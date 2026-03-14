@@ -130,19 +130,19 @@ func set_resources(factors: Dictionary, currency: Dictionary, personnel: Diction
 		var block_id: String = rb.block_id
 		match block_id:
 			"cognition":
-				rb.set_value(str(_safe_int(factors.get("cognition", 0))))
+				rb.set_value(str(UIUtils.safe_int(factors.get("cognition", 0))))
 			"computing_power":
-				rb.set_value(str(_safe_int(factors.get("computation", 0))))
+				rb.set_value(str(UIUtils.safe_int(factors.get("computation", 0))))
 			"willpower":
-				rb.set_value(str(_safe_int(factors.get("willpower", 0))))
+				rb.set_value(str(UIUtils.safe_int(factors.get("willpower", 0))))
 			"permission":
-				rb.set_value(str(_safe_int(factors.get("permission", 0))))
+				rb.set_value(str(UIUtils.safe_int(factors.get("permission", 0))))
 			"info":
-				rb.set_value(str(_safe_int(currency.get("info", 0))))
+				rb.set_value(str(UIUtils.safe_int(currency.get("info", 0))))
 			"truth":
-				rb.set_value(str(_safe_int(currency.get("truth", 0))))
+				rb.set_value(str(UIUtils.safe_int(currency.get("truth", 0))))
 			"investigator":
-				rb.set_value(str(_safe_int(personnel.get("investigator", 0))))
+				rb.set_value(str(UIUtils.safe_int(personnel.get("investigator", 0))))
 			"researcher":
 				_apply_researcher_block(rb, personnel)
 			"shelter":
@@ -152,8 +152,8 @@ func set_resources(factors: Dictionary, currency: Dictionary, personnel: Diction
 
 
 func _apply_researcher_block(rb: ResourceBlock, personnel: Dictionary) -> void:
-	var total: int = _safe_int(personnel.get("researcher", 0))
-	var eroded: int = _safe_int(personnel.get("eroded", 0))
+	var total: int = UIUtils.safe_int(personnel.get("researcher", 0))
+	var eroded: int = UIUtils.safe_int(personnel.get("eroded", 0))
 	var ui: Node = get_parent().get_node_or_null("UIMain") if get_parent() else null
 	var in_cleanup: int = int(ui.get("researchers_in_cleanup")) if ui and ui.get("researchers_in_cleanup") != null else 0
 	var in_construction: int = int(ui.get("researchers_in_construction")) if ui and ui.get("researchers_in_construction") != null else 0
@@ -188,19 +188,6 @@ func _get_housing_display_value() -> int:
 			units = room.get_room_units()
 		total += gv.get_housing_for_room_units(units) if gv and gv.has_method("get_housing_for_room_units") else (units * 2)
 	return total
-
-
-static func _safe_int(v: Variant) -> int:
-	if v is int:
-		return int(v)
-	if v is float:
-		return int(v)
-	if v is String:
-		var s: String = (v as String).strip_edges()
-		if "/" in s:
-			s = s.split("/", true, 1)[0].strip_edges() if s.split("/", true, 1).size() > 0 else ""
-		return int(s) if s.is_valid_int() else 0
-	return 0
 
 
 ## 从 UIMain 拉取数据并刷新显示；作为子场景时由 GameMain._sync_resources_to_topbar 调用

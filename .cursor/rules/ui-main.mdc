@@ -15,7 +15,7 @@ alwaysApply: false
 ## 布局结构
 
 - **主场景**：`scenes/ui/ui_main.tscn`，CanvasLayer layer=10
-- **TopBar**：48px 高，全宽；顺序：因子|货币 | Spacer | **TimePanel** | Spacer | 人员 | **ShelterErosionPanel**
+- **TopBar**：48px 高，全宽；顺序：因子|货币 | Spacer | **TimeControlBar** | Spacer | 人员 | **ShelterErosionPanel**
 - **居中**：TimePanel 两侧用 Control + `size_flags_horizontal = 3` 实现居中
 - **分区间距**：HBox 32px；子区 12px；因子/人员项 4px
 
@@ -23,10 +23,10 @@ alwaysApply: false
 
 | 组件 | 场景 | 数据源 |
 |------|------|--------|
-| TimePanel | time_panel.tscn | GameTime |
+| TimeControlBar | time_control_bar.tscn | GameTime |
 | ShelterErosionPanel | shelter_erosion_panel.tscn | ErosionCore |
 
-- TimePanel：播放/暂停、1x/2x/6x、时间文本；96x 在 DebugInfoPanel；TimeIndicator 绕中心旋转
+- TimeControlBar：播放/暂停、1x/2x/6x、时/天/周显示；96x 在 DebugInfoPanel
 - ShelterErosionPanel：左侧侵蚀等级，右侧 ErosionCycleBar；悬停显示来源/周期详情
 - 侵蚀颜色：+1 白、0 翠绿、-2 橙黄、-4 赤红、-8 深紫（erosion_cycle_bar.gd 常量）
 

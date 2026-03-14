@@ -10,6 +10,13 @@ const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 signal block_hovered(block_id: String)
 signal block_unhovered(block_id: String)
 
+## 由 UIMain 在 _ready 时注入，避免 get_parent() 链
+var _ui_root: Node = null
+
+
+func set_ui_root(ui: Node) -> void:
+	_ui_root = ui
+
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -37,10 +44,8 @@ func _update_scale() -> void:
 
 
 func _setup_resource_block_hover() -> void:
-	var topbar: Node = get_node_or_null("Topbar0")
-	if not topbar:
-		return
-	for child in _collect_resource_blocks(topbar):
+	## 从根节点收集所有 ResourceBlock，支持 Topbar0、Topbar1 及未来扩展
+	for child in _collect_resource_blocks(self):
 		if child.has_signal("hovered") and child.has_signal("unhovered"):
 			child.hovered.connect(_on_resource_block_hovered)
 			child.unhovered.connect(_on_resource_block_unhovered)
@@ -78,37 +83,34 @@ func _on_erosion_changed(_new_value: int) -> void:
 
 
 func _on_settings_pressed() -> void:
-	var p: Node = get_parent()
-	var ui: Node = p.get_parent() if p else null
-	var gm: Node = ui.get_parent() if ui else null
+	if _ui_root == null:
+		_ui_root = get_parent().get_parent() if get_parent() else null
+	var gm: Node = _ui_root.get_parent() if _ui_root else null
 	var pause_menu: CanvasLayer = gm.get_node_or_null("PauseMenu") as CanvasLayer if gm else null
 	if pause_menu and pause_menu.has_method("show_menu"):
 		pause_menu.show_menu()
 
 
 func set_resources(factors: Dictionary, currency: Dictionary, personnel: Dictionary) -> void:
-	var topbar: Node = get_node_or_null("Topbar0")
-	if not topbar:
-		return
-	for rb in _collect_resource_blocks(topbar):
+	for rb in _collect_resource_blocks(self):
 		if not rb is ResourceBlock:
 			continue
 		var block_id: String = rb.block_id
 		match block_id:
 			"cognition":
-				rb.set_value(str(_safe_int(factors.get("cognition", 0))))
+				rb.set_value(str(UIUtils.safe_int(factors.get("cognition", 0))))
 			"computing_power":
-				rb.set_value(str(_safe_int(factors.get("computation", 0))))
+				rb.set_value(str(UIUtils.safe_int(factors.get("computation", 0))))
 			"willpower":
-				rb.set_value(str(_safe_int(factors.get("willpower", 0))))
+				rb.set_value(str(UIUtils.safe_int(factors.get("willpower", 0))))
 			"permission":
-				rb.set_value(str(_safe_int(factors.get("permission", 0))))
+				rb.set_value(str(UIUtils.safe_int(factors.get("permission", 0))))
 			"info":
-				rb.set_value(str(_safe_int(currency.get("info", 0))))
+				rb.set_value(str(UIUtils.safe_int(currency.get("info", 0))))
 			"truth":
-				rb.set_value(str(_safe_int(currency.get("truth", 0))))
+				rb.set_value(str(UIUtils.safe_int(currency.get("truth", 0))))
 			"investigator":
-				rb.set_value(str(_safe_int(personnel.get("investigator", 0))))
+				rb.set_value(str(UIUtils.safe_int(personnel.get("investigator", 0))))
 			"researcher":
 				_apply_researcher_block(rb, personnel)
 			"shelter":
@@ -118,10 +120,9 @@ func set_resources(factors: Dictionary, currency: Dictionary, personnel: Diction
 
 
 func _apply_researcher_block(rb: ResourceBlock, personnel: Dictionary) -> void:
-	var total: int = _safe_int(personnel.get("researcher", 0))
-	var eroded: int = _safe_int(personnel.get("eroded", 0))
-	var p: Node = get_parent()
-	var ui: Node = p.get_parent() if p else null
+	var total: int = UIUtils.safe_int(personnel.get("researcher", 0))
+	var eroded: int = UIUtils.safe_int(personnel.get("eroded", 0))
+	var ui: Node = _ui_root if _ui_root else (get_parent().get_parent() if get_parent() else null)
 	var in_cleanup: int = int(ui.get("researchers_in_cleanup")) if ui and ui.get("researchers_in_cleanup") != null else 0
 	var in_construction: int = int(ui.get("researchers_in_construction")) if ui and ui.get("researchers_in_construction") != null else 0
 	var in_rooms: int = int(ui.get("researchers_working_in_rooms")) if ui and ui.get("researchers_working_in_rooms") != null else 0
@@ -131,17 +132,14 @@ func _apply_researcher_block(rb: ResourceBlock, personnel: Dictionary) -> void:
 
 
 func _get_shelter_display_value() -> int:
-	var p: Node = get_parent()
-	var gm: Node = p.get_parent().get_parent() if p and p.get_parent() else null
+	var gm: Node = _ui_root.get_parent() if _ui_root else null
 	if gm and gm.get("_shelter_level") != null:
 		return int(gm.get("_shelter_level"))
 	return 1
 
 
 func _get_housing_display_value() -> int:
-	var p: Node = get_parent()
-	var ui: Node = p.get_parent() if p else null
-	var gm: Node = ui.get_parent() if ui else null
+	var gm: Node = _ui_root.get_parent() if _ui_root else null
 	if not gm or gm.get("_rooms") == null:
 		return 0
 	var rooms: Array = gm.get("_rooms")
@@ -160,22 +158,8 @@ func _get_housing_display_value() -> int:
 	return total
 
 
-static func _safe_int(v: Variant) -> int:
-	if v is int:
-		return int(v)
-	if v is float:
-		return int(v)
-	if v is String:
-		var s: String = (v as String).strip_edges()
-		if "/" in s:
-			s = s.split("/", true, 1)[0].strip_edges() if s.split("/", true, 1).size() > 0 else ""
-		return int(s) if s.is_valid_int() else 0
-	return 0
-
-
 func refresh_display() -> void:
-	var p: Node = get_parent()
-	var ui: Node = p.get_parent() if p else null
+	var ui: Node = _ui_root if _ui_root else (get_parent().get_parent() if get_parent() else null)
 	if not ui or not ui.has_method("get_resources"):
 		return
 	var res: Dictionary = ui.get_resources()

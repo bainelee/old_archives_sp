@@ -13,13 +13,10 @@ extends CanvasLayer
 @onready var _progress_ring: Control = $ConfirmContainer/ProgressRing
 var _progress_rings_container: Control
 
-const PROGRESS_RING_SCRIPT := preload("res://scripts/ui/cleanup_progress_ring.gd")
 var _progress_rings: Dictionary = {}  ## room_index -> Control
 
 var _confirm_room_screen_pos: Vector2 = Vector2.ZERO
 const CONFIRM_SIZE := 80
-const PROGRESS_RING_SIZE := 80
-const PROGRESS_RING_RADIUS := 40.0
 
 
 func _ready() -> void:
@@ -105,7 +102,7 @@ func hide_cleanup_selecting_ui() -> void:
 
 func show_progress_at(screen_pos: Vector2, ratio: float) -> void:
 	_confirm_room_screen_pos = screen_pos
-	_confirm_container.position = screen_pos - Vector2(PROGRESS_RING_RADIUS, PROGRESS_RING_RADIUS)
+	_confirm_container.position = screen_pos - Vector2(ProgressRingOverlayHelper.PROGRESS_RING_RADIUS, ProgressRingOverlayHelper.PROGRESS_RING_RADIUS)
 	_confirm_container.visible = true
 	_confirm_button.visible = false
 	_progress_ring.visible = true
@@ -114,49 +111,21 @@ func show_progress_at(screen_pos: Vector2, ratio: float) -> void:
 
 
 func update_progress_rooms(rooms_data: Array) -> void:
-	if not _progress_rings_container:
-		return
-	var active_ids: Dictionary = {}
-	for item in rooms_data:
-		if item is Dictionary:
-			var rid: int = int(item.get("room_index", -1))
-			var pos: Vector2 = item.get("position", Vector2.ZERO)
-			var ratio: float = clampf(float(item.get("ratio", 0)), 0.0, 1.0)
-			active_ids[rid] = true
-			if not _progress_rings.has(rid):
-				var new_ring: Control = Control.new()
-				new_ring.set_script(PROGRESS_RING_SCRIPT)
-				new_ring.custom_minimum_size = Vector2(PROGRESS_RING_SIZE, PROGRESS_RING_SIZE)
-				new_ring.set_anchors_preset(Control.PRESET_TOP_LEFT)
-				new_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE  # 不阻挡房间点击
-				_progress_rings_container.add_child(new_ring)
-				_progress_rings[rid] = new_ring
-			var r: Control = _progress_rings[rid]
-			r.position = pos - Vector2(PROGRESS_RING_RADIUS, PROGRESS_RING_RADIUS)
-			r.size = Vector2(PROGRESS_RING_SIZE, PROGRESS_RING_SIZE)
-			r.set("progress_ratio", ratio)
-			r.visible = true
-			r.queue_redraw()
-	for rid in _progress_rings.duplicate().keys():
-		if not active_ids.has(rid):
-			_progress_rings[rid].queue_free()
-			_progress_rings.erase(rid)
+	ProgressRingOverlayHelper.update_progress_rooms(_progress_rings_container, _progress_rings, rooms_data)
 	_progress_ring.visible = false
 	# 不触碰确认按钮：进度环与确认可同时存在（清理房间 A 时仍可对房间 B 显示 ✓）
 
 
 func hide_progress() -> void:
 	## 仅清除进度环，不触碰确认按钮（由 show_confirm_at/hide_confirm 管理）
-	for rid in _progress_rings.duplicate().keys():
-		_progress_rings[rid].queue_free()
-	_progress_rings.clear()
+	ProgressRingOverlayHelper.hide_progress(_progress_rings)
 
 
 func _process(_delta: float) -> void:
 	## 每帧从 3D 场景重算房间在屏幕上的位置，使镜头平移/缩放时（含暂停时）进度条、确认按钮、悬停面板仍正确跟随
 	var gm: Node2D = get_parent() as Node2D
 	var vp: Viewport = get_viewport() if gm else null
-	if _hover_panel.visible and vp and has_method("update_hover_position"):
+	if _hover_panel.visible and vp:
 		update_hover_position(vp.get_mouse_position(), vp.get_visible_rect().size)
 	if gm and gm.has_method("_room_center_to_screen"):
 		if _confirm_container.visible:
@@ -167,7 +136,7 @@ func _process(_delta: float) -> void:
 		for rid in _progress_rings:
 			var pos: Vector2 = gm.call("_room_center_to_screen", rid)
 			var r: Control = _progress_rings[rid]
-			r.position = pos - Vector2(PROGRESS_RING_RADIUS, PROGRESS_RING_RADIUS)
+			r.position = pos - Vector2(ProgressRingOverlayHelper.PROGRESS_RING_RADIUS, ProgressRingOverlayHelper.PROGRESS_RING_RADIUS)
 			r.queue_redraw()
 	else:
 		for ring in _progress_rings.values():
