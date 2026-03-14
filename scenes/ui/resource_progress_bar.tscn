@@ -1,0 +1,80 @@
+[gd_scene load_steps=4 format=3 uid="uid://resource_progress_bar_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/resource_progress_bar.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/resource_block/progress_back.png" id="2_back"]
+[ext_resource type="Texture2D" path="res://assets/ui/resource_block/progress_inside.png" id="3_inside"]
+
+[node name="ResourceProgressBar" type="Control"]
+custom_minimum_size = Vector2(112, 8)
+layout_mode = 2
+script = ExtResource("1_script")
+current_value = 80.0
+max_value = 100.0
+
+[node name="Back" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MaskNormal" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 89.0
+offset_bottom = 7.0
+clip_children = 2
+
+[node name="Inside" type="TextureRect" parent="MaskNormal"]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 110.0
+offset_bottom = 6.0
+texture = ExtResource("3_inside")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="MaskLeft" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 67.0
+offset_bottom = 7.0
+clip_children = 2
+
+[node name="InsideLeft" type="TextureRect" parent="MaskLeft"]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 110.0
+offset_bottom = 6.0
+texture = ExtResource("3_inside")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="MaskRight" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_left = 45.0
+offset_top = 1.0
+offset_right = 111.0
+offset_bottom = 7.0
+clip_children = 2
+
+[node name="InsideRight" type="TextureRect" parent="MaskRight"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = -66.0
+offset_right = 44.0
+offset_bottom = 6.0
+texture = ExtResource("3_inside")
+expand_mode = 1
+stretch_mode = 1

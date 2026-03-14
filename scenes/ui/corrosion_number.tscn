@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://52yph6wsc3mo"]
+
+[ext_resource type="Script" uid="uid://dug5vmphohp0p" path="res://scripts/ui/corrosion_number.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://crk1oy0d0r51t" path="res://assets/ui/corrosion_number/background_corrosion_number.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://bwoeydlnhvjro" path="res://assets/ui/corrosion_number/corrosion_number_plus_sign.png" id="3_plus"]
+[ext_resource type="Texture2D" uid="uid://5gvtrclvptb7" path="res://assets/ui/corrosion_number/corrosion_number_minus_sign.png" id="4_minus"]
+[ext_resource type="Texture2D" uid="uid://c76t3tvfe1wr4" path="res://assets/ui/corrosion_number/corrosion_number_5.png" id="5_i5gm1"]
+[ext_resource type="Texture2D" uid="uid://cag0kh8arxr2t" path="res://assets/ui/corrosion_number/corrosion_number_9.png" id="6_uh5hh"]
+[ext_resource type="Texture2D" uid="uid://bl0s7316sx2rr" path="res://assets/ui/corrosion_number/corrosion_number_1.png" id="7_6s38j"]
+
+[node name="CorrosionNumber" type="Control" unique_id=1274703496]
+custom_minimum_size = Vector2(96, 32)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_script")
+preview_value = 591
+
+[node name="Background" type="TextureRect" parent="." unique_id=219088452]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlusSign" type="TextureRect" parent="." unique_id=1563124551]
+layout_mode = 1
+offset_left = 23.0
+offset_top = 6.0
+offset_right = 34.0
+offset_bottom = 27.0
+texture = ExtResource("3_plus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MinusSign" type="TextureRect" parent="." unique_id=1478874722]
+visible = false
+layout_mode = 1
+offset_left = 23.0
+offset_top = 6.0
+offset_right = 34.0
+offset_bottom = 27.0
+texture = ExtResource("4_minus")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Digit0" type="TextureRect" parent="." unique_id=625426671]
+layout_mode = 1
+offset_left = 36.0
+offset_top = 6.0
+offset_right = 47.0
+offset_bottom = 27.0
+texture = ExtResource("5_i5gm1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Digit1" type="TextureRect" parent="." unique_id=834889294]
+layout_mode = 1
+offset_left = 49.0
+offset_top = 6.0
+offset_right = 60.0
+offset_bottom = 27.0
+texture = ExtResource("6_uh5hh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Digit2" type="TextureRect" parent="." unique_id=2059466681]
+layout_mode = 1
+offset_left = 62.0
+offset_top = 6.0
+offset_right = 73.0
+offset_bottom = 27.0
+texture = ExtResource("7_6s38j")
+expand_mode = 1
+stretch_mode = 5

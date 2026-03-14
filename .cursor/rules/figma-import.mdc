@@ -7,6 +7,11 @@ globs:
   - ".cursor/commands/figma-sync-test-page.md"
   - "assets/icons/**"
   - "assets/ui/**"
+  - "assets/ui/topbar/**"
+  - "assets/ui/corrosion_number/**"
+  - "assets/ui/forecast_warning/**"
+  - "assets/ui/buttons/**"
+  - "assets/ui/resource_block/**"
   - "assets/misc/**"
 alwaysApply: false
 ---
@@ -55,13 +60,17 @@ GET https://api.figma.com/v1/images/:fileKey?ids=:nodeIds&format=png&scale=1
 - `nodeIds`：逗号分隔，如 `4:4,13:8,14:15`（需 URL 编码 `%3A`）
 - **scale=1**：必须与 Figma 设计一致（1:1），避免导出 2x 导致 Godot 显示尺寸错误
 
-### 2.2 按命名分类存放
+### 2.2 按组件分类存放（old_archives_topbar）
 
-| Figma 元素命名规则 | 存放路径 |
-|-------------------|----------|
-| `icon*`（icon_news、icon_firesalt 等） | `assets/icons/` |
-| `button_back` | `assets/ui/` |
-| 其余未分类 | `assets/misc/` |
+| 命名/组件 | 存放路径 |
+|-----------|----------|
+| background_topbar*、delimiter_topbar | `assets/ui/topbar/` |
+| background_corrosion_number、corrosion_number_* | `assets/ui/corrosion_number/` |
+| background_corrosion_forecast、handle_*、forecast_warning_sign_* | `assets/ui/forecast_warning/` |
+| button_*、icon_pause*、icon_goon* | `assets/ui/buttons/` |
+| progress_*、icon_frame_*、animation_icon_* | `assets/ui/resource_block/` |
+| icon_*（资源图标） | `assets/icons/` |
+| 其余未分类 | `assets/ui/misc/` |
 
 - 文件名：使用语义化名称，如 `icon_news.png`、`button_back.png`、`archives_test_1.png`
 - 下载：用 `Invoke-WebRequest -OutFile`（PowerShell）或 `curl` 将 API 返回的 URL 内容保存

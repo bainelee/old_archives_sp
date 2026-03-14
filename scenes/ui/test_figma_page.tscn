@@ -1,36 +1,44 @@
-[gd_scene load_steps=13 format=3 uid="uid://test_figma_page_01"]
+[gd_scene format=3 uid="uid://dejraui5mgkcg"]
 
-[ext_resource type="Script" path="res://scripts/ui/test_figma_page.gd" id="1_test_figma"]
-[ext_resource type="Texture2D" path="res://assets/ui/button_back.png" id="2_btn_back"]
-[ext_resource type="Texture2D" path="res://assets/icons/icon_news.png" id="3_icon_news"]
-[ext_resource type="Texture2D" path="res://assets/icons/icon_paper.png" id="4_icon_paper"]
-[ext_resource type="Texture2D" path="res://assets/icons/icon_book.png" id="5_icon_book"]
-[ext_resource type="Texture2D" path="res://assets/icons/icon_email.png" id="6_icon_email"]
-[ext_resource type="Texture2D" path="res://assets/icons/icon_firesalt.png" id="7_icon_firesalt"]
-[ext_resource type="Texture2D" path="res://assets/misc/archives_test_1.png" id="8_archives_test_1"]
-[ext_resource type="Texture2D" path="res://assets/misc/archives_book_1.png" id="9_archives_book_1"]
-[ext_resource type="Texture2D" path="res://assets/misc/archives_book_0.png" id="10_archives_book_0"]
-[ext_resource type="Texture2D" path="res://assets/misc/important_letter.png" id="11_important_letter"]
+[ext_resource type="Script" uid="uid://ycnch3ptmkb4" path="res://scripts/ui/test_figma_page.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/resource_block.tscn" id="5_rb"]
+[ext_resource type="PackedScene" uid="uid://52yph6wsc3mo" path="res://scenes/ui/corrosion_number.tscn" id="6_cn"]
+[ext_resource type="Texture2D" uid="uid://b2raq0wagxb0u" path="res://assets/ui/buttons/button_disabled_36x36.png" id="tex_btn36_disabled"]
+[ext_resource type="Texture2D" uid="uid://d3bxnb7dd5jnj" path="res://assets/ui/buttons/button_nor_36x36.png" id="tex_btn36_nor"]
+[ext_resource type="Texture2D" uid="uid://4yovmrbqt2ae" path="res://assets/ui/buttons/button_press_36x36.png" id="tex_btn36_press"]
+[ext_resource type="Texture2D" uid="uid://bv4k22xv4600y" path="res://assets/ui/buttons/button_48x32_disabled.png" id="tex_btn48_disabled"]
+[ext_resource type="Texture2D" uid="uid://imoadbd5cm6c" path="res://assets/ui/buttons/button_48x32_hover.png" id="tex_btn48_hover"]
+[ext_resource type="Texture2D" uid="uid://d3x0ykhlr320p" path="res://assets/ui/buttons/button_48x32_nor.png" id="tex_btn48_nor"]
+[ext_resource type="Texture2D" uid="uid://dp65tm6a4phxx" path="res://assets/ui/buttons/button_48x32_press.png" id="tex_btn48_press"]
+[ext_resource type="Texture2D" uid="uid://dlr0htjrtpx5m" path="res://assets/ui/resource_block/animation_icon_convert_to_nor.png" id="tex_convert"]
+[ext_resource type="Texture2D" uid="uid://cxmv0is25he8o" path="res://assets/ui/topbar/delimiter_topbar.png" id="tex_delimiter"]
+[ext_resource type="Texture2D" uid="uid://df3x8ju1nvgrh" path="res://assets/ui/forecast_warning/background_corrosion_forecast.png" id="tex_forecast_bg"]
+[ext_resource type="Texture2D" uid="uid://df3t112oybbdd" path="res://assets/icons/icon_cognition.png" id="tex_icon_cognition"]
+[ext_resource type="Texture2D" uid="uid://cxudy850vc8kf" path="res://assets/icons/icon_computing_power_white.png" id="tex_icon_computing"]
+[ext_resource type="Texture2D" uid="uid://bmv8dxgvdbv80" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="tex_icon_frame_blue"]
+[ext_resource type="Texture2D" uid="uid://d0o32plkfqiq4" path="res://assets/ui/buttons/icon_goon_28x28.png" id="tex_icon_goon"]
+[ext_resource type="Texture2D" uid="uid://c0ynlot0wjddr" path="res://assets/ui/buttons/icon_goon_2x_28x28.png" id="tex_icon_goon2x"]
+[ext_resource type="Texture2D" uid="uid://if3a6ow6x72o" path="res://assets/ui/buttons/icon_goon_3x_28x28.png" id="tex_icon_goon3x"]
+[ext_resource type="Texture2D" uid="uid://bdev3hnjwxrrk" path="res://assets/icons/icon_infomation.png" id="tex_icon_infomation"]
+[ext_resource type="Texture2D" uid="uid://dljpphn6mls8u" path="res://assets/icons/icon_investigator.png" id="tex_icon_investigator"]
+[ext_resource type="Texture2D" uid="uid://cxhkagpdiibb4" path="res://assets/ui/buttons/icon_pause_28x28.png" id="tex_icon_pause"]
+[ext_resource type="Texture2D" uid="uid://dj7x5fioi03br" path="res://assets/icons/icon_permission.png" id="tex_icon_permission"]
+[ext_resource type="Texture2D" uid="uid://yprmm82tsa37" path="res://assets/icons/icon_questions.png" id="tex_icon_questions"]
+[ext_resource type="Texture2D" uid="uid://gbw85637v3pv" path="res://assets/icons/icon_researcher.png" id="tex_icon_researcher"]
+[ext_resource type="Texture2D" uid="uid://cn52pgyt65qtn" path="res://assets/icons/icon_settings.png" id="tex_icon_settings"]
+[ext_resource type="Texture2D" uid="uid://nuagb3gxh68n" path="res://assets/icons/icon_shelter_white.png" id="tex_icon_shelter"]
+[ext_resource type="Texture2D" uid="uid://dhljbwlygc5l2" path="res://assets/icons/icon_truth.png" id="tex_icon_truth"]
+[ext_resource type="Texture2D" uid="uid://dk7q0caftmdi1" path="res://assets/icons/icon_willpower.png" id="tex_icon_willpower"]
+[ext_resource type="Texture2D" uid="uid://b1ymx0o63g173" path="res://assets/ui/topbar/background_topbar_0.png" id="tex_topbar0"]
+[ext_resource type="Texture2D" uid="uid://bpsj6pjim03i3" path="res://assets/ui/topbar/background_topbar_1.png" id="tex_topbar1"]
+[ext_resource type="Texture2D" uid="uid://bdc1u5p2vn5wm" path="res://assets/ui/topbar/background_topbar1_mid.png" id="tex_topbar1_mid"]
+[ext_resource type="Texture2D" uid="uid://xm7yx6yocxsx" path="res://assets/ui/topbar/background_topbar1_side.png" id="tex_topbar1_side"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn1"]
-texture = ExtResource("2_btn_back")
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
-bg_color = Color(0.666, 0.666, 0.666, 1)
-corner_radius_top_left = 0
-corner_radius_top_right = 0
-corner_radius_bottom_right = 0
-corner_radius_bottom_left = 0
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
-
-[node name="TestFigmaPage" type="CanvasLayer"]
+[node name="TestFigmaPage" type="CanvasLayer" unique_id=1079676365]
 layer = 15
-script = ExtResource("1_test_figma")
+script = ExtResource("1_script")
 
-[node name="Content" type="Control" parent="."]
+[node name="Content" type="Control" parent="." unique_id=631433811]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -38,16 +46,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background" type="ColorRect" parent="Content"]
+[node name="Background" type="ColorRect" parent="Content" unique_id=1722630703]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.85, 0.85, 0.85, 1)
+color = Color(0.637, 0.637, 0.637, 1)
 
-[node name="Center" type="CenterContainer" parent="Content"]
+[node name="Center" type="CenterContainer" parent="Content" unique_id=2129711839]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -55,151 +63,562 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="DesignCanvas" type="Control" parent="Content/Center"]
+[node name="DesignCanvas" type="Control" parent="Content/Center" unique_id=1739127161]
 custom_minimum_size = Vector2(1920, 1080)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="ArchivesTest1" type="TextureRect" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 49.0
-offset_top = 41.0
-offset_right = 137.0
-offset_bottom = 149.0
+[node name="TopbarFull" type="Control" parent="Content/Center/DesignCanvas" unique_id=234571821]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 108.0
+grow_horizontal = 2
+
+[node name="TopbarBg" type="ColorRect" parent="Content/Center/DesignCanvas/TopbarFull" unique_id=1955106301]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.286, 0.286, 0.286, 1)
+
+[node name="Topbar0" type="Control" parent="Content/Center/DesignCanvas/TopbarFull" unique_id=183270687]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 60.0
+
+[node name="BackgroundTopbar0" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=333655155]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_topbar0")
 expand_mode = 1
-texture = ExtResource("8_archives_test_1")
 stretch_mode = 5
 
-[node name="ArchivesBook1" type="TextureRect" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 137.0
-offset_top = 41.0
-offset_right = 225.0
-offset_bottom = 149.0
+[node name="BaseButtonSettings" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=74685487]
+layout_mode = 1
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 48.0
+offset_bottom = 48.0
+texture_normal = ExtResource("tex_btn36_nor")
+texture_pressed = ExtResource("tex_btn36_press")
+texture_disabled = ExtResource("tex_btn36_disabled")
+stretch_mode = 5
+
+[node name="IconSettings" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/BaseButtonSettings" unique_id=286289542]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_icon_settings")
 expand_mode = 1
-texture = ExtResource("9_archives_book_1")
 stretch_mode = 5
 
-[node name="ArchivesBook0" type="TextureRect" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 225.0
-offset_top = 41.0
-offset_right = 313.0
-offset_bottom = 149.0
+[node name="BaseButtonQuestion" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1776722534]
+layout_mode = 1
+offset_left = 60.0
+offset_top = 12.0
+offset_right = 96.0
+offset_bottom = 48.0
+texture_normal = ExtResource("tex_btn36_nor")
+texture_pressed = ExtResource("tex_btn36_press")
+texture_disabled = ExtResource("tex_btn36_disabled")
+stretch_mode = 5
+
+[node name="IconQuestions" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/BaseButtonQuestion" unique_id=23941197]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_icon_questions")
 expand_mode = 1
-texture = ExtResource("10_archives_book_0")
 stretch_mode = 5
 
-[node name="ImportantLetter" type="TextureRect" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 313.0
-offset_top = 41.0
-offset_right = 401.0
-offset_bottom = 149.0
+[node name="Delimiter1" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1417774341]
+layout_mode = 1
+offset_left = 435.0
+offset_top = 10.0
+offset_right = 439.0
+offset_bottom = 42.0
+texture = ExtResource("tex_delimiter")
 expand_mode = 1
-texture = ExtResource("11_important_letter")
 stretch_mode = 5
 
-[node name="Title" type="Label" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 414.0
-offset_top = 287.0
-offset_right = 1506.0
-offset_bottom = 413.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 96
-text = "GAME NAME TEST"
-horizontal_alignment = 1
-
-[node name="Btn1" type="Button" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 771.0
-offset_top = 559.0
-offset_right = 1173.0
-offset_bottom = 666.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 40
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn1")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn1")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn1")
-theme_override_styles/disabled = SubResource("StyleBoxTexture_btn1")
-text = "BUTTON-1"
-
-[node name="Btn2" type="Button" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 771.0
-offset_top = 698.0
-offset_right = 1173.0
-offset_bottom = 805.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 40
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_btn")
-text = "BUTTON-2"
-
-[node name="Btn3" type="Button" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 771.0
-offset_top = 837.0
-offset_right = 1173.0
-offset_bottom = 944.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 40
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_btn")
-text = "BUTTON-3"
-
-[node name="IconFiresalt" type="TextureButton" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 106.0
-offset_top = 836.0
-offset_right = 194.0
-offset_bottom = 944.0
-ignore_texture_size = true
-texture_normal = ExtResource("7_icon_firesalt")
+[node name="Delimiter2" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=533880161]
+layout_mode = 1
+offset_left = 663.0
+offset_top = 10.0
+offset_right = 667.0
+offset_bottom = 42.0
+texture = ExtResource("tex_delimiter")
+expand_mode = 1
 stretch_mode = 5
 
-[node name="IconBtnNews" type="TextureButton" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 1438.0
-offset_top = 963.0
-offset_right = 1518.0
-offset_bottom = 1043.0
-ignore_texture_size = true
-texture_normal = ExtResource("3_icon_news")
+[node name="Delimiter3" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1106451072]
+layout_mode = 1
+offset_left = 799.0
+offset_top = 8.0
+offset_right = 803.0
+offset_bottom = 40.0
+texture = ExtResource("tex_delimiter")
+expand_mode = 1
 stretch_mode = 5
 
-[node name="IconBtnPaper" type="TextureButton" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 1555.0
-offset_top = 963.0
-offset_right = 1635.0
-offset_bottom = 1043.0
-ignore_texture_size = true
-texture_normal = ExtResource("4_icon_paper")
+[node name="Delimiter4" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1523504059]
+layout_mode = 1
+offset_left = 1117.0
+offset_top = 10.0
+offset_right = 1121.0
+offset_bottom = 42.0
+texture = ExtResource("tex_delimiter")
+expand_mode = 1
 stretch_mode = 5
 
-[node name="IconBtnBook" type="TextureButton" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 1672.0
-offset_top = 963.0
-offset_right = 1752.0
-offset_bottom = 1043.0
-ignore_texture_size = true
-texture_normal = ExtResource("5_icon_book")
+[node name="Delimiter5" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=355690335]
+layout_mode = 1
+offset_left = 1253.0
+offset_top = 10.0
+offset_right = 1257.0
+offset_bottom = 42.0
+texture = ExtResource("tex_delimiter")
+expand_mode = 1
 stretch_mode = 5
 
-[node name="IconBtnEmail" type="TextureButton" parent="Content/Center/DesignCanvas"]
-layout_mode = 0
-offset_left = 1789.0
-offset_top = 963.0
-offset_right = 1869.0
-offset_bottom = 1043.0
-ignore_texture_size = true
-texture_normal = ExtResource("6_icon_email")
+[node name="Delimiter6" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1042452200]
+layout_mode = 1
+offset_left = 1389.0
+offset_top = 10.0
+offset_right = 1393.0
+offset_bottom = 42.0
+texture = ExtResource("tex_delimiter")
+expand_mode = 1
 stretch_mode = 5
+
+[node name="Delimiter7" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1696816137]
+layout_mode = 1
+offset_left = 1525.0
+offset_top = 10.0
+offset_right = 1529.0
+offset_bottom = 42.0
+texture = ExtResource("tex_delimiter")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Delimiter8" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1188647454]
+layout_mode = 1
+offset_left = 1613.0
+offset_top = 10.0
+offset_right = 1617.0
+offset_bottom = 42.0
+texture = ExtResource("tex_delimiter")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Delimiter9" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1377761747]
+layout_mode = 1
+offset_left = 1701.0
+offset_top = 10.0
+offset_right = 1705.0
+offset_bottom = 42.0
+texture = ExtResource("tex_delimiter")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Topbar1Mid" type="Control" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1310896658]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 805.0
+offset_top = 3.0
+offset_right = 1115.0
+offset_bottom = 57.0
+
+[node name="Bg" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/Topbar1Mid" unique_id=1725535285]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_topbar1_mid")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ResourceBlockComputingPower" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/Topbar1Mid" unique_id=1425028655 instance=ExtResource("5_rb")]
+custom_minimum_size = Vector2(112, 44)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 15.0
+offset_top = 5.0
+offset_right = 127.0
+offset_bottom = 49.0
+block_id = "computing_power"
+layout_style = 1
+frame_texture = ExtResource("tex_icon_frame_blue")
+icon_texture = ExtResource("tex_icon_computing")
+
+[node name="ConvertButton" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/Topbar1Mid" unique_id=622223881]
+layout_mode = 1
+offset_left = 139.0
+offset_top = 5.0
+offset_right = 171.0
+offset_bottom = 37.0
+texture_normal = ExtResource("tex_convert")
+stretch_mode = 5
+
+[node name="ResourceBlockShelter" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/Topbar1Mid" unique_id=1489398496 instance=ExtResource("5_rb")]
+custom_minimum_size = Vector2(112, 44)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 183.0
+offset_top = 5.0
+offset_right = 295.0
+offset_bottom = 49.0
+block_id = "shelter"
+layout_style = 1
+frame_texture = ExtResource("tex_icon_frame_blue")
+icon_texture = ExtResource("tex_icon_shelter")
+
+[node name="ResourceBlockHousing" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=525599210 instance=ExtResource("5_rb")]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 305.0
+offset_top = 2.0
+offset_right = 433.0
+offset_bottom = 58.0
+
+[node name="ResourceBlockResearcher" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1648845815 instance=ExtResource("5_rb")]
+custom_minimum_size = Vector2(220, 56)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 441.0
+offset_top = 2.0
+offset_right = 661.0
+offset_bottom = 58.0
+block_id = "researcher"
+initial_value = "8/10/2"
+layout_style = 3
+icon_texture = ExtResource("tex_icon_researcher")
+use_long_back = true
+use_researcher_mode = true
+
+[node name="ResourceBlockCognition" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=82314382 instance=ExtResource("5_rb")]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 669.0
+offset_top = 2.0
+offset_right = 797.0
+offset_bottom = 58.0
+block_id = "cognition"
+icon_texture = ExtResource("tex_icon_cognition")
+
+[node name="ResourceBlockPermission" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1516885075 instance=ExtResource("5_rb")]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 1123.0
+offset_top = 2.0
+offset_right = 1251.0
+offset_bottom = 58.0
+block_id = "permission"
+icon_texture = ExtResource("tex_icon_permission")
+
+[node name="ResourceBlockWillpower" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=875374547 instance=ExtResource("5_rb")]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 1259.0
+offset_top = 2.0
+offset_right = 1387.0
+offset_bottom = 58.0
+block_id = "willpower"
+icon_texture = ExtResource("tex_icon_willpower")
+
+[node name="ResourceBlockInfomation" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=906771090 instance=ExtResource("5_rb")]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 1395.0
+offset_top = 2.0
+offset_right = 1523.0
+offset_bottom = 58.0
+block_id = "info"
+icon_texture = ExtResource("tex_icon_infomation")
+show_progress = false
+
+[node name="ResourceBlockInvestigator" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=580907782 instance=ExtResource("5_rb")]
+custom_minimum_size = Vector2(80, 56)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 1531.0
+offset_top = 2.0
+offset_right = 1611.0
+offset_bottom = 58.0
+block_id = "investigator"
+initial_value = "60"
+layout_style = 2
+icon_texture = ExtResource("tex_icon_investigator")
+show_progress = false
+
+[node name="ResourceBlockTruth" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=2019077132 instance=ExtResource("5_rb")]
+custom_minimum_size = Vector2(80, 56)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 1619.0
+offset_top = 2.0
+offset_right = 1699.0
+offset_bottom = 58.0
+block_id = "truth"
+initial_value = "60"
+layout_style = 2
+icon_texture = ExtResource("tex_icon_truth")
+show_progress = false
+
+[node name="Topbar1" type="Control" parent="Content/Center/DesignCanvas/TopbarFull" unique_id=798732725]
+layout_mode = 1
+anchors_preset = 0
+offset_top = 60.0
+offset_right = 1920.0
+offset_bottom = 108.0
+
+[node name="BackgroundTopbar1" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=639117415]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_topbar1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BackgroundSide1" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1284145680]
+layout_mode = 1
+offset_left = 370.0
+offset_top = 8.0
+offset_right = 910.0
+offset_bottom = 40.0
+texture = ExtResource("tex_topbar1_side")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BackgroundSide2" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1044416462]
+layout_mode = 1
+offset_left = 1010.0
+offset_top = 8.0
+offset_right = 1550.0
+offset_bottom = 40.0
+texture = ExtResource("tex_topbar1_side")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CorrosionLabel" type="Label" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1612104100]
+layout_mode = 1
+offset_left = 378.0
+offset_top = 8.0
+offset_right = 636.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "CORROSION IN 90 DAYS:"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ForecastWarning" type="Control" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=668966585]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 644.0
+offset_top = 8.0
+offset_right = 910.0
+offset_bottom = 40.0
+
+[node name="Background" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/ForecastWarning" unique_id=1235424712]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_forecast_bg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CorrosionNumber" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=93928547 instance=ExtResource("6_cn")]
+layout_mode = 1
+offset_left = 912.0
+offset_top = 8.0
+offset_right = 1008.0
+offset_bottom = 40.0
+
+[node name="BtnPause" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=490095342]
+layout_mode = 1
+offset_left = 1010.0
+offset_top = 8.0
+offset_right = 1058.0
+offset_bottom = 40.0
+texture_normal = ExtResource("tex_btn48_nor")
+texture_pressed = ExtResource("tex_btn48_press")
+texture_hover = ExtResource("tex_btn48_hover")
+texture_disabled = ExtResource("tex_btn48_disabled")
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/BtnPause" unique_id=528083186]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_icon_pause")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Btn1x" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1080608291]
+layout_mode = 1
+offset_left = 1060.0
+offset_top = 8.0
+offset_right = 1108.0
+offset_bottom = 40.0
+texture_normal = ExtResource("tex_btn48_nor")
+texture_pressed = ExtResource("tex_btn48_press")
+texture_hover = ExtResource("tex_btn48_hover")
+texture_disabled = ExtResource("tex_btn48_disabled")
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/Btn1x" unique_id=618754718]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_icon_goon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Btn2x" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=812171195]
+layout_mode = 1
+offset_left = 1110.0
+offset_top = 8.0
+offset_right = 1158.0
+offset_bottom = 40.0
+texture_normal = ExtResource("tex_btn48_nor")
+texture_pressed = ExtResource("tex_btn48_press")
+texture_hover = ExtResource("tex_btn48_hover")
+texture_disabled = ExtResource("tex_btn48_disabled")
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/Btn2x" unique_id=615287411]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_icon_goon2x")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Btn6x" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1119442919]
+layout_mode = 1
+offset_left = 1160.0
+offset_top = 8.0
+offset_right = 1208.0
+offset_bottom = 40.0
+texture_normal = ExtResource("tex_btn48_nor")
+texture_pressed = ExtResource("tex_btn48_press")
+texture_hover = ExtResource("tex_btn48_hover")
+texture_disabled = ExtResource("tex_btn48_disabled")
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/Btn6x" unique_id=1314097865]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_icon_goon3x")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TimeLabels" type="Control" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1960360242]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 1216.0
+offset_top = 14.0
+offset_right = 1456.0
+offset_bottom = 44.0
+
+[node name="Hour" type="Label" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/TimeLabels" unique_id=1210045986]
+layout_mode = 1
+offset_top = 5.0
+offset_right = 82.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "HOUR:16"
+
+[node name="Day" type="Label" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/TimeLabels" unique_id=283941792]
+layout_mode = 1
+offset_left = 82.0
+offset_top = 5.0
+offset_right = 148.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "DAY:29"
+
+[node name="Week" type="Label" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1/TimeLabels" unique_id=1895454682]
+layout_mode = 1
+offset_left = 148.0
+offset_top = 5.0
+offset_right = 240.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "WEEK:2199"

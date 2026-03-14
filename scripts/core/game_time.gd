@@ -38,8 +38,14 @@ var is_flowing: bool = true:
 				var c: Dictionary = conns[i]
 				var callable_obj: Callable = c.get("callable", Callable())
 				var target: Object = callable_obj.get_object() if callable_obj.is_valid() else null
-				var method_str: String = callable_obj.get_method() if callable_obj.is_valid() else ""
-				var path_str: String = str(target.get_path()) if target and target is Node else (str(target) if target else "null")
+				var method_str: String = String(callable_obj.get_method()) if callable_obj.is_valid() else ""
+				var path_str: String
+				if target and target is Node:
+					path_str = str(target.get_path())
+				elif target:
+					path_str = str(target)
+				else:
+					path_str = "null"
 				var rid: int = -1
 				var parent_rid: int = -1
 				if target:

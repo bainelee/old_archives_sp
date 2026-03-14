@@ -9,6 +9,7 @@ Godot 4.6 项目：场景编辑器 + 2D 基地建设游戏。
   - Godot 通用：`godot-gdscript.mdc`（.gd）、`godot-scenes-performance.mdc`（.tscn/.gd）
   - **3D 场景编辑器**：正常方向 Z 朝外/X 朝右/Y 朝上；3d_actor root 须 (0,0,0)，偏移在引用场景中设置；ActorBox 黑色、RoomReferenceGrid 灰白，见 `.cursor/rules/3d-scene-editor.mdc`
   - **Figma 导入**：从 Figma 读取→下载→导入 Godot 时，按 `.cursor/rules/figma-import.mdc` 执行
+  - **预制作 UI**：预排布 UI 须支持编辑器中动态调整、效果立即可见；相关逻辑不得写在 `_ready()`，见 `.cursor/rules/ui-editor-live.mdc`
   - **数值同步**：用户说「调整数值」「我调整了数值」等时，按 `.cursor/subagents/game-values-sync.md` 全量同步 `datas/game_values.json`、`game_base.json`、`docs/design/*.md` 及脚本硬编码
 - **术语对照**：[docs/settings/00-project-keywords.md](docs/settings/00-project-keywords.md)
 - **详情**：[docs/design/00-project-overview.md](docs/design/00-project-overview.md)

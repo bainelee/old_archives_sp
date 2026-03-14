@@ -32,6 +32,7 @@ const GAME_MAIN_SCENE := "res://scenes/game/game_main.tscn"
 enum Mode { MAIN, SAVE, LOAD }
 var _mode: Mode = Mode.MAIN
 var _pending_delete_slot: int = -1
+var _was_flowing_before_menu: bool = true  ## show_menu 前的时间流逝状态，hide_menu 时恢复
 
 
 func _ready() -> void:
@@ -57,6 +58,9 @@ func _setup_buttons() -> void:
 
 
 func show_menu() -> void:
+	_was_flowing_before_menu = GameTime.is_flowing if GameTime else true
+	if GameTime:
+		GameTime.is_flowing = false
 	visible = true
 	_mode = Mode.MAIN
 	_panel.visible = true
@@ -66,6 +70,8 @@ func show_menu() -> void:
 
 func hide_menu() -> void:
 	visible = false
+	if GameTime:
+		GameTime.is_flowing = _was_flowing_before_menu
 	## 关闭菜单时根据时间是否在流逝决定 tree.paused，避免时间暂停时恢复游戏逻辑
 	get_tree().paused = not (GameTime and GameTime.is_flowing)
 

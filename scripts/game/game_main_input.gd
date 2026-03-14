@@ -41,6 +41,11 @@ static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> b
 
 
 static func process_input(game_main: Node2D, event: InputEvent) -> void:
+	## 暂停菜单打开时完全跳过游戏输入，避免点击穿透到底层 UI/游戏世界
+	var pause_menu: CanvasLayer = game_main.get_node_or_null("PauseMenu") as CanvasLayer
+	if pause_menu and pause_menu.visible:
+		return
+
 	if event is InputEventKey:
 		var key_event: InputEventKey = event as InputEventKey
 		if key_event.pressed and key_event.keycode == KEY_F12:
