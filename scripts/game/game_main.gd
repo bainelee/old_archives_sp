@@ -976,9 +976,8 @@ func _grant_room_resources_to_player(room: RoomInfo) -> void:
 
 func _sync_resources_to_topbar() -> void:
 	var ui: Node = get_node_or_null("UIMain")
-	if not ui or not ui.has_method("refresh_display"):
-		return
-	ui.refresh_display()
+	if ui and ui.has_method("refresh_display"):
+		ui.refresh_display()
 
 
 ## 获取因子消耗/产出细则，供 TopBar 因子悬停面板使用

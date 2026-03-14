@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://dejraui5mgkcg"]
+[gd_scene format=3 uid="uid://topbar_figma_01"]
 
-[ext_resource type="Script" uid="uid://ycnch3ptmkb4" path="res://scripts/ui/test_figma_page.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/topbar_figma.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/ui/resource_block.tscn" id="5_rb"]
 [ext_resource type="PackedScene" uid="uid://52yph6wsc3mo" path="res://scenes/ui/corrosion_number.tscn" id="6_cn"]
 [ext_resource type="PackedScene" uid="uid://dttradv3t4x01" path="res://scenes/ui/forecast_warning.tscn" id="7_fw"]
@@ -8,21 +8,13 @@
 [ext_resource type="Texture2D" uid="uid://b2raq0wagxb0u" path="res://assets/ui/buttons/button_disabled_36x36.png" id="tex_btn36_disabled"]
 [ext_resource type="Texture2D" uid="uid://d3bxnb7dd5jnj" path="res://assets/ui/buttons/button_nor_36x36.png" id="tex_btn36_nor"]
 [ext_resource type="Texture2D" uid="uid://4yovmrbqt2ae" path="res://assets/ui/buttons/button_press_36x36.png" id="tex_btn36_press"]
-[ext_resource type="Texture2D" uid="uid://bv4k22xv4600y" path="res://assets/ui/buttons/button_48x32_disabled.png" id="tex_btn48_disabled"]
-[ext_resource type="Texture2D" uid="uid://imoadbd5cm6c" path="res://assets/ui/buttons/button_48x32_hover.png" id="tex_btn48_hover"]
-[ext_resource type="Texture2D" uid="uid://d3x0ykhlr320p" path="res://assets/ui/buttons/button_48x32_nor.png" id="tex_btn48_nor"]
-[ext_resource type="Texture2D" uid="uid://dp65tm6a4phxx" path="res://assets/ui/buttons/button_48x32_press.png" id="tex_btn48_press"]
 [ext_resource type="Texture2D" uid="uid://dlr0htjrtpx5m" path="res://assets/ui/resource_block/animation_icon_convert_to_nor.png" id="tex_convert"]
 [ext_resource type="Texture2D" uid="uid://cxmv0is25he8o" path="res://assets/ui/topbar/delimiter_topbar.png" id="tex_delimiter"]
 [ext_resource type="Texture2D" uid="uid://df3t112oybbdd" path="res://assets/icons/icon_cognition.png" id="tex_icon_cognition"]
 [ext_resource type="Texture2D" uid="uid://cxudy850vc8kf" path="res://assets/icons/icon_computing_power_white.png" id="tex_icon_computing"]
 [ext_resource type="Texture2D" uid="uid://bmv8dxgvdbv80" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="tex_icon_frame_blue"]
-[ext_resource type="Texture2D" uid="uid://d0o32plkfqiq4" path="res://assets/ui/buttons/icon_goon_28x28.png" id="tex_icon_goon"]
-[ext_resource type="Texture2D" uid="uid://c0ynlot0wjddr" path="res://assets/ui/buttons/icon_goon_2x_28x28.png" id="tex_icon_goon2x"]
-[ext_resource type="Texture2D" uid="uid://if3a6ow6x72o" path="res://assets/ui/buttons/icon_goon_3x_28x28.png" id="tex_icon_goon3x"]
 [ext_resource type="Texture2D" uid="uid://bdev3hnjwxrrk" path="res://assets/icons/icon_infomation.png" id="tex_icon_infomation"]
 [ext_resource type="Texture2D" uid="uid://dljpphn6mls8u" path="res://assets/icons/icon_investigator.png" id="tex_icon_investigator"]
-[ext_resource type="Texture2D" uid="uid://cxhkagpdiibb4" path="res://assets/ui/buttons/icon_pause_28x28.png" id="tex_icon_pause"]
 [ext_resource type="Texture2D" uid="uid://dj7x5fioi03br" path="res://assets/icons/icon_permission.png" id="tex_icon_permission"]
 [ext_resource type="Texture2D" uid="uid://yprmm82tsa37" path="res://assets/icons/icon_questions.png" id="tex_icon_questions"]
 [ext_resource type="Texture2D" uid="uid://gbw85637v3pv" path="res://assets/icons/icon_researcher.png" id="tex_icon_researcher"]
@@ -35,64 +27,30 @@
 [ext_resource type="Texture2D" uid="uid://bdc1u5p2vn5wm" path="res://assets/ui/topbar/background_topbar1_mid.png" id="tex_topbar1_mid"]
 [ext_resource type="Texture2D" uid="uid://xm7yx6yocxsx" path="res://assets/ui/topbar/background_topbar1_side.png" id="tex_topbar1_side"]
 
-[node name="TestFigmaPage" type="CanvasLayer" unique_id=1079676365]
-layer = 15
-script = ExtResource("1_script")
-
-[node name="Content" type="Control" parent="." unique_id=631433811]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Background" type="ColorRect" parent="Content" unique_id=1722630703]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.637, 0.637, 0.637, 1)
-
-[node name="Center" type="CenterContainer" parent="Content" unique_id=2129711839]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="DesignCanvas" type="Control" parent="Content/Center" unique_id=1739127161]
-custom_minimum_size = Vector2(1920, 1080)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-
-[node name="TopbarFull" type="Control" parent="Content/Center/DesignCanvas" unique_id=234571821]
-layout_mode = 1
+[node name="TopbarFigma" type="Control"]
+custom_minimum_size = Vector2(1920, 108)
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 108.0
 grow_horizontal = 2
+script = ExtResource("1_script")
 
-[node name="TopbarBg" type="ColorRect" parent="Content/Center/DesignCanvas/TopbarFull" unique_id=1955106301]
+[node name="TopbarBg" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.286, 0.286, 0.286, 1)
+color = Color(0.12, 0.12, 0.18, 0.92)
 
-[node name="Topbar0" type="Control" parent="Content/Center/DesignCanvas/TopbarFull" unique_id=183270687]
+[node name="Topbar0" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 0
 offset_right = 1920.0
 offset_bottom = 60.0
 
-[node name="BackgroundTopbar0" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=333655155]
+[node name="BackgroundTopbar0" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -103,7 +61,7 @@ texture = ExtResource("tex_topbar0")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BaseButtonSettings" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=74685487]
+[node name="BaseButtonSettings" type="TextureButton" parent="Topbar0"]
 layout_mode = 1
 offset_left = 12.0
 offset_top = 12.0
@@ -114,7 +72,7 @@ texture_pressed = ExtResource("tex_btn36_press")
 texture_disabled = ExtResource("tex_btn36_disabled")
 stretch_mode = 5
 
-[node name="IconSettings" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/BaseButtonSettings" unique_id=286289542]
+[node name="IconSettings" type="TextureRect" parent="Topbar0/BaseButtonSettings"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -131,7 +89,7 @@ texture = ExtResource("tex_icon_settings")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BaseButtonQuestion" type="TextureButton" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1776722534]
+[node name="BaseButtonQuestion" type="TextureButton" parent="Topbar0"]
 layout_mode = 1
 offset_left = 60.0
 offset_top = 12.0
@@ -142,7 +100,7 @@ texture_pressed = ExtResource("tex_btn36_press")
 texture_disabled = ExtResource("tex_btn36_disabled")
 stretch_mode = 5
 
-[node name="IconQuestions" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/BaseButtonQuestion" unique_id=23941197]
+[node name="IconQuestions" type="TextureRect" parent="Topbar0/BaseButtonQuestion"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -159,7 +117,7 @@ texture = ExtResource("tex_icon_questions")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter1" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1417774341]
+[node name="Delimiter1" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 435.0
 offset_top = 10.0
@@ -169,7 +127,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter2" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=533880161]
+[node name="Delimiter2" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 663.0
 offset_top = 10.0
@@ -179,7 +137,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter3" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1106451072]
+[node name="Delimiter3" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 799.0
 offset_top = 8.0
@@ -189,7 +147,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter4" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1523504059]
+[node name="Delimiter4" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 1117.0
 offset_top = 10.0
@@ -199,7 +157,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter5" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=355690335]
+[node name="Delimiter5" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 1253.0
 offset_top = 10.0
@@ -209,7 +167,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter6" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1042452200]
+[node name="Delimiter6" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 1389.0
 offset_top = 10.0
@@ -219,7 +177,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter7" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1696816137]
+[node name="Delimiter7" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 1525.0
 offset_top = 10.0
@@ -229,7 +187,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter8" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1188647454]
+[node name="Delimiter8" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 1613.0
 offset_top = 10.0
@@ -239,7 +197,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Delimiter9" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1377761747]
+[node name="Delimiter9" type="TextureRect" parent="Topbar0"]
 layout_mode = 1
 offset_left = 1701.0
 offset_top = 10.0
@@ -249,7 +207,7 @@ texture = ExtResource("tex_delimiter")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Topbar1Mid" type="Control" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1310896658]
+[node name="Topbar1Mid" type="Control" parent="Topbar0"]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 805.0
@@ -257,7 +215,7 @@ offset_top = 3.0
 offset_right = 1115.0
 offset_bottom = 57.0
 
-[node name="Bg" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/Topbar1Mid" unique_id=1725535285]
+[node name="Bg" type="TextureRect" parent="Topbar0/Topbar1Mid"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -268,7 +226,7 @@ texture = ExtResource("tex_topbar1_mid")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ResourceBlockComputingPower" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/Topbar1Mid" unique_id=1425028655 instance=ExtResource("5_rb")]
+[node name="ResourceBlockComputingPower" parent="Topbar0/Topbar1Mid" instance=ExtResource("5_rb")]
 custom_minimum_size = Vector2(112, 44)
 layout_mode = 1
 anchors_preset = 0
@@ -281,7 +239,7 @@ layout_style = 1
 frame_texture = ExtResource("tex_icon_frame_blue")
 icon_texture = ExtResource("tex_icon_computing")
 
-[node name="ConvertIcon" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/Topbar1Mid" unique_id=622223881]
+[node name="ConvertIcon" type="TextureRect" parent="Topbar0/Topbar1Mid"]
 layout_mode = 1
 offset_left = 139.0
 offset_top = 5.0
@@ -292,7 +250,7 @@ texture = ExtResource("tex_convert")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ResourceBlockShelter" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0/Topbar1Mid" unique_id=1489398496 instance=ExtResource("5_rb")]
+[node name="ResourceBlockShelter" parent="Topbar0/Topbar1Mid" instance=ExtResource("5_rb")]
 custom_minimum_size = Vector2(112, 44)
 layout_mode = 1
 anchors_preset = 0
@@ -305,7 +263,7 @@ layout_style = 1
 frame_texture = ExtResource("tex_icon_frame_blue")
 icon_texture = ExtResource("tex_icon_shelter")
 
-[node name="ResourceBlockHousing" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=525599210 instance=ExtResource("5_rb")]
+[node name="ResourceBlockHousing" parent="Topbar0" instance=ExtResource("5_rb")]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 305.0
@@ -314,7 +272,7 @@ offset_right = 433.0
 offset_bottom = 58.0
 block_id = "housing"
 
-[node name="ResourceBlockResearcher" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1648845815 instance=ExtResource("5_rb")]
+[node name="ResourceBlockResearcher" parent="Topbar0" instance=ExtResource("5_rb")]
 custom_minimum_size = Vector2(220, 56)
 layout_mode = 1
 anchors_preset = 0
@@ -329,7 +287,7 @@ icon_texture = ExtResource("tex_icon_researcher")
 use_long_back = true
 use_researcher_mode = true
 
-[node name="ResourceBlockCognition" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=82314382 instance=ExtResource("5_rb")]
+[node name="ResourceBlockCognition" parent="Topbar0" instance=ExtResource("5_rb")]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 669.0
@@ -339,7 +297,7 @@ offset_bottom = 58.0
 block_id = "cognition"
 icon_texture = ExtResource("tex_icon_cognition")
 
-[node name="ResourceBlockPermission" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=1516885075 instance=ExtResource("5_rb")]
+[node name="ResourceBlockPermission" parent="Topbar0" instance=ExtResource("5_rb")]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 1123.0
@@ -349,7 +307,7 @@ offset_bottom = 58.0
 block_id = "permission"
 icon_texture = ExtResource("tex_icon_permission")
 
-[node name="ResourceBlockWillpower" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=875374547 instance=ExtResource("5_rb")]
+[node name="ResourceBlockWillpower" parent="Topbar0" instance=ExtResource("5_rb")]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 1259.0
@@ -359,7 +317,7 @@ offset_bottom = 58.0
 block_id = "willpower"
 icon_texture = ExtResource("tex_icon_willpower")
 
-[node name="ResourceBlockInfomation" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=906771090 instance=ExtResource("5_rb")]
+[node name="ResourceBlockInfomation" parent="Topbar0" instance=ExtResource("5_rb")]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 1395.0
@@ -370,7 +328,7 @@ block_id = "info"
 icon_texture = ExtResource("tex_icon_infomation")
 show_progress = false
 
-[node name="ResourceBlockInvestigator" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=580907782 instance=ExtResource("5_rb")]
+[node name="ResourceBlockInvestigator" parent="Topbar0" instance=ExtResource("5_rb")]
 custom_minimum_size = Vector2(80, 56)
 layout_mode = 1
 anchors_preset = 0
@@ -384,7 +342,7 @@ layout_style = 2
 icon_texture = ExtResource("tex_icon_investigator")
 show_progress = false
 
-[node name="ResourceBlockTruth" parent="Content/Center/DesignCanvas/TopbarFull/Topbar0" unique_id=2019077132 instance=ExtResource("5_rb")]
+[node name="ResourceBlockTruth" parent="Topbar0" instance=ExtResource("5_rb")]
 custom_minimum_size = Vector2(80, 56)
 layout_mode = 1
 anchors_preset = 0
@@ -398,14 +356,14 @@ layout_style = 2
 icon_texture = ExtResource("tex_icon_truth")
 show_progress = false
 
-[node name="Topbar1" type="Control" parent="Content/Center/DesignCanvas/TopbarFull" unique_id=798732725]
+[node name="Topbar1" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 0
 offset_top = 60.0
 offset_right = 1920.0
 offset_bottom = 108.0
 
-[node name="BackgroundTopbar1" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=639117415]
+[node name="BackgroundTopbar1" type="TextureRect" parent="Topbar1"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -416,7 +374,7 @@ texture = ExtResource("tex_topbar1")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BackgroundSide1" type="TextureRect" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1284145680]
+[node name="BackgroundSide1" type="TextureRect" parent="Topbar1"]
 layout_mode = 1
 offset_left = 370.0
 offset_top = 8.0
@@ -426,7 +384,7 @@ texture = ExtResource("tex_topbar1_side")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="CorrosionLabel" type="Label" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1612104100]
+[node name="CorrosionLabel" type="Label" parent="Topbar1"]
 layout_mode = 1
 offset_left = 378.0
 offset_top = 8.0
@@ -438,25 +396,24 @@ text = "CORROSION IN 90 DAYS:"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="ForecastWarning" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=1847355304 instance=ExtResource("7_fw")]
+[node name="ForecastWarning" parent="Topbar1" instance=ExtResource("7_fw")]
 layout_mode = 1
 offset_left = 644.0
 offset_top = 8.0
 offset_right = 910.0
 offset_bottom = 40.0
 
-[node name="CorrosionNumber" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" unique_id=93928547 instance=ExtResource("6_cn")]
+[node name="CorrosionNumber" parent="Topbar1" instance=ExtResource("6_cn")]
 layout_mode = 1
 offset_left = 912.0
 offset_top = 8.0
 offset_right = 1008.0
 offset_bottom = 40.0
 
-[node name="TimeControlBar" parent="Content/Center/DesignCanvas/TopbarFull/Topbar1" instance=ExtResource("8_tcb")]
+[node name="TimeControlBar" parent="Topbar1" instance=ExtResource("8_tcb")]
 layout_mode = 1
 anchors_preset = 0
 offset_left = 1010.0
 offset_top = 8.0
 offset_right = 1550.0
 offset_bottom = 40.0
-

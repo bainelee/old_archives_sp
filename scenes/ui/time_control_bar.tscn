@@ -1,0 +1,192 @@
+[gd_scene load_steps=12 format=3 uid="uid://time_control_bar_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/time_control_bar.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/topbar/background_topbar1_side.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://bv4k22xv4600y" path="res://assets/ui/buttons/button_48x32_disabled.png" id="tex_disabled"]
+[ext_resource type="Texture2D" uid="uid://imoadbd5cm6c" path="res://assets/ui/buttons/button_48x32_hover.png" id="tex_hover"]
+[ext_resource type="Texture2D" uid="uid://d3x0ykhlr320p" path="res://assets/ui/buttons/button_48x32_nor.png" id="tex_nor"]
+[ext_resource type="Texture2D" uid="uid://dp65tm6a4phxx" path="res://assets/ui/buttons/button_48x32_press.png" id="tex_press"]
+[ext_resource type="Texture2D" uid="uid://cxhkagpdiibb4" path="res://assets/ui/buttons/icon_pause_28x28.png" id="tex_pause"]
+[ext_resource type="Texture2D" uid="uid://d0o32plkfqiq4" path="res://assets/ui/buttons/icon_goon_28x28.png" id="tex_goon"]
+[ext_resource type="Texture2D" uid="uid://c0ynlot0wjddr" path="res://assets/ui/buttons/icon_goon_2x_28x28.png" id="tex_goon2x"]
+[ext_resource type="Texture2D" uid="uid://if3a6ow6x72o" path="res://assets/ui/buttons/icon_goon_3x_28x28.png" id="tex_goon3x"]
+
+[node name="TimeControlBar" type="Control"]
+custom_minimum_size = Vector2(540, 32)
+layout_mode = 3
+script = ExtResource("1_script")
+
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BgTexture" type="TextureRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BtnPause" type="TextureButton" parent="Background"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 48.0
+offset_bottom = 32.0
+toggle_mode = true
+texture_normal = ExtResource("tex_nor")
+texture_pressed = ExtResource("tex_press")
+texture_hover = ExtResource("tex_hover")
+texture_disabled = ExtResource("tex_disabled")
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Background/BtnPause"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_pause")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Btn1x" type="TextureButton" parent="Background"]
+layout_mode = 1
+offset_left = 50.0
+offset_top = 0.0
+offset_right = 98.0
+offset_bottom = 32.0
+toggle_mode = true
+texture_normal = ExtResource("tex_nor")
+texture_pressed = ExtResource("tex_press")
+texture_hover = ExtResource("tex_hover")
+texture_disabled = ExtResource("tex_disabled")
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Background/Btn1x"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_goon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Btn2x" type="TextureButton" parent="Background"]
+layout_mode = 1
+offset_left = 100.0
+offset_top = 0.0
+offset_right = 148.0
+offset_bottom = 32.0
+toggle_mode = true
+texture_normal = ExtResource("tex_nor")
+texture_pressed = ExtResource("tex_press")
+texture_hover = ExtResource("tex_hover")
+texture_disabled = ExtResource("tex_disabled")
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Background/Btn2x"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_goon2x")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Btn6x" type="TextureButton" parent="Background"]
+layout_mode = 1
+offset_left = 150.0
+offset_top = 0.0
+offset_right = 198.0
+offset_bottom = 32.0
+toggle_mode = true
+texture_normal = ExtResource("tex_nor")
+texture_pressed = ExtResource("tex_press")
+texture_hover = ExtResource("tex_hover")
+texture_disabled = ExtResource("tex_disabled")
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Background/Btn6x"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("tex_goon3x")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TimeLabels" type="Control" parent="Background"]
+layout_mode = 1
+offset_left = 206.0
+offset_top = 6.0
+offset_right = 446.0
+offset_bottom = 36.0
+
+[node name="Hour" type="Label" parent="Background/TimeLabels"]
+layout_mode = 1
+offset_top = -2.0
+offset_right = 82.0
+offset_bottom = 21.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "HOUR:0"
+
+[node name="Day" type="Label" parent="Background/TimeLabels"]
+layout_mode = 1
+offset_left = 82.0
+offset_top = -2.0
+offset_right = 148.0
+offset_bottom = 21.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "DAY:0"
+
+[node name="Week" type="Label" parent="Background/TimeLabels"]
+layout_mode = 1
+offset_left = 148.0
+offset_top = -2.0
+offset_right = 240.0
+offset_bottom = 21.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "WEEK:1"

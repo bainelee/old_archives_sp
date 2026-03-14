@@ -11,9 +11,6 @@ const CONSTRUCTION_SELECTING_TARGET := 2
 const CONSTRUCTION_CONFIRMING := 3
 
 static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> bool:
-	var test_page: CanvasLayer = game_main.get_node_or_null("TestFigmaPage") as CanvasLayer
-	if test_page and test_page.visible:
-		return true
 	var top_bar: Control = game_main.get_node_or_null("UIMain/TopBar") as Control
 	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
 		return true
@@ -45,15 +42,6 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 	var pause_menu: CanvasLayer = game_main.get_node_or_null("PauseMenu") as CanvasLayer
 	if pause_menu and pause_menu.visible:
 		return
-
-	if event is InputEventKey:
-		var key_event: InputEventKey = event as InputEventKey
-		if key_event.pressed and key_event.keycode == KEY_F12:
-			var test_page: CanvasLayer = game_main.get_node_or_null("TestFigmaPage") as CanvasLayer
-			if test_page and test_page.has_method("toggle"):
-				test_page.toggle()
-				game_main.get_viewport().set_input_as_handled()
-				return
 
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event as InputEventMouseButton

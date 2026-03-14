@@ -14,6 +14,8 @@ const BAR_HEIGHT_CENTER := 16.0
 const SIGN_SIZE := 12.0
 const SIGN_OFFSET_FROM_HANDLE := 3.0
 
+## 侵蚀数值 → handle y 等级 0–4：+1→0, 0→1, -2→2, -4→3, -8→4
+const VALUE_TO_LEVEL := {1: 0, 0: 1, -2: 2, -4: 3, -8: 4}
 ## 侵蚀等级 → 贴图索引：0=绿 1=蓝 2=橙 3=紫 4=红
 const LEVEL_TO_INDEX := [1, 0, 2, 3, 4]
 const HANDLE_PATHS := [
@@ -36,12 +38,26 @@ var _handle_container: Control
 var _last_data_hash := 0
 
 
+func _exit_tree() -> void:
+	if Engine.is_editor_hint():
+		return
+	if not is_instance_valid(GameTime):
+		return
+	# 使用字符串形式避免直接访问 signal 属性可能引发的错误
+	if GameTime.is_connected("time_updated", _on_time_updated):
+		GameTime.disconnect("time_updated", _on_time_updated)
+
+
 func _ready() -> void:
 	_background = get_node_or_null("Background") as TextureRect
 	_handle_container = get_node_or_null("HandleContainer") as Control
 	if not _handle_container:
 		_handle_container = self
 	_rebuild_handles()
+	if not Engine.is_editor_hint() and ErosionCore and GameTime:
+		if not GameTime.is_connected("time_updated", _on_time_updated):
+			GameTime.connect("time_updated", _on_time_updated)
+		_on_time_updated()
 
 
 func _process(_delta: float) -> void:
@@ -113,7 +129,22 @@ func _rebuild_handles() -> void:
 					_handle_container.add_child(sign_rect)
 
 
-## 设置预测数据（预留，由外部注入，运行时用）
-func set_forecast_data(_days_data: Array) -> void:
-	# 待实现：根据每日侵蚀数据更新 handle、warning sign 等
-	pass
+## 设置预测数据，将 ErosionCore.get_forecast_segments 返回格式转为 handles
+## segments: [{"value": int}, ...]，每段对应一天的侵蚀值
+## 索引 0 = 1 天后（最右），索引 n-1 = n 天后；84 段时索引 83 = 84 天后（最左）
+func set_forecast_data(segments: Array) -> void:
+	var new_handles: Array[Vector3] = []
+	for i in segments.size():
+		var seg: Variant = segments[i]
+		if seg is Dictionary:
+			var value: int = seg.get("value", 0)
+			var level: int = VALUE_TO_LEVEL.get(value, 1)
+			var days_from_now: int = i + 1
+			new_handles.append(Vector3(days_from_now, level, 0))
+	handles = new_handles
+
+
+func _on_time_updated() -> void:
+	if ErosionCore and GameTime:
+		var segs := ErosionCore.get_forecast_segments(84, GameTime.get_total_hours())
+		set_forecast_data(segs)

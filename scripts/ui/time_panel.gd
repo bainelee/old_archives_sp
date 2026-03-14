@@ -1,6 +1,6 @@
 extends HBoxContainer
 ## 可复用的时间流逝 UI 面板
-## 包含：时间流逝指示器、播放/暂停、1x/2x/6x/96x 倍速、时间显示
+## 包含：时间流逝指示器、播放/暂停、1x/2x/6x 倍速、时间显示（96x 移至 Debug UI）
 
 const ICON_PLAY := "▶"
 const ICON_PAUSE := "⏸"
@@ -10,7 +10,6 @@ const ICON_PAUSE := "⏸"
 @onready var _btn_1x: Button = $Speed1xButton
 @onready var _btn_2x: Button = $Speed2xButton
 @onready var _btn_6x: Button = $Speed6xButton
-@onready var _btn_96x: Button = $Speed96xButton
 @onready var _label_time: Label = $TimeLabel
 
 var _indicator_rotation: float = 0.0
@@ -32,7 +31,6 @@ func _ready() -> void:
 	_btn_1x.pressed.connect(_on_1x_pressed)
 	_btn_2x.pressed.connect(_on_2x_pressed)
 	_btn_6x.pressed.connect(_on_6x_pressed)
-	_btn_96x.pressed.connect(_on_96x_pressed)
 
 
 func _exit_tree() -> void:
@@ -93,14 +91,12 @@ func _on_1x_pressed() -> void:
 	GameTime.set_speed_1x()
 	_btn_2x.button_pressed = false
 	_btn_6x.button_pressed = false
-	_btn_96x.button_pressed = false
 
 
 func _on_2x_pressed() -> void:
 	if _btn_2x.button_pressed:
 		GameTime.set_speed_2x()
 		_btn_6x.button_pressed = false
-		_btn_96x.button_pressed = false
 	else:
 		GameTime.set_speed_1x()
 
@@ -109,21 +105,9 @@ func _on_6x_pressed() -> void:
 	if _btn_6x.button_pressed:
 		GameTime.set_speed_6x()
 		_btn_2x.button_pressed = false
-		_btn_96x.button_pressed = false
 	else:
 		GameTime.set_speed_1x()
 		_btn_2x.button_pressed = false
-
-
-func _on_96x_pressed() -> void:
-	if _btn_96x.button_pressed:
-		GameTime.set_speed_96x()
-		_btn_2x.button_pressed = false
-		_btn_6x.button_pressed = false
-	else:
-		GameTime.set_speed_1x()
-		_btn_2x.button_pressed = false
-		_btn_6x.button_pressed = false
 
 
 ## 时间流逝时默认显示播放图标，暂停时默认显示暂停图标；悬浮时显示「将要切换到的」图标
@@ -142,8 +126,7 @@ func _update_play_pause_icon() -> void:
 func _update_speed_buttons() -> void:
 	var speed: float = GameTime.speed_multiplier
 	_btn_2x.button_pressed = (speed >= 1.99 and speed < 5.99)
-	_btn_6x.button_pressed = (speed >= 5.99 and speed < 95.99)
-	_btn_96x.button_pressed = (speed >= 95.99)
+	_btn_6x.button_pressed = (speed >= 5.99)
 
 
 func _update_time_label() -> void:

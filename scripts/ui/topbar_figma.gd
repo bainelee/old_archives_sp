@@ -1,41 +1,43 @@
-extends CanvasLayer
+extends Control
+## UIMain 内嵌的 Figma 风格 TopBar
+## 显示 ResourceBlock、TimeControlBar、CorrosionNumber、ForecastWarning
+## 父节点为 UIMain，通过 get_parent() 获取 get_resources、researchers_in_*
 
-## 测试 Figma 同步的 UI 页面，按 F12 切换显示/隐藏
-## 所有布局、颜色、样式均存储在 .tscn 中，由 Figma MCP 同步时直接写入场景
-## 禁止使用截图或 JSON 运行时加载；同步时需读取 Figma 的 layout、fills、cornerRadius 等原始数据
-## 鼠标悬停资源块会发出 hovered/unhovered，详细信息面板可连接（暂未实现新界面）
-## 数据从 UIMain 同步，与主 TopBar 一致
-
-const CANVAS_SIZE := Vector2(1920.0, 1080.0)
+const DESIGN_WIDTH := 1920.0
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 
-var _design_canvas: Control
+signal block_hovered(block_id: String)
+signal block_unhovered(block_id: String)
 
 
 func _ready() -> void:
-	_design_canvas = get_node_or_null("Content/Center/DesignCanvas") as Control
-	if _design_canvas:
-		_design_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	# 设置按钮：点击等同 ESC，唤出暂停菜单
-	var btn_settings: TextureButton = get_node_or_null("Content/Center/DesignCanvas/TopbarFull/Topbar0/BaseButtonSettings") as TextureButton
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var btn_settings: TextureButton = get_node_or_null("Topbar0/BaseButtonSettings") as TextureButton
 	if btn_settings:
 		btn_settings.pressed.connect(_on_settings_pressed)
-	# 连接所有 ResourceBlock 的悬停信号（详细信息面板待实现）
 	_setup_resource_block_hover()
-	# 侵蚀数字：订阅 ErosionCore，移除示例值
 	_setup_corrosion_number()
-	# 仅在作为子场景实例时隐藏；单独运行本场景时保持可见便于调试
-	if get_tree().current_scene != self:
-		visible = false
-	_update_canvas_scale()
-	get_viewport().size_changed.connect(_update_canvas_scale)
-	# 延迟刷新，确保 UIMain 已加载
+	_update_scale()
+	get_viewport().size_changed.connect(_update_scale)
 	call_deferred("refresh_display")
 
 
+func _exit_tree() -> void:
+	if not is_instance_valid(ErosionCore):
+		return
+	if ErosionCore.is_connected("erosion_changed", _on_erosion_changed):
+		ErosionCore.disconnect("erosion_changed", _on_erosion_changed)
+
+
+func _update_scale() -> void:
+	var vp_size: Vector2 = get_viewport().get_visible_rect().size
+	var s := vp_size.x / DESIGN_WIDTH
+	scale = Vector2(s, s)
+
+
 func _setup_resource_block_hover() -> void:
-	var topbar: Node = get_node_or_null("Content/Center/DesignCanvas/TopbarFull/Topbar0")
+	var topbar: Node = get_node_or_null("Topbar0")
 	if not topbar:
 		return
 	for child in _collect_resource_blocks(topbar):
@@ -51,77 +53,41 @@ func _collect_resource_blocks(parent: Node) -> Array:
 	return result
 
 
-func _on_resource_block_hovered(_block_id: String) -> void:
-	## 预留：显示资源块详细信息面板（新界面待实现）
-	pass
+func _on_resource_block_hovered(block_id: String) -> void:
+	block_hovered.emit(block_id)
 
 
-func _on_resource_block_unhovered(_block_id: String) -> void:
-	## 预留：隐藏资源块详细信息面板
-	pass
+func _on_resource_block_unhovered(block_id: String) -> void:
+	block_unhovered.emit(block_id)
 
 
 func _setup_corrosion_number() -> void:
-	var cn: Node = get_node_or_null("Content/Center/DesignCanvas/TopbarFull/Topbar1/CorrosionNumber")
+	var cn: Node = get_node_or_null("Topbar1/CorrosionNumber")
 	if not cn or not cn.has_method("set_corrosion_value"):
 		return
 	if ErosionCore:
 		cn.set_corrosion_value(ErosionCore.current_erosion)
-		if not ErosionCore.erosion_changed.is_connected(_on_erosion_changed):
-			ErosionCore.erosion_changed.connect(_on_erosion_changed)
+		if not ErosionCore.is_connected("erosion_changed", _on_erosion_changed):
+			ErosionCore.connect("erosion_changed", _on_erosion_changed)
 
 
-func _on_erosion_changed(new_value: int) -> void:
-	var cn: Node = get_node_or_null("Content/Center/DesignCanvas/TopbarFull/Topbar1/CorrosionNumber")
-	if cn and cn.has_method("set_corrosion_value"):
-		cn.set_corrosion_value(new_value)
-
-
-func _exit_tree() -> void:
-	if ErosionCore and ErosionCore.erosion_changed.is_connected(_on_erosion_changed):
-		ErosionCore.erosion_changed.disconnect(_on_erosion_changed)
-
-
-## 设置侵蚀数字（供外部调用，如 GameMain 注入）
-func set_corrosion_value(value: int) -> void:
-	var cn: Node = get_node_or_null("Content/Center/DesignCanvas/TopbarFull/Topbar1/CorrosionNumber")
-	if cn and cn.has_method("set_corrosion_value"):
-		cn.set_corrosion_value(value)
+func _on_erosion_changed(_new_value: int) -> void:
+	var cn: Node = get_node_or_null("Topbar1/CorrosionNumber")
+	if cn and cn.has_method("set_corrosion_value") and ErosionCore:
+		cn.set_corrosion_value(ErosionCore.current_erosion)
 
 
 func _on_settings_pressed() -> void:
-	## 等同按 ESC，唤出暂停菜单
-	var pause_menu: CanvasLayer = get_parent().get_node_or_null("PauseMenu") as CanvasLayer
+	var p: Node = get_parent()
+	var ui: Node = p.get_parent() if p else null
+	var gm: Node = ui.get_parent() if ui else null
+	var pause_menu: CanvasLayer = gm.get_node_or_null("PauseMenu") as CanvasLayer if gm else null
 	if pause_menu and pause_menu.has_method("show_menu"):
 		pause_menu.show_menu()
 
 
-func _update_canvas_scale() -> void:
-	if not _design_canvas:
-		return
-	var vp_size: Vector2 = get_viewport().get_visible_rect().size
-	var s := minf(vp_size.x / CANVAS_SIZE.x, vp_size.y / CANVAS_SIZE.y)
-	_design_canvas.scale = Vector2(s, s)
-
-
-func show_page() -> void:
-	visible = true
-	refresh_display()
-
-
-func hide_page() -> void:
-	visible = false
-
-
-func toggle() -> void:
-	visible = not visible
-	if visible:
-		refresh_display()
-
-
-## 从 UIMain 同步资源数据到 ResourceBlock，与主 TopBar 逻辑一致
 func set_resources(factors: Dictionary, currency: Dictionary, personnel: Dictionary) -> void:
-	var topbar: Node = get_node_or_null("Content/Center/DesignCanvas/TopbarFull/Topbar0")
+	var topbar: Node = get_node_or_null("Topbar0")
 	if not topbar:
 		return
 	for rb in _collect_resource_blocks(topbar):
@@ -154,7 +120,8 @@ func set_resources(factors: Dictionary, currency: Dictionary, personnel: Diction
 func _apply_researcher_block(rb: ResourceBlock, personnel: Dictionary) -> void:
 	var total: int = _safe_int(personnel.get("researcher", 0))
 	var eroded: int = _safe_int(personnel.get("eroded", 0))
-	var ui: Node = get_parent().get_node_or_null("UIMain") if get_parent() else null
+	var p: Node = get_parent()
+	var ui: Node = p.get_parent() if p else null
 	var in_cleanup: int = int(ui.get("researchers_in_cleanup")) if ui and ui.get("researchers_in_cleanup") != null else 0
 	var in_construction: int = int(ui.get("researchers_in_construction")) if ui and ui.get("researchers_in_construction") != null else 0
 	var in_rooms: int = int(ui.get("researchers_working_in_rooms")) if ui and ui.get("researchers_working_in_rooms") != null else 0
@@ -164,14 +131,17 @@ func _apply_researcher_block(rb: ResourceBlock, personnel: Dictionary) -> void:
 
 
 func _get_shelter_display_value() -> int:
-	var gm: Node = get_parent()
+	var p: Node = get_parent()
+	var gm: Node = p.get_parent().get_parent() if p and p.get_parent() else null
 	if gm and gm.get("_shelter_level") != null:
 		return int(gm.get("_shelter_level"))
 	return 1
 
 
 func _get_housing_display_value() -> int:
-	var gm: Node = get_parent()
+	var p: Node = get_parent()
+	var ui: Node = p.get_parent() if p else null
+	var gm: Node = ui.get_parent() if ui else null
 	if not gm or gm.get("_rooms") == null:
 		return 0
 	var rooms: Array = gm.get("_rooms")
@@ -203,9 +173,9 @@ static func _safe_int(v: Variant) -> int:
 	return 0
 
 
-## 从 UIMain 拉取数据并刷新显示；作为子场景时由 GameMain._sync_resources_to_topbar 调用
 func refresh_display() -> void:
-	var ui: Node = get_parent().get_node_or_null("UIMain") if get_parent() else null
+	var p: Node = get_parent()
+	var ui: Node = p.get_parent() if p else null
 	if not ui or not ui.has_method("get_resources"):
 		return
 	var res: Dictionary = ui.get_resources()

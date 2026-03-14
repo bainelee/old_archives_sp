@@ -43,14 +43,6 @@ theme_override_font_sizes/font_size = 12
 toggle_mode = true
 text = "6x"
 
-[node name="Speed96xButton" type="Button" parent="."]
-layout_mode = 2
-custom_minimum_size = Vector2(40, 28)
-theme_override_colors/font_color = Color(0.9, 0.9, 0.85, 1)
-theme_override_font_sizes/font_size = 12
-toggle_mode = true
-text = "96x"
-
 [node name="TimeLabel" type="Label" parent="."]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)

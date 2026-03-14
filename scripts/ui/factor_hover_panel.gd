@@ -1,16 +1,10 @@
-extends PanelContainer
-## 因子悬停面板 - 显示在鼠标左侧
-## 显示：库存、总消耗、可供使用天数、消耗细则、产出细则
+extends "res://scripts/ui/detail_hover_panel_base.gd"
+## 因子悬停面板 - 显示：库存、总消耗、可供使用天数、消耗细则、产出细则
 
 @onready var _label_stock: Label = $Margin/VBox/Stock
 @onready var _label_consume_total: Label = $Margin/VBox/ConsumeTotal
 @onready var _label_consume_details: Label = $Margin/VBox/ConsumeDetails
 @onready var _label_produce_details: Label = $Margin/VBox/ProduceDetails
-
-
-func _ready() -> void:
-	visible = false
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 ## data: { stock, cap, daily_consume, consume_details, daily_produce, produce_details }
@@ -53,19 +47,10 @@ func show_for_factor(factor_name: String, data: Dictionary) -> void:
 	visible = true
 
 
-func hide_panel() -> void:
-	visible = false
+const TOPBAR_HEIGHT := 108.0  ## TopBar 高度，面板 y 贴顶
 
-
-const TOPBAR_HEIGHT := 48.0
-
-func update_position(mouse_pos: Vector2, viewport_size: Vector2) -> void:
-	var panel_size: Vector2 = size
-	var padding: float = 12.0
-	var left_x: float = mouse_pos.x - panel_size.x - padding
-	left_x = clampf(left_x, 0, viewport_size.x - panel_size.x)
-	var y: float = clampf(TOPBAR_HEIGHT, TOPBAR_HEIGHT, viewport_size.y - panel_size.y)
-	position = Vector2(left_x, y)
+func _get_position_y(_mouse_pos: Vector2, panel_size: Vector2, viewport_size: Vector2) -> float:
+	return clampf(TOPBAR_HEIGHT, TOPBAR_HEIGHT, viewport_size.y - panel_size.y)
 
 
 func _fmt(n: int) -> String:

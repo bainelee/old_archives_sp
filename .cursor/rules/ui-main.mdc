@@ -26,7 +26,7 @@ alwaysApply: false
 | TimePanel | time_panel.tscn | GameTime |
 | ShelterErosionPanel | shelter_erosion_panel.tscn | ErosionCore |
 
-- TimePanel：播放/暂停、1x/2x/6x/96x、时间文本；TimeIndicator 绕中心旋转
+- TimePanel：播放/暂停、1x/2x/6x、时间文本；96x 在 DebugInfoPanel；TimeIndicator 绕中心旋转
 - ShelterErosionPanel：左侧侵蚀等级，右侧 ErosionCycleBar；悬停显示来源/周期详情
 - 侵蚀颜色：+1 白、0 翠绿、-2 橙黄、-4 赤红、-8 深紫（erosion_cycle_bar.gd 常量）
 

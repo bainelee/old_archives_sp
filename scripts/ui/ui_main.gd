@@ -6,22 +6,9 @@ extends CanvasLayer
 signal cleanup_button_pressed
 signal build_button_pressed
 
-@onready var _label_cognition: Label = $TopBar/Content/HBox/Factors/Cognition/Value
-@onready var _label_computation: Label = $TopBar/Content/HBox/Factors/Computation/Value
-@onready var _label_will: Label = $TopBar/Content/HBox/Factors/Will/Value
-@onready var _label_permission: Label = $TopBar/Content/HBox/Factors/Permission/Value
-@onready var _label_info: Label = $TopBar/Content/HBox/Currency/Info/Value
-@onready var _label_truth: Label = $TopBar/Content/HBox/Currency/Truth/Value
-@onready var _label_researcher: Label = $TopBar/Content/HBox/Personnel/Researcher/Value
-@onready var _label_eroded: Label = $TopBar/Content/HBox/Personnel/Eroded/Value
-@onready var _label_investigator: Label = $TopBar/Content/HBox/Personnel/Investigator/Value
-@onready var _researcher_hover_area: Control = $TopBar/Content/HBox/Personnel/Researcher
+@onready var _topbar_figma: Node = $TopBar/TopbarFigma
 @onready var _researcher_hover_panel: PanelContainer = $ResearcherHoverPanel
 @onready var _factor_hover_panel: PanelContainer = $FactorHoverPanel
-@onready var _factor_cognition: Control = $TopBar/Content/HBox/Factors/Cognition
-@onready var _factor_computation: Control = $TopBar/Content/HBox/Factors/Computation
-@onready var _factor_will: Control = $TopBar/Content/HBox/Factors/Will
-@onready var _factor_permission: Control = $TopBar/Content/HBox/Factors/Permission
 @onready var _pan_speed_slider: HSlider = $DebugInfoPanel/Margin/VBox/PanSpeedRow/PanSpeedSlider
 @onready var _pan_speed_value_label: Label = $DebugInfoPanel/Margin/VBox/PanSpeedRow/Value
 
@@ -31,69 +18,69 @@ var cognition_amount: int:
 	get: return _cognition_amount
 	set(v):
 		_cognition_amount = int(v) if v != null else 0
-		_update_label(_label_cognition, _cognition_amount)
 var _computation_amount: int = 0
 var computation_amount: int:
 	get: return _computation_amount
 	set(v):
 		var val: int = int(v) if v != null else 0
 		_computation_amount = val
-		_update_label(_label_computation, val)
 var _will_amount: int = 0
 var will_amount: int:
 	get: return _will_amount
 	set(v):
 		_will_amount = int(v) if v != null else 0
-		_update_label(_label_will, _will_amount)
 var _permission_amount: int = 0
 var permission_amount: int:
 	get: return _permission_amount
 	set(v):
 		_permission_amount = int(v) if v != null else 0
-		_update_label(_label_permission, _permission_amount)
 
 ## 资源-货币
-var info_amount: int = 0:
-	set(v):
-		info_amount = v
-		_update_label(_label_info, v)
-var truth_amount: int = 0:
-	set(v):
-		truth_amount = v
-		_update_label(_label_truth, v)
+var info_amount: int = 0
+var truth_amount: int = 0
 
 ## 人员（researcher_count=总数，eroded_count=被侵蚀数；显示为 未侵蚀/总数）
-var researcher_count: int = 0:
+var _researcher_count: int = 0
+var researcher_count: int:
+	get: return _researcher_count
 	set(v):
-		researcher_count = v
+		_researcher_count = int(v) if v != null else 0
 		_update_researcher_display()
-var eroded_count: int = 0:
+var _eroded_count: int = 0
+var eroded_count: int:
+	get: return _eroded_count
 	set(v):
-		eroded_count = v
+		_eroded_count = int(v) if v != null else 0
 		_update_researcher_display()
-		_update_label(_label_eroded, v)
 ## 清理中临时占用的研究员数（由 GameMain 同步，清理结束后返还）
-var researchers_in_cleanup: int = 0:
+var _researchers_in_cleanup: int = 0
+var researchers_in_cleanup: int:
+	get: return _researchers_in_cleanup
 	set(v):
-		researchers_in_cleanup = v
+		_researchers_in_cleanup = int(v) if v != null else 0
 		_update_researcher_display()
 		_update_researcher_hover_if_visible()
 ## 建设中占用的研究员数（预留，暂为 0）
-var researchers_in_construction: int = 0:
+var _researchers_in_construction: int = 0
+var researchers_in_construction: int:
+	get: return _researchers_in_construction
 	set(v):
-		researchers_in_construction = v
+		_researchers_in_construction = int(v) if v != null else 0
 		_update_researcher_display()
 		_update_researcher_hover_if_visible()
 ## 房间内工作的研究员数（预留，暂为 0）
-var researchers_working_in_rooms: int = 0:
+var _researchers_working_in_rooms: int = 0
+var researchers_working_in_rooms: int:
+	get: return _researchers_working_in_rooms
 	set(v):
-		researchers_working_in_rooms = v
+		_researchers_working_in_rooms = int(v) if v != null else 0
 		_update_researcher_display()
 		_update_researcher_hover_if_visible()
-var investigator_count: int = 0:
+var _investigator_count: int = 0
+var investigator_count: int:
+	get: return _investigator_count
 	set(v):
-		investigator_count = v
-		_update_label(_label_investigator, v)
+		_investigator_count = int(v) if v != null else 0
 
 
 func _ready() -> void:
@@ -109,11 +96,10 @@ func _ready() -> void:
 	var btn_researcher_list: Button = get_node_or_null("BarBelowTop/BtnResearcherList")
 	if btn_researcher_list:
 		btn_researcher_list.pressed.connect(_on_researcher_list_button_pressed)
-	if _researcher_hover_area:
-		_researcher_hover_area.mouse_filter = Control.MOUSE_FILTER_STOP
-		_researcher_hover_area.mouse_entered.connect(_on_researcher_hover_entered)
-		_researcher_hover_area.mouse_exited.connect(_on_researcher_hover_exited)
-	_setup_factor_hover()
+	if _topbar_figma and _topbar_figma.has_signal("block_hovered"):
+		_topbar_figma.block_hovered.connect(_on_topbar_block_hovered)
+	if _topbar_figma and _topbar_figma.has_signal("block_unhovered"):
+		_topbar_figma.block_unhovered.connect(_on_topbar_block_unhovered)
 	if _pan_speed_slider:
 		_pan_speed_slider.value_changed.connect(_on_pan_speed_changed)
 		_on_pan_speed_changed(_pan_speed_slider.value)
@@ -121,6 +107,9 @@ func _ready() -> void:
 	if pan_label:
 		pan_label.text = tr("LABEL_PAN_SPEED")
 	_setup_shelter_level_debug()
+	var btn_96x: Button = get_node_or_null("DebugInfoPanel/Margin/VBox/Speed96xRow/BtnSet96x") as Button
+	if btn_96x:
+		btn_96x.pressed.connect(_on_speed_96x_pressed)
 	var show_ray_btn: CheckButton = get_node_or_null("DebugInfoPanel/Margin/VBox/ShowRayHit") as CheckButton
 	if show_ray_btn:
 		show_ray_btn.toggled.connect(_on_show_ray_hit_toggled)
@@ -146,61 +135,40 @@ func _on_researcher_list_button_pressed() -> void:
 		panel.toggle_from_entry()
 
 
-func _setup_factor_hover() -> void:
-	if _factor_cognition:
-		_factor_cognition.mouse_filter = Control.MOUSE_FILTER_STOP
-		_factor_cognition.mouse_entered.connect(_on_factor_hover_entered.bind("cognition"))
-		_factor_cognition.mouse_exited.connect(_on_factor_hover_exited)
-	if _factor_computation:
-		_factor_computation.mouse_filter = Control.MOUSE_FILTER_STOP
-		_factor_computation.mouse_entered.connect(_on_factor_hover_entered.bind("computation"))
-		_factor_computation.mouse_exited.connect(_on_factor_hover_exited)
-	if _factor_will:
-		_factor_will.mouse_filter = Control.MOUSE_FILTER_STOP
-		_factor_will.mouse_entered.connect(_on_factor_hover_entered.bind("willpower"))
-		_factor_will.mouse_exited.connect(_on_factor_hover_exited)
-	if _factor_permission:
-		_factor_permission.mouse_filter = Control.MOUSE_FILTER_STOP
-		_factor_permission.mouse_entered.connect(_on_factor_hover_entered.bind("permission"))
-		_factor_permission.mouse_exited.connect(_on_factor_hover_exited)
+func _on_topbar_block_hovered(block_id: String) -> void:
+	_hide_all_detail_panels()
+	match block_id:
+		"cognition", "computing_power", "willpower", "permission":
+			var factor_key: String = "computation" if block_id == "computing_power" else block_id
+			var game_main: Node = get_parent()
+			if not game_main or not game_main.has_method("get_factor_breakdown"):
+				return
+			var data: Dictionary = game_main.get_factor_breakdown(factor_key)
+			var factor_name: String = ""
+			match factor_key:
+				"cognition": factor_name = tr("LABEL_COGNITION")
+				"computation": factor_name = tr("LABEL_COMPUTATION")
+				"willpower": factor_name = tr("LABEL_WILLPOWER")
+				"permission": factor_name = tr("LABEL_PERMISSION")
+				_: return
+			if _factor_hover_panel and _factor_hover_panel.has_method("show_for_factor"):
+				_factor_hover_panel.show_for_factor(factor_name, data)
+				call_deferred("_update_detail_panel_position_once", _factor_hover_panel)
+		"researcher", "eroded", "investigator", "shelter", "housing":
+			if _researcher_hover_panel and _researcher_hover_panel.has_method("show_panel"):
+				_researcher_hover_panel.show_panel(
+					researcher_count,
+					eroded_count,
+					researchers_in_cleanup,
+					researchers_in_construction,
+					researchers_working_in_rooms
+				)
+				call_deferred("_update_detail_panel_position_once", _researcher_hover_panel)
 
 
-func _on_factor_hover_entered(factor_key: String) -> void:
-	var game_main: Node = get_parent()
-	if not game_main or not game_main.has_method("get_factor_breakdown"):
-		return
-	var data: Dictionary = game_main.get_factor_breakdown(factor_key)
-	var factor_name: String = ""
-	match factor_key:
-		"cognition": factor_name = tr("LABEL_COGNITION")
-		"computation": factor_name = tr("LABEL_COMPUTATION")
-		"willpower": factor_name = tr("LABEL_WILLPOWER")
-		"permission": factor_name = tr("LABEL_PERMISSION")
-		_: return
-	if _factor_hover_panel and _factor_hover_panel.has_method("show_for_factor"):
-		_factor_hover_panel.show_for_factor(factor_name, data)
-		call_deferred("_update_factor_panel_position_once")
-
-
-func _on_factor_hover_exited() -> void:
-	## 不立即隐藏，由 _process 判断鼠标是否离开因子区域与面板
+func _on_topbar_block_unhovered(_block_id: String) -> void:
+	## 不立即隐藏，由 _process 判断鼠标是否离开区域与面板
 	pass
-
-
-func _on_researcher_hover_entered() -> void:
-	if _researcher_hover_panel and _researcher_hover_panel.has_method("show_panel"):
-		_researcher_hover_panel.show_panel(
-			researcher_count,
-			eroded_count,
-			researchers_in_cleanup,
-			researchers_in_construction,
-			researchers_working_in_rooms
-		)
-
-
-func _on_researcher_hover_exited() -> void:
-	if _researcher_hover_panel and _researcher_hover_panel.has_method("hide_panel"):
-		_researcher_hover_panel.hide_panel()
 
 
 func _on_pan_speed_changed(value: float) -> void:
@@ -234,6 +202,11 @@ func _on_shelter_debug_minus() -> void:
 	_update_shelter_debug_display()
 
 
+func _on_speed_96x_pressed() -> void:
+	if GameTime:
+		GameTime.set_speed_96x()
+
+
 func _update_shelter_debug_display() -> void:
 	var lbl: Label = get_node_or_null("DebugInfoPanel/Margin/VBox/ShelterLevelRow/ValueLabel") as Label
 	if lbl and ErosionCore:
@@ -260,28 +233,46 @@ func _on_show_room_info_toggled(on: bool) -> void:
 
 func _process(_delta: float) -> void:
 	var viewport: Viewport = get_viewport()
-	if viewport:
-		var mouse_pos: Vector2 = viewport.get_mouse_position()
-		var vp_size: Vector2 = viewport.get_visible_rect().size
-		if _researcher_hover_panel and _researcher_hover_panel.visible and _researcher_hover_panel.has_method("update_position"):
-			_researcher_hover_panel.update_position(mouse_pos, vp_size)
-		if _factor_hover_panel and _factor_hover_panel.visible:
-			if not _is_mouse_over_factor_or_panel(mouse_pos):
-				_factor_hover_panel.hide_panel()
+	if not viewport:
+		return
+	var mouse_pos: Vector2 = viewport.get_mouse_position()
+	var vp_size: Vector2 = viewport.get_visible_rect().size
+	var active_panel: Control = _get_visible_detail_panel()
+	if active_panel:
+		active_panel.update_position(mouse_pos, vp_size)
+		if not _is_mouse_over_detail_source_or_panel(mouse_pos):
+			active_panel.hide_panel()
 
 
-func _update_factor_panel_position_once() -> void:
+func _hide_all_detail_panels() -> void:
+	if _factor_hover_panel:
+		_factor_hover_panel.hide_panel()
+	if _researcher_hover_panel:
+		_researcher_hover_panel.hide_panel()
+
+
+func _get_visible_detail_panel() -> Control:
+	if _factor_hover_panel and _factor_hover_panel.visible:
+		return _factor_hover_panel
+	if _researcher_hover_panel and _researcher_hover_panel.visible:
+		return _researcher_hover_panel
+	return null
+
+
+func _update_detail_panel_position_once(panel: Control) -> void:
 	var viewport: Viewport = get_viewport()
-	if viewport and _factor_hover_panel and _factor_hover_panel.visible and _factor_hover_panel.has_method("update_position"):
-		_factor_hover_panel.update_position(viewport.get_mouse_position(), viewport.get_visible_rect().size)
+	if viewport and panel and panel.visible:
+		panel.update_position(viewport.get_mouse_position(), viewport.get_visible_rect().size)
 
 
-func _is_mouse_over_factor_or_panel(mouse_pos: Vector2) -> bool:
+func _is_mouse_over_detail_source_or_panel(mouse_pos: Vector2) -> bool:
 	if _factor_hover_panel and _factor_hover_panel.visible and _factor_hover_panel.get_global_rect().has_point(mouse_pos):
 		return true
-	for ctrl in [_factor_cognition, _factor_computation, _factor_will, _factor_permission]:
-		if ctrl and ctrl.get_global_rect().has_point(mouse_pos):
-			return true
+	if _researcher_hover_panel and _researcher_hover_panel.visible and _researcher_hover_panel.get_global_rect().has_point(mouse_pos):
+		return true
+	var top_bar: Control = get_node_or_null("TopBar") as Control
+	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
+		return true
 	return false
 
 
@@ -299,10 +290,7 @@ func _update_researcher_hover_if_visible() -> void:
 ## 建设选择模式下禁用其余 UI、隐藏灾厄
 func set_construction_blocking(blocked: bool) -> void:
 	if blocked:
-		if _researcher_hover_panel and _researcher_hover_panel.has_method("hide_panel"):
-			_researcher_hover_panel.hide_panel()
-		if _factor_hover_panel and _factor_hover_panel.has_method("hide_panel"):
-			_factor_hover_panel.hide_panel()
+		_hide_all_detail_panels()
 	_set_buttons_blocked($TopBar, blocked)
 	_set_control_mouse_filter($TopBar, blocked)
 	var cleanup_btn: Button = get_node_or_null("BottomRightBar/BtnCleanup") as Button
@@ -319,10 +307,7 @@ func set_construction_blocking(blocked: bool) -> void:
 ## 清理选择模式下禁用其余 UI 的悬停与点击
 func set_cleanup_blocking(blocked: bool) -> void:
 	if blocked:
-		if _researcher_hover_panel and _researcher_hover_panel.has_method("hide_panel"):
-			_researcher_hover_panel.hide_panel()
-		if _factor_hover_panel and _factor_hover_panel.has_method("hide_panel"):
-			_factor_hover_panel.hide_panel()
+		_hide_all_detail_panels()
 	_set_buttons_blocked($TopBar, blocked)
 	_set_buttons_blocked($CalamityBar, blocked)
 	_set_control_mouse_filter($TopBar, blocked)
@@ -360,27 +345,13 @@ func _set_control_mouse_filter(node: Node, ignore: bool) -> void:
 		_set_control_mouse_filter(c, ignore)
 
 
-func _update_label(lbl: Label, value: int) -> void:
-	if lbl:
-		lbl.text = str(value)
-
-
 func _update_researcher_display() -> void:
-	if _label_researcher:
-		var idle: int = maxi(0, researcher_count - eroded_count - researchers_in_cleanup - researchers_in_construction - researchers_working_in_rooms)
-		_label_researcher.text = "%d/%d" % [idle, researcher_count]
+	_refresh_all()
 
 
 func _refresh_all() -> void:
-	_update_label(_label_cognition, cognition_amount)
-	_update_label(_label_computation, computation_amount)
-	_update_label(_label_will, will_amount)
-	_update_label(_label_permission, permission_amount)
-	_update_label(_label_info, info_amount)
-	_update_label(_label_truth, truth_amount)
-	_update_researcher_display()
-	_update_label(_label_eroded, eroded_count)
-	_update_label(_label_investigator, investigator_count)
+	if _topbar_figma and _topbar_figma.has_method("refresh_display"):
+		_topbar_figma.refresh_display()
 
 
 ## 强制刷新 TopBar 显示（消耗/获得资源后调用，确保数值与 UI 一致）
