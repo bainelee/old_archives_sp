@@ -10,7 +10,7 @@
 
 | 组件 | 路径 | 职责 |
 |------|------|------|
-| **ErosionCore** | `scripts/core/erosion_core.gd` | 侵蚀数据源（Autoload），提供当前等级与未来 3 个月预测 |
+| **ErosionCore** | `scripts/core/erosion_core.gd` | 侵蚀数据源（Autoload），提供当前等级与未来 84 天预测 |
 | **ShelterErosionPanel** | `scenes/ui/shelter_erosion_panel.tscn` | 可复用面板：左侧当前侵蚀，右侧周期长条 |
 | **ErosionCycleBar** | `scripts/ui/erosion_cycle_bar.gd` | 长条形侵蚀变化周期标识，不同颜色图元随时间向左滚动 |
 
@@ -40,15 +40,25 @@
 
 ---
 
-## 3. 周期长条行为
+## 3. 周期长条行为（ErosionCycleBar）
 
-- **时间跨度**：未来 3 个月（90 天 = 2160 游戏小时）
-- **侵蚀序列**：基于绝对游戏时间生成，每级侵蚀持续 2 周，随机选取五种等级之一
+- **时间跨度**：未来 3 个月（84 天 = 2016 游戏小时，4 周/月）
+- **侵蚀序列**：基于绝对游戏时间生成，侵蚀最快 7 天可变化，随机选取五种等级之一
 - **连续滚动**：时间流逝时视图左移，序列不重置（`_forecast_start_hours` 递进）
 - **悬停提示**：鼠标悬停周期条时，显示「距离现在Xd 等级名 数值」
-- **分段数**：90 段，每段约 1 天
+- **分段数**：84 段，每段约 1 天
 - **滚动**：随时间流逝，图元向左移动；每滚动一个分段，刷新预测数据
 - **时间比例**：与 GameTime 一致（3 秒 = 1 游戏小时）
+
+---
+
+## 3.1 ForecastWarning 侵蚀预警条
+
+- **位置**：TopBar（topbar_figma 内）
+- **尺寸**：252×20，3px=1 天，84 天
+- **方向**：最右侧=今天，最左侧=距今 84 天
+- **handle**：仅侵蚀变化点生成；恶化→红标、好转→绿标
+- **移动**：handle 每日右移 3px，到达今日后消失；最多 12 个
 
 ---
 
@@ -66,10 +76,12 @@ ShelterErosionPanel 置于 TopBar 右侧，在人员信息之后，布局为：
 
 | 文件 | 职责 |
 |------|------|
-| `scripts/core/erosion_core.gd` | ErosionCore Autoload，侵蚀常量、预测接口 |
+| `scripts/core/erosion_core.gd` | ErosionCore Autoload，侵蚀常量、预测接口、ForecastWarning handle 池 |
 | `scripts/ui/shelter_erosion_panel.gd` | 面板逻辑，同步 ErosionCore 与 UI |
 | `scripts/ui/erosion_cycle_bar.gd` | 周期长条绘制与滚动 |
+| `scripts/ui/forecast_warning.gd` | 侵蚀预警条，显示变化点 handle |
 | `scenes/ui/shelter_erosion_panel.tscn` | 面板场景 |
+| `scenes/ui/forecast_warning.tscn` | 侵蚀预警条场景 |
 | `project.godot` | ErosionCore Autoload 配置 |
 
 ---

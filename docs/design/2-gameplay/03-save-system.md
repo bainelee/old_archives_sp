@@ -138,12 +138,18 @@
 
 ### 3.4 侵蚀预测格式
 
-- **段数**：90 段（3 个月 ≈ 90 天，与 `ErosionCycleBar.SEGMENT_COUNT` 一致）
+- **段数**：84 段（3 个月 = 84 天，4 周/月，与 `ErosionCycleBar.SEGMENT_COUNT` 一致）
 - **每段**：`{"value": int}`，value 为侵蚀等级（+1 隐性 / 0 轻度 / -2 显性 / -4 涌动阴霾 / -8 莱卡昂的暗影）
-- **顺序**：从保存时刻起，第 1 天、第 2 天、…、第 90 天
-- **生成**：保存时调用 `ErosionCore.get_forecast_segments(90, GameTime.get_total_hours())`；加载时若有 `forecast` 则直接使用，否则按恢复后的 `total_game_hours` 重新生成
+- **顺序**：从保存时刻起，第 1 天、第 2 天、…、第 84 天
+- **生成**：保存时调用 `ErosionCore.get_forecast_segments(84, GameTime.get_total_hours())`；加载时若有 `forecast` 则直接使用，否则按恢复后的 `total_game_hours` 重新生成
 
-### 3.5 数据类型约定
+### 3.5 侵蚀预警 handle 池（ForecastWarning）
+
+- **字段**：`erosion.forecast_handles`，Array 类型
+- **每元素**：`{days_from_now: int, level: int, sign_type: int, pixel_offset: float}`
+- **说明**：仅侵蚀变化点生成 handle；恶化→sign_type=1 红标，好转→sign_type=2 绿标；handle 每日右移 3px，到达今日后消失；最多 12 个
+
+### 3.6 数据类型约定
 
 所有存档内的数值采用**整数**存储，避免浮点误差与跨平台不一致。
 
@@ -160,7 +166,7 @@
 
 ---
 
-### 3.6 版本与迁移
+### 3.7 版本与迁移
 
 | version | 说明 | 迁移策略 |
 |---------|------|----------|

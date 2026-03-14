@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://df3x8ju1nvgrh" path="res://assets/ui/forecast_warning/background_corrosion_forecast.png" id="2_bg"]
 
 [node name="ForecastWarning" type="Control" unique_id=736147284]
-custom_minimum_size = Vector2(266, 32)
+custom_minimum_size = Vector2(252, 20)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_script")

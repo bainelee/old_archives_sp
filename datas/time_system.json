@@ -6,7 +6,7 @@
   "calendar": {
     "hours_per_day": 24,
     "days_per_week": 7,
-    "days_per_month": 30,
+    "days_per_month": 28,
     "months_per_year": 12
   },
   "speed_presets": {

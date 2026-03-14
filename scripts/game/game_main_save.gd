@@ -23,6 +23,13 @@ static func _get_shelter_level_from_game_main(game_main: Node2D) -> int:
 	return int(v) if v != null else 1
 
 
+static func _collect_erosion_for_save(game_main: Node2D) -> Dictionary:
+	var erosion: Dictionary = {"shelter_level": _get_shelter_level_from_game_main(game_main)}
+	if ErosionCore and ErosionCore.has_method("get_forecast_handles_for_save"):
+		erosion["forecast_handles"] = ErosionCore.get_forecast_handles_for_save()
+	return erosion
+
+
 static func collect_game_state(game_main: Node2D) -> Dictionary:
 	## 收集当前游戏状态（供暂停菜单保存调用）
 	var grid_width: int = game_main.get("GRID_WIDTH")
@@ -88,7 +95,7 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 			"speed_multiplier": GameTime.speed_multiplier if GameTime else 1.0,
 		},
 		KEY_RESOURCES: resources,
-		KEY_EROSION: {"shelter_level": _get_shelter_level_from_game_main(game_main)},
+		KEY_EROSION: _collect_erosion_for_save(game_main),
 	}
 	if PersonnelErosionCore:
 		state[KEY_PERSONNEL_EROSION] = PersonnelErosionCore.to_save_dict()
@@ -247,11 +254,19 @@ static func apply_resources(game_main: Node2D, d: Dictionary) -> void:
 		if not PersonnelErosionCore.personnel_updated.is_connected(Callable(game_main, "_on_personnel_updated")):
 			PersonnelErosionCore.personnel_updated.connect(Callable(game_main, "_on_personnel_updated"))
 
-	## 庇护核心等级
+	## 庇护核心等级 + ForecastWarning handle 池
 	var erosion_data: Variant = d.get(KEY_EROSION, null)
 	var shelter_level: int = 1
 	if erosion_data is Dictionary:
-		shelter_level = int((erosion_data as Dictionary).get("shelter_level", 1))
+		var ed: Dictionary = erosion_data as Dictionary
+		shelter_level = int(ed.get("shelter_level", 1))
+		## 恢复 ForecastWarning handle 池到 ErosionCore
+		if ErosionCore and ErosionCore.has_method("load_forecast_handles"):
+			var handles: Variant = ed.get("forecast_handles", null)
+			if handles is Array:
+				ErosionCore.load_forecast_handles(handles as Array, total_hours)
+			else:
+				ErosionCore.load_forecast_handles([], total_hours)
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv and gv.has_method("get_shelter_level_min"):
 		shelter_level = clampi(shelter_level, gv.get_shelter_level_min(), gv.get_shelter_level_max())

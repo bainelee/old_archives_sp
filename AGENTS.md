@@ -13,7 +13,7 @@ Godot 4.6 项目：场景编辑器 + 2D 基地建设游戏。
   - **数值同步**：用户说「调整数值」「我调整了数值」等时，按 `.cursor/subagents/game-values-sync.md` 全量同步 `datas/game_values.json`、`game_base.json`、`docs/design/*.md` 及脚本硬编码
 - **术语对照**：[docs/settings/00-project-keywords.md](docs/settings/00-project-keywords.md)
 - **详情**：[docs/design/00-project-overview.md](docs/design/00-project-overview.md)
-- **test_figma_page UI 组件**：`ResourceProgressBar`、`ResourceBlock`、`CorrosionNumber`、`ForecastWarning`；ForecastWarning 用 `handles: Array[Vector3]` 配置 handle（x=距今天数 y=侵蚀等级 0–4 z=警示），84天→最左，handle 贴图三尺寸用 `tex.get_size()` 防拉伸，清除子节点须先 `remove_child` 再 `queue_free`
+- **test_figma_page UI 组件**：`ResourceProgressBar`、`ResourceBlock`、`CorrosionNumber`、`ForecastWarning`；ForecastWarning 侵蚀预警条：252×20，3px=1天、84天；仅侵蚀变化点生成 handle，恶化→红标、好转→绿标；handle 每日右移 3px 至今日消失；handle 池与侵蚀 schedule 写入存档；handle 与 warning_sign 贴图用 `tex.get_size()` 动态尺寸、防拉伸，清除子节点须先 `remove_child` 再 `queue_free`
 
 # Memorix — Automatic Memory Rules
 
