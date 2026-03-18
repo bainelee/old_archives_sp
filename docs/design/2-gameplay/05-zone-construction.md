@@ -15,7 +15,7 @@
 | 区域类型 | 可建设于的房间类型 | 备注 |
 |----------|-------------------|------|
 | 研究区 | 图书室、机房、资料库、教学室 | 消耗房间存量产出因子，数值见 [01](../0-values/01-game-values.md) 第 6 节 |
-| 造物区 | 实验室、推理室 | 消耗意志产出权限/信息，数值见 08 第 7 节 |
+| 造物区 | 实验室、推理室 | 消耗意志产出权限/信息，数值见 [01](../0-values/01-game-values.md) 第 7 节 |
 | 事务所区 | 事务所遗址 | |
 | 生活区 | 宿舍 | 提供住房 |
 | 医疗区 | 医疗室 | 新房间类型，数值待定 |
@@ -215,7 +215,7 @@ NONE（遮罩隐藏，tag 和区域按钮消失，灾厄 UI 恢复）
 | 建设后每小时产出 | 研究区/造物区等产出数据，见 [01](../0-values/01-game-values.md) 第 6、7 节 |
 | 建设后每小时消耗 | 若有（如造物区消耗意志），一并显示 |
 
-数据来源：08-game-values.md。
+数据来源：[01-game-values](../0-values/01-game-values.md)。
 
 ### 5.7 确认与退出
 
@@ -251,7 +251,7 @@ NONE（遮罩隐藏，tag 和区域按钮消失，灾厄 UI 恢复）
 
 ### 6.2 与改造的关系
 
-- **改造**：空房间 → 实验室/推理室等（见 08 第 8 节）
+- **改造**：空房间 → 实验室/推理室等（见 [01](../0-values/01-game-values.md) 第 8 节）
 - **建设**：已清理房间 → 研究区/造物区/生活区/事务所
 - 两者为同级操作，互斥于同一房间的同一时刻
 
@@ -289,7 +289,7 @@ NONE（遮罩隐藏，tag 和区域按钮消失，灾厄 UI 恢复）
 
 - 新增 `zone_type: int`，默认 0（无）
 - 新增 `ZoneType` 枚举（或新建 `scripts/core/zone_type.gd`），与 1.1 对应表一致
-- 新增 `get_construction_cost() -> Dictionary`、`get_construction_researcher_count() -> int`、`get_construction_time_hours() -> float`（参考 `get_cleanup_*` 模式，数值见 08 第 5 节）
+- 新增 `get_construction_cost() -> Dictionary`、`get_construction_researcher_count() -> int`、`get_construction_time_hours() -> float`（参考 `get_cleanup_*` 模式，数值见 [01](../0-values/01-game-values.md) 第 5 节）
 - 新增 `can_build_zone(zone_type: int) -> bool`：根据 room_type 与 1.1 对应表判断
 - `to_dict()` / `from_dict()` 中序列化 `zone_type`，兼容旧存档（缺省=0）
 

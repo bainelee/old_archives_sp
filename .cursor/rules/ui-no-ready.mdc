@@ -1,0 +1,20 @@
+---
+description: 预制作 UI 不得将编辑器可见逻辑写在 _ready 中（全局规则）
+alwaysApply: true
+---
+
+# 预制作 UI 禁止 _ready 规则（全局）
+
+**非游戏开始后生成的 UI 设计**，不得将需在编辑器中观测的逻辑写在 `_ready()` 中。
+
+## 原则
+
+- `_ready()` 仅在运行游戏后执行，编辑器中编辑场景时**不会调用**
+- 凡需在编辑器中检查效果（字体、布局、主题等），必须写在 `_enter_tree()`、`@export` setter 或 `_process()`（配合 `@tool`）中
+- `_ready()` 仅用于运行期初始化（如隐藏面板、连接信号、获取运行依赖）
+
+## 实现方式
+
+- 使用 `@tool` + `_enter_tree()` 做字体、边距、间距等应用
+- 使用 `@export` + setter 在 Inspector 修改时立即生效
+- 详见 `.cursor/rules/ui-editor-live.mdc`

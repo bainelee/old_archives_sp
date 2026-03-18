@@ -1,41 +1,45 @@
 ---
-description: RoomInfo 结构、room_info.json 格式与同步逻辑
+description: RoomInfo 结构、room_info 格式与同步逻辑
 globs:
   - "scripts/editor/*.gd"
   - "datas/room_info.json"
+  - "datas/room_info_legacy.json"
 alwaysApply: false
 ---
 
-# 房间信息与 room_info.json 规范
+# 房间信息与 room_info 规范
 
-修改房间相关逻辑或 `room_info.json` 时须遵守。
+修改房间相关逻辑或 room_info JSON 时须遵守。项目存在两套 room_info：
+
+- **2D 编辑器**：`room_info_legacy.json`，id `ROOM_001`，见 `docs/design/1-editor/02-room-info-and-json-sync.md`
+- **3D 游戏**：`room_info.json`，id `room_00`，见 `docs/design/4-archives_rooms/05-room-info-3d-format.md`
 
 ## RoomInfo（`room_info.gd`）
 
 - **地图用**：`to_dict()` → `rect_x/y/w/h`、`id`、`json_room_id`、`desc`
-- **JSON 用**：`to_json_room_dict(id)` → `size`、`room_type` 名称、`room_type_id`
-- **json_room_id**：空表示新建；首次保存分配 `ROOM_%03d`；导入模板时直接写入
+- **JSON 用**：`to_json_room_dict(id)` → `size`、`room_type` 名称、`room_type_id`（2D legacy 格式）
+- **json_room_id**：2D 时 `ROOM_%03d`；3D 时与 room id 一致（如 `room_00`）
 
-## room_info.json
+## room_info_legacy.json（2D 编辑器）
 
-- **路径**：`datas/room_info.json`，UTF-8
-- **结构**：`{ "source": "...", "rooms": [ {...}, ... ] }`
-- **desc/pre_clean_text 数组**：每项之间自动换行（`parse_text_field` 用 `\n` 拼接），无需写 `\n`；字符串内的 `\n` 仍有效
-- **房间 id**：`ROOM_001` 格式，三位数字
+- **路径**：`datas/room_info_legacy.json`
+- **房间 id**：`ROOM_001` 格式
+- **同步**：地图保存时 `_sync_rooms_to_json`，仅地图编辑器调用
+
+## room_info.json（3D 游戏）
+
+- **路径**：`datas/room_info.json`
+- **房间 id**：`room_00`、`room_01`、`room_hall_00` 等
+- **结构**：`3d_size`、`grid_x`、`grid_y`、`room_resources` 等
+- **读取**：`room_info_loader.gd`、SaveManager
+
+## 通用约定
+
+- **desc/pre_clean_text 数组**：每项之间自动换行（`parse_text_field` 用 `\n` 拼接）
 - **输出**：`JSON.stringify(data, "  ", false)` 保持 pretty-print
-
-## 同步逻辑（`_sync_rooms_to_json`）
-
-- 仅在地图保存成功时调用
-- `json_room_id` 空 → 分配新 id 并追加
-- `json_room_id` 非空 → 按 id 查找并覆盖，不存在则追加
-
-## 约束
-
-- room_info.json 为共享模板库，多槽位会覆盖同一 id
-- 地图 → JSON 自动同步；JSON → 地图仅通过「从模板导入」
-- 底图仅支持 `res://`，用 `FileDialog.ACCESS_RESOURCES`
+- **底图**：仅支持 `res://`，用 `FileDialog.ACCESS_RESOURCES`
 
 ## 参考
 
-- 详细说明：`docs/design/1-editor/02-room-info-and-json-sync.md`
+- 2D 详细说明：`docs/design/1-editor/02-room-info-and-json-sync.md`
+- 3D 格式：`docs/design/4-archives_rooms/05-room-info-3d-format.md`

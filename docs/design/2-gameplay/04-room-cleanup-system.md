@@ -142,7 +142,7 @@ var _cleanup_rooms_in_progress: Dictionary = {}  # room_index -> {"elapsed": flo
 |------|------|
 | get_cleanup_researcher_count() | 清理需占用研究员数（3～5 单位 2 人，6～7 单位 3 人） |
 
-### 5.2 默认公式（未配置时，见 08-game-values 4.1）
+### 5.2 默认公式（未配置时，见 [01-game-values §4.1](../0-values/01-game-values.md#41-房间单位与尺寸类型)）
 
 | 项目 | 公式 |
 |------|------|

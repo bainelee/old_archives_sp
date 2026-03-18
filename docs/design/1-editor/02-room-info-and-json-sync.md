@@ -1,8 +1,12 @@
-# 02 - 房间信息与 room_info.json 同步
+# 02 - 房间信息与 room_info 同步（2D 地图编辑器）
 
 ## 概述
 
-场景编辑器的房间信息通过 `RoomInfo` 结构体承载，既保存到地图槽位 JSON（`user://maps/slot_N.json`），也与 `datas/room_info.json` 双向同步。本文档描述设计、实现及各项限制，供后续开发参考。
+**适用范围**：本文档描述 **2D 地图编辑器** 与 `datas/room_info_legacy.json` 的同步，**不适用于** 3D 游戏主场景使用的 `datas/room_info.json`。两套体系相互独立：
+- **2D 编辑器**：`room_info_legacy.json`，id 格式 `ROOM_001`，房间尺寸 `rect` / `size: 5×3`
+- **3D 游戏**：`room_info.json`，id 格式 `room_00`，房间尺寸 `3d_size` / `grid_x、grid_y`，详见 [4-archives_rooms/05-room-info-3d-format.md](../4-archives_rooms/05-room-info-3d-format.md)
+
+场景编辑器的房间信息通过 `RoomInfo` 结构体承载，既保存到地图槽位 JSON（`user://maps/slot_N.json`），也与 `datas/room_info_legacy.json` 双向同步。本文档描述设计、实现及各项限制，供后续开发参考。
 
 ---
 
@@ -20,16 +24,16 @@
 | resources | Array | 资源列表，每项 `{"resource_type": int, "resource_amount": int}` |
 | base_image_path | String | 底图路径，相对于 res:// |
 | pre_clean_text | String | 清理前文本 |
-| json_room_id | String | 关联的 room_info.json 模板 id（如 ROOM_001），空表示新建未同步 |
-| desc | String | 房间描述，与 room_info.json 的 desc 对应 |
+| json_room_id | String | 关联的 room_info_legacy.json 模板 id（如 ROOM_001），空表示新建未同步 |
+| desc | String | 房间描述，与 room_info_legacy.json 的 desc 对应 |
 
-### room_info.json 路径与编码
+### room_info_legacy.json 路径与编码
 
-- **路径**：`datas/room_info.json`（相对项目根目录）
+- **路径**：`datas/room_info_legacy.json`（相对项目根目录）
 - **编码**：UTF-8
-- **说明**：`datas/` 通过 `.gdignore` 未被 Godot 导入，仅作数据文件
+- **说明**：`datas/` 通过 `.gdignore` 未被 Godot 导入，仅作数据文件；2D 编辑器读取/写入此文件，3D 游戏使用独立的 `room_info.json`
 
-### room_info.json 结构
+### room_info_legacy.json 结构
 
 ```json
 {
@@ -102,7 +106,7 @@
 ### 流程
 
 1. 选中房间 → 点击「从模板导入」
-2. 读取 `datas/room_info.json`，解析 `rooms` 数组
+2. 读取 `datas/room_info_legacy.json`，解析 `rooms` 数组
 3. 弹窗列表展示 `id` + `room_name`，用户选择一项并确认
 4. 将模板字段写入当前房间：  
    `json_room_id`, `room_name`, `room_type`, `clean_status`, `pre_clean_text`, `base_image_path`, `desc`, `resources`
@@ -124,7 +128,7 @@
 
 ### 同步逻辑（`_sync_rooms_to_json`）
 
-1. **读取现有 room_info.json**  
+1. **读取现有 room_info_legacy.json**  
    - 文件存在则解析，保留 `source`、`rooms` 等顶层字段  
    - 不存在则新建 `{"source": "场景编辑器同步", "rooms": []}`
 
@@ -165,7 +169,7 @@
 ## 数据流向概览
 
 ```
-地图槽位 JSON (slot_N.json)          room_info.json
+地图槽位 JSON (slot_N.json)       room_info_legacy.json
         │                                    │
         │  load                              │  import
         ▼                                    │
@@ -186,9 +190,9 @@
 - 首次保存时自动分配 `ROOM_XXX`，并写入 room_info.json
 - 从模板导入会直接设置 `json_room_id`，不触发自动分配
 
-### 2. room_info.json 为单一数据源
+### 2. room_info_legacy.json 为单一数据源
 
-- 所有地图槽位的房间在保存时都写入同一 `room_info.json`
+- 所有地图槽位的房间在保存时都写入同一 `room_info_legacy.json`
 - 不同槽位若有相同 `json_room_id`，会覆盖同一模板条目
 - 不适合作为「每个槽位一套模板」的存储，当前设计为共享模板库
 
@@ -199,13 +203,13 @@
 
 ### 4. 编辑冲突
 
-- 若在外部直接修改 room_info.json，下次保存地图会覆盖这些修改
+- 若在外部直接修改 room_info_legacy.json，下次保存地图会覆盖这些修改
 - 建议以场景编辑器为主要编辑入口，JSON 作为导出/模板数据
 
 ### 5. 地图槽位 JSON 与 room_info.json 的差异
 
 - 槽位 JSON 使用 `room.to_dict()`，包含 `rect_x/y/w/h`、`id` 等地图专用字段
-- room_info.json 使用 `room.to_json_room_dict()`，包含 `size`、`room_type` 名称等模板字段
+- room_info_legacy.json 使用 `room.to_json_room_dict()`，包含 `size`、`room_type` 名称等模板字段
 - 二者通过 `json_room_id` 关联
 
 ### 6. 底图路径
@@ -221,5 +225,5 @@
 |------|------|
 | `scripts/editor/room_info.gd` | RoomInfo 定义，to_dict / from_dict / to_json_room_dict |
 | `scripts/editor/map_editor.gd` | 编辑器主逻辑，房间 UI、导入、同步 |
-| `datas/room_info.json` | 房间模板数据 |
+| `datas/room_info_legacy.json` | 2D 编辑器房间模板数据 |
 | `datas/README.md` | datas 目录说明 |

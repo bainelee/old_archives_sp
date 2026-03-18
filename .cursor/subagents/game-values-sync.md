@@ -68,5 +68,5 @@
 - 因子：cognition / computation / willpower / permission
 - 货币：info / truth
 - 人员：researcher / labor / eroded
-- zone_type：1=研究区 2=造物区 3=事务所 4=生活区
+- zone_type：1= 2=造物区 3=事务所 4=生活区
 - room_type：0=图书室 1=机房 2=教学室 3=资料库 5=实验室 6=推理室 8=宿舍

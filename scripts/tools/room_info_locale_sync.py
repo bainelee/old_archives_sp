@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""从 room_info.json 提取 room_name、pre_clean_text、desc，生成 translations.csv 的 room 键。"""
+"""从 room_info.json（3D 游戏）提取 room_name、pre_clean_text、desc，生成 translations.csv 的 room 键。
+数据源：datas/room_info.json（非 room_info_legacy.json）。
+Key 格式：{id}_NAME、{id}_PRE_CLEAN、{id}_DESC，如 room_00_NAME。
+"""
 import json
 import csv
 import os
 
-ROOM_INFO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "datas", "room_info_legacy.json")
+ROOM_INFO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "datas", "room_info.json")
 TRANSLATIONS_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "translations", "translations.csv")
 OUTPUT_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "translations", "translations_new.csv")
 
@@ -92,7 +95,7 @@ def main():
     room_keys = set()
     room_rows = []
     for r in rooms:
-        rid = r.get("id", "")
+        rid = str(r.get("id", "")).strip()
         if not rid or rid in room_keys:
             continue
         room_keys.add(rid)

@@ -17,7 +17,7 @@
 | **0-values/** | [01 - 游戏数值系统](0-values/01-game-values.md) | 研究员认知消耗、核心庇护/范围、房间清理、建设区域、生活区住房、研究区/造物区产出、空房间改造 |
 | | [02 - 游戏数值运行时系统](0-values/02-game-values-runtime.md) | 数值数据源、加载与引用、热重载、同步工作流 |
 | **1-editor/** | [01 - 地图编辑器](1-editor/01-map-editor.md) | 网格系统、底板编辑、房间划分 |
-| | [02 - 房间信息与 room_info.json 同步](1-editor/02-room-info-and-json-sync.md) | RoomInfo 结构、JSON 格式、同步逻辑 |
+| | [02 - 房间信息与 room_info 同步（2D）](1-editor/02-room-info-and-json-sync.md) | 2D 编辑器与 room_info_legacy.json |
 | | [03 - 3D 场景编辑器](1-editor/03-3d-scene-editor.md) | 3D 格子、元件盒 actor_box、3d_actor 模板 |
 | | [04 - 预设 3D 房间框架](1-editor/04-preset-room-frame.md) | preset_room_frame、房间参考网格、外轮廓、外墙、道具 |
 | | [05 - RoomItems 网格对齐](1-editor/05-room-items-grid-snap.md) | 编辑器插件：RoomItems 子节点移动时对齐 RoomReferenceGrid 网格 |
@@ -36,6 +36,11 @@
 | **99-tools/** | [01 - Framelink MCP 配置](99-tools/01-framelink-mcp-setup.md) | Figma Personal Access Token、Framelink MCP 配置 |
 | **100-figma_process/** | [README](100-figma_process/README.md) | Figma 设计与同步规则、MCP 配置（独立编号 01、02…） |
 | **locale/** | [01 - 本地化](locale/01-localization.md) | 中英双语、CSV 翻译表、tr()、语言切换（开始界面互斥按钮） |
+| **4-archives_rooms/** | [01 - 档案馆房间信息](4-archives_rooms/01-archive_rooms_info.md) | 房间名称、尺寸、类型、描述、存量（设计参考） |
+| | [02 - 房间尺寸与设计规范](4-archives_rooms/02-room-dimensions-and-specs.md) | 3d_size、volum、设计约定 |
+| | [03 - 房间类型定义](4-archives_rooms/03-room-types.md) | 中英对照、RoomType 枚举 |
+| | [04 - 房间解锁与邻接](4-archives_rooms/04-room-unlock-adjacency.md) | 解锁状态、grid、邻接判定 |
+| | [05 - 3D room_info 格式](4-archives_rooms/05-room-info-3d-format.md) | room_info.json 结构与约定 |
 
 ## 文档编号约定
 

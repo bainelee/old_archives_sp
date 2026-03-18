@@ -4,6 +4,8 @@
 
 本文档描述《旧日档案馆》中与消耗、产出相关的核心数值设计。术语中英对照与数据键名见 [00-project-keywords](../../settings/00-project-keywords.md)。
 
+**数据权威**：运行时以 `datas/*.json` 为准（`game_values.json`、`cleanup_system.json`、`construction_system.json`、`researcher_system.json` 等）。本文档为设计说明，修改数值时需同步更新对应 JSON 及 schema，见 [00-data-driven-index](00-data-driven-index.md)。
+
 ---
 
 ## 0. 因子储藏系统
@@ -97,7 +99,7 @@
 
 ### 4.1 房间单位与尺寸类型
 
-房间单位由 `room_size_config.json` 的 `size_3d`（base/tall/small/small_tall/long）查表决定，不再使用 rect 面积/5。
+房间单位由 `datas/room_size_config.json` 的 `size_3d`（base/tall/small/small_tall/long）查表决定，不再使用 rect 面积/5。完整尺寸定义见 [02-room-dimensions-and-specs](../4-archives_rooms/02-room-dimensions-and-specs.md)。
 
 | 尺寸类型 | volum (x×y×z) | 单位 |
 |----------|---------------|------|
@@ -108,6 +110,8 @@
 | long | 42×10×10 | 4 |
 
 ### 4.2 清理需求（按房间单位）
+
+数据来源：`datas/cleanup_system.json`。
 
 | 房间单位 | 研究员占用（人，上限 2） | 信息消耗（数量） | 清理时长（小时） |
 |----------|--------------------------|------------------|------------------|
@@ -124,7 +128,7 @@
 
 ## 5. 建设区域
 
-建设区域时，除**耗时**外，资源消耗与房间空间单位关系不大，采用统一数值。
+建设区域时，除**耗时**外，资源消耗与房间空间单位关系不大，采用统一数值。数据来源：`datas/construction_system.json`。
 
 ### 5.1 建设需求
 
@@ -239,7 +243,7 @@
 
 ## 9. 运行时数据与相关文档
 
-**运行时数据**：游戏内调用数值时从 `res://datas/game_values.json` 加载，由 `GameValues`（Autoload）读取。本文档不打包进游戏，修改设计后需同步更新 `game_values.json`。
+**运行时数据**：游戏内由 `GameValues`（Autoload）从 `datas/*.json` 加载，包括 `game_values.json`、`cleanup_system.json`、`construction_system.json`、`researcher_system.json` 等。本文档为设计说明，修改后需同步更新对应 JSON 与 schema，见 [02-game-values-runtime](02-game-values-runtime.md) 与 [00-data-driven-index](00-data-driven-index.md)。
 
 - [名词解释：空间单位](../../名词解释.md#空间单位)
 - [名词解释：房间类型](../../名词解释.md#房间类型)

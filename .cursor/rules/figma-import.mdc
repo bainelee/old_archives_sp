@@ -3,6 +3,10 @@ description: Figma 设计读取、下载、导入 Godot 的完整流程
 globs:
   - "scenes/ui/test_figma_page.tscn"
   - "scripts/ui/test_figma_page.gd"
+  - "scenes/ui/factor_details_panel.tscn"
+  - "scripts/ui/factor_details_panel.gd"
+  - "scenes/ui/detail_panel*.tscn"
+  - "scripts/ui/detail_panel*.gd"
   - "docs/design/100-figma_process/**"
   - ".cursor/commands/figma-sync-test-page.md"
   - "assets/icons/**"
@@ -24,6 +28,15 @@ alwaysApply: false
 
 - **禁止**：截图作为设计依据、JSON 运行时加载、猜测或估算数值
 - **必须**：使用 Figma REST API 原始数据，直接编辑 .tscn
+
+## 预制作 UI 脚本规范（必须遵守）
+
+凡因 Figma 同步而**新增或修改**的、属于**预制作 UI** 的 GDScript（如 details_panel、factor_details_panel、在编辑器中需即时看到效果的控件），必须遵守：
+
+- ** [.cursor/rules/ui-no-ready.mdc](.cursor/rules/ui-no-ready.mdc)**：不得将需在编辑器中观测的逻辑写在 `_ready()` 中；仅用于运行期初始化（隐藏、mouse_filter、信号等）。
+- ** [.cursor/rules/ui-editor-live.mdc](.cursor/rules/ui-editor-live.mdc)**：字体、边距、间距、主题、布局等「编辑器可见」的更新，一律放在 `_enter_tree()`、`@export` setter 或 `_process()`（配合 `@tool`）中。
+
+违反上述规范会导致在编辑器中修改 Inspector 或场景时界面不刷新。
 
 ## 流程一：读取 Figma 数据
 
@@ -112,6 +125,15 @@ offset_bottom = canvas_top + height
 
 - 不通过 JSON 或运行时加载
 - 布局、颜色、样式全部写入场景文件，引擎编辑器打开即可见
+
+## Figma 同步预制作 UI 自检清单
+
+执行「从 Figma 同步到 Godot」并涉及预制作 UI 时，完成后自检：
+
+1. **编辑器可见逻辑不在 _ready**：所有字体、主题、边距、间距、布局相关更新均在 `_enter_tree()` 或 `@export` setter 中实现；`_ready()` 仅包含运行期逻辑（如隐藏、mouse_filter、信号），且在编辑器分支提前 return。
+2. **新绑定用可刷新路径**：若有新增加的「编辑器可见」的绑定（如 Label 随进度条数值变化），使用 `_enter_tree()` 或 `_process(Engine.is_editor_hint())` / setter，绝不放在 `_ready()`。
+3. **资源路径一致**：图片等按上文「按组件分类存放」下载并放入约定路径（如 `assets/ui/factor_details/`），在 .tscn 中正确引用。
+4. **Figma 溯源可查**：在对应设计文档中记录 Figma 设计链接、fileKey、nodeId（API 格式 `X:Y`），便于日后用 API 逐项对照。
 
 ## 参考文件
 
