@@ -1,0 +1,599 @@
+[gd_scene format=3 uid="uid://b7k2nax1will"]
+
+[ext_resource type="Script" path="res://scripts/ui/factor_details_panel_willpower.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://bclsm3813db14" path="res://assets/ui/factor_details/details_background.png" id="3_bg_figma"]
+[ext_resource type="Texture2D" uid="uid://bmv8dxgvdbv80" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="4_frame"]
+[ext_resource type="Texture2D" uid="uid://dk7q0caftmdi1" path="res://assets/icons/icon_willpower.png" id="5_icon"]
+[ext_resource type="PackedScene" path="res://scenes/ui/detail_storage_progress_bar.tscn" id="6_progress"]
+[ext_resource type="Texture2D" uid="uid://s27bd0p4dkjf" path="res://assets/ui/factor_details/up_pointer_cognition.png" id="8_up"]
+[ext_resource type="Texture2D" uid="uid://c5da27t8vy25r" path="res://assets/ui/factor_details/warning_sign.png" id="9_warn"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bg"]
+texture = ExtResource("3_bg_figma")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.09, 0.145, 0.498, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_row"]
+content_margin_left = 7.0
+content_margin_top = 2.0
+content_margin_right = 0.0
+content_margin_bottom = 2.0
+bg_color = Color(0.165, 0.165, 0.165, 0.18)
+
+[node name="FactorDetailsPanelWillpower" type="PanelContainer" unique_id=328732686]
+clip_contents = true
+custom_minimum_size = Vector2(320, 0)
+theme = ExtResource("2_theme")
+theme_override_styles/panel = SubResource("StyleBoxTexture_bg")
+script = ExtResource("1_script")
+
+[node name="DetailsVboxContainer" type="VBoxContainer" parent="." unique_id=414355052]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HeaderVbox" type="VBoxContainer" parent="DetailsVboxContainer" unique_id=1907622868]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="UpPointer" type="Control" parent="DetailsVboxContainer/HeaderVbox" unique_id=1907622867]
+custom_minimum_size = Vector2(316, 20)
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/UpPointer" unique_id=2103953720]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_up")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailsTitle" type="PanelContainer" parent="DetailsVboxContainer/HeaderVbox" unique_id=1468190310]
+custom_minimum_size = Vector2(316, 40)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_title")
+
+[node name="TitleLayout" type="HBoxContainer" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle" unique_id=1982513978]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IconHolder" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=1307679112]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+
+[node name="IconFrame" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/IconHolder" unique_id=1995391129]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("4_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IconWillpower" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/IconHolder" unique_id=1950480158]
+modulate = Color(1.8, 1.8, 1.8, 1)
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("5_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextTitleName" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=753009974]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "FACTOR-WILLPOWER"
+
+[node name="SpacerTitle" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=2002226338]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextTitleState" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=440404593]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "SURPLUS"
+horizontal_alignment = 2
+
+[node name="ContentMargin" type="MarginContainer" parent="DetailsVboxContainer" unique_id=1991015468]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="ContentVbox" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin" unique_id=306979442]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DetailStorageInfo" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=70195235]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TextStorageTitle" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo" unique_id=511724618]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
+theme_override_font_sizes/font_size = 12
+text = "Storage Server - Willpower Factor"
+
+[node name="ProgressBarWrapper" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo" unique_id=266475948]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="StorageProgressBar" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/ProgressBarWrapper" unique_id=268058832 instance=ExtResource("6_progress")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ProgressBarLabel" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/ProgressBarWrapper" unique_id=1920001142]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -70.0
+offset_top = -6.0
+offset_right = 70.0
+offset_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
+theme_override_font_sizes/font_size = 12
+text = "50,000 / 55,000"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StorageWarning" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo" unique_id=1841636619]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="WarningIcon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/StorageWarning" unique_id=1537422569]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("9_warn")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WarningText" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/StorageWarning" unique_id=49268783]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
+theme_override_font_sizes/font_size = 12
+text = "储存服务器已满"
+
+[node name="TotalExpectedBurn" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=856480709]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalExpectedBurn" unique_id=1316968273]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
+theme_override_font_sizes/font_size = 16
+text = "预期总消耗："
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalExpectedBurn" unique_id=296809318]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalExpectedBurn" unique_id=1687575028]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
+theme_override_font_sizes/font_size = 16
+text = "480"
+horizontal_alignment = 2
+
+[node name="SplitLine1" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=747518273]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LineDark" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine1" unique_id=1331470478]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.447, 0.447, 0.447, 1)
+
+[node name="LineLight" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine1" unique_id=621977515]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.792, 0.792, 0.792, 1)
+
+[node name="FixedOverheadWrap" type="MarginContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=1998984799]
+layout_mode = 2
+theme_override_constants/margin_top = 4
+
+[node name="FixedOverhead" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap" unique_id=1988984798]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="FixedOverheadTitle" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead" unique_id=1839957712]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadTitle" unique_id=1038361399]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "固有消耗"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadTitle" unique_id=417368769]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadTitle" unique_id=580394898]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "200/天"
+horizontal_alignment = 2
+
+[node name="FixedOverheadEntries" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead" unique_id=262245768]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Entry1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries" unique_id=197474224]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry1" unique_id=465794041]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry1/HBox" unique_id=32288126]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "区域基础意志消耗"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry1/HBox" unique_id=1815805991]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry1/HBox" unique_id=897477361]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "120/天"
+horizontal_alignment = 2
+
+[node name="Entry2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries" unique_id=812113754]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry2" unique_id=1950278680]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry2/HBox" unique_id=843745313]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "探索-杜尔金矿区"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry2/HBox" unique_id=1262972523]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry2/HBox" unique_id=1140841767]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "80/天"
+horizontal_alignment = 2
+
+[node name="SplitLine2" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=1592902799]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LineDark" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine2" unique_id=420868573]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.447, 0.447, 0.447, 1)
+
+[node name="LineLight" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine2" unique_id=1270082525]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.792, 0.792, 0.792, 1)
+
+[node name="ArchivesOverheadWrap" type="MarginContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=1298724591]
+layout_mode = 2
+theme_override_constants/margin_top = 4
+
+[node name="ArchivesOverhead" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap" unique_id=1298724590]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="ArchivesOverheadTitle" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead" unique_id=1298724592]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesOverheadTitle" unique_id=1298724593]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "档案馆消耗"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesOverheadTitle" unique_id=1298724594]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesOverheadTitle" unique_id=1298724595]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "280/天"
+horizontal_alignment = 2
+
+[node name="ArchivesEntry1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead" unique_id=514087043]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesEntry1" unique_id=152041951]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesEntry1/HBox" unique_id=588328345]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "造物区-实验室"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesEntry1/HBox" unique_id=895432554]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesEntry1/HBox" unique_id=1558093641]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "120/天"
+horizontal_alignment = 2
+
+[node name="ArchivesEntry2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead" unique_id=1551198146]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesEntry2" unique_id=1115906336]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesEntry2/HBox" unique_id=483767349]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "造物区-推理室"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesEntry2/HBox" unique_id=382085888]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead/ArchivesEntry2/HBox" unique_id=1470550778]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "160/天"
+horizontal_alignment = 2
+
+[node name="SplitLine3" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=149376946]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LineDark" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine3" unique_id=521501896]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.447, 0.447, 0.447, 1)
+
+[node name="LineLight" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine3" unique_id=381432070]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.792, 0.792, 0.792, 1)
+
+[node name="OutputWrap" type="MarginContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=1633081761]
+layout_mode = 2
+theme_override_constants/margin_top = 4
+
+[node name="Output" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap" unique_id=1633081760]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="OutputTitle" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output" unique_id=1089503599]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle" unique_id=1465748785]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "产出"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle" unique_id=1778714062]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle" unique_id=2142955686]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "640/天"
+horizontal_alignment = 2
+
+[node name="OutputEntries" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output" unique_id=420370384]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Entry1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries" unique_id=817528423]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1" unique_id=1694911720]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox" unique_id=1726037708]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "图书室-基础教学室"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox" unique_id=1074374611]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox" unique_id=466161522]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "240/天"
+horizontal_alignment = 2
+
+[node name="Entry2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries" unique_id=341238780]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry2" unique_id=1600375465]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry2/HBox" unique_id=1047830271]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "图书室-高级教学室"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry2/HBox" unique_id=278790522]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry2/HBox" unique_id=176062256]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "320/天"
+horizontal_alignment = 2
+
+[node name="Entry3" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries" unique_id=1850835830]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry3" unique_id=1832702984]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry3/HBox" unique_id=1215040524]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "放映厅-基础放映厅"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry3/HBox" unique_id=406601578]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry3/HBox" unique_id=855665267]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "80/天"
+horizontal_alignment = 2
+
+[node name="SplitLine4" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=1168298695]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LineDark" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine4" unique_id=1742957729]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.447, 0.447, 0.447, 1)
+
+[node name="LineLight" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine4" unique_id=98155396]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.792, 0.792, 0.792, 1)
+
+[node name="ResourceSurplus" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=212188529]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ResourceSurplus" unique_id=894403185]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "资源富余"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ResourceSurplus" unique_id=2023840820]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ResourceSurplus" unique_id=582716916]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "+120/天"
+horizontal_alignment = 2
+
+[node name="ResourceStorageRow" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=288244652]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ResourceStorageRow" unique_id=1535215554]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ResourceStorageRow/HBox" unique_id=230563424]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "资源储备"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ResourceStorageRow/HBox" unique_id=1676745013]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ResourceStorageRow/HBox" unique_id=1810026963]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "+120/天"
+horizontal_alignment = 2
+
+[node name="BottomPlaceholder" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=288244653]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2

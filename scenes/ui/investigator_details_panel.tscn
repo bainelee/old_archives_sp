@@ -1,0 +1,376 @@
+[gd_scene format=3 uid="uid://investigator_details_panel"]
+
+[ext_resource type="Script" path="res://scripts/ui/investigator_details_panel.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://bclsm3813db14" path="res://assets/ui/factor_details/details_background.png" id="3_bg"]
+[ext_resource type="Texture2D" uid="uid://bmv8dxgvdbv80" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="4_frame"]
+[ext_resource type="Texture2D" path="res://assets/icons/icon_investigator.png" id="5_icon"]
+[ext_resource type="Texture2D" uid="uid://s27bd0p4dkjf" path="res://assets/ui/factor_details/up_pointer_cognition.png" id="8_up"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bg"]
+texture = ExtResource("3_bg")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.09, 0.145, 0.498, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_row"]
+content_margin_left = 7.0
+content_margin_top = 2.0
+content_margin_right = 0.0
+content_margin_bottom = 2.0
+bg_color = Color(0.165, 0.165, 0.165, 0.18)
+
+[node name="InvestigatorDetailsPanel" type="PanelContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(320, 0)
+theme = ExtResource("2_theme")
+theme_override_styles/panel = SubResource("StyleBoxTexture_bg")
+script = ExtResource("1_script")
+
+[node name="DetailsVboxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HeaderVbox" type="VBoxContainer" parent="DetailsVboxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="UpPointer" type="Control" parent="DetailsVboxContainer/HeaderVbox"]
+custom_minimum_size = Vector2(316, 20)
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/UpPointer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_up")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailsTitle" type="PanelContainer" parent="DetailsVboxContainer/HeaderVbox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_title")
+custom_minimum_size = Vector2(316, 40)
+
+[node name="TitleLayout" type="HBoxContainer" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IconHolder" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+
+[node name="IconFrame" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/IconHolder"]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("4_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IconInvestigator" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/IconHolder"]
+modulate = Color(1.8, 1.8, 1.8, 1)
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("5_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextTitleName" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "INVESTIGATOR"
+
+[node name="SpacerTitle" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ContentMargin" type="MarginContainer" parent="DetailsVboxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="ContentVbox" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="AvailableRow" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AvailableRow"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "可分配调查员"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AvailableRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AvailableRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "8"
+horizontal_alignment = 2
+
+[node name="AssignedWrap" type="MarginContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+layout_mode = 2
+theme_override_constants/margin_top = 4
+
+[node name="Assigned" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="AssignedTitle" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedTitle"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "已分配调查员"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedTitle"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedTitle"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "8"
+horizontal_alignment = 2
+
+[node name="AssignedEntries" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Entry1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry1"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry1/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "探索-天堑观测站"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry1/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry1/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "2"
+horizontal_alignment = 2
+
+[node name="Entry2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry2"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry2/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "探索-科尔博柯大使馆"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry2/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry2/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "2"
+horizontal_alignment = 2
+
+[node name="Entry3" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry3"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry3/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "探索-雪貂软件"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry3/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry3/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "2"
+horizontal_alignment = 2
+
+[node name="Entry4" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry4"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry4/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "探索-蓝木连接点"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry4/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AssignedWrap/Assigned/AssignedEntries/Entry4/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "2"
+horizontal_alignment = 2
+
+[node name="SplitLine1" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LineDark" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine1"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.447, 0.447, 0.447, 1)
+
+[node name="LineLight" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine1"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.792, 0.792, 0.792, 1)
+
+[node name="RecruitedWrap" type="MarginContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+layout_mode = 2
+theme_override_constants/margin_top = 4
+
+[node name="Recruited" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="RecruitedTitle" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedTitle"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "已招募调查员"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedTitle"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedTitle"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "16"
+horizontal_alignment = 2
+
+[node name="RecruitedEntries" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Entry1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries/Entry1"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries/Entry1/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "事务所区"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries/Entry1/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries/Entry1/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "15"
+horizontal_alignment = 2
+
+[node name="Entry2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries/Entry2"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries/Entry2/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "事件-原生调查员（其一）"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries/Entry2/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/RecruitedWrap/Recruited/RecruitedEntries/Entry2/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "1"
+horizontal_alignment = 2
+
+[node name="BottomPlaceholder" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2

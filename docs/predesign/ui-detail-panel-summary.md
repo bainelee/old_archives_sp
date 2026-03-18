@@ -6,9 +6,20 @@
 
 | 复用项 | 路径 | 说明 |
 |--------|------|------|
-| **详情面板主场景** | `scenes/ui/factor_details_panel.tscn` | 宽度 320、结构完整（HeaderVbox + ContentMargin + 各区块），可复制后改文案与数据类型作为其他「详情类」面板（如庇护能量详情、住房详情） |
-| **详情面板脚本** | `scripts/ui/factor_details_panel.gd` | @tool、@export 布局、运行期隐藏、进度条文案同步；其他详情面板可继承或复制后只改 `show_for_xxx` 与数据绑定 |
-| **详情用进度条** | `scenes/ui/detail_storage_progress_bar.tscn` + `scripts/ui/detail_storage_progress_bar.gd` | 仅用于详情内的储存条：总高 20、内高 16、2px 边距、back 图 + 色块填充；不用于 topbar |
+| **详情面板主场景** | `scenes/ui/factor_details_panel.tscn` | 认知因子；宽度 320、结构完整（HeaderVbox + ContentMargin + 各区块），可复制后改文案与数据类型作为其他「详情类」面板 |
+| **意志因子详情面板** | `scenes/ui/factor_details_panel_willpower.tscn` | 与认知因子结构一致、解耦独立场景；复用同一套资产与 DetailStorageProgressBar；Figma 67:629 |
+| **权限因子详情面板** | `scenes/ui/factor_details_panel_permission.tscn` | 无资源消耗 list（即时瞬时消耗）；仅储存 + 产出 + 资源富余；Figma 67:630 |
+| **计算因子详情面板** | `scenes/ui/factor_details_panel_computation.tscn` | 消耗组为「核心消耗」、仅 title 层无子条目；Figma 67:751 |
+| **庇护能量详情面板** | `scenes/ui/factor_details_panel_shelter.tscn` | 无状态文、标题 SHELTER POWER；储存为「庇护能量出力上限」、已分配/固有分配/建设分配/产出/区域庇护状态；Figma 67:855 |
+| **研究员详情面板** | `scenes/ui/researcher_details_panel.tscn` | 无状态文、标题 RESEARCHER；储存为「研究员总览」、三段进度条（闲置/在职/被侵蚀）；闲置/被侵蚀/在职+区域细则/研究员总数；Figma 70:964 |
+| **住房详情面板** | `scenes/ui/housing_details_panel.tscn` | 无状态文、标题 HOUSING；储存为「住房信息总览」、住房总览条（需求/已提供，橙/灰/红）；可分配/住房缺口/住房产出+细则/住房总数；Figma 76:65 |
+| **信息详情面板** | `scenes/ui/information_details_panel.tscn` | 无储存条、标题 INFORMATION；信息产出+细则、额外影响+细则、信息储量；Figma 70:1154 |
+| **调查员详情面板** | `scenes/ui/investigator_details_panel.tscn` | 无储存条、标题 INVESTIGATOR；可分配/已分配+探索节点细则、已招募+事务所·事件细则；Figma 72:1259 |
+| **真相详情面板** | `scenes/ui/truth_details_panel.tscn` | 无储存条、标题 TRUTH；已获得真相+细则（名称）、已解读真相+细则（名称）；Figma 72:1337 |
+| **详情面板脚本** | 各 factor_details_panel_*.gd、researcher_details_panel.gd、housing/information/investigator/truth_details_panel.gd | @tool、@export 布局、运行期隐藏；各 show_for_*(data) |
+| **详情用进度条** | `scenes/ui/detail_storage_progress_bar.tscn` | 因子/庇护等储存条；总高 20、内高 16、2px 边距 |
+| **研究员总览条** | `scenes/ui/detail_researcher_overview_bar.tscn` | 三段（橙/灰/红）闲置/在职/被侵蚀，中央 8/32/4；仅研究员详情用 |
+| **住房总览条** | `scenes/ui/detail_housing_overview_bar.tscn` | 三段（橙/灰/红）可分配/已提供/缺口，中央 需求/已提供（如 36/32）；仅住房详情用 |
 | **主题** | `assets/ui/detail_panel_theme.tres` | 默认字体 Sarasa；凡用此主题的面板可统一字体 |
 
 ### 2. 资产
@@ -123,5 +134,5 @@
 
 - 设计详解：[ui-detail-panel-design.md](ui-detail-panel-design.md)
 - 与 Figma/文档差异：[ui-detail-panel-diff.md](ui-detail-panel-diff.md)
-- Figma 来源：fileKey `ndfJ5hiWy9b4iq5JNuZwSJ`，主节点 67:622；details_background 74:9，storage_progress_bar_back 90:52
+- Figma 来源：认知 67:622、意志 67:629、权限 67:630、计算 67:751、庇护 67:855、研究员 70:964、住房 76:65、信息 70:1154、调查员 72:1259、真相 72:1337（fileKey `ndfJ5hiWy9b4iq5JNuZwSJ`）；details_background 74:9，storage_progress_bar_back 90:52
 - 规则：`.cursor/rules/ui-no-ready.mdc`、`ui-editor-live.mdc`、`figma-import.mdc`

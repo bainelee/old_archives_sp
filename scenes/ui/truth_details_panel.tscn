@@ -1,0 +1,253 @@
+[gd_scene format=3 uid="uid://csqbtq74sxw78"]
+
+[ext_resource type="Script" uid="uid://mkcxaia5ioja" path="res://scripts/ui/truth_details_panel.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://bclsm3813db14" path="res://assets/ui/factor_details/details_background.png" id="3_bg"]
+[ext_resource type="Texture2D" uid="uid://bmv8dxgvdbv80" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="4_frame"]
+[ext_resource type="Texture2D" uid="uid://dhljbwlygc5l2" path="res://assets/icons/icon_truth.png" id="5_icon"]
+[ext_resource type="Texture2D" uid="uid://s27bd0p4dkjf" path="res://assets/ui/factor_details/up_pointer_cognition.png" id="8_up"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bg"]
+texture = ExtResource("3_bg")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.09, 0.145, 0.498, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_row"]
+content_margin_left = 7.0
+content_margin_top = 2.0
+content_margin_right = 0.0
+content_margin_bottom = 2.0
+bg_color = Color(0.165, 0.165, 0.165, 0.18)
+
+[node name="TruthDetailsPanel" type="PanelContainer" unique_id=1375466362]
+clip_contents = true
+custom_minimum_size = Vector2(320, 0)
+theme = ExtResource("2_theme")
+theme_override_styles/panel = SubResource("StyleBoxTexture_bg")
+script = ExtResource("1_script")
+
+[node name="DetailsVboxContainer" type="VBoxContainer" parent="." unique_id=755967537]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HeaderVbox" type="VBoxContainer" parent="DetailsVboxContainer" unique_id=1480074786]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="UpPointer" type="Control" parent="DetailsVboxContainer/HeaderVbox" unique_id=1379764338]
+custom_minimum_size = Vector2(316, 20)
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/UpPointer" unique_id=1122241167]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_up")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DetailsTitle" type="PanelContainer" parent="DetailsVboxContainer/HeaderVbox" unique_id=87514524]
+custom_minimum_size = Vector2(316, 40)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_title")
+
+[node name="TitleLayout" type="HBoxContainer" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle" unique_id=441432354]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IconHolder" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=1720633039]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+
+[node name="IconFrame" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/IconHolder" unique_id=1473592754]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("4_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IconTruth" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/IconHolder" unique_id=613913978]
+modulate = Color(1.8, 1.8, 1.8, 1)
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("5_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextTitleName" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=566260733]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "TRUTH"
+
+[node name="SpacerTitle" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=931893117]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ContentMargin" type="MarginContainer" parent="DetailsVboxContainer" unique_id=917528591]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+
+[node name="ContentVbox" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin" unique_id=1285204682]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="AcquiredWrap" type="MarginContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=1498846432]
+layout_mode = 2
+theme_override_constants/margin_top = 0
+
+[node name="Acquired" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap" unique_id=993285306]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="AcquiredTitle" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired" unique_id=83498923]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredTitle" unique_id=1519400039]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "已获得真相"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredTitle" unique_id=485346326]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredTitle" unique_id=932305098]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "4"
+horizontal_alignment = 2
+
+[node name="AcquiredEntries" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired" unique_id=181330991]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Entry1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredEntries" unique_id=511645035]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredEntries/Entry1" unique_id=1232473643]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "影中呢喃"
+
+[node name="Entry2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredEntries" unique_id=1143558507]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredEntries/Entry2" unique_id=1511134615]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "帷幔与盐滩"
+
+[node name="Entry3" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredEntries" unique_id=1243369621]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredEntries/Entry3" unique_id=781497654]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "浮空灵柩-奈希洛斯"
+
+[node name="Entry4" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredEntries" unique_id=402246363]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AcquiredWrap/Acquired/AcquiredEntries/Entry4" unique_id=1464700371]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "曾经的八人"
+
+[node name="SplitLine1" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=401131017]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LineDark" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine1" unique_id=1811238701]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.447, 0.447, 0.447, 1)
+
+[node name="LineLight" type="ColorRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/SplitLine1" unique_id=824541620]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.792, 0.792, 0.792, 1)
+
+[node name="InterpretedWrap" type="MarginContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=1807445052]
+layout_mode = 2
+theme_override_constants/margin_top = 4
+
+[node name="Interpreted" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InterpretedWrap" unique_id=955798169]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="InterpretedTitle" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InterpretedWrap/Interpreted" unique_id=208196152]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InterpretedWrap/Interpreted/InterpretedTitle" unique_id=687545710]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "已解读真相"
+
+[node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InterpretedWrap/Interpreted/InterpretedTitle" unique_id=1520774289]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InterpretedWrap/Interpreted/InterpretedTitle" unique_id=1956901783]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "1"
+horizontal_alignment = 2
+
+[node name="InterpretedEntries" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InterpretedWrap/Interpreted" unique_id=875160306]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Entry1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InterpretedWrap/Interpreted/InterpretedEntries" unique_id=745593094]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row")
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InterpretedWrap/Interpreted/InterpretedEntries/Entry1" unique_id=702157107]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "浮空灵柩-奈希洛斯"
+
+[node name="BottomPlaceholder" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=2031053490]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
