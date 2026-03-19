@@ -235,4 +235,4 @@ func clear_container(container: Container) -> void:
 	for child in children:
 		if is_instance_valid(child) and child.get_parent() == container:
 			container.remove_child(child)
-			child.queue_free()
+			child.free()

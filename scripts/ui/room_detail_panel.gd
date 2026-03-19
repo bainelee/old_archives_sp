@@ -61,7 +61,8 @@ func show_room(room: ArchivesRoomInfo) -> void:
 
 func _update_zone_operation(room: ArchivesRoomInfo) -> void:
 	for child in _zone_op_content.get_children():
-		child.queue_free()
+		_zone_op_content.remove_child(child)
+		child.free()
 	if room.zone_type == 0:
 		_zone_op_row.visible = false
 		return
@@ -139,7 +140,8 @@ func _add_zone_op_line(label_text: String, value: String, value_color: Color) ->
 
 func _update_resources(room: ArchivesRoomInfo) -> void:
 	for child in _resources_container.get_children():
-		child.queue_free()
+		_resources_container.remove_child(child)
+		child.free()
 	if room.zone_type == ZoneTypeScript.Type.RESEARCH:
 		_resources_label.text = tr("LABEL_CURRENT_RESERVE")
 	else:
@@ -167,13 +169,23 @@ func hide_panel() -> void:
 	visible = false
 
 
+func _exit_tree() -> void:
+	if _zone_op_content:
+		for child in _zone_op_content.get_children().duplicate():
+			_zone_op_content.remove_child(child)
+			child.free()
+	if _resources_container:
+		for child in _resources_container.get_children().duplicate():
+			_resources_container.remove_child(child)
+			child.free()
+
+
 func _compute_dynamic_hash(room: ArchivesRoomInfo) -> int:
 	if room == null:
 		return -1
 	var h: int = 17
 	h = h * 31 + room.zone_type
 	h = h * 31 + room.clean_status
-	h = h * 31 + room.shelter_status
 	h = h * 31 + room.resources.hash()
 	var ui: Node = get_node_or_null("../UIMain")
 	if ui:

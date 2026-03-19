@@ -70,6 +70,13 @@ func _ready() -> void:
 	mouse_exited.connect(_on_mouse_exited)
 
 
+func _exit_tree() -> void:
+	if _icon_frame:
+		_icon_frame.texture = null
+	if _icon:
+		_icon.texture = null
+
+
 func _cache_nodes() -> void:
 	_icon_frame = get_node_or_null("IconFrame") as TextureRect
 	_icon = get_node_or_null("Icon") as TextureRect

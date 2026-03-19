@@ -91,7 +91,8 @@ func _show_zone_buttons_for_category(cat: String) -> void:
 	if not _zone_buttons or not _zone_buttons is HBoxContainer:
 		return
 	for c in _zone_buttons.get_children():
-		c.queue_free()
+		_zone_buttons.remove_child(c)
+		c.free()
 	var zones: Array = _category_zones.get(cat, [])
 	for z in zones:
 		var btn: Button = Button.new()

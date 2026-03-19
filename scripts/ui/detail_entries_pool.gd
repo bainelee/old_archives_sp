@@ -130,7 +130,11 @@ func release_container_contents(container: Container) -> void:
 			release_label(child)
 		else:
 			## 其他类型直接释放
-			child.queue_free()
+			if child is Node:
+				var n: Node = child as Node
+				if n.get_parent():
+					n.get_parent().remove_child(n)
+				n.free()
 
 
 ## 裁剪池大小（防止无限增长）
@@ -143,23 +147,35 @@ func trim_pools(max_size: int = DEFAULT_POOL_SIZE) -> void:
 func _trim_pool(pool: Array, max_size: int) -> void:
 	while pool.size() > max_size:
 		var item = pool.pop_back()
-		## 检查节点是否有效且不在场景树中（避免关闭时重复释放）
-		if is_instance_valid(item) and not item.is_inside_tree():
-			item.queue_free()
+		## 关闭阶段优先立即释放，避免 queue_free 来不及执行导致 RID 泄漏
+		if is_instance_valid(item) and item is Node:
+			var n: Node = item as Node
+			if n.get_parent():
+				n.get_parent().remove_child(n)
+			n.free()
 
 
 ## 清空所有池（仅在场景关闭时调用，避免重复释放）
 func clear_all_pools() -> void:
-	## 先尝试从池外移除节点，再释放（防止关闭时已释放导致错误）
+	## 关闭阶段优先立即释放，避免 queue_free 在引擎停机时滞留
 	for item in _pooled_labels:
-		if is_instance_valid(item) and not item.is_inside_tree():
-			item.queue_free()
+		if is_instance_valid(item) and item is Node:
+			var n: Node = item as Node
+			if n.get_parent():
+				n.get_parent().remove_child(n)
+			n.free()
 	for item in _pooled_rows:
-		if is_instance_valid(item) and not item.is_inside_tree():
-			item.queue_free()
+		if is_instance_valid(item) and item is Node:
+			var n: Node = item as Node
+			if n.get_parent():
+				n.get_parent().remove_child(n)
+			n.free()
 	for item in _pooled_hboxes:
-		if is_instance_valid(item) and not item.is_inside_tree():
-			item.queue_free()
+		if is_instance_valid(item) and item is Node:
+			var n: Node = item as Node
+			if n.get_parent():
+				n.get_parent().remove_child(n)
+			n.free()
 	_pooled_labels.clear()
 	_pooled_rows.clear()
 	_pooled_hboxes.clear()

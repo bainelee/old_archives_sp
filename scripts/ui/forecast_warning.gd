@@ -60,12 +60,11 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	if Engine.is_editor_hint():
-		return
-	if is_instance_valid(GameTime) and GameTime.time_updated.is_connected(_on_time_updated):
+	if not Engine.is_editor_hint() and is_instance_valid(GameTime) and GameTime.time_updated.is_connected(_on_time_updated):
 		GameTime.time_updated.disconnect(_on_time_updated)
-	if is_instance_valid(ErosionCore) and ErosionCore.erosion_changed.is_connected(_on_erosion_changed):
+	if not Engine.is_editor_hint() and is_instance_valid(ErosionCore) and ErosionCore.erosion_changed.is_connected(_on_erosion_changed):
 		ErosionCore.erosion_changed.disconnect(_on_erosion_changed)
+	_clear_runtime_resources()
 
 
 func _preload_textures() -> void:
@@ -161,7 +160,7 @@ func _draw_handles_from_pool(pool: Array) -> void:
 	for c in _handle_container.get_children().duplicate():
 		if c.name.begins_with("Handle_") or c.name.begins_with("Sign_"):
 			_handle_container.remove_child(c)
-			c.queue_free()
+			c.free()
 	for i in pool.size():
 		var h: Variant = pool[i]
 		if not (h is Dictionary):
@@ -205,3 +204,14 @@ func _draw_handles_from_pool(pool: Array) -> void:
 				sign_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				sign_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 				_handle_container.add_child(sign_rect)
+
+
+func _clear_runtime_resources() -> void:
+	if _handle_container:
+		for c in _handle_container.get_children().duplicate():
+			if c.name.begins_with("Handle_") or c.name.begins_with("Sign_"):
+				_handle_container.remove_child(c)
+				c.free()
+	_handle_textures.clear()
+	_sign_red_tex = null
+	_sign_green_tex = null

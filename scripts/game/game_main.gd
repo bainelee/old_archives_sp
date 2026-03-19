@@ -265,7 +265,8 @@ func _setup_researchers() -> void:
 		return
 	var existing: Node = room_node.get_node_or_null("ResearchersContainer")
 	if existing:
-		existing.queue_free()
+		room_node.remove_child(existing)
+		existing.free()
 	var container: Node3D = Node3D.new()
 	container.name = "ResearchersContainer"
 	room_node.add_child(container)

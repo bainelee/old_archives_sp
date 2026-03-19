@@ -73,10 +73,14 @@ func _setup_menu() -> void:
 
 
 func _remove_menu() -> void:
-	if _snap_menu != null and is_instance_valid(_snap_menu):
+	if _snap_menu != null:
 		if Engine.is_editor_hint():
 			remove_tool_menu_item("RoomItems 网格对齐")
-		_snap_menu.queue_free()
+		## remove_tool_menu_item 可能已间接释放菜单，需二次校验后再手动 free。
+		if is_instance_valid(_snap_menu):
+			if _snap_menu.get_parent():
+				_snap_menu.get_parent().remove_child(_snap_menu)
+			_snap_menu.free()
 	_snap_menu = null
 
 

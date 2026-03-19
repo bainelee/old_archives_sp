@@ -285,7 +285,8 @@ static func refresh_room_list(editor: Node) -> void:
 	var room_list_container: VBoxContainer = editor.get("_room_list_container")
 	var rooms: Array = editor.get("_rooms")
 	for child in room_list_container.get_children():
-		child.queue_free()
+		room_list_container.remove_child(child)
+		child.free()
 	for i in rooms.size():
 		var room: ArchivesRoomInfo = rooms[i]
 		var btn: Button = Button.new()
@@ -355,7 +356,8 @@ static func refresh_room_resources_ui(editor: Node) -> void:
 	var selected_idx: int = editor.get("_selected_room_index")
 	var rooms: Array = editor.get("_rooms")
 	for c in room_resources_container.get_children():
-		c.queue_free()
+		room_resources_container.remove_child(c)
+		c.free()
 	if selected_idx < 0 or selected_idx >= rooms.size():
 		return
 	var room: ArchivesRoomInfo = rooms[selected_idx]

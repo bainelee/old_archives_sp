@@ -114,6 +114,11 @@ func _ready() -> void:
 		call_deferred("_update_progress")
 
 
+func _exit_tree() -> void:
+	if _back:
+		_back.texture = null
+
+
 func _cache_nodes() -> void:
 	_back = get_node_or_null("Back") as TextureRect
 	_mask_normal = get_node_or_null("MaskNormal") as Control

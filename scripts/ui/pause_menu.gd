@@ -4,7 +4,6 @@ extends CanvasLayer
 
 const START_MENU_SCENE := "res://scenes/ui/start_menu.tscn"
 const GAME_MAIN_SCENE := "res://scenes/game/game_main.tscn"
-const SlotPanelHelper = preload("res://scripts/ui/slot_panel_helper.gd")
 
 @onready var _panel: Control = $Panel
 @onready var _btn_resume: Button = $Panel/Center/MenuPanel/VBox/BtnResume

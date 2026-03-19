@@ -42,11 +42,19 @@ static func update_progress_rooms(container: Control, rings: Dictionary, rooms_d
 			r.queue_redraw()
 	for rid in rings.duplicate().keys():
 		if not active_ids.has(rid):
-			rings[rid].queue_free()
+			var dead_ring: Control = rings[rid]
+			if is_instance_valid(dead_ring):
+				if dead_ring.get_parent():
+					dead_ring.get_parent().remove_child(dead_ring)
+				dead_ring.free()
 			rings.erase(rid)
 
 
 static func hide_progress(rings: Dictionary) -> void:
 	for rid in rings.duplicate().keys():
-		rings[rid].queue_free()
+		var dead_ring: Control = rings[rid]
+		if is_instance_valid(dead_ring):
+			if dead_ring.get_parent():
+				dead_ring.get_parent().remove_child(dead_ring)
+			dead_ring.free()
 	rings.clear()

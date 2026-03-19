@@ -5,7 +5,6 @@ extends Control
 ## 无存档时「继续游戏」禁用；新游戏需选择槽位并创建存档
 
 const GAME_MAIN_SCENE := "res://scenes/game/game_main.tscn"
-const SlotPanelHelper = preload("res://scripts/ui/slot_panel_helper.gd")
 
 @onready var _btn_new_game: Button = $Center/VBox/BtnNewGame
 @onready var _btn_continue: Button = $Center/VBox/BtnContinue

@@ -52,6 +52,13 @@ func _ready() -> void:
 	_entries_pool = DetailEntriesPool.new()
 
 
+func _exit_tree() -> void:
+	if _entries_pool:
+		_clear_all_entries()
+		_entries_pool.clear_all_pools()
+		_entries_pool = null
+
+
 ## ============================================================================
 ## 数据展示接口（重写基类方法）
 ## ============================================================================

@@ -58,6 +58,19 @@ func _apply_preview() -> void:
 	set_corrosion_value(preview_value)
 
 
+func _exit_tree() -> void:
+	for d in _digits:
+		if is_instance_valid(d):
+			d.texture = null
+	if _plus_sign:
+		_plus_sign.texture = null
+	if _minus_sign:
+		_minus_sign.texture = null
+	if _background:
+		_background.texture = null
+	_digit_textures.clear()
+
+
 func set_corrosion_value(value: int) -> void:
 	value = clampi(value, -999, 999)
 	var abs_val: int = absi(value)
