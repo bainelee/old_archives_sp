@@ -5,8 +5,11 @@ extends CanvasLayer
 
 signal cleanup_button_pressed
 signal build_button_pressed
+signal bottom_task_placeholder_pressed(button_id: String)
 
 @onready var _topbar_figma: Node = $TopBar/TopbarFigma
+@onready var _calamity_progress: ProgressBar = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline/CalamityProgress") as ProgressBar
+@onready var _calamity_value_label: Label = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline/CalamityValue") as Label
 
 ## 详情面板（按资源类型）
 @onready var _cognition_panel: PanelContainer = $CognitionDetailPanel
@@ -152,12 +155,15 @@ func _ready() -> void:
 	if _topbar_figma and _topbar_figma.has_method("set_ui_root"):
 		_topbar_figma.set_ui_root(self)
 	_refresh_all()
-	var btn: Button = get_node_or_null("BottomRightBar/BtnCleanup")
+	var btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnCleanup")
 	if btn:
 		btn.pressed.connect(_on_cleanup_button_pressed)
-	var build_btn: Button = get_node_or_null("BottomRightBar/BtnBuild")
+	var build_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnBuild")
 	if build_btn:
 		build_btn.pressed.connect(_on_build_button_pressed)
+	_connect_bottom_placeholder_button("BottomRightBar/Margin/Content/BtnCenter", "center")
+	_connect_bottom_placeholder_button("BottomRightBar/Margin/Content/BtnCouncil", "triple_council")
+	_connect_bottom_placeholder_button("BottomRightBar/Margin/Content/BtnTechStack", "tech_stack")
 	var btn_researcher_list: Button = get_node_or_null("BarBelowTop/BtnResearcherList")
 	if btn_researcher_list:
 		btn_researcher_list.pressed.connect(_on_researcher_list_button_pressed)
@@ -165,6 +171,9 @@ func _ready() -> void:
 		_topbar_figma.block_hovered.connect(_on_topbar_block_hovered)
 	if _topbar_figma and _topbar_figma.has_signal("block_unhovered"):
 		_topbar_figma.block_unhovered.connect(_on_topbar_block_unhovered)
+	if PersonnelErosionCore and PersonnelErosionCore.has_signal("calamity_updated"):
+		PersonnelErosionCore.calamity_updated.connect(_on_calamity_updated)
+	_sync_calamity_inline()
 	
 	## 连接 DataProviders 信号实现实时刷新
 	_connect_data_providers_signals()
@@ -176,6 +185,18 @@ func _on_cleanup_button_pressed() -> void:
 
 func _on_build_button_pressed() -> void:
 	build_button_pressed.emit()
+
+
+func _connect_bottom_placeholder_button(node_path: String, button_id: String) -> void:
+	var btn: Button = get_node_or_null(node_path) as Button
+	if btn:
+		btn.pressed.connect(func() -> void:
+			_on_bottom_task_placeholder_button_pressed(button_id)
+		)
+
+
+func _on_bottom_task_placeholder_button_pressed(button_id: String) -> void:
+	bottom_task_placeholder_pressed.emit(button_id)
 
 
 func _on_researcher_list_button_pressed() -> void:
@@ -374,19 +395,35 @@ func _refresh_visible_panels(panels: Array[PanelContainer]) -> void:
 			_detail_panel_dirty = true
 
 
+func _sync_calamity_inline() -> void:
+	var value: float = 0.0
+	if PersonnelErosionCore:
+		value = PersonnelErosionCore.get_calamity_value()
+	_on_calamity_updated(value)
+
+
+func _on_calamity_updated(value: float) -> void:
+	var max_val: float = float(PersonnelErosionCore.get_calamity_max()) if PersonnelErosionCore else 30000.0
+	var ratio: float = clampf(value / max_val, 0.0, 1.0) if max_val > 0.0 else 0.0
+	if _calamity_progress:
+		_calamity_progress.value = ratio
+	if _calamity_value_label:
+		_calamity_value_label.text = str(int(value))
+
+
 ## 建设选择模式下禁用其余 UI、隐藏灾厄
 func set_construction_blocking(blocked: bool) -> void:
 	if blocked:
 		_hide_all_detail_panels()
 	_set_buttons_blocked($TopBar, blocked)
 	_set_control_mouse_filter($TopBar, blocked)
-	var cleanup_btn: Button = get_node_or_null("BottomRightBar/BtnCleanup") as Button
+	var cleanup_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnCleanup") as Button
 	if cleanup_btn:
 		cleanup_btn.disabled = blocked
-	var renovate_btn: Button = get_node_or_null("BottomRightBar/BtnRenovate") as Button
+	var renovate_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnRenovate") as Button
 	if renovate_btn:
 		renovate_btn.disabled = blocked
-	var calamity: Control = get_node_or_null("CalamityBar") as Control
+	var calamity: Control = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline") as Control
 	if calamity:
 		calamity.visible = not blocked
 
@@ -396,13 +433,16 @@ func set_cleanup_blocking(blocked: bool) -> void:
 	if blocked:
 		_hide_all_detail_panels()
 	_set_buttons_blocked($TopBar, blocked)
-	_set_buttons_blocked($CalamityBar, blocked)
+	var calamity_inline: Control = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline") as Control
+	if calamity_inline:
+		_set_buttons_blocked(calamity_inline, blocked)
 	_set_control_mouse_filter($TopBar, blocked)
-	_set_control_mouse_filter($CalamityBar, blocked)
-	var build_btn: Button = get_node_or_null("BottomRightBar/BtnBuild") as Button
+	if calamity_inline:
+		_set_control_mouse_filter(calamity_inline, blocked)
+	var build_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnBuild") as Button
 	if build_btn:
 		build_btn.disabled = blocked
-	var renovate_btn: Button = get_node_or_null("BottomRightBar/BtnRenovate") as Button
+	var renovate_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnRenovate") as Button
 	if renovate_btn:
 		renovate_btn.disabled = blocked
 

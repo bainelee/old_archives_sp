@@ -23,8 +23,8 @@ static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> b
 	var bar: Control = game_main.get_node_or_null("UIMain/BottomRightBar") as Control
 	if bar and bar.get_global_rect().has_point(mouse_pos):
 		return true
-	var calamity: Control = game_main.get_node_or_null("UIMain/CalamityBar") as Control
-	if calamity and calamity.get_global_rect().has_point(mouse_pos):
+	var calamity: Control = game_main.get_node_or_null("UIMain/BottomRightBar/Margin/Content/CalamityInline") as Control
+	if calamity and calamity.visible and calamity.get_global_rect().has_point(mouse_pos):
 		return true
 	var debug_info: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control
 	if debug_info and debug_info.visible and debug_info.get_global_rect().has_point(mouse_pos):

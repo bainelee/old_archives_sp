@@ -64,7 +64,7 @@ static func consume_cleanup_cost(game_main: Node2D, room: ArchivesRoomInfo) -> v
 
 
 static func is_click_over_cleanup_allowed_ui(game_main: Node2D, mouse_pos: Vector2) -> bool:
-	var btn: Control = game_main.get_node_or_null("UIMain/BottomRightBar/BtnCleanup") as Control
+	var btn: Control = game_main.get_node_or_null("UIMain/BottomRightBar/Margin/Content/BtnCleanup") as Control
 	if btn and btn.get_global_rect().has_point(mouse_pos):
 		return true
 	var debug_panel: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control

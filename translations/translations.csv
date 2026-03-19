@@ -45,6 +45,9 @@ LABEL_PAN_SPEED,Pan Speed,拖动速度
 BTN_CLEANUP,Clean,清理
 BTN_CONSTRUCTION,Build,建设
 BTN_REMODEL,Remodel,改造
+BTN_CENTER,Center,中枢
+BTN_TRIPLE_COUNCIL,Triple Council,三重评议会
+BTN_TECH_STACK,Tech Stack,技术栈
 ROOM_TYPE_LIBRARY,Library,图书室
 ROOM_TYPE_LAB,Lab,机房
 ROOM_TYPE_CLASSROOM,Classroom,教学室

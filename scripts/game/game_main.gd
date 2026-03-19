@@ -1086,7 +1086,7 @@ func _setup_cleanup_mode() -> void:
 	var overlay: Node = get_node_or_null("CleanupOverlay")
 	if overlay and overlay.has_signal("confirm_cleanup_pressed"):
 		overlay.confirm_cleanup_pressed.connect(_on_cleanup_confirm_pressed)
-	var btn: Button = get_node_or_null("UIMain/BottomRightBar/BtnCleanup") as Button
+	var btn: Button = get_node_or_null("UIMain/BottomRightBar/Margin/Content/BtnCleanup") as Button
 	if btn:
 		btn.pressed.connect(_on_cleanup_button_pressed)
 	else:
@@ -1112,11 +1112,18 @@ func _setup_construction_mode() -> void:
 	var ui: Node = get_node_or_null("UIMain")
 	if ui and ui.has_signal("build_button_pressed"):
 		ui.build_button_pressed.connect(_on_build_button_pressed)
+	if ui and ui.has_signal("bottom_task_placeholder_pressed"):
+		ui.bottom_task_placeholder_pressed.connect(_on_bottom_task_placeholder_pressed)
 
 
 func _on_build_button_pressed() -> void:
 	GameMainConstructionHelper.on_build_button_pressed(self)
 	_update_room_highlights()
+
+
+func _on_bottom_task_placeholder_pressed(button_id: String) -> void:
+	## 底栏占位入口：中枢/三重评议会/技术栈功能后续再接入
+	print("[BottomTaskPlaceholder] pressed: %s" % button_id)
 
 
 func _on_construction_zone_selected(zone_type: int) -> void:

@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://b5uajm0ty58x7" path="res://scripts/ui/ui_main.gd" id="1_ui_main"]
 [ext_resource type="Script" path="res://scripts/ui/ui_main_debug_panel.gd" id="1_debug_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/topbar_figma.tscn" id="2_topbar_figma"]
-[ext_resource type="PackedScene" path="res://scenes/ui/calamity_bar.tscn" id="4_calamity_bar"]
 [ext_resource type="PackedScene" path="res://scenes/ui/researcher_list_panel.tscn" id="7_researcher_list"]
 [ext_resource type="PackedScene" path="res://scenes/ui/factor_details_panel.tscn" id="8_cognition_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/factor_details_panel_willpower.tscn" id="9_willpower_panel"]
@@ -15,6 +14,12 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/information_details_panel.tscn" id="15_information_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/investigator_details_panel.tscn" id="16_investigator_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/truth_details_panel.tscn" id="17_truth_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/bottom_task_button.tscn" id="18_generic_button"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_nor.png" id="19_bottom_bar_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/resource_block/progress_back.png" id="20_progress_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="21_icon_frame"]
+[ext_resource type="Script" path="res://scripts/ui/bottom_task_bar_layout.gd" id="22_bottom_task_layout"]
+[ext_resource type="Texture2D" path="res://assets/ui/resource_block/icon_frame_base_32x32.png" id="23_icon_frame_base"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
 bg_color = Color(0.12, 0.12, 0.18, 0.92)
@@ -39,6 +44,27 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bottom_task_bar"]
+texture = ExtResource("19_bottom_bar_bg")
+texture_margin_left = 2.0
+texture_margin_right = 2.0
+texture_margin_top = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_calamity_progress_back"]
+texture = ExtResource("20_progress_bg")
+texture_margin_left = 2.0
+texture_margin_right = 2.0
+texture_margin_top = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_calamity_progress_fill"]
+bg_color = Color(0.545098, 0.0901961, 0.0901961, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="UIMain" type="CanvasLayer" unique_id=1949984106]
 layer = 10
@@ -196,8 +222,6 @@ theme_override_colors/font_color = Color(0.6, 0.9, 0.6, 1)
 theme_override_font_sizes/font_size = 14
 text = "+"
 
-[node name="CalamityBar" parent="." unique_id=1203875538 instance=ExtResource("4_calamity_bar")]
-
 [node name="CognitionDetailPanel" parent="." unique_id=994421566 instance=ExtResource("8_cognition_panel")]
 
 [node name="WillpowerDetailPanel" parent="." unique_id=994421567 instance=ExtResource("9_willpower_panel")]
@@ -218,49 +242,169 @@ text = "+"
 
 [node name="TruthDetailPanel" parent="." unique_id=994421575 instance=ExtResource("17_truth_panel")]
 
-[node name="BottomRightBar" type="HBoxContainer" parent="." unique_id=2046743287]
-anchors_preset = 3
-anchor_left = 1.0
+[node name="BottomRightBar" type="PanelContainer" parent="." unique_id=2046743287]
+anchors_preset = 14
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -426.0
-offset_top = -85.0
-offset_right = -20.0
-offset_bottom = -20.0
-grow_horizontal = 0
+offset_top = -56.0
+grow_horizontal = 2
 grow_vertical = 0
-theme_override_constants/separation = 8
+theme_override_styles/panel = SubResource("StyleBoxTexture_bottom_task_bar")
 
-[node name="BtnCleanup" type="Button" parent="BottomRightBar" unique_id=1060668944]
-custom_minimum_size = Vector2(130, 65)
-layout_mode = 2
-size_flags_vertical = 0
-theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
-text = "BTN_CLEANUP"
+[node name="SolidBg" type="ColorRect" parent="BottomRightBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.658824, 0.658824, 0.658824, 1)
+show_behind_parent = true
 
-[node name="BtnBuild" type="Button" parent="BottomRightBar" unique_id=603276110]
-custom_minimum_size = Vector2(130, 65)
+[node name="Margin" type="MarginContainer" parent="BottomRightBar"]
 layout_mode = 2
-size_flags_vertical = 0
-theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Content" type="Control" parent="BottomRightBar/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("22_bottom_task_layout")
+left_group_gap = 8
+right_group_gap = 8
+right_to_calamity_gap = 36
+right_margin = 0
+
+[node name="BtnCenter" parent="BottomRightBar/Margin/Content" instance=ExtResource("18_generic_button")]
+layout_mode = 1
+offset_right = 100.0
+offset_bottom = 40.0
+icon = ExtResource("21_icon_frame")
 theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
+text = "BTN_CENTER"
+button_width = 100
+button_height = 40
+button_bg_color = Color(0.658824, 0.658824, 0.658824, 1)
+icon_bg_color = Color(0.0470588, 0.0588235, 0.701961, 1)
+icon_frame_texture = ExtResource("21_icon_frame")
+
+[node name="BtnCouncil" parent="BottomRightBar/Margin/Content" instance=ExtResource("18_generic_button")]
+layout_mode = 1
+offset_left = 108.0
+offset_right = 308.0
+offset_bottom = 40.0
+icon = ExtResource("21_icon_frame")
+theme_override_font_sizes/font_size = 16
+text = "BTN_TRIPLE_COUNCIL"
+button_width = 200
+button_height = 40
+button_bg_color = Color(0.658824, 0.658824, 0.658824, 1)
+icon_bg_color = Color(0.635294, 0.635294, 0.635294, 1)
+icon_frame_texture = ExtResource("23_icon_frame_base")
+
+[node name="BtnBuild" parent="BottomRightBar/Margin/Content" instance=ExtResource("18_generic_button")]
+layout_mode = 1
+offset_left = 884.0
+offset_right = 1084.0
+offset_bottom = 40.0
+icon = ExtResource("21_icon_frame")
+theme_override_font_sizes/font_size = 16
 text = "BTN_CONSTRUCTION"
+button_width = 200
+button_height = 40
+button_bg_color = Color(0.658824, 0.658824, 0.658824, 1)
+icon_bg_color = Color(0.635294, 0.635294, 0.635294, 1)
+icon_frame_texture = ExtResource("23_icon_frame_base")
 
-[node name="BtnRenovate" type="Button" parent="BottomRightBar" unique_id=1700922277]
-custom_minimum_size = Vector2(130, 65)
-layout_mode = 2
-size_flags_vertical = 0
-theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+[node name="BtnRenovate" parent="BottomRightBar/Margin/Content" instance=ExtResource("18_generic_button")]
+layout_mode = 1
+offset_left = 1092.0
+offset_right = 1292.0
+offset_bottom = 40.0
+icon = ExtResource("21_icon_frame")
 theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
 text = "BTN_REMODEL"
+button_width = 200
+button_height = 40
+button_bg_color = Color(0.658824, 0.658824, 0.658824, 1)
+icon_bg_color = Color(0.635294, 0.635294, 0.635294, 1)
+icon_frame_texture = ExtResource("23_icon_frame_base")
+
+[node name="BtnCleanup" parent="BottomRightBar/Margin/Content" instance=ExtResource("18_generic_button")]
+layout_mode = 1
+offset_left = 1300.0
+offset_right = 1420.0
+offset_bottom = 40.0
+icon = ExtResource("21_icon_frame")
+theme_override_font_sizes/font_size = 16
+text = "BTN_CLEANUP"
+button_width = 120
+button_height = 40
+button_bg_color = Color(0.658824, 0.658824, 0.658824, 1)
+icon_bg_color = Color(0.635294, 0.635294, 0.635294, 1)
+icon_frame_texture = ExtResource("23_icon_frame_base")
+
+[node name="BtnTechStack" parent="BottomRightBar/Margin/Content" instance=ExtResource("18_generic_button")]
+layout_mode = 1
+offset_left = 1428.0
+offset_right = 1548.0
+offset_bottom = 40.0
+icon = ExtResource("21_icon_frame")
+theme_override_font_sizes/font_size = 16
+text = "BTN_TECH_STACK"
+button_width = 120
+button_height = 40
+button_bg_color = Color(0.658824, 0.658824, 0.658824, 1)
+icon_bg_color = Color(0.635294, 0.635294, 0.635294, 1)
+icon_frame_texture = ExtResource("23_icon_frame_base")
+
+[node name="CalamityInline" type="Control" parent="BottomRightBar/Margin/Content"]
+layout_mode = 1
+offset_left = 1584.0
+offset_right = 1904.0
+offset_bottom = 40.0
+
+[node name="CalamityProgress" type="ProgressBar" parent="BottomRightBar/Margin/Content/CalamityInline"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+max_value = 1.0
+step = 0.001
+show_percentage = false
+theme_override_styles/background = SubResource("StyleBoxTexture_calamity_progress_back")
+theme_override_styles/fill = SubResource("StyleBoxFlat_calamity_progress_fill")
+
+[node name="CalamityTitle" type="Label" parent="BottomRightBar/Margin/Content/CalamityInline"]
+layout_mode = 1
+offset_left = 124.0
+offset_top = 4.0
+offset_right = 196.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 8
+text = "LABEL_CALAMITY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CalamityValue" type="Label" parent="BottomRightBar/Margin/Content/CalamityInline"]
+layout_mode = 1
+offset_left = 124.0
+offset_top = 16.0
+offset_right = 196.0
+offset_bottom = 36.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1

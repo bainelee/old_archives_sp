@@ -69,7 +69,7 @@ static func consume_construction_cost(game_main: Node2D, room: ArchivesRoomInfo,
 
 
 static func is_click_over_construction_allowed_ui(game_main: Node2D, mouse_pos: Vector2) -> bool:
-	var build_btn: Control = game_main.get_node_or_null("UIMain/BottomRightBar/BtnBuild") as Control
+	var build_btn: Control = game_main.get_node_or_null("UIMain/BottomRightBar/Margin/Content/BtnBuild") as Control
 	if build_btn and build_btn.get_global_rect().has_point(mouse_pos):
 		return true
 	var construction_overlay: Node = game_main.call("_get_construction_overlay")
