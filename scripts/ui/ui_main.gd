@@ -178,11 +178,21 @@ func _on_topbar_block_hovered(block_id: String) -> void:
 			if _investigator_panel and _investigator_panel.has_method("show_panel"):
 				_investigator_panel.show_panel(data)
 				call_deferred("_update_detail_panel_position_once", _investigator_panel)
+		"info":
+			var data: Dictionary = data_providers.get_information_breakdown()
+			if _information_panel and _information_panel.has_method("show_panel"):
+				_information_panel.show_panel(data)
+				call_deferred("_update_detail_panel_position_once", _information_panel)
+		"truth":
+			var data: Dictionary = data_providers.get_truth_breakdown()
+			if _truth_panel and _truth_panel.has_method("show_panel"):
+				_truth_panel.show_panel(data)
+				call_deferred("_update_detail_panel_position_once", _truth_panel)
 
 
 func _on_topbar_block_unhovered(_block_id: String) -> void:
-	## 不立即隐藏，由 _process 判断鼠标是否离开区域与面板
-	pass
+	## 鼠标离开资源块时立即隐藏所有详情面板
+	_hide_all_detail_panels()
 
 
 func _process(_delta: float) -> void:

@@ -44,31 +44,28 @@ func _refresh_display(data: Dictionary) -> void:
 	var output: Array = data.get("output", [])
 	var extra_effects: Array = data.get("extra_effects", [])
 
-	## 信息产出和细则
+	## 信息产出章节（标题+总数值同行）
 	var total_output := 0
 	for entry in output:
 		total_output += entry.get("amount", 0)
 
-	_add_section_title(content, tr("INFORMATION_OUTPUT"))
-	_add_info_row(content, tr("TOTAL_OUTPUT"), "+" + str(total_output) + "/" + tr("DAY"))
+	_add_section_title_row(content, tr("INFORMATION_OUTPUT"), "+" + str(total_output) + "/" + tr("DAY"))
 
 	if output.size() > 0:
 		for detail in output:
 			var source: String = detail.get("source", tr("UNKNOWN"))
 			var amount: int = detail.get("amount", 0)
-			_add_detail_row(content, source, "+" + str(amount))
+			_add_detail_row_with_bg(content, source, "+" + str(amount))
 
-	## 额外影响和细则
+	## 额外影响章节（标题+总数值同行）
 	var total_extra := 0
 	for entry in extra_effects:
 		total_extra += entry.get("amount", 0)
 
 	if extra_effects.size() > 0 or total_extra != 0:
 		_add_split_line(content)
-		_add_section_title(content, tr("EXTRA_EFFECTS"))
-	if total_extra != 0:
 		var total_sign := "+" if total_extra > 0 else ""
-		_add_info_row(content, tr("TOTAL_EXTRA"), total_sign + str(total_extra))
+		_add_section_title_row(content, tr("EXTRA_EFFECTS"), total_sign + str(total_extra))
 	for effect in extra_effects:
 		var source: String = effect.get("source", tr("UNKNOWN"))
 		var amount: int = effect.get("amount", 0)
@@ -77,11 +74,14 @@ func _refresh_display(data: Dictionary) -> void:
 		if desc:
 			display_text += " (" + desc + ")"
 		var effect_sign := "+" if amount > 0 else ""
-		_add_detail_row(content, display_text, effect_sign + str(amount))
+		_add_detail_row_with_bg(content, display_text, effect_sign + str(amount))
 
-	## 信息储量
+	## 信息储量章节（标题+数值同行）
 	_add_split_line(content)
-	_add_info_row(content, tr("INFORMATION_STORAGE"), format_number(current))
+	_add_section_title_row(content, tr("INFORMATION_STORAGE"), format_number(current))
+	
+	## 底部空白条目间隔
+	_add_bottom_spacer(content)
 	
 	## 确保面板高度自适应内容
 	call_deferred("_force_layout_refresh")
@@ -132,12 +132,71 @@ func _add_split_line(container: VBoxContainer) -> void:
 	container.add_child(line)
 
 
-## 添加章节标题
-func _add_section_title(container: VBoxContainer, title: String) -> void:
-	var label := Label.new()
-	label.text = title
-	label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
-	container.add_child(label)
+## 添加章节标题行（标题和数值在同一行）
+func _add_section_title_row(container: VBoxContainer, title: String, value: String) -> void:
+	var hbox := HBoxContainer.new()
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(hbox)
+	
+	var title_label := Label.new()
+	title_label.text = title
+	title_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	title_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(title_label)
+	
+	## 弹性空间
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer)
+	
+	var value_label := Label.new()
+	value_label.text = value
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	value_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(value_label)
+
+
+## 添加带灰色背景的细则行
+func _add_detail_row_with_bg(container: VBoxContainer, source: String, value: String) -> void:
+	## 创建一个容器来放置背景和行内容
+	var row_container := Control.new()
+	row_container.custom_minimum_size = Vector2(280, 24)
+	row_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(row_container)
+	
+	## 添加灰色背景（先添加，确保在最底层）
+	var bg := ColorRect.new()
+	bg.color = Color(0.5, 0.5, 0.5, 0.3)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row_container.add_child(bg)
+	
+	## 创建行内容的HBoxContainer
+	var hbox := HBoxContainer.new()
+	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hbox.offset_left = 8
+	hbox.offset_right = -8
+	row_container.add_child(hbox)
+
+	var source_label := Label.new()
+	source_label.text = source
+	source_label.add_theme_color_override("font_color", Color(0.6, 0.65, 0.7))
+	source_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	source_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hbox.add_child(source_label)
+
+	## 弹性空间，将来源和数值推到两边
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer)
+
+	var value_label := Label.new()
+	value_label.text = value
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value_label.add_theme_color_override("font_color", Color(0.5, 0.8, 0.5))
+	value_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hbox.add_child(value_label)
 
 
 ## 添加信息行
@@ -188,11 +247,22 @@ func _add_detail_row(container: VBoxContainer, source: String, value: String) ->
 	hbox.add_child(value_label)
 
 
-## 更新标题（支持本地化）
+## 添加底部空白间隔
+func _add_bottom_spacer(container: VBoxContainer) -> void:
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, 8)
+	container.add_child(spacer)
+
+
+## 更新标题（支持本地化，英文大写）
 func _update_title() -> void:
 	if not _title_label:
 		return
 	var title_text := tr("LABEL_INFO")
-	if title_text == "LABEL_INFO" or title_text.is_empty():
-		title_text = "信息"
-	_title_label.text = title_text
+	## 英文时使用全大写标题
+	if title_text == "INFORMATION":
+		_title_label.text = "INFORMATION"
+	elif title_text == "LABEL_INFO" or title_text.is_empty():
+		_title_label.text = "信息"
+	else:
+		_title_label.text = title_text

@@ -528,3 +528,18 @@ FACTOR_WARNING_DRIED_UP,Resource dried up,资源已枯竭
 FACTOR_WARNING_LACKING,Resource lacking,资源不足
 FACTOR_WARNING_STRAINED,Resource strained,资源紧张
 FACTOR_WARNING_ABUNDANT,Resource abundant,资源充裕
+FACTOR_NO_AFFECT,No Affect,无影响
+FACTOR_ARCHIVES_CONSUMPTION_ALL_RESEARCHERS,All Researchers,所有研究员
+TOTAL_OUTPUT,Total Output,总产出
+NO_TRUTH_ACQUIRED,No truth acquired,未获得真相
+NO_TRUTH_INTERPRETED,No truth interpreted,未解读真相
+ACQUIRED_COUNT,Acquired Count,已获得数量
+INTERPRETED_COUNT,Interpreted Count,已解读数量
+AVAILABLE_COUNT,Available Count,可分配数量
+ASSIGNED_COUNT,Assigned Count,已分配数量
+RECRUITED_COUNT,Recruited Count,已招募数量
+OFFICE_RECRUITMENT,Office Recruitment,事务所招募
+EVENT_RECRUITMENT,Event Recruitment,事件/探索招募
+UNKNOWN_NODE,Unknown Node,未知节点
+UNKNOWN_SOURCE,Unknown Source,未知来源
+UNKNOWN,Unknown,未知

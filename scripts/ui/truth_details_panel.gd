@@ -43,11 +43,10 @@ func _refresh_display(data: Dictionary) -> void:
 	var acquired: Array = data.get("acquired", [])
 	var interpreted: Array = data.get("interpreted", [])
 
-	## 已获得真相数量
-	_add_section_title(content, tr("TRUTH_ACQUIRED"))
-	_add_info_row(content, tr("ACQUIRED_COUNT"), str(acquired.size()))
+	## 已获得真相章节（标题+数量同行）
+	_add_section_title_row(content, tr("TRUTH_ACQUIRED"), str(acquired.size()))
 
-	## 已获得真相细则：真相名称列表
+	## 已获得真相细则：真相名称列表（带灰色背景）
 	if acquired.size() > 0:
 		for truth in acquired:
 			var truth_name: String = truth.get("name", tr("UNKNOWN_TRUTH"))
@@ -55,18 +54,20 @@ func _refresh_display(data: Dictionary) -> void:
 	else:
 		_add_detail_text(content, tr("NO_TRUTH_ACQUIRED"))
 
-	## 已解读真相数量
+	## 已解读真相章节（标题+数量同行）
 	_add_split_line(content)
-	_add_section_title(content, tr("TRUTH_INTERPRETED"))
-	_add_info_row(content, tr("INTERPRETED_COUNT"), str(interpreted.size()))
+	_add_section_title_row(content, tr("TRUTH_INTERPRETED"), str(interpreted.size()))
 
-	## 已解读真相细则：真相名称列表
+	## 已解读真相细则：真相名称列表（带灰色背景）
 	if interpreted.size() > 0:
 		for truth in interpreted:
 			var truth_name: String = truth.get("name", tr("UNKNOWN_TRUTH"))
 			_add_truth_item(content, truth_name, true)
 	else:
 		_add_detail_text(content, tr("NO_TRUTH_INTERPRETED"))
+	
+	## 底部空白条目间隔
+	_add_bottom_spacer(content)
 	
 	## 确保面板高度自适应内容
 	call_deferred("_force_layout_refresh")
@@ -117,12 +118,29 @@ func _add_split_line(container: VBoxContainer) -> void:
 	container.add_child(line)
 
 
-## 添加章节标题
-func _add_section_title(container: VBoxContainer, title: String) -> void:
-	var label := Label.new()
-	label.text = title
-	label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
-	container.add_child(label)
+## 添加章节标题行（标题和数值在同一行）
+func _add_section_title_row(container: VBoxContainer, title: String, value: String) -> void:
+	var hbox := HBoxContainer.new()
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(hbox)
+	
+	var title_label := Label.new()
+	title_label.text = title
+	title_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	title_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(title_label)
+	
+	## 弹性空间
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer)
+	
+	var value_label := Label.new()
+	value_label.text = value
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	value_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(value_label)
 
 
 ## 添加信息行
@@ -150,16 +168,32 @@ func _add_info_row(container: VBoxContainer, label: String, value: String, value
 	hbox.add_child(value_node)
 
 
-## 添加真相条目（带图标指示是否已解读）
+## 添加真相条目（带灰色背景和图标指示是否已解读）
 func _add_truth_item(container: VBoxContainer, truth_name: String, is_interpreted: bool) -> void:
+	## 创建一个容器来放置背景和行内容
+	var row_container := Control.new()
+	row_container.custom_minimum_size = Vector2(280, 24)
+	row_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(row_container)
+	
+	## 添加灰色背景（先添加，确保在最底层）
+	var bg := ColorRect.new()
+	bg.color = Color(0.5, 0.5, 0.5, 0.3)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row_container.add_child(bg)
+	
+	## 创建行内容的HBoxContainer
 	var hbox := HBoxContainer.new()
-	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	container.add_child(hbox)
+	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hbox.offset_left = 8
+	hbox.offset_right = -8
+	row_container.add_child(hbox)
 
 	## 状态指示器（小图标）
 	var indicator := ColorRect.new()
 	indicator.custom_minimum_size = Vector2(8, 8)
 	indicator.color = Color(0.2, 0.6, 0.3) if is_interpreted else Color(0.4, 0.4, 0.4)
+	indicator.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	hbox.add_child(indicator)
 
 	## 间距
@@ -172,22 +206,50 @@ func _add_truth_item(container: VBoxContainer, truth_name: String, is_interprete
 	name_label.text = truth_name
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	hbox.add_child(name_label)
 
 
-## 添加详情文本（用于空状态）
+## 添加详情文本（用于空状态，带灰色背景）
 func _add_detail_text(container: VBoxContainer, text: String) -> void:
+	## 创建一个容器来放置背景和行内容
+	var row_container := Control.new()
+	row_container.custom_minimum_size = Vector2(280, 24)
+	row_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(row_container)
+	
+	## 添加灰色背景（先添加，确保在最底层）
+	var bg := ColorRect.new()
+	bg.color = Color(0.5, 0.5, 0.5, 0.3)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row_container.add_child(bg)
+	
 	var label := Label.new()
-	label.text = "  " + text
+	label.text = text
 	label.add_theme_color_override("font_color", Color(0.5, 0.55, 0.6))
-	container.add_child(label)
+	label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	label.offset_left = 8
+	label.offset_right = -8
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row_container.add_child(label)
 
 
-## 更新标题（支持本地化）
+## 添加底部空白间隔
+func _add_bottom_spacer(container: VBoxContainer) -> void:
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, 8)
+	container.add_child(spacer)
+
+
+## 更新标题（支持本地化，英文大写）
 func _update_title() -> void:
 	if not _title_label:
 		return
 	var title_text := tr("LABEL_TRUTH")
-	if title_text == "LABEL_TRUTH" or title_text.is_empty():
-		title_text = "真相"
-	_title_label.text = title_text
+	## 英文时使用全大写标题
+	if title_text == "TRUTH":
+		_title_label.text = "TRUTH"
+	elif title_text == "LABEL_TRUTH" or title_text.is_empty():
+		_title_label.text = "真相"
+	else:
+		_title_label.text = title_text

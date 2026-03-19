@@ -50,40 +50,40 @@ func _refresh_display(data: Dictionary) -> void:
 	if available == 0 and total > 0:
 		available = maxi(0, total - assigned)
 
-	## 可分配调查员数量
-	_add_section_title(content, tr("INVESTIGATOR_AVAILABLE"))
-	_add_info_row(content, tr("AVAILABLE_COUNT"), str(available))
+	## 可分配调查员章节（标题+数量同行）
+	_add_section_title_row(content, tr("INVESTIGATOR_AVAILABLE"), str(available))
 
-	## 已分配调查员数量
+	## 已分配调查员章节（标题+数量同行）
 	_add_split_line(content)
-	_add_section_title(content, tr("INVESTIGATOR_ASSIGNED"))
-	_add_info_row(content, tr("ASSIGNED_COUNT"), str(assigned))
+	_add_section_title_row(content, tr("INVESTIGATOR_ASSIGNED"), str(assigned))
 
-	## 已分配细则：探索节点名称+数量
+	## 已分配细则：探索节点名称+数量（带灰色背景）
 	if assigned_details.size() > 0:
 		for detail in assigned_details:
 			var node_name: String = detail.get("node_name", tr("UNKNOWN_NODE"))
 			var count: int = detail.get("count", 0)
-			_add_detail_row(content, node_name, str(count))
+			_add_detail_row_with_bg(content, node_name, str(count))
 	elif assigned > 0:
 		## 有分配但没有细则时显示占位文本
-		_add_detail_row(content, tr("EXPLORATION_NODES"), "...")
+		_add_detail_row_with_bg(content, tr("EXPLORATION_NODES"), "...")
 
-	## 已招募调查员数量
+	## 已招募调查员章节（标题+数量同行）
 	_add_split_line(content)
-	_add_section_title(content, tr("INVESTIGATOR_RECRUITED"))
-	_add_info_row(content, tr("RECRUITED_COUNT"), str(total))
+	_add_section_title_row(content, tr("INVESTIGATOR_RECRUITED"), str(total))
 
-	## 已招募细则：事务所区招募+事件/探索节点招募
+	## 已招募细则：事务所区招募+事件/探索节点招募（带灰色背景）
 	if recruited_details.size() > 0:
 		for detail in recruited_details:
 			var source: String = detail.get("source", tr("UNKNOWN_SOURCE"))
 			var count: int = detail.get("count", 0)
-			_add_detail_row(content, source, str(count))
+			_add_detail_row_with_bg(content, source, str(count))
 	else:
 		## 默认显示两种来源占位
-		_add_detail_row(content, tr("OFFICE_RECRUITMENT"), "0")
-		_add_detail_row(content, tr("EVENT_RECRUITMENT"), "0")
+		_add_detail_row_with_bg(content, tr("OFFICE_RECRUITMENT"), "0")
+		_add_detail_row_with_bg(content, tr("EVENT_RECRUITMENT"), "0")
+	
+	## 底部空白条目间隔
+	_add_bottom_spacer(content)
 	
 	## 确保面板高度自适应内容
 	call_deferred("_force_layout_refresh")
@@ -134,12 +134,71 @@ func _add_split_line(container: VBoxContainer) -> void:
 	container.add_child(line)
 
 
-## 添加章节标题
-func _add_section_title(container: VBoxContainer, title: String) -> void:
-	var label := Label.new()
-	label.text = title
-	label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
-	container.add_child(label)
+## 添加章节标题行（标题和数值在同一行）
+func _add_section_title_row(container: VBoxContainer, title: String, value: String) -> void:
+	var hbox := HBoxContainer.new()
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(hbox)
+	
+	var title_label := Label.new()
+	title_label.text = title
+	title_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	title_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(title_label)
+	
+	## 弹性空间
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer)
+	
+	var value_label := Label.new()
+	value_label.text = value
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	value_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(value_label)
+
+
+## 添加带灰色背景的细则行
+func _add_detail_row_with_bg(container: VBoxContainer, source: String, value: String) -> void:
+	## 创建一个容器来放置背景和行内容
+	var row_container := Control.new()
+	row_container.custom_minimum_size = Vector2(280, 24)
+	row_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(row_container)
+	
+	## 添加灰色背景（先添加，确保在最底层）
+	var bg := ColorRect.new()
+	bg.color = Color(0.5, 0.5, 0.5, 0.3)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row_container.add_child(bg)
+	
+	## 创建行内容的HBoxContainer
+	var hbox := HBoxContainer.new()
+	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hbox.offset_left = 8
+	hbox.offset_right = -8
+	row_container.add_child(hbox)
+
+	var source_label := Label.new()
+	source_label.text = source
+	source_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	source_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	source_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hbox.add_child(source_label)
+
+	## 弹性空间，将来源和数值推到两边
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer)
+
+	var value_label := Label.new()
+	value_label.text = value
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	value_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hbox.add_child(value_label)
 
 
 ## 添加信息行
@@ -192,11 +251,22 @@ func _add_detail_row(container: VBoxContainer, source: String, value: String) ->
 	hbox.add_child(value_label)
 
 
-## 更新标题（支持本地化）
+## 添加底部空白间隔
+func _add_bottom_spacer(container: VBoxContainer) -> void:
+	var spacer := Control.new()
+	spacer.custom_minimum_size = Vector2(0, 8)
+	container.add_child(spacer)
+
+
+## 更新标题（支持本地化，英文大写）
 func _update_title() -> void:
 	if not _title_label:
 		return
 	var title_text := tr("LABEL_INVESTIGATOR")
-	if title_text == "LABEL_INVESTIGATOR" or title_text.is_empty():
-		title_text = "调查员"
-	_title_label.text = title_text
+	## 英文时使用全大写标题
+	if title_text == "INVESTIGATOR":
+		_title_label.text = "INVESTIGATOR"
+	elif title_text == "LABEL_INVESTIGATOR" or title_text.is_empty():
+		_title_label.text = "调查员"
+	else:
+		_title_label.text = title_text

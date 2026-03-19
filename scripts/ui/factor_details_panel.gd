@@ -27,6 +27,8 @@ const FACTOR_KEY := "cognition"
 
 ## 条目容器路径
 @export var fixed_entries_container_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries")
+## 注意：ArchivesOverhead 包含预置节点(ArchivesOverheadTitle/ArchivesEntry/ConsumeAffectEntry)
+## 动态条目不应直接放在 ArchivesOverhead 下，以免被 _clear_all_entries 误删
 @export var archives_entries_container_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/ArchivesOverheadWrap/ArchivesOverhead")
 @export var output_entries_container_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries")
 
@@ -288,40 +290,54 @@ func _update_archives_overhead(entries: Array, raw_entries: Array) -> void:
 	if title_label:
 		title_label.text = str(total) + "/天"
 	
-	## 获取容器（认知因子特殊：直接在ArchivesOverhead下添加条目，不使用子VBox）
+	## 获取容器
 	var container := get_node_or_null(archives_entries_container_path) as VBoxContainer
-	if not container or not _entries_pool:
+	if not container:
 		return
 	
-	## 认知因子特殊处理：仅显示"所有研究员"
-	if entries.size() > 0:
-		var row := _entries_pool.acquire_row()
-		row.custom_minimum_size = Vector2(0, 24)
+	## 获取场景预置的节点
+	var archives_entry := container.get_node_or_null("ArchivesEntry") as PanelContainer
+	var consume_affect_entry := container.get_node_or_null("ConsumeAffectEntry") as PanelContainer
+	
+	## 认知因子特殊处理：始终显示"所有研究员"条目（即使消耗为0）
+	## 设计文档：认知因子的档案馆消耗只有研究员消耗，条目仅有"所有研究员"一条
+	if archives_entry:
+		archives_entry.visible = true
+		## 更新"所有研究员"条目文本
+		var hbox := archives_entry.get_node_or_null("HBox") as HBoxContainer
+		if hbox:
+			var name_label := hbox.get_node_or_null("Label") as Label
+			var value_label := hbox.get_node_or_null("Value") as Label
+			if name_label:
+				name_label.text = tr("FACTOR_ARCHIVES_CONSUMPTION_ALL_RESEARCHERS")
+			if value_label:
+				value_label.text = str(total) + "/天"
+	
+	## 处理消耗影响条目（ConsumeAffectEntry）
+	## 无论是否有实际影响，都显示此条目以展示排版
+	if consume_affect_entry:
+		consume_affect_entry.visible = true
+		consume_affect_entry.custom_minimum_size = Vector2(0, 16)  ## 高度16px
 		
-		var hbox := _entries_pool.acquire_hbox()
-		hbox.add_theme_constant_override("separation", 8)
-		
-		var name_label := _entries_pool.acquire_label()
-		name_label.add_theme_font_size_override("font_size", 14)
-		name_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063, 1))
-		name_label.text = tr("FACTOR_ARCHIVES_CONSUMPTION_ALL_RESEARCHERS")
-		name_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		
-		var spacer := Control.new()
-		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		
-		var value_label := _entries_pool.acquire_label()
-		value_label.add_theme_font_size_override("font_size", 14)
-		value_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063, 1))
-		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		value_label.text = str(total) + "/天"
-		value_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		
-		hbox.add_child(name_label)
-		hbox.add_child(spacer)
-		hbox.add_child(value_label)
-		row.add_child(hbox)
-		container.add_child(row)
+		var hbox := consume_affect_entry.get_node_or_null("HBox") as HBoxContainer
+		if hbox:
+			var affect_label := hbox.get_node_or_null("Label") as Label
+			var affect_value := hbox.get_node_or_null("Value") as Label
+			
+			## 检查是否有消耗影响数据（预留接口）
+			## 当前默认显示"无影响"占位文本
+			var has_affects := false
+			var affect_reason := tr("FACTOR_NO_AFFECT")
+			var affect_value_text := ""
+			
+			if has_affects:
+				## 预留：当有实际影响数据时显示具体原因
+				pass
+			
+			if affect_label:
+				affect_label.text = affect_reason
+			if affect_value:
+				affect_value.text = affect_value_text
 
 
 func _update_output(entries: Array, raw_entries: Array) -> void:
@@ -399,14 +415,16 @@ func _update_surplus_shortage(daily_net: int) -> void:
 func _clear_all_entries() -> void:
 	## 清空所有动态条目容器
 	if _entries_pool:
+		## 固有消耗条目 - 动态生成，需要清空
 		var fixed_container := get_node_or_null(fixed_entries_container_path) as VBoxContainer
 		if fixed_container:
 			_entries_pool.release_container_contents(fixed_container)
 		
-		var archives_container := get_node_or_null(archives_entries_container_path) as VBoxContainer
-		if archives_container:
-			_entries_pool.release_container_contents(archives_container)
+		## 档案馆消耗 - 注意：ArchivesOverhead 包含预置节点(ArchivesEntry/ConsumeAffectEntry)
+		## 这些预置节点不应被清空，它们由 _update_archives_overhead() 直接控制可见性
+		## 如果将来需要动态添加更多档案馆消耗条目，应创建子容器存放
 		
+		## 产出条目 - 动态生成，需要清空
 		var output_container := get_node_or_null(output_entries_container_path) as VBoxContainer
 		if output_container:
 			_entries_pool.release_container_contents(output_container)
