@@ -1,5 +1,5 @@
 @tool
-extends DetailPanelBase
+extends "res://scripts/ui/factor_detail_panel_base.gd"
 ## 意志因子详细信息面板
 ## 继承自 DetailPanelBase，复用基类的布局配置与工具方法
 ## 与认知因子详情面板结构一致，解耦为独立场景与脚本
@@ -60,8 +60,8 @@ func show_panel(data: Dictionary) -> void:
 	## 先调用基类设置可见性，确保子节点准备好
 	super.show_panel(data)
 	
-	## 从 DataProviders 获取最新数据
-	var factor_data: Dictionary = DataProviders.get_factor_breakdown(FACTOR_KEY)
+	## 统一数据流：优先使用外部传入 data，空时再兜底从 DataProviders 拉取
+	var factor_data: Dictionary = data if not data.is_empty() else DataProviders.get_factor_breakdown(FACTOR_KEY)
 	
 	## 更新标题栏状态文本
 	_update_title_state(factor_data.get("status", ""))
@@ -117,56 +117,7 @@ func _force_layout_refresh() -> void:
 
 ## 修复预置行的布局（确保Label不占满空间，数值右对齐）
 func _fix_predefined_rows_layout() -> void:
-	## 首先确保 ContentVbox 填满 ContentMargin 的可用空间
-	var content_margin := _get_content_margin()
-	var content := _get_content_vbox()
-	
-	if content_margin and content:
-		## ContentVbox 应该填满 ContentMargin 减去边距后的宽度
-		## ContentMargin 宽度 = 316，边距 = 左右各 20，所以可用宽度 = 276
-		content.custom_minimum_size.x = 276
-		content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	
-	if not content:
-		return
-	
-	## 修复所有预置行的布局 - 正确的布局策略：
-	## Label: SHRINK_BEGIN (0) - 只占用自身文本宽度
-	## Spacer: EXPAND_FILL (3) - 占据所有剩余空间
-	## Value: SHRINK_END (8) - 只占用自身文本宽度，但通过alignment右对齐
-	var row_names := ["TotalExpectedBurn", "ResourceSurplus", "ResourceStorageRow"]
-	for row_name in row_names:
-		var row := content.get_node_or_null(row_name) as HBoxContainer
-		if not row:
-			continue
-		
-		## 强制行填满 ContentVbox 宽度
-		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.custom_minimum_size.x = 276  ## ContentVbox 可用宽度
-		
-		## 遍历行的子节点
-		for child in row.get_children():
-			if child is Label:
-				if child.name == "Value":
-					## Value: SHRINK_END + 右对齐，不占满空间
-					child.size_flags_horizontal = Control.SIZE_SHRINK_END
-					child.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-				else:
-					## Label: SHRINK_BEGIN + 左对齐，不占满空间
-					child.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-					child.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-					
-			elif child is Control and child.name == "Spacer":
-				## Spacer应该占据所有剩余空间
-				child.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				child.size_flags_stretch_ratio = 1.0
-	
-	## 强制重新布局和排序
-	for row_name in row_names:
-		var row := content.get_node_or_null(row_name) as HBoxContainer
-		if row:
-			row.queue_sort()
-	queue_sort()
+	_apply_standard_row_layout(["TotalExpectedBurn", "ResourceSurplus", "ResourceStorageRow"])
 
 
 ## ============================================================================

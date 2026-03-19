@@ -5,7 +5,8 @@ extends Node3D
 ## 房间参考网格：根据 room_volume 绘制三面网格，中心位于底面中心。
 ## 从兄弟节点 RoomInfo3D 读取 room_volume。
 
-const GRID_CELL_SIZE: float = 0.5
+const ProjectConstants = preload("res://scripts/core/project_constants.gd")
+const GRID_CELL_SIZE: float = ProjectConstants.GRID_CELL_SIZE
 
 ## 材质资源：可在编辑器中调节颜色与透明度
 const MAT_ROOM_GRID: StandardMaterial3D = preload("res://assets/materials/tools_materials/mat_room_reference_grid.tres")

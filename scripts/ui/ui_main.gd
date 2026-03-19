@@ -20,6 +20,57 @@ signal build_button_pressed
 @onready var _investigator_panel: PanelContainer = $InvestigatorDetailPanel
 @onready var _truth_panel: PanelContainer = $TruthDetailPanel
 
+
+func _all_detail_panels() -> Array[PanelContainer]:
+	return [
+		_cognition_panel, _willpower_panel, _permission_panel, _computation_panel,
+		_shelter_panel, _researcher_detail_panel, _housing_panel,
+		_information_panel, _investigator_panel, _truth_panel,
+	]
+
+
+func _get_panel_for_block(block_id: String) -> PanelContainer:
+	match block_id:
+		"cognition": return _cognition_panel
+		"willpower": return _willpower_panel
+		"permission": return _permission_panel
+		"computing_power": return _computation_panel
+		"researcher", "eroded": return _researcher_detail_panel
+		"shelter": return _shelter_panel
+		"housing": return _housing_panel
+		"investigator": return _investigator_panel
+		"info": return _information_panel
+		"truth": return _truth_panel
+	return null
+
+
+func _fetch_panel_data(panel: PanelContainer) -> Dictionary:
+	var dp: Node = _get_data_providers()
+	if not dp:
+		return {}
+	if panel == _cognition_panel and dp.has_method("get_factor_breakdown"):
+		return dp.get_factor_breakdown("cognition")
+	if panel == _willpower_panel and dp.has_method("get_factor_breakdown"):
+		return dp.get_factor_breakdown("willpower")
+	if panel == _permission_panel and dp.has_method("get_factor_breakdown"):
+		return dp.get_factor_breakdown("permission")
+	if panel == _computation_panel and dp.has_method("get_factor_breakdown"):
+		return dp.get_factor_breakdown("computation")
+	if panel == _shelter_panel and dp.has_method("get_shelter_breakdown"):
+		return dp.get_shelter_breakdown()
+	if panel == _researcher_detail_panel and dp.has_method("get_researcher_breakdown"):
+		return dp.get_researcher_breakdown()
+	if panel == _housing_panel and dp.has_method("get_housing_breakdown"):
+		return dp.get_housing_breakdown()
+	if panel == _information_panel and dp.has_method("get_information_breakdown"):
+		return dp.get_information_breakdown()
+	if panel == _investigator_panel and dp.has_method("get_investigator_breakdown"):
+		return dp.get_investigator_breakdown()
+	if panel == _truth_panel and dp.has_method("get_truth_breakdown"):
+		return dp.get_truth_breakdown()
+	return {}
+
+
 ## 资源-因子（使用显式后备变量，避免 Node.get() 对自定义属性解析异常）
 var _cognition_amount: int = 0
 var cognition_amount: int:
@@ -90,6 +141,10 @@ var investigator_count: int:
 	set(v):
 		_investigator_count = int(v) if v != null else 0
 
+var _detail_panel_dirty: bool = false
+var _refresh_all_queued: bool = false
+var _suspend_auto_refresh: bool = false
+
 
 func _ready() -> void:
 	## 暂停时保持可点击，以便用户可通过时间面板播放按钮恢复时间
@@ -131,63 +186,13 @@ func _on_researcher_list_button_pressed() -> void:
 
 func _on_topbar_block_hovered(block_id: String) -> void:
 	_hide_all_detail_panels()
-	
-	## 获取 DataProviders 实例
-	var data_providers: Node = _get_data_providers()
-	if not data_providers:
+	var panel: PanelContainer = _get_panel_for_block(block_id)
+	if not panel or not panel.has_method("show_panel"):
 		return
-	
-	match block_id:
-		"cognition":
-			var data: Dictionary = data_providers.get_factor_breakdown("cognition")
-			if _cognition_panel and _cognition_panel.has_method("show_panel"):
-				_cognition_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _cognition_panel)
-		"willpower":
-			var data: Dictionary = data_providers.get_factor_breakdown("willpower")
-			if _willpower_panel and _willpower_panel.has_method("show_panel"):
-				_willpower_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _willpower_panel)
-		"permission":
-			var data: Dictionary = data_providers.get_factor_breakdown("permission")
-			if _permission_panel and _permission_panel.has_method("show_panel"):
-				_permission_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _permission_panel)
-		"computing_power":
-			var data: Dictionary = data_providers.get_factor_breakdown("computation")
-			if _computation_panel and _computation_panel.has_method("show_panel"):
-				_computation_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _computation_panel)
-		"researcher", "eroded":
-			var data: Dictionary = data_providers.get_researcher_breakdown()
-			if _researcher_detail_panel and _researcher_detail_panel.has_method("show_panel"):
-				_researcher_detail_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _researcher_detail_panel)
-		"shelter":
-			var data: Dictionary = data_providers.get_shelter_breakdown()
-			if _shelter_panel and _shelter_panel.has_method("show_panel"):
-				_shelter_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _shelter_panel)
-		"housing":
-			var data: Dictionary = data_providers.get_housing_breakdown()
-			if _housing_panel and _housing_panel.has_method("show_panel"):
-				_housing_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _housing_panel)
-		"investigator":
-			var data: Dictionary = data_providers.get_investigator_breakdown()
-			if _investigator_panel and _investigator_panel.has_method("show_panel"):
-				_investigator_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _investigator_panel)
-		"info":
-			var data: Dictionary = data_providers.get_information_breakdown()
-			if _information_panel and _information_panel.has_method("show_panel"):
-				_information_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _information_panel)
-		"truth":
-			var data: Dictionary = data_providers.get_truth_breakdown()
-			if _truth_panel and _truth_panel.has_method("show_panel"):
-				_truth_panel.show_panel(data)
-				call_deferred("_update_detail_panel_position_once", _truth_panel)
+	var data: Dictionary = _fetch_panel_data(panel)
+	if not data.is_empty():
+		panel.show_panel(data)
+		call_deferred("_update_detail_panel_position_once", panel)
 
 
 func _on_topbar_block_unhovered(_block_id: String) -> void:
@@ -206,68 +211,30 @@ func _process(_delta: float) -> void:
 		active_panel.update_position(mouse_pos, vp_size)
 		if not _is_mouse_over_detail_source_or_panel(mouse_pos):
 			active_panel.hide_panel()
+			_detail_panel_dirty = false
 		else:
-			## 面板可见且鼠标在悬停区域时，定期刷新数据
-			_refresh_visible_detail_panel(active_panel)
+			## 改为脏标记刷新，避免每帧重建详情条目
+			if _detail_panel_dirty:
+				_refresh_visible_detail_panel(active_panel)
+				_detail_panel_dirty = false
 
 
-## 刷新当前可见的详细信息面板（实时数据更新）
 func _refresh_visible_detail_panel(panel: Control) -> void:
 	if not panel or not panel.has_method("show_panel"):
 		return
-	
-	var data_providers: Node = _get_data_providers()
-	if not data_providers:
-		return
-	
-	var data: Dictionary = {}
-	
-	## 根据面板类型获取对应数据
-	if panel == _cognition_panel and data_providers.has_method("get_factor_breakdown"):
-		data = data_providers.get_factor_breakdown("cognition")
-	elif panel == _willpower_panel and data_providers.has_method("get_factor_breakdown"):
-		data = data_providers.get_factor_breakdown("willpower")
-	elif panel == _permission_panel and data_providers.has_method("get_factor_breakdown"):
-		data = data_providers.get_factor_breakdown("permission")
-	elif panel == _computation_panel and data_providers.has_method("get_factor_breakdown"):
-		data = data_providers.get_factor_breakdown("computation")
-	elif panel == _shelter_panel and data_providers.has_method("get_shelter_breakdown"):
-		data = data_providers.get_shelter_breakdown()
-	elif panel == _researcher_detail_panel and data_providers.has_method("get_researcher_breakdown"):
-		data = data_providers.get_researcher_breakdown()
-	elif panel == _housing_panel and data_providers.has_method("get_housing_breakdown"):
-		data = data_providers.get_housing_breakdown()
-	elif panel == _information_panel and data_providers.has_method("get_information_breakdown"):
-		data = data_providers.get_information_breakdown()
-	elif panel == _investigator_panel and data_providers.has_method("get_investigator_breakdown"):
-		data = data_providers.get_investigator_breakdown()
-	elif panel == _truth_panel and data_providers.has_method("get_truth_breakdown"):
-		data = data_providers.get_truth_breakdown()
-	
+	var data: Dictionary = _fetch_panel_data(panel)
 	if not data.is_empty():
 		panel.show_panel(data)
 
 
 func _hide_all_detail_panels() -> void:
-	## 隐藏所有详情面板
-	var panels: Array[PanelContainer] = [
-		_cognition_panel, _willpower_panel, _permission_panel, _computation_panel,
-		_shelter_panel, _researcher_detail_panel, _housing_panel,
-		_information_panel, _investigator_panel, _truth_panel
-	]
-	for panel in panels:
+	for panel in _all_detail_panels():
 		if panel and panel.has_method("hide_panel"):
 			panel.hide_panel()
 
 
 func _get_visible_detail_panel() -> Control:
-	## 检查所有新面板，返回当前可见的面板
-	var panels: Array[PanelContainer] = [
-		_cognition_panel, _willpower_panel, _permission_panel, _computation_panel,
-		_shelter_panel, _researcher_detail_panel, _housing_panel,
-		_information_panel, _investigator_panel, _truth_panel
-	]
-	for panel in panels:
+	for panel in _all_detail_panels():
 		if panel and panel.visible:
 			return panel
 	return null
@@ -280,17 +247,9 @@ func _update_detail_panel_position_once(panel: Control) -> void:
 
 
 func _is_mouse_over_detail_source_or_panel(mouse_pos: Vector2) -> bool:
-	## 检查鼠标是否在任何可见详情面板上
-	var panels: Array[PanelContainer] = [
-		_cognition_panel, _willpower_panel, _permission_panel, _computation_panel,
-		_shelter_panel, _researcher_detail_panel, _housing_panel,
-		_information_panel, _investigator_panel, _truth_panel
-	]
-	for panel in panels:
+	for panel in _all_detail_panels():
 		if panel and panel.visible and panel.get_global_rect().has_point(mouse_pos):
 			return true
-	
-	## 检查鼠标是否在 TopBar 上（详情面板触发区域）
 	var top_bar: Control = get_node_or_null("TopBar") as Control
 	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
 		return true
@@ -409,41 +368,10 @@ func _on_truth_data_changed() -> void:
 	_refresh_visible_panels([_truth_panel])
 
 
-## 刷新可见的面板列表
 func _refresh_visible_panels(panels: Array[PanelContainer]) -> void:
-	var data_providers: Node = _get_data_providers()
-	if not data_providers:
-		return
-	
 	for panel in panels:
-		if not panel or not panel.visible or not panel.has_method("show_panel"):
-			continue
-		
-		## 根据面板类型获取对应数据
-		var data: Dictionary = {}
-		if panel == _cognition_panel and data_providers.has_method("get_factor_breakdown"):
-			data = data_providers.get_factor_breakdown("cognition")
-		elif panel == _willpower_panel and data_providers.has_method("get_factor_breakdown"):
-			data = data_providers.get_factor_breakdown("willpower")
-		elif panel == _permission_panel and data_providers.has_method("get_factor_breakdown"):
-			data = data_providers.get_factor_breakdown("permission")
-		elif panel == _computation_panel and data_providers.has_method("get_factor_breakdown"):
-			data = data_providers.get_factor_breakdown("computation")
-		elif panel == _shelter_panel and data_providers.has_method("get_shelter_breakdown"):
-			data = data_providers.get_shelter_breakdown()
-		elif panel == _researcher_detail_panel and data_providers.has_method("get_researcher_breakdown"):
-			data = data_providers.get_researcher_breakdown()
-		elif panel == _housing_panel and data_providers.has_method("get_housing_breakdown"):
-			data = data_providers.get_housing_breakdown()
-		elif panel == _information_panel and data_providers.has_method("get_information_breakdown"):
-			data = data_providers.get_information_breakdown()
-		elif panel == _investigator_panel and data_providers.has_method("get_investigator_breakdown"):
-			data = data_providers.get_investigator_breakdown()
-		elif panel == _truth_panel and data_providers.has_method("get_truth_breakdown"):
-			data = data_providers.get_truth_breakdown()
-		
-		if not data.is_empty():
-			panel.show_panel(data)
+		if panel and panel.visible:
+			_detail_panel_dirty = true
 
 
 ## 建设选择模式下禁用其余 UI、隐藏灾厄
@@ -505,6 +433,20 @@ func _set_control_mouse_filter(node: Node, ignore: bool) -> void:
 
 
 func _update_researcher_display() -> void:
+	if _suspend_auto_refresh:
+		return
+	_request_refresh_all()
+
+
+func _request_refresh_all() -> void:
+	if _refresh_all_queued:
+		return
+	_refresh_all_queued = true
+	call_deferred("_flush_refresh_all")
+
+
+func _flush_refresh_all() -> void:
+	_refresh_all_queued = false
 	_refresh_all()
 
 
@@ -531,6 +473,7 @@ func get_permission() -> int:
 
 ## 便捷：一次性更新所有数据（供游戏状态层调用）
 func set_resources(factors: Dictionary, currency: Dictionary, personnel: Dictionary) -> void:
+	_suspend_auto_refresh = true
 	cognition_amount = UIUtils.safe_int(factors.get("cognition", 0), 0)
 	computation_amount = UIUtils.safe_int(factors.get("computation", 0), 0)
 	will_amount = UIUtils.safe_int(factors.get("willpower", 0), 0)
@@ -540,7 +483,8 @@ func set_resources(factors: Dictionary, currency: Dictionary, personnel: Diction
 	researcher_count = int(personnel.get("researcher", 0))
 	eroded_count = int(personnel.get("eroded", 0))
 	investigator_count = int(personnel.get("investigator", 0))
-	_refresh_all()  ## 确保 Label 与属性同步（应对 @onready 时序等边界情况）
+	_suspend_auto_refresh = false
+	_request_refresh_all()  ## 合并一帧内多次刷新请求，避免重复刷新
 
 
 ## 获取当前资源数据（供存档保存调用）

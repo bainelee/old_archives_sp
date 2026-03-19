@@ -21,9 +21,9 @@ config/icon="res://icon.svg"
 [autoload]
 
 LocaleManager="*res://scripts/core/locale_manager.gd"
+GameValues="*res://scripts/core/game_values.gd"
 GameTime="*res://scripts/core/game_time.gd"
 ErosionCore="*res://scripts/core/erosion_core.gd"
-GameValues="*res://scripts/core/game_values.gd"
 PersonnelErosionCore="*res://scripts/core/personnel_erosion_core.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
 DataProviders="*res://scripts/core/data_providers.gd"

@@ -508,7 +508,7 @@ func get_remodel_cost() -> Dictionary:
 
 ## --- Time system ---
 func get_time_real_seconds_per_game_hour() -> float:
-	return float(_time_data.get("time", {}).get("real_seconds_per_game_hour", 3.0))
+	return float(_time_data.get("time", {}).get("real_seconds_per_game_hour", 1.0))
 
 
 func get_time_hours_per_day() -> int:
@@ -520,7 +520,7 @@ func get_time_days_per_week() -> int:
 
 
 func get_time_days_per_month() -> int:
-	return int(_time_data.get("calendar", {}).get("days_per_month", 30))
+	return int(_time_data.get("calendar", {}).get("days_per_month", 28))
 
 
 func get_time_months_per_year() -> int:

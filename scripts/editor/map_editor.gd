@@ -339,19 +339,19 @@ func _on_import_template_confirm_pressed() -> void:
 	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
 		return
 	var t: Dictionary = _import_template_data[template_idx] as Dictionary
-	var room: RoomInfo = _rooms[_selected_room_index]
+	var room: ArchivesRoomInfo = _rooms[_selected_room_index]
 	room.json_room_id = str(t.get("id", ""))
 	room.room_name = str(t.get("room_name", ""))
-	room.room_type = int(t.get("room_type_id", RoomInfo.RoomType.EMPTY_ROOM))
-	room.clean_status = int(t.get("clean_status", RoomInfo.CleanStatus.UNCLEANED))
-	room.pre_clean_text = RoomInfo.parse_text_field(t.get("pre_clean_text"), tr("DEFAULT_PRE_CLEAN"))
+	room.room_type = int(t.get("room_type_id", ArchivesRoomInfo.RoomType.EMPTY_ROOM))
+	room.clean_status = int(t.get("clean_status", ArchivesRoomInfo.CleanStatus.UNCLEANED))
+	room.pre_clean_text = ArchivesRoomInfo.parse_text_field(t.get("pre_clean_text"), tr("DEFAULT_PRE_CLEAN"))
 	room.base_image_path = str(t.get("base_image_path", ""))
-	room.desc = RoomInfo.parse_text_field(t.get("desc"), "")
+	room.desc = ArchivesRoomInfo.parse_text_field(t.get("desc"), "")
 	room.resources.clear()
 	for res in (t.get("resources", []) as Array):
 		if res is Dictionary:
 			room.resources.append({
-				"resource_type": int(res.get("resource_type", RoomInfo.ResourceType.NONE)),
+				"resource_type": int(res.get("resource_type", ArchivesRoomInfo.ResourceType.NONE)),
 				"resource_amount": int(res.get("resource_amount", 0))
 			})
 	_import_template_panel.visible = false
@@ -391,15 +391,15 @@ func _on_room_desc_changed() -> void:
 func _on_room_res_add_pressed() -> void:
 	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
 		return
-	var room: RoomInfo = _rooms[_selected_room_index]
-	room.resources.append({"resource_type": RoomInfo.ResourceType.NONE, "resource_amount": 0})
+	var room: ArchivesRoomInfo = _rooms[_selected_room_index]
+	room.resources.append({"resource_type": ArchivesRoomInfo.ResourceType.NONE, "resource_amount": 0})
 	_refresh_room_resources_ui()
 
 
 func _on_room_res_type_changed(res_idx: int, type_idx: int) -> void:
 	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
 		return
-	var room: RoomInfo = _rooms[_selected_room_index]
+	var room: ArchivesRoomInfo = _rooms[_selected_room_index]
 	if res_idx >= 0 and res_idx < room.resources.size():
 		if room.resources[res_idx] is Dictionary:
 			room.resources[res_idx]["resource_type"] = type_idx
@@ -408,7 +408,7 @@ func _on_room_res_type_changed(res_idx: int, type_idx: int) -> void:
 func _on_room_res_amount_changed(res_idx: int, value: float) -> void:
 	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
 		return
-	var room: RoomInfo = _rooms[_selected_room_index]
+	var room: ArchivesRoomInfo = _rooms[_selected_room_index]
 	if res_idx >= 0 and res_idx < room.resources.size():
 		if room.resources[res_idx] is Dictionary:
 			room.resources[res_idx]["resource_amount"] = int(value)
@@ -417,7 +417,7 @@ func _on_room_res_amount_changed(res_idx: int, value: float) -> void:
 func _on_room_res_remove_pressed(res_idx: int) -> void:
 	if _selected_room_index < 0 or _selected_room_index >= _rooms.size():
 		return
-	var room: RoomInfo = _rooms[_selected_room_index]
+	var room: ArchivesRoomInfo = _rooms[_selected_room_index]
 	if res_idx >= 0 and res_idx < room.resources.size():
 		room.resources.remove_at(res_idx)
 		_refresh_room_resources_ui()
@@ -644,7 +644,7 @@ func _rebuild_room_ids() -> void:
 		for y in GRID_HEIGHT:
 			_room_ids[x][y] = -1
 	for i in _rooms.size():
-		var room: RoomInfo = _rooms[i]
+		var room: ArchivesRoomInfo = _rooms[i]
 		for gx in range(room.rect.position.x, room.rect.position.x + room.rect.size.x):
 			for gy in range(room.rect.position.y, room.rect.position.y + room.rect.size.y):
 				if gx >= 0 and gx < GRID_WIDTH and gy >= 0 and gy < GRID_HEIGHT:
@@ -765,7 +765,7 @@ func _load_map_from_slot(slot: int) -> void:
 		var rooms_data: Array = d.get(MapEditorMapIO.SAVE_KEY_ROOMS, []) as Array
 		for room_dict in rooms_data:
 			if room_dict is Dictionary:
-				_rooms.append(RoomInfo.from_dict(room_dict as Dictionary))
+				_rooms.append(ArchivesRoomInfo.from_dict(room_dict as Dictionary))
 		_next_room_id = int(d.get("next_room_id", 0))
 		_rebuild_room_ids()
 		if _edit_level == FloorTileType.EditLevel.ROOM:

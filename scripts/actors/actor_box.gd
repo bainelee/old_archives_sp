@@ -5,7 +5,8 @@ extends Node3D
 ## 元件盒：定义 3D 元件的占用体积，在编辑器中以三面网格线框可视化。
 ## 挂载于 3d_actor 场景 root 下，volume 变化时自动更新 position 与网格。
 
-const GRID_CELL_SIZE: float = 0.5
+const ProjectConstants = preload("res://scripts/core/project_constants.gd")
+const GRID_CELL_SIZE: float = ProjectConstants.GRID_CELL_SIZE
 
 ## 材质资源：可在编辑器中调节颜色与透明度
 const MAT_ACTOR_BOX_GRID: StandardMaterial3D = preload("res://assets/materials/tools_materials/mat_actor_box_grid.tres")

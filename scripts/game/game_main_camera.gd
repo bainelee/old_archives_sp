@@ -71,7 +71,7 @@ static func focus_camera_on_room(game_main: Node2D, room_index: int) -> void:
 	var cell_size: int = game_main.get("CELL_SIZE")
 	if not camera:
 		return
-	var room: RoomInfo = rooms[room_index]
+	var room: ArchivesRoomInfo = rooms[room_index]
 	var target_pos_2d: Vector2 = Vector2(
 		(room.rect.position.x + room.rect.size.x / 2.0) * cell_size,
 		(room.rect.position.y + room.rect.size.y / 2.0) * cell_size
@@ -167,7 +167,7 @@ static func is_room_in_center_zone(game_main: Node2D, room_index: int) -> bool:
 	var cell_size: int = game_main.get("CELL_SIZE")
 	if room_index < 0 or room_index >= rooms.size() or not camera:
 		return false
-	var room: RoomInfo = rooms[room_index]
+	var room: ArchivesRoomInfo = rooms[room_index]
 	var vp_size: Vector2 = game_main.get_viewport().get_visible_rect().size
 	var half_zone: int = int(FOCUS_CENTER_ZONE_SIZE / 2.0)
 	var center_zone: Rect2 = Rect2(

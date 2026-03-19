@@ -44,7 +44,7 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 	var tiles_data: Array = []
 	var rooms_data: Array = []
 	for i in rooms.size():
-		var room: RoomInfo = rooms[i]
+		var room: ArchivesRoomInfo = rooms[i]
 		var rd: Dictionary = room.to_dict()
 		if construction_rooms.has(i):
 			var data: Dictionary = construction_rooms[i]
@@ -181,7 +181,7 @@ static func apply_map(game_main: Node2D, d: Dictionary) -> void:
 		var room_dict: Variant = rooms_data[i]
 		if room_dict is Dictionary:
 			var rd: Dictionary = room_dict as Dictionary
-			rooms.append(RoomInfo.from_dict(rd))
+			rooms.append(ArchivesRoomInfo.from_dict(rd))
 			var elapsed: Variant = rd.get("zone_building_elapsed", null)
 			var total_val: Variant = rd.get("zone_building_total", null)
 			if elapsed != null and total_val != null:

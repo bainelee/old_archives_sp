@@ -16,12 +16,16 @@ var _tiles: Array[Array] = []
 var _current_slot: int = 0
 var _rooms: Array = []
 
+@warning_ignore("unused_private_class_variable")
 var _base_image_cache: Dictionary = {}
 var _camera: Camera2D  ## 2D 备用，若存在 game_main_camera 则主要用 3D
 var _camera3d: Camera3D  ## 场景中的 game_main_camera，用于 3D 主视图
 var _camera_distance: float = 30.0  ## 3D 镜头与场景中心沿 -Z 的距离，基准与 game_main_camera 初始位置一致
+@warning_ignore("unused_private_class_variable")
 var _pan_speed: float = 0.02  ## 中键拖动镜头时的速度系数，可由 Debug 面板滑块调整
+@warning_ignore("unused_private_class_variable")
 var _is_panning := false
+@warning_ignore("unused_private_class_variable")
 var _pan_start := Vector2.ZERO
 
 ## 房间选择系统
@@ -46,24 +50,32 @@ var _focus_tween: Tween = null
 ## 清理房间模式（支持多房间同时清理）
 enum CleanupMode { NONE, SELECTING, CONFIRMING, CLEANING }
 var _cleanup_mode: CleanupMode = CleanupMode.NONE
+@warning_ignore("unused_private_class_variable")
 var _cleanup_confirm_room_index := -1
 var _cleanup_rooms_in_progress: Dictionary = {}
+@warning_ignore("unused_private_class_variable")
 var _time_was_flowing_before_cleanup := false
 
 ## 建设模式（11-zone-construction）
 enum ConstructionMode { NONE, SELECTING_ZONE, SELECTING_TARGET, CONFIRMING }
 var _construction_mode: ConstructionMode = ConstructionMode.NONE
 var _construction_selected_zone: int = 0
+@warning_ignore("unused_private_class_variable")
 var _construction_confirm_room_index := -1
 var _construction_rooms_in_progress: Dictionary = {}
+@warning_ignore("unused_private_class_variable")
 var _time_was_flowing_before_construction := false
 
 ## 已建设房间产出
+@warning_ignore("unused_private_class_variable")
 var _built_room_production_accumulator: float = 0.0
 
 ## 庇护能量：核心等级 1～5，存档持久化
 var _shelter_level: int = 1
+@warning_ignore("unused_private_class_variable")
 var _shelter_accumulator: float = 0.0
+@warning_ignore("unused_private_class_variable")
+var _shelter_helper: RefCounted = null
 
 ## 读档时待应用的研究员 3D 位置 [{id, room_id, pos}]，由 _setup_researchers 应用后清空
 var _pending_researchers_3d: Array = []
@@ -126,7 +138,7 @@ func _setup_room_highlights() -> void:
 	if not scene:
 		return
 	for i in _rooms.size():
-		var room: RoomInfo = _rooms[i]
+		var room: ArchivesRoomInfo = _rooms[i]
 		var rid: String = room.id if room.id else room.json_room_id
 		if rid.is_empty():
 			continue
@@ -154,7 +166,7 @@ func _setup_room_overlays() -> void:
 	const THICKNESS_IN := 0.2
 	const THICKNESS_OUT := 0.4
 	for i in _rooms.size():
-		var room: RoomInfo = _rooms[i]
+		var room: ArchivesRoomInfo = _rooms[i]
 		var rid: String = room.id if room.id else room.json_room_id
 		if rid.is_empty():
 			continue
@@ -194,7 +206,7 @@ func _setup_room_info_labels() -> void:
 	const THICKNESS_IN := 0.2
 	const THICKNESS_OUT := 0.4
 	for i in _rooms.size():
-		var room: RoomInfo = _rooms[i]
+		var room: ArchivesRoomInfo = _rooms[i]
 		var rid: String = room.id if room.id else room.json_room_id
 		if rid.is_empty():
 			continue
@@ -318,7 +330,7 @@ func _apply_pending_researchers_3d() -> void:
 		var resolved_id: String = room_id
 		if _find_room_node_in_archives(archives, room_id) == null:
 			for room in _rooms:
-				var r: RoomInfo = room as RoomInfo
+				var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 				if not r:
 					continue
 				if (r.id == room_id or r.json_room_id == room_id) and not r.id.is_empty():
@@ -366,17 +378,17 @@ func _setup_researcher_lifecycle() -> void:
 	sim_root.add_child(lifecycle)
 
 
-func _format_room_info_text(room: RoomInfo) -> String:
-	var type_str: String = RoomInfo.get_room_type_name(room.room_type)
+func _format_room_info_text(room: ArchivesRoomInfo) -> String:
+	var type_str: String = ArchivesRoomInfo.get_room_type_name(room.room_type)
 	var unlock_str: String = "已解锁" if room.unlocked else "未解锁"
-	var clean_str: String = RoomInfo.get_clean_status_name(room.clean_status)
+	var clean_str: String = ArchivesRoomInfo.get_clean_status_name(room.clean_status)
 	var res_parts: Array = []
 	for r in room.resources:
 		if r is Dictionary:
-			var rt: int = int(r.get("resource_type", RoomInfo.ResourceType.NONE))
+			var rt: int = int(r.get("resource_type", ArchivesRoomInfo.ResourceType.NONE))
 			var amt: int = int(r.get("resource_amount", 0))
-			if rt != RoomInfo.ResourceType.NONE and amt > 0:
-				res_parts.append("%s %d" % [RoomInfo.get_resource_type_name(rt), amt])
+			if rt != ArchivesRoomInfo.ResourceType.NONE and amt > 0:
+				res_parts.append("%s %d" % [ArchivesRoomInfo.get_resource_type_name(rt), amt])
 	var res_str: String = (", ".join(res_parts)) if res_parts.size() > 0 else "无"
 	return "类型: %s\n解锁: %s\n清理: %s\n资源: %s" % [type_str, unlock_str, clean_str, res_str]
 
@@ -388,9 +400,9 @@ func _update_room_info_labels() -> void:
 			continue
 		label.visible = _debug_show_room_info
 		if _debug_show_room_info:
-			var room: RoomInfo = null
+			var room: ArchivesRoomInfo = null
 			for r in _rooms:
-				var rinfo: RoomInfo = r as RoomInfo
+				var rinfo: ArchivesRoomInfo = r as ArchivesRoomInfo
 				var check_rid: String = rinfo.id if rinfo.id else rinfo.json_room_id
 				if check_rid == rid:
 					room = rinfo
@@ -408,10 +420,10 @@ func _update_room_overlays() -> void:
 		var mi: MeshInstance3D = _room_overlays[rid] as MeshInstance3D
 		if not mi:
 			continue
-		var room: RoomInfo = null
+		var room: ArchivesRoomInfo = null
 		var room_index: int = -1
 		for j in _rooms.size():
-			var rinfo: RoomInfo = _rooms[j] as RoomInfo
+			var rinfo: ArchivesRoomInfo = _rooms[j] as ArchivesRoomInfo
 			var check_rid: String = rinfo.id if rinfo.id else rinfo.json_room_id
 			if check_rid == rid:
 				room = rinfo
@@ -426,7 +438,7 @@ func _update_room_overlays() -> void:
 		var mat_gray: Material = _room_overlay_mats.get("gray")
 		var mat_blue: Material = _room_overlay_mats.get("blue")
 		if in_cleanup_selecting:
-			var can_select: bool = room.unlocked and room.clean_status == RoomInfo.CleanStatus.UNCLEANED and not is_cleaning
+			var can_select: bool = room.unlocked and room.clean_status == ArchivesRoomInfo.CleanStatus.UNCLEANED and not is_cleaning
 			mi.visible = true
 			mi.material_override = mat_blue if can_select else mat_black
 		elif in_construction_selecting:
@@ -434,7 +446,7 @@ func _update_room_overlays() -> void:
 			mi.visible = true
 			mi.material_override = mat_blue if can_select else mat_black
 		else:
-			if room.clean_status == RoomInfo.CleanStatus.CLEANED and room.unlocked:
+			if room.clean_status == ArchivesRoomInfo.CleanStatus.CLEANED and room.unlocked:
 				mi.visible = false
 			else:
 				mi.visible = true
@@ -476,11 +488,11 @@ func get_room_door_passage_position(room_id: String, door_side: String) -> Vecto
 
 
 ## 按 room_id 获取 RoomInfo
-func get_room_info_by_id(room_id: String) -> RoomInfo:
+func get_room_info_by_id(room_id: String) -> ArchivesRoomInfo:
 	if room_id.is_empty():
 		return null
 	for room in _rooms:
-		var r: RoomInfo = room as RoomInfo
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if not r:
 			continue
 		var rid: String = r.id if r.id else r.json_room_id
@@ -493,10 +505,10 @@ func get_room_info_by_id(room_id: String) -> RoomInfo:
 func get_wanderable_room_ids() -> Array[String]:
 	var out: Array[String] = ["room_00"]
 	for room in _rooms:
-		var r: RoomInfo = room as RoomInfo
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if not r:
 			continue
-		if not r.unlocked or r.clean_status != RoomInfo.CleanStatus.CLEANED:
+		if not r.unlocked or r.clean_status != ArchivesRoomInfo.CleanStatus.CLEANED:
 			continue
 		var rid: String = r.id if r.id else r.json_room_id
 		if rid.is_empty():
@@ -562,16 +574,16 @@ func get_researcher_detail(researcher_id: int) -> Dictionary:
 	var housing_rid: String = str(enriched.get("housing_room_id", ""))
 
 	## work_area / living_area: zone_type + room name
-	var _room_by_id: Callable = func(rid: String) -> RoomInfo:
+	var _room_by_id: Callable = func(rid: String) -> ArchivesRoomInfo:
 		if rid.is_empty():
 			return null
 		for room in _rooms:
-			var r: RoomInfo = room as RoomInfo
+			var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 			if (r.id if r.id else r.json_room_id) == rid:
 				return r
 		return null
-	var work_room: RoomInfo = _room_by_id.call(work_rid)
-	var living_room: RoomInfo = _room_by_id.call(housing_rid)
+	var work_room: ArchivesRoomInfo = _room_by_id.call(work_rid)
+	var living_room: ArchivesRoomInfo = _room_by_id.call(housing_rid)
 	if work_room:
 		var zname: String = ZoneTypeScript.get_zone_name(work_room.zone_type) if work_room.zone_type != 0 else tr("ZONE_NONE")
 		out["work_area"] = "%s %s" % [zname, work_room.get_display_name()]
@@ -684,7 +696,7 @@ func _raycast_mouse_3d() -> Dictionary:
 		return out
 	var room_id: String = room_node.name
 	for i in _rooms.size():
-		var room: RoomInfo = _rooms[i]
+		var room: ArchivesRoomInfo = _rooms[i]
 		var rid: String = room.id if room.id else room.json_room_id
 		if rid == room_id:
 			## 未解锁房间视为不可悬停（设计：04-room-unlock-adjacency）；Debug 开关开启时可悬停
@@ -710,7 +722,7 @@ func _update_room_highlights() -> void:
 	var in_construction_selecting: bool = (_construction_mode == ConstructionMode.SELECTING_TARGET or _construction_mode == ConstructionMode.CONFIRMING)
 	var room_index: int = _hovered_room_index
 	if room_index >= 0 and room_index < _rooms.size() and not in_cleanup_selecting and not in_construction_selecting:
-		var room: RoomInfo = _rooms[room_index]
+		var room: ArchivesRoomInfo = _rooms[room_index]
 		var rid: String = room.id if room.id else room.json_room_id
 		var hl: Node = _room_highlights.get(rid) as Node
 		if hl:
@@ -726,7 +738,7 @@ func _update_debug_info() -> void:
 		return
 	var room_index: int = _hovered_room_index
 	if room_index >= 0 and room_index < _rooms.size():
-		var room: RoomInfo = _rooms[room_index]
+		var room: ArchivesRoomInfo = _rooms[room_index]
 		var rid: String = room.id if room.id else room.json_room_id
 		var name_str: String = room.room_name if room.room_name else room.get_display_name()
 		lbl.text = "房间: %s\nid: %s" % [name_str, rid]
@@ -858,7 +870,7 @@ func _room_center_to_screen(room_index: int) -> Vector2:
 	var cam3d: Camera3D = _camera3d
 	if cam3d:
 		return _room_center_to_screen_3d(room_index)
-	var room: RoomInfo = _rooms[room_index]
+	var room: ArchivesRoomInfo = _rooms[room_index]
 	var world_center: Vector2 = Vector2(
 		(room.rect.position.x + room.rect.size.x / 2.0) * CELL_SIZE,
 		(room.rect.position.y + room.rect.size.y / 2.0) * CELL_SIZE
@@ -870,7 +882,7 @@ func _get_room_center_3d(room_index: int) -> Vector3:
 	## 获取房间在 3D 场景中的世界坐标中心，供镜头聚焦等使用
 	if room_index < 0 or room_index >= _rooms.size():
 		return Vector3.ZERO
-	var room: RoomInfo = _rooms[room_index]
+	var room: ArchivesRoomInfo = _rooms[room_index]
 	var rid: String = room.id if room.id else room.json_room_id
 	if rid.is_empty():
 		return Vector3.ZERO
@@ -912,7 +924,7 @@ func _get_mouse_grid() -> Vector2i:
 
 func _get_room_at_grid(gx: int, gy: int) -> int:
 	for i in _rooms.size():
-		var room: RoomInfo = _rooms[i]
+		var room: ArchivesRoomInfo = _rooms[i]
 		if room.rect.has_point(Vector2i(gx, gy)):
 			return i
 	return -1
@@ -940,37 +952,18 @@ func _get_construction_overlay() -> Node:
 	return get_node_or_null("ConstructionOverlay")
 
 
-func _grant_room_resources_to_player(room: RoomInfo) -> void:
+func _grant_room_resources_to_player(room: ArchivesRoomInfo) -> void:
 	var ui: Node = get_node_or_null("UIMain")
 	if not ui:
 		return
-	var gv: Node = _GameValuesRef.get_singleton()
 	for r in room.resources:
 		if not (r is Dictionary):
 			continue
-		var rt: int = int(r.get("resource_type", RoomInfo.ResourceType.NONE))
+		var rt: int = int(r.get("resource_type", ArchivesRoomInfo.ResourceType.NONE))
 		var amt: int = int(r.get("resource_amount", 0))
-		if rt == RoomInfo.ResourceType.NONE or amt <= 0:
+		if rt == ArchivesRoomInfo.ResourceType.NONE or amt <= 0:
 			continue
-		var cap: int = 999999
-		match rt:
-			RoomInfo.ResourceType.COGNITION:
-				cap = gv.get_factor_cap("cognition") if gv else 999999
-				ui.cognition_amount = mini(ui.cognition_amount + amt, cap)
-			RoomInfo.ResourceType.COMPUTATION:
-				cap = gv.get_factor_cap("computation") if gv else 999999
-				var cf_now: int = ui.get_computation() if ui.has_method("get_computation") else int(ui.get("computation_amount") or 0)
-				ui.computation_amount = mini(cf_now + amt, cap)
-			RoomInfo.ResourceType.WILL:
-				cap = gv.get_factor_cap("willpower") if gv else 999999
-				ui.will_amount = mini(ui.will_amount + amt, cap)
-			RoomInfo.ResourceType.PERMISSION:
-				cap = gv.get_factor_cap("permission") if gv else 999999
-				ui.permission_amount = mini(ui.permission_amount + amt, cap)
-			RoomInfo.ResourceType.INFO:
-				ui.info_amount = ui.info_amount + amt
-			RoomInfo.ResourceType.TRUTH:
-				ui.truth_amount = ui.truth_amount + amt
+		ResourceLedger.add_by_type(ui, rt, amt)
 	_sync_resources_to_topbar()
 
 
@@ -1076,7 +1069,7 @@ func _clear_room_selection() -> void:
 	queue_redraw()
 
 
-func _show_room_detail(room: RoomInfo) -> void:
+func _show_room_detail(room: ArchivesRoomInfo) -> void:
 	var panel: Node = get_node_or_null("RoomDetailPanel")
 	if panel and panel.has_method("show_room"):
 		panel.show_room(room)

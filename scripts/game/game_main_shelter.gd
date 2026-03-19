@@ -7,7 +7,6 @@ extends RefCounted
 
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
-
 ## 每小时 tick 后的庇护能量分配结果 { room_id: energy }
 var _room_shelter_energy: Dictionary = {}
 ## 本小时实际消耗的计算因子
@@ -89,7 +88,7 @@ static func _count_work_slots(game_main: Node2D) -> int:
 		if room_idx >= 0 and room_idx < rooms.size():
 			n += rooms[room_idx].get_construction_researcher_count(zt)
 	for room in rooms:
-		var rm: RoomInfo = room as RoomInfo
+		var rm: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if rm.zone_type == 0 or rm.zone_type == ZoneTypeScript.Type.LIVING:
 			continue
 		if (rm.id if rm.id else rm.json_room_id).is_empty():
@@ -121,7 +120,7 @@ static func enrich_researcher_with_rooms(game_main: Node2D, researcher: Dictiona
 				work_slots.append("")
 
 	for room in rooms:
-		var rm: RoomInfo = room as RoomInfo
+		var rm: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if rm.zone_type == 0 or rm.zone_type == ZoneTypeScript.Type.LIVING:
 			continue
 		var rid_str: String = rm.id if rm.id else rm.json_room_id
@@ -133,7 +132,7 @@ static func enrich_researcher_with_rooms(game_main: Node2D, researcher: Dictiona
 	var housing_slots: Array[String] = []
 	var gv: Node = _GameValuesRef.get_singleton()
 	for room in rooms:
-		var rm: RoomInfo = room as RoomInfo
+		var rm: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if rm.zone_type != ZoneTypeScript.Type.LIVING:
 			continue
 		var rid_str: String = rm.id if rm.id else rm.json_room_id
@@ -196,9 +195,9 @@ func _tick(game_main: Node2D, game_hours_delta: float, shelter_level: int) -> vo
 func _collect_need_shelter(rooms: Array, ui: Node, game_main: Node2D, no_shelter_types: Array) -> Array[Dictionary]:
 	var need_shelter: Array[Dictionary] = []
 	for room in rooms:
-		if not (room is RoomInfo):
+		if not (room is ArchivesRoomInfo):
 			continue
-		var r: RoomInfo = room as RoomInfo
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 		var rid: String = r.id if r.id else r.json_room_id
 		if rid.is_empty():
 			continue
@@ -242,7 +241,7 @@ func _compute_and_apply(game_main: Node2D, ui: Node, rooms: Array, energy_cap: i
 	_last_cf_consumed = cf_to_deduct
 
 
-static func _room_in_use(room: RoomInfo, ui: Node, _game_main: Node2D) -> bool:
+static func _room_in_use(room: ArchivesRoomInfo, ui: Node, _game_main: Node2D) -> bool:
 	if room.zone_type == ZoneTypeScript.Type.RESEARCH:
 		return _research_has_reserve(room)
 	if room.zone_type == ZoneTypeScript.Type.CREATION:
@@ -252,18 +251,18 @@ static func _room_in_use(room: RoomInfo, ui: Node, _game_main: Node2D) -> bool:
 	return false
 
 
-static func _research_has_reserve(room: RoomInfo) -> bool:
+static func _research_has_reserve(room: ArchivesRoomInfo) -> bool:
 	var gv: Node = _GameValuesRef.get_singleton()
 	if not gv:
 		return false
 	var rt: String = gv.get_research_output_resource(room.room_type)
-	var res_type: int = RoomInfo.ResourceType.NONE
+	var res_type: int = ArchivesRoomInfo.ResourceType.NONE
 	match rt:
-		"cognition": res_type = RoomInfo.ResourceType.COGNITION
-		"computation": res_type = RoomInfo.ResourceType.COMPUTATION
-		"willpower": res_type = RoomInfo.ResourceType.WILL
-		"permission": res_type = RoomInfo.ResourceType.PERMISSION
-	if res_type == RoomInfo.ResourceType.NONE:
+		"cognition": res_type = ArchivesRoomInfo.ResourceType.COGNITION
+		"computation": res_type = ArchivesRoomInfo.ResourceType.COMPUTATION
+		"willpower": res_type = ArchivesRoomInfo.ResourceType.WILL
+		"permission": res_type = ArchivesRoomInfo.ResourceType.PERMISSION
+	if res_type == ArchivesRoomInfo.ResourceType.NONE:
 		return false
 	for r in room.resources:
 		if r is Dictionary and int(r.get("resource_type", -1)) == res_type:
@@ -273,8 +272,8 @@ static func _research_has_reserve(room: RoomInfo) -> bool:
 
 static func _sort_rooms_by_priority(entries: Array[Dictionary]) -> void:
 	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		var za: int = int((a.room as RoomInfo).zone_type)
-		var zb: int = int((b.room as RoomInfo).zone_type)
+		var za: int = int((a.room as ArchivesRoomInfo).zone_type)
+		var zb: int = int((b.room as ArchivesRoomInfo).zone_type)
 		var pa: int = _zone_priority(za)
 		var pb: int = _zone_priority(zb)
 		if pa != pb:
@@ -318,9 +317,9 @@ static func get_shelter_consumption_breakdown(game_main: Node2D, shelter_level: 
 			var from_helper: Array = []
 			var rid_to_room: Dictionary = {}
 			for room in rooms:
-				if not (room is RoomInfo):
+				if not (room is ArchivesRoomInfo):
 					continue
-				var r: RoomInfo = room as RoomInfo
+				var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 				var rid: String = r.id if r.id else r.json_room_id
 				if rid.is_empty():
 					continue
@@ -330,9 +329,9 @@ static func get_shelter_consumption_breakdown(game_main: Node2D, shelter_level: 
 				if energy <= 0:
 					continue
 				var r: Variant = rid_to_room.get(rid)
-				if not (r is RoomInfo):
+				if not (r is ArchivesRoomInfo):
 					continue
-				var room: RoomInfo = r as RoomInfo
+				var room: ArchivesRoomInfo = r as ArchivesRoomInfo
 				from_helper.append({
 					"zone_name": ZoneTypeScript.get_zone_name(room.zone_type),
 					"room_name": room.get_display_name(),
@@ -355,9 +354,9 @@ static func get_shelter_consumption_breakdown(game_main: Node2D, shelter_level: 
 
 	var need_shelter: Array[Dictionary] = []
 	for room in rooms:
-		if not (room is RoomInfo):
+		if not (room is ArchivesRoomInfo):
 			continue
-		var r: RoomInfo = room as RoomInfo
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 		var rid: String = r.id if r.id else r.json_room_id
 		if rid.is_empty():
 			continue
@@ -387,7 +386,7 @@ static func get_shelter_consumption_breakdown(game_main: Node2D, shelter_level: 
 			break
 		var give: int = mini(target_per_room, to_allocate)
 		to_allocate -= give
-		var r: RoomInfo = entry.room as RoomInfo
+		var r: ArchivesRoomInfo = entry.room as ArchivesRoomInfo
 		result.append({
 			"zone_name": ZoneTypeScript.get_zone_name(r.zone_type),
 			"room_name": r.get_display_name(),

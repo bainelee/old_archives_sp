@@ -3,7 +3,6 @@ extends RefCounted
 
 ## 地图编辑器房间相关 UI 构建 - 房间编辑面板、导入模板弹窗、保存确认弹窗、房间列表
 ## 将 UI 构建逻辑与主类解耦，通过 editor 参数连接信号与注入控件引用
-
 const ROOM_INFO_JSON_PATH := "datas/room_info_legacy.json"
 
 
@@ -40,8 +39,8 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 	lbl_type.text = TranslationServer.translate("EDITOR_LABEL_TYPE")
 	type_row.add_child(lbl_type)
 	var room_type_option: OptionButton = OptionButton.new()
-	for i in range(RoomInfo.RoomType.size()):
-		room_type_option.add_item(RoomInfo.get_room_type_name(i), i)
+	for i in range(ArchivesRoomInfo.RoomType.size()):
+		room_type_option.add_item(ArchivesRoomInfo.get_room_type_name(i), i)
 	room_type_option.item_selected.connect(editor._on_room_type_selected)
 	type_row.add_child(room_type_option)
 	vbox.add_child(type_row)
@@ -52,7 +51,7 @@ static func build_room_edit_panel(editor: Node) -> PanelContainer:
 	clean_row.add_child(lbl_clean)
 	var room_clean_option: OptionButton = OptionButton.new()
 	for i in range(2):
-		room_clean_option.add_item(RoomInfo.get_clean_status_name(i), i)
+		room_clean_option.add_item(ArchivesRoomInfo.get_clean_status_name(i), i)
 	room_clean_option.item_selected.connect(editor._on_room_clean_selected)
 	clean_row.add_child(room_clean_option)
 	vbox.add_child(clean_row)
@@ -258,7 +257,7 @@ static func refresh_room_panel(editor: Node) -> void:
 		btn_delete_room.visible = false
 		editor.call("_refresh_room_resources_ui")
 		return
-	var room: RoomInfo = rooms[selected_idx]
+	var room: ArchivesRoomInfo = rooms[selected_idx]
 	room_name_edit.editable = true
 	room_type_option.disabled = false
 	room_clean_option.disabled = false
@@ -288,7 +287,7 @@ static func refresh_room_list(editor: Node) -> void:
 	for child in room_list_container.get_children():
 		child.queue_free()
 	for i in rooms.size():
-		var room: RoomInfo = rooms[i]
+		var room: ArchivesRoomInfo = rooms[i]
 		var btn: Button = Button.new()
 		var display_name: String = room.room_name if room.room_name else (TranslationServer.translate("EDITOR_ROOM_N") % (i + 1))
 		btn.text = display_name
@@ -306,7 +305,7 @@ static func focus_camera_on_room(editor: Node, room_index: int) -> void:
 	var cell_size: int = editor.get("CELL_SIZE")
 	if room_index < 0 or room_index >= rooms.size() or not camera:
 		return
-	var room: RoomInfo = rooms[room_index]
+	var room: ArchivesRoomInfo = rooms[room_index]
 	var r: Rect2i = room.rect
 	var center_x: float = (r.position.x + r.size.x / 2.0) * cell_size
 	var center_y: float = (r.position.y + r.size.y / 2.0) * cell_size
@@ -359,7 +358,7 @@ static func refresh_room_resources_ui(editor: Node) -> void:
 		c.queue_free()
 	if selected_idx < 0 or selected_idx >= rooms.size():
 		return
-	var room: RoomInfo = rooms[selected_idx]
+	var room: ArchivesRoomInfo = rooms[selected_idx]
 	for i in room.resources.size():
 		var r: Variant = room.resources[i]
 		if not (r is Dictionary):
@@ -367,8 +366,8 @@ static func refresh_room_resources_ui(editor: Node) -> void:
 		var row: HBoxContainer = HBoxContainer.new()
 		var opt: OptionButton = OptionButton.new()
 		for j in range(7):
-			opt.add_item(RoomInfo.get_resource_type_name(j), j)
-		opt.selected = int(r.get("resource_type", RoomInfo.ResourceType.NONE))
+			opt.add_item(ArchivesRoomInfo.get_resource_type_name(j), j)
+		opt.selected = int(r.get("resource_type", ArchivesRoomInfo.ResourceType.NONE))
 		var res_idx: int = i
 		opt.item_selected.connect(func(sel: int) -> void: editor.call("_on_room_res_type_changed", res_idx, sel))
 		row.add_child(opt)

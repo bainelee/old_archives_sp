@@ -8,7 +8,6 @@ const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const BuiltRoomHelper = preload("res://scripts/game/game_main_built_room.gd")
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 
-@onready var _panel: PanelContainer = $Panel
 @onready var _label_name: Label = $Panel/Margin/Scroll/VBox/NameRow/Value
 @onready var _label_type: Label = $Panel/Margin/Scroll/VBox/TypeRow/Value
 @onready var _label_clean: Label = $Panel/Margin/Scroll/VBox/CleanRow/Value
@@ -20,7 +19,8 @@ const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 @onready var _label_desc: RichTextLabel = $Panel/Margin/Scroll/VBox/DescRow/Content
 
 ## 当前显示的房间，用于实时刷新存量/产出/消耗
-var _current_room: RoomInfo = null
+var _current_room: ArchivesRoomInfo = null
+var _last_dynamic_hash: int = -1
 
 
 func _ready() -> void:
@@ -30,7 +30,10 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	## 面板可见时，实时刷新存量等数据（研究区存量每游戏小时变化）
 	if visible and _current_room != null:
-		_refresh_dynamic_data()
+		var dynamic_hash: int = _compute_dynamic_hash(_current_room)
+		if dynamic_hash != _last_dynamic_hash:
+			_last_dynamic_hash = dynamic_hash
+			_refresh_dynamic_data()
 
 
 func _refresh_dynamic_data() -> void:
@@ -40,22 +43,23 @@ func _refresh_dynamic_data() -> void:
 	_update_resources(_current_room)
 
 
-func show_room(room: RoomInfo) -> void:
+func show_room(room: ArchivesRoomInfo) -> void:
 	if room == null:
 		hide_panel()
 		return
 	_current_room = room
 	_label_name.text = room.get_display_name()
-	_label_type.text = RoomInfo.get_room_type_name(room.room_type)
-	_label_clean.text = RoomInfo.get_clean_status_name(room.clean_status)
+	_label_type.text = ArchivesRoomInfo.get_room_type_name(room.room_type)
+	_label_clean.text = ArchivesRoomInfo.get_clean_status_name(room.clean_status)
 	_label_size.text = "%d×%d" % [room.rect.size.x, room.rect.size.y]
 	_label_desc.text = room.get_display_desc()
 	_update_zone_operation(room)
 	_update_resources(room)
+	_last_dynamic_hash = _compute_dynamic_hash(room)
 	visible = true
 
 
-func _update_zone_operation(room: RoomInfo) -> void:
+func _update_zone_operation(room: ArchivesRoomInfo) -> void:
 	for child in _zone_op_content.get_children():
 		child.queue_free()
 	if room.zone_type == 0:
@@ -74,14 +78,14 @@ func _update_zone_operation(room: RoomInfo) -> void:
 
 static func _resource_name_to_type(res_name: String) -> int:
 	match res_name:
-		"cognition": return RoomInfo.ResourceType.COGNITION
-		"computation": return RoomInfo.ResourceType.COMPUTATION
-		"willpower": return RoomInfo.ResourceType.WILL
-		"permission": return RoomInfo.ResourceType.PERMISSION
-		_: return RoomInfo.ResourceType.NONE
+		"cognition": return ArchivesRoomInfo.ResourceType.COGNITION
+		"computation": return ArchivesRoomInfo.ResourceType.COMPUTATION
+		"willpower": return ArchivesRoomInfo.ResourceType.WILL
+		"permission": return ArchivesRoomInfo.ResourceType.PERMISSION
+		_: return ArchivesRoomInfo.ResourceType.NONE
 
 
-func _add_research_zone_info(room: RoomInfo) -> void:
+func _add_research_zone_info(room: ArchivesRoomInfo) -> void:
 	## 研究区：存量、每小时产出
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
@@ -97,11 +101,11 @@ func _add_research_zone_info(room: RoomInfo) -> void:
 		if r is Dictionary and int(r.get("resource_type", -1)) == rt:
 			reserve_amt = int(r.get("resource_amount", 0))
 			break
-	_add_zone_op_line(tr("LABEL_CURRENT_RESERVE"), "%s %d" % [RoomInfo.get_resource_type_name(rt), reserve_amt], Color(0.95, 0.9, 0.7))
-	_add_zone_op_line(tr("LABEL_HOURLY_OUTPUT"), "%s +%d" % [RoomInfo.get_resource_type_name(rt), output_hour], Color(0.5, 0.9, 0.6))
+	_add_zone_op_line(tr("LABEL_CURRENT_RESERVE"), "%s %d" % [ArchivesRoomInfo.get_resource_type_name(rt), reserve_amt], Color(0.95, 0.9, 0.7))
+	_add_zone_op_line(tr("LABEL_HOURLY_OUTPUT"), "%s +%d" % [ArchivesRoomInfo.get_resource_type_name(rt), output_hour], Color(0.5, 0.9, 0.6))
 
 
-func _add_creation_zone_info(room: RoomInfo) -> void:
+func _add_creation_zone_info(room: ArchivesRoomInfo) -> void:
 	## 造物区：每小时消耗、产出；暂停研究时显示状态
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
@@ -120,9 +124,9 @@ func _add_creation_zone_info(room: RoomInfo) -> void:
 	if is_paused:
 		_add_zone_op_line(tr("LABEL_RECOVER_COND"), tr("WILL_24H_COND") % need_24h, Color(0.7, 0.75, 0.85))
 	match room.room_type:
-		RoomInfo.RoomType.SERVER_ROOM:
+		ArchivesRoomInfo.RoomType.SERVER_ROOM:
 			_add_zone_op_line(tr("LABEL_HOURLY_OUTPUT"), tr("LABEL_PERMISSION_H") % output_hour, Color(0.5, 0.9, 0.6))
-		RoomInfo.RoomType.REASONING:
+		ArchivesRoomInfo.RoomType.REASONING:
 			_add_zone_op_line(tr("LABEL_HOURLY_OUTPUT"), tr("LABEL_INFO_H") % output_hour, Color(0.5, 0.9, 0.6))
 		_:
 			pass
@@ -133,7 +137,7 @@ func _add_zone_op_line(label_text: String, value: String, value_color: Color) ->
 	_zone_op_content.add_child(h)
 
 
-func _update_resources(room: RoomInfo) -> void:
+func _update_resources(room: ArchivesRoomInfo) -> void:
 	for child in _resources_container.get_children():
 		child.queue_free()
 	if room.zone_type == ZoneTypeScript.Type.RESEARCH:
@@ -149,14 +153,29 @@ func _update_resources(room: RoomInfo) -> void:
 	else:
 		for r in resources:
 			if r is Dictionary:
-				var rt: int = int(r.get("resource_type", RoomInfo.ResourceType.NONE))
+				var rt: int = int(r.get("resource_type", ArchivesRoomInfo.ResourceType.NONE))
 				var amt: int = int(r.get("resource_amount", 0))
 				var lbl: Label = Label.new()
-				lbl.text = RoomInfo.get_resource_type_name(rt) + "  %d" % amt
+				lbl.text = ArchivesRoomInfo.get_resource_type_name(rt) + "  %d" % amt
 				lbl.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
 				_resources_container.add_child(lbl)
 
 
 func hide_panel() -> void:
 	_current_room = null
+	_last_dynamic_hash = -1
 	visible = false
+
+
+func _compute_dynamic_hash(room: ArchivesRoomInfo) -> int:
+	if room == null:
+		return -1
+	var h: int = 17
+	h = h * 31 + room.zone_type
+	h = h * 31 + room.clean_status
+	h = h * 31 + room.shelter_status
+	h = h * 31 + room.resources.hash()
+	var ui: Node = get_node_or_null("../UIMain")
+	if ui:
+		h = h * 31 + int(ui.get("will_amount") if ui.get("will_amount") != null else 0)
+	return h

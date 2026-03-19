@@ -2,15 +2,14 @@
 
 [ext_resource type="Script" uid="uid://butw330nycgbl" path="res://scripts/ui/resource_progress_bar.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://5e3dt6s0fjrn" path="res://assets/ui/resource_block/progress_back.png" id="2_back"]
-[ext_resource type="Texture2D" uid="uid://cij4decatcema" path="res://assets/ui/resource_block/progress_inside.png" id="3_inside"]
 
 [node name="ResourceProgressBar" type="Control" unique_id=760597291]
 custom_minimum_size = Vector2(112, 8)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_script")
-color_idle = Color(1, 0.55799997, 0.14999998, 1)
-color_eroded = Color(1, 0.100000024, 0.100000024, 1)
+color_orange = Color(0.992, 0.592, 0.161, 1)
+color_red = Color(1, 0.2, 0.2, 1)
 
 [node name="Back" type="TextureRect" parent="." unique_id=1845041133]
 layout_mode = 1
@@ -32,14 +31,11 @@ offset_top = 1.0
 offset_right = 89.0
 offset_bottom = 7.0
 
-[node name="Inside" type="TextureRect" parent="MaskNormal" unique_id=144968286]
-visible = false
+[node name="Inside" type="ColorRect" parent="MaskNormal" unique_id=144968286]
 layout_mode = 1
 offset_right = 110.0
 offset_bottom = 6.0
-texture = ExtResource("3_inside")
-expand_mode = 1
-stretch_mode = 1
+color = Color(0.992, 0.592, 0.161, 1)
 
 [node name="MaskLeft" type="Control" parent="." unique_id=379339958]
 visible = false
@@ -51,13 +47,11 @@ offset_top = 1.0
 offset_right = 67.0
 offset_bottom = 7.0
 
-[node name="InsideLeft" type="TextureRect" parent="MaskLeft" unique_id=321576541]
+[node name="InsideLeft" type="ColorRect" parent="MaskLeft" unique_id=321576541]
 layout_mode = 1
 offset_right = 110.0
 offset_bottom = 6.0
-texture = ExtResource("3_inside")
-expand_mode = 1
-stretch_mode = 1
+color = Color(0.992, 0.592, 0.161, 1)
 
 [node name="MaskRight" type="Control" parent="." unique_id=1242233601]
 visible = false
@@ -69,11 +63,9 @@ offset_top = 1.0
 offset_right = 111.0
 offset_bottom = 7.0
 
-[node name="InsideRight" type="TextureRect" parent="MaskRight" unique_id=270851382]
+[node name="InsideRight" type="ColorRect" parent="MaskRight" unique_id=270851382]
 layout_mode = 1
 offset_left = -66.0
 offset_right = 44.0
 offset_bottom = 6.0
-texture = ExtResource("3_inside")
-expand_mode = 1
-stretch_mode = 1
+color = Color(1, 0.2, 0.2, 1)

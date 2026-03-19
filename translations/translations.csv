@@ -543,3 +543,139 @@ EVENT_RECRUITMENT,Event Recruitment,事件/探索招募
 UNKNOWN_NODE,Unknown Node,未知节点
 UNKNOWN_SOURCE,Unknown Source,未知来源
 UNKNOWN,Unknown,未知
+room_00_NAME,Archive Core,档案馆核心
+room_00_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_00_DESC,"The heart of the archive, consuming computation factor to sustain civilization shelter against mysterious erosion.","档案馆的心脏，能够通过消耗计算因子为档案馆带来文明的庇佑，
+阻隔来自暴君—莱卡昂的神秘侵蚀。
+秩序并非天生，它必须被极其昂贵地维持。"
+room_01_NAME,Archive Main Hall,档案馆正厅
+room_01_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_01_DESC,"The main hall built by Seeker Visser, where wisdom and the challenge to time once converged.","探寻者-维瑟建立这座档案馆，并以此中智慧破译智者罗曼所留下的道标，
+为此他不惜驯服时间、迈入永恒。
+「 只要你仍在档案馆内，便无需理会时间之残忍。
+在永恒的时间中，并没有任何路径会被阻断。 」"
+room_02_NAME,Archive Gatehouse,档案馆门卫室
+room_02_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_02_DESC,"Once a steward room, later turned into a public gatehouse for screening visitors.","在档案馆作为私有庄园的年代，这里只是一个管家的居所，
+第八任管理员特伦德宣布档案馆对外开放，将此处改为门卫室查问外来者。
+他决心让档案馆中的知识和信息能带给这个离析的世界一些改变。他做到了，但这也是他晚年悲剧的原因。
+「之一？」"
+room_03_NAME,Philosophy Archive Room,哲学文献室
+room_03_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_03_DESC,"An archive of philosophy texts, still carrying the weight of thought and lingering tobacco.","以哲学资料、文献为主的档案室，纸张在岁月中卷曲，如同那些曾在此处盘旋的沉重。
+虽然沉寂多年，空气中仍然弥漫着厚重的烟草味。
+曾有一位来自东洲的乡村教师负责这个档案室，他在此整理、编纂、研习晦涩的哲思。"
+room_04_NAME,Periodical Archive Room,刊物档案室
+room_04_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_04_DESC,A periodical archive rebuilt to preserve publications and recordings from across the world.,"阿德利亚依靠其信息学、传播学以及特殊学术的知识重建了刊物档案室；
+她不仅仅整理旧版的报刊，还整理收纳了世界各地的录音录像出版物。
+静谧之中，仿佛能听见历史的白噪音。"
+room_05_NAME,Terminal Console,终端操作台
+room_05_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_05_DESC,The Pale Colossus terminal; even partial power hums with a reassuring presence.,"苍白巨像的操作台终端，
+即便仅能使用一小部分苍白巨像的力量，其内部传来的低频嗡鸣也足以令让人免于恐惧。
+边缘的黄铜旋钮已被汗水与岁月磨得发亮。
+巨像沉默，但绝非死去。"
+room_06_NAME,Scribe Office,书记员办公室
+room_06_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_06_DESC,The former office of a meticulous scribe who recorded forbidden entries and wrote a resistance novel.,"这个房间曾经由白文先生的书记员-弗耶所使用，
+他负责辅助白文先生整理、收纳和誊写关于档案馆进出典籍的资料，
+进出此地的每一份禁忌，都被他用近乎强迫症般的笔迹锁入账册。
+也是在那段时间，他将极东抗争会的年轻人们的故事写成一部小说并出版。
+""当你严阵以待时，死神是不会找上你的。"""
+room_07_NAME,Anomalous Fundamentals Classroom,异常基理教习室
+room_07_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_07_DESC,A classroom where anomalous principles were taught with strict discipline and exact formulas.,"理论学者——巴塞洛缪曾在这里向初学者们讲授常识之外的法则。
+他用粉笔和直尺在黑板上精准地解构了第二个月亮的碎裂，在维度与质量的转换算式极其精妙，但对于最复杂的秘源量却使用相当易懂且笨拙的算法。
+他严厉斥责后排某个旁听的年轻教师身上散不去的劣质烟草味，工作记录中抱怨后勤处这个月又克扣了他用来润喉的甘草糖。
+""不要在教室吸烟，不要迟到。"""
+room_08_NAME,Pharmaceutical Research Lab,制药研究室
+room_08_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_08_DESC,"A former pharmaceutical lab filled with residue, sharp odors, and wartime medical legends.","小伊凡中尉曾经的实验室,边缘带有缺口的玻璃安瓿瓶中残留着近乎黑色的药液，散发出碘伏与旧铜币的混合气味。
+他精通制药,技艺无视了血肉与现实的边界,也超出时代、科技和现实的限制。
+据传他负责档案馆期间，曾于地下建立了一个隐匿的医院，用于救治战争带来的伤患。
+比其在战场上夺去他人的生命，他更喜欢剥夺死神的权力。"
+room_09_NAME,Gwen Temporary Office,格温的临时事务所
+room_09_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_09_DESC,A temporary office once used by Gwen team before joining the war against Lycaon.,"格温·别利琴科组建的调查员团队短暂以此为据点,桌上散落着未及收起的地图。
+作为解决了科尔博柯事件的调查员，格温最终也加入到对抗莱卡昂的战争中。
+「科尔博柯就要掉下去了。」"
+room_10_NAME,Case Exhibit Room,案情陈列室
+room_10_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_10_DESC,"A case exhibit room of old files and red threads, where reason was tested for truth.","旧的案件档案堆放其中，巨型线索板上钉满褪色的档案与红线，
+曾在此处寻觅答案的人将思绪层层剥解，直到只剩不可妥协的真相。
+""理智在此燃烧，留下光辉与灰烬。"""
+room_11_NAME,East Inner Corridor,东侧内部廊道
+room_11_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_11_DESC,East inner corridor,东侧内部廊道
+room_hall_00_NAME,Annex Room F101,副楼房间F101
+room_hall_00_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_00_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_01_NAME,Annex Room F102,副楼房间F102
+room_hall_01_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_01_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_02_NAME,Annex Room F201,副楼房间F201
+room_hall_02_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_02_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_03_NAME,Annex Room F202,副楼房间F202
+room_hall_03_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_03_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_04_NAME,Annex Room F301,副楼房间F301
+room_hall_04_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_04_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_05_NAME,Annex Room F302,副楼房间F302
+room_hall_05_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_05_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_06_NAME,Annex Room F401,副楼房间F401
+room_hall_06_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_06_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_07_NAME,Annex Room F402,副楼房间F402
+room_hall_07_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_07_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_08_NAME,Annex Room F501,副楼房间F501
+room_hall_08_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_08_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_hall_09_NAME,Annex Room F502,副楼房间F502
+room_hall_09_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_hall_09_DESC,A dusty resting place with an old bed; traces of old visitors remain in this quiet annex room.,"蒙尘的栖所。一张铺着褪色亚麻布的旧床。
+空气中的霉味与烟味混杂，仿佛能嗅到旧日的余温。
+曾有许多带着秘密的访客在此短暂歇脚，将他们的梦境与疲惫一同遗留在了这间不起眼的客房里。"
+room_pass_0_NAME,F1 East Stairwell,F1东侧楼梯间
+room_pass_0_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_0_DESC,Default corridor description,默认通道描述
+room_pass_1_NAME,F1 West Stairwell,F1西侧楼梯间
+room_pass_1_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_1_DESC,Default corridor description,默认通道描述
+room_pass_2_NAME,F2 West Core Passage,F2西侧核心通道
+room_pass_2_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_2_DESC,Default corridor description,默认通道描述
+room_pass_3_NAME,F3 West Core Passage,F3西侧核心通道
+room_pass_3_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_3_DESC,Default corridor description,默认通道描述
+room_pass_4_NAME,Server Room East Passage,机房东侧通道
+room_pass_4_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_4_DESC,Default corridor description,默认通道描述
+room_pass_5_NAME,Archive East Gate,档案馆东侧门
+room_pass_5_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_5_DESC,Default corridor description,默认通道描述
+room_pass_6_NAME,Inner Corridor,内侧回廊
+room_pass_6_PRE_CLEAN,Default pre-clean text,默认清理前描述
+room_pass_6_DESC,Default corridor description,默认通道描述

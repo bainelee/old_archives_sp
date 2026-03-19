@@ -15,7 +15,7 @@ const LABEL_COLOR_DIM := Color(0.7, 0.75, 0.85, 1)
 const INSUFFICIENT_COLOR := Color(0.95, 0.4, 0.35, 1)
 
 
-func show_for_room(room: RoomInfo, player_resources: Dictionary, can_afford: bool, researchers_needed: int = 0, researchers_available: int = 0) -> void:
+func show_for_room(room: ArchivesRoomInfo, player_resources: Dictionary, can_afford: bool, researchers_needed: int = 0, researchers_available: int = 0) -> void:
 	if room == null:
 		hide_panel()
 		return
@@ -41,7 +41,7 @@ func _format_room_resources(resources: Array) -> String:
 	var parts: PackedStringArray = []
 	for r in resources:
 		if r is Dictionary:
-			var rt: int = int(r.get("resource_type", RoomInfo.ResourceType.NONE))
+			var rt: int = int(r.get("resource_type", ArchivesRoomInfo.ResourceType.NONE))
 			var amt: int = int(r.get("resource_amount", 0))
-			parts.append(RoomInfo.get_resource_type_name(rt) + " %d" % amt)
+			parts.append(ArchivesRoomInfo.get_resource_type_name(rt) + " %d" % amt)
 	return tr("HOVER_RESERVE_LINE") % ", ".join(parts)

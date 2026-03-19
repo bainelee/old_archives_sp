@@ -405,7 +405,7 @@ func _try_move_to_random_target() -> void:
 		return
 	var gm: Node = _get_game_main()
 	if gm and gm.has_method("get_wanderable_room_ids") and randf() < WANDER_CROSS_ROOM_CHANCE:
-		var room_a: RoomInfo = gm.get_room_info_by_id(_current_room_id) if gm.has_method("get_room_info_by_id") else null
+		var room_a: ArchivesRoomInfo = gm.get_room_info_by_id(_current_room_id) if gm.has_method("get_room_info_by_id") else null
 		if room_a:
 			var wanderable: Array = gm.get_wanderable_room_ids()
 			var candidates: Array[String] = []
@@ -414,7 +414,7 @@ func _try_move_to_random_target() -> void:
 					candidates.append(adj_id)
 			if not candidates.is_empty():
 				var room_b_id: String = candidates[randi() % candidates.size()]
-				var room_b: RoomInfo = gm.get_room_info_by_id(room_b_id) if gm.has_method("get_room_info_by_id") else null
+				var room_b: ArchivesRoomInfo = gm.get_room_info_by_id(room_b_id) if gm.has_method("get_room_info_by_id") else null
 				if room_b:
 					var adj_type: String = RoomLayoutHelper.get_adjacency_type(room_a, room_b)
 					_pending_room_cross_target_id = room_b_id

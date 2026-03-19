@@ -4,6 +4,7 @@ extends CanvasLayer
 
 const START_MENU_SCENE := "res://scenes/ui/start_menu.tscn"
 const GAME_MAIN_SCENE := "res://scenes/game/game_main.tscn"
+const SlotPanelHelper = preload("res://scripts/ui/slot_panel_helper.gd")
 
 @onready var _panel: Control = $Panel
 @onready var _btn_resume: Button = $Panel/Center/MenuPanel/VBox/BtnResume
@@ -51,10 +52,7 @@ func _setup_buttons() -> void:
 	_btn_quit.pressed.connect(_on_quit)
 	_btn_slot_cancel.pressed.connect(_on_slot_cancel)
 	_delete_confirm.confirmed.connect(_on_delete_confirmed)
-	for i in _slot_buttons.size():
-		var slot_index := i
-		_slot_buttons[i].pressed.connect(func() -> void: _on_slot_selected(slot_index))
-		_delete_buttons[i].pressed.connect(func() -> void: _on_delete_clicked(slot_index))
+	SlotPanelHelper.connect_slot_rows(_slot_buttons, _delete_buttons, Callable(self, "_on_slot_selected"), Callable(self, "_on_delete_clicked"))
 
 
 func show_menu() -> void:
@@ -100,16 +98,8 @@ func _show_slot_panel(title: String) -> void:
 
 
 func _refresh_slot_buttons() -> void:
-	for i in _slot_buttons.size():
-		var meta: Variant = SaveManager.get_slot_metadata(i)
-		if meta == null:
-			_slot_buttons[i].text = tr("SLOT_EMPTY") % [i + 1]
-			_delete_buttons[i].disabled = true
-		else:
-			var name_str: String = (meta as Dictionary).get("map_name", tr("DEFAULT_UNTITLED"))
-			_slot_buttons[i].text = tr("SLOT_WITH_NAME") % [i + 1, name_str]
-			_delete_buttons[i].disabled = false
-		_slot_buttons[i].disabled = (_mode == Mode.LOAD and meta == null)
+	var mode_key: String = "save" if _mode == Mode.SAVE else "load"
+	SlotPanelHelper.refresh_slot_rows(_slot_buttons, _delete_buttons, mode_key)
 
 
 func _on_delete_clicked(slot: int) -> void:

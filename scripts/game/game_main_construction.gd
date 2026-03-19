@@ -47,7 +47,7 @@ static func is_room_constructing(game_main: Node2D, room_index: int) -> bool:
 	return game_main.get("_construction_rooms_in_progress").has(room_index)
 
 
-static func can_afford_construction(room: RoomInfo, zone_type: int, resources: Dictionary, game_main: Node2D) -> bool:
+static func can_afford_construction(room: ArchivesRoomInfo, zone_type: int, resources: Dictionary, game_main: Node2D) -> bool:
 	var cost: Dictionary = room.get_construction_cost(zone_type)
 	for key in cost:
 		var have: int = int(resources.get(key, 0))
@@ -59,26 +59,12 @@ static func can_afford_construction(room: RoomInfo, zone_type: int, resources: D
 	return true
 
 
-static func consume_construction_cost(game_main: Node2D, room: RoomInfo, zone_type: int) -> void:
+static func consume_construction_cost(game_main: Node2D, room: ArchivesRoomInfo, zone_type: int) -> void:
 	var cost: Dictionary = room.get_construction_cost(zone_type)
 	var ui: Node = game_main.get_node_or_null("UIMain")
 	if not ui:
 		return
-	for key in cost:
-		var amt: int = int(cost.get(key, 0))
-		if key == "cognition":
-			ui.cognition_amount = maxi(0, ui.cognition_amount - amt)
-		elif key == "computation":
-			var cf_before: int = ui.get_computation() if ui.has_method("get_computation") else int(ui.get("computation_amount") or 0)
-			ui.computation_amount = maxi(0, cf_before - amt)
-		elif key == "willpower":
-			ui.will_amount = maxi(0, ui.will_amount - amt)
-		elif key == "permission":
-			ui.permission_amount = maxi(0, ui.permission_amount - amt)
-		elif key == "info":
-			ui.info_amount = maxi(0, ui.info_amount - amt)
-		elif key == "truth":
-			ui.truth_amount = maxi(0, ui.truth_amount - amt)
+	ResourceLedger.consume_cost(ui, cost)
 	game_main.call("_sync_resources_to_topbar")
 
 
@@ -114,7 +100,7 @@ static func process_overlay(game_main: Node2D, construction_overlay: Node, delta
 	# 悬停与确认位置
 	if construction_mode == CONSTRUCTION_SELECTING_TARGET or construction_mode == CONSTRUCTION_CONFIRMING:
 		if construction_selected_zone != 0 and hovered_room_index >= 0 and hovered_room_index < rooms.size():
-			var room: RoomInfo = rooms[hovered_room_index]
+			var room: ArchivesRoomInfo = rooms[hovered_room_index]
 			if room.can_build_zone(construction_selected_zone) and not is_room_constructing(game_main, hovered_room_index):
 				var resources: Dictionary = get_player_resources.call()
 				var can_afford: bool = can_afford_construction(room, construction_selected_zone, resources, game_main)
@@ -225,7 +211,7 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 	var rooms: Array = game_main.get("_rooms")
 	if construction_mode != CONSTRUCTION_CONFIRMING or construction_confirm_room_index < 0:
 		return
-	var room: RoomInfo = rooms[construction_confirm_room_index]
+	var room: ArchivesRoomInfo = rooms[construction_confirm_room_index]
 	var zone_type: int = construction_selected_zone
 	var resources: Dictionary = game_main.call("_get_player_resources")
 	if not can_afford_construction(room, zone_type, resources, game_main):
@@ -259,7 +245,7 @@ static func handle_left_click(game_main: Node2D, rid: int) -> void:
 	var focus_camera: Callable = Callable(game_main, "_focus_camera_on_room")
 
 	if rid >= 0:
-		var room: RoomInfo = rooms[rid]
+		var room: ArchivesRoomInfo = rooms[rid]
 		if room.can_build_zone(construction_selected_zone) and not is_room_constructing(game_main, rid):
 			var resources: Dictionary = get_player_resources.call()
 			var can_afford: bool = can_afford_construction(room, construction_selected_zone, resources, game_main)

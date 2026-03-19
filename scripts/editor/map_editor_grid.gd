@@ -59,14 +59,14 @@ static func try_create_room(editor: Node, start: Vector2i, end: Vector2i) -> voi
 				return
 	var w: int = x_max - x_min + 1
 	var h: int = y_max - y_min + 1
-	var room: RoomInfo = RoomInfo.new()
+	var room: ArchivesRoomInfo = ArchivesRoomInfo.new()
 	var next_id: int = editor.get("_next_room_id")
 	room.id = "room_%d" % next_id
 	editor.set("_next_room_id", next_id + 1)
 	room.room_name = TranslationServer.translate("DEFAULT_UNTITLED")
 	room.rect = Rect2i(x_min, y_min, w, h)
-	room.room_type = RoomInfo.RoomType.EMPTY_ROOM
-	room.clean_status = RoomInfo.CleanStatus.UNCLEANED
+	room.room_type = ArchivesRoomInfo.RoomType.EMPTY_ROOM
+	room.clean_status = ArchivesRoomInfo.CleanStatus.UNCLEANED
 	room.pre_clean_text = TranslationServer.translate("DEFAULT_PRE_CLEAN")
 	room.resources = []
 	rooms.append(room)

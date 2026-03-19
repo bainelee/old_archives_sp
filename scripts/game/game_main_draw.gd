@@ -90,7 +90,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 	var in_cleanup_selecting: bool = (cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING)
 	var in_construction_selecting: bool = (construction_mode == CONSTRUCTION_SELECTING_TARGET or construction_mode == CONSTRUCTION_CONFIRMING)
 	for i in rooms.size():
-		var room: RoomInfo = rooms[i]
+		var room: ArchivesRoomInfo = rooms[i]
 		var px: float = room.rect.position.x * cell_size
 		var py: float = room.rect.position.y * cell_size
 		var pw: float = room.rect.size.x * cell_size
@@ -99,7 +99,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 		var is_room_cleaning: bool = cleanup_rooms.has(i)
 		var is_room_constructing: bool = construction_rooms.has(i)
 		if in_cleanup_selecting:
-			if room.unlocked and room.clean_status == RoomInfo.CleanStatus.UNCLEANED and not is_room_cleaning:
+			if room.unlocked and room.clean_status == ArchivesRoomInfo.CleanStatus.UNCLEANED and not is_room_cleaning:
 				canvas.draw_rect(rect, Color(1, 1, 1, 0.4), true)
 			else:
 				canvas.draw_rect(rect, Color(0, 0, 0, 0.6), true)
@@ -108,7 +108,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 				canvas.draw_rect(rect, Color(0.2, 0.5, 1.0, 0.4), true)
 			else:
 				canvas.draw_rect(rect, Color(0, 0, 0, 0.6), true)
-		elif room.clean_status == RoomInfo.CleanStatus.UNCLEANED or not room.unlocked:
+		elif room.clean_status == ArchivesRoomInfo.CleanStatus.UNCLEANED or not room.unlocked:
 			canvas.draw_rect(rect, Color(0, 0, 0, 0.4), true)
 		# 已建设房间：30% 透明度绿色遮罩，提示可辨识
 		elif room.zone_type != 0:
@@ -120,7 +120,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 		var font: Font = ThemeDB.fallback_font
 		var font_size: int = 12
 		for i in rooms.size():
-			var room: RoomInfo = rooms[i]
+			var room: ArchivesRoomInfo = rooms[i]
 			if BuiltRoomHelper.is_creation_zone_paused(room, ui):
 				var px: float = room.rect.position.x * cell_size
 				var py: float = room.rect.position.y * cell_size
@@ -137,7 +137,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 	# 房间边框（清理/建设模式下不显示）
 	if cleanup_mode != CLEANUP_SELECTING and cleanup_mode != CLEANUP_CONFIRMING and construction_mode != CONSTRUCTION_SELECTING_TARGET and construction_mode != CONSTRUCTION_CONFIRMING:
 		for i in rooms.size():
-			var room: RoomInfo = rooms[i]
+			var room: ArchivesRoomInfo = rooms[i]
 			var r: Rect2i = room.rect
 			var px: float = r.position.x * cell_size
 			var py: float = r.position.y * cell_size

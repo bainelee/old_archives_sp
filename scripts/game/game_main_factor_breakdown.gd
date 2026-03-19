@@ -112,9 +112,9 @@ static func _get_research_production(game_main: Node2D, resource_key: String) ->
 	var res_type: int = _resource_key_to_type(resource_key)
 	var result: Array = []
 	for room in rooms:
-		if not (room is RoomInfo):
+		if not (room is ArchivesRoomInfo):
 			continue
-		var r: RoomInfo = room as RoomInfo
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if r.room_type != room_type or r.zone_type != ZoneTypeScript.Type.RESEARCH:
 			continue
 		if not _research_room_has_reserve(r, res_type):
@@ -131,7 +131,7 @@ static func _get_research_production(game_main: Node2D, resource_key: String) ->
 	return result
 
 
-static func _research_room_has_reserve(room: RoomInfo, res_type: int) -> bool:
+static func _research_room_has_reserve(room: ArchivesRoomInfo, res_type: int) -> bool:
 	for res in room.resources:
 		if res is Dictionary and int(res.get("resource_type", -1)) == res_type:
 			return int(res.get("resource_amount", 0)) > 0
@@ -146,9 +146,9 @@ static func _get_creation_consumption(game_main: Node2D) -> Array:
 	var rooms: Array = game_main.get("_rooms")
 	var result: Array = []
 	for room in rooms:
-		if not (room is RoomInfo):
+		if not (room is ArchivesRoomInfo):
 			continue
-		var r: RoomInfo = room as RoomInfo
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if r.zone_type != ZoneTypeScript.Type.CREATION:
 			continue
 		if GameMainBuiltRoomHelper.is_creation_zone_paused(r, ui):
@@ -171,15 +171,15 @@ static func _get_creation_production_permission(game_main: Node2D) -> Array:
 	var rooms: Array = game_main.get("_rooms")
 	var result: Array = []
 	for room in rooms:
-		if not (room is RoomInfo):
+		if not (room is ArchivesRoomInfo):
 			continue
-		var r: RoomInfo = room as RoomInfo
-		if r.room_type != RoomInfo.RoomType.SERVER_ROOM or r.zone_type != ZoneTypeScript.Type.CREATION:
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
+		if r.room_type != ArchivesRoomInfo.RoomType.SERVER_ROOM or r.zone_type != ZoneTypeScript.Type.CREATION:
 			continue
 		if GameMainBuiltRoomHelper.is_creation_zone_paused(r, ui):
 			continue
 		var units: int = GameMainBuiltRoomHelper.get_room_units(r)
-		var rate: int = gv.get_creation_produce_per_unit_per_hour(RoomInfo.RoomType.SERVER_ROOM)
+		var rate: int = gv.get_creation_produce_per_unit_per_hour(ArchivesRoomInfo.RoomType.SERVER_ROOM)
 		var per_day: int = units * rate * 24
 		if per_day > 0:
 			result.append({
@@ -192,8 +192,8 @@ static func _get_creation_production_permission(game_main: Node2D) -> Array:
 
 static func _resource_key_to_type(key: String) -> int:
 	match key:
-		"cognition": return RoomInfo.ResourceType.COGNITION
-		"computation": return RoomInfo.ResourceType.COMPUTATION
-		"willpower": return RoomInfo.ResourceType.WILL
-		"permission": return RoomInfo.ResourceType.PERMISSION
-	return RoomInfo.ResourceType.NONE
+		"cognition": return ArchivesRoomInfo.ResourceType.COGNITION
+		"computation": return ArchivesRoomInfo.ResourceType.COMPUTATION
+		"willpower": return ArchivesRoomInfo.ResourceType.WILL
+		"permission": return ArchivesRoomInfo.ResourceType.PERMISSION
+	return ArchivesRoomInfo.ResourceType.NONE

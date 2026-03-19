@@ -13,6 +13,9 @@ const CLEANUP_SELECTING := 1
 const CLEANUP_CONFIRMING := 2
 
 static func on_button_pressed(game_main: Node2D) -> void:
+	## 清理/建设模式互斥，避免两套模式状态同时进入
+	if int(game_main.get("_construction_mode")) != 0:
+		return
 	var cleanup_mode: int = game_main.get("_cleanup_mode")
 	if cleanup_mode == CLEANUP_NONE:
 		enter_selecting_mode(game_main)
@@ -39,7 +42,7 @@ static func is_room_cleaning(game_main: Node2D, room_index: int) -> bool:
 	return game_main.get("_cleanup_rooms_in_progress").has(room_index)
 
 
-static func can_afford_cleanup(room: RoomInfo, resources: Dictionary, game_main: Node2D) -> bool:
+static func can_afford_cleanup(room: ArchivesRoomInfo, resources: Dictionary, game_main: Node2D) -> bool:
 	var cost: Dictionary = room.get_cleanup_cost()
 	for key in cost:
 		var have: int = int(resources.get(key, 0))
@@ -51,26 +54,12 @@ static func can_afford_cleanup(room: RoomInfo, resources: Dictionary, game_main:
 	return true
 
 
-static func consume_cleanup_cost(game_main: Node2D, room: RoomInfo) -> void:
+static func consume_cleanup_cost(game_main: Node2D, room: ArchivesRoomInfo) -> void:
 	var cost: Dictionary = room.get_cleanup_cost()
 	var ui: Node = game_main.get_node_or_null("UIMain")
 	if not ui:
 		return
-	for key in cost:
-		var amt: int = int(cost.get(key, 0))
-		if key == "cognition":
-			ui.cognition_amount = maxi(0, ui.cognition_amount - amt)
-		elif key == "computation":
-			var cf_before: int = ui.get_computation() if ui.has_method("get_computation") else int(ui.get("computation_amount") or 0)
-			ui.computation_amount = maxi(0, cf_before - amt)
-		elif key == "willpower":
-			ui.will_amount = maxi(0, ui.will_amount - amt)
-		elif key == "permission":
-			ui.permission_amount = maxi(0, ui.permission_amount - amt)
-		elif key == "info":
-			ui.info_amount = maxi(0, ui.info_amount - amt)
-		elif key == "truth":
-			ui.truth_amount = maxi(0, ui.truth_amount - amt)
+	ResourceLedger.consume_cost(ui, cost)
 	game_main.call("_sync_resources_to_topbar")
 
 
@@ -103,8 +92,8 @@ static func process_overlay(game_main: Node2D, overlay: Node, delta: float) -> v
 	# 悬停与确认位置更新
 	if cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING:
 		if hovered_room_index >= 0 and hovered_room_index < rooms.size():
-			var room: RoomInfo = rooms[hovered_room_index]
-			if room.unlocked and room.clean_status == RoomInfo.CleanStatus.UNCLEANED and not is_room_cleaning(game_main, hovered_room_index):
+			var room: ArchivesRoomInfo = rooms[hovered_room_index]
+			if room.unlocked and room.clean_status == ArchivesRoomInfo.CleanStatus.UNCLEANED and not is_room_cleaning(game_main, hovered_room_index):
 				var resources: Dictionary = get_player_resources.call()
 				var can_afford: bool = can_afford_cleanup(room, resources, game_main)
 				var researchers_available: int = maxi(0, int(resources.get("researcher", 0)) - int(resources.get("eroded", 0)) - get_cleanup_researchers_occupied(game_main))
@@ -132,8 +121,8 @@ static func process_overlay(game_main: Node2D, overlay: Node, delta: float) -> v
 		var elapsed: float = data.get("elapsed", 0.0)
 		var ratio: float = clampf(elapsed / total, 0.0, 1.0)
 		if ratio >= 1.0:
-			var cleaned_room: RoomInfo = rooms[room_idx]
-			cleaned_room.clean_status = RoomInfo.CleanStatus.CLEANED
+			var cleaned_room: ArchivesRoomInfo = rooms[room_idx]
+			cleaned_room.clean_status = ArchivesRoomInfo.CleanStatus.CLEANED
 			unlock_adjacent_rooms(game_main, cleaned_room)
 			if not GameMainBuiltRoomHelper.is_research_zone_room(cleaned_room):
 				grant_room_resources.call(cleaned_room)
@@ -217,7 +206,7 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 	var rooms: Array = game_main.get("_rooms")
 	if cleanup_mode != CLEANUP_CONFIRMING or cleanup_confirm_room_index < 0:
 		return
-	var room: RoomInfo = rooms[cleanup_confirm_room_index]
+	var room: ArchivesRoomInfo = rooms[cleanup_confirm_room_index]
 	var resources: Dictionary = game_main.call("_get_player_resources")
 	if not can_afford_cleanup(room, resources, game_main):
 		return
@@ -237,7 +226,7 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 	exit_mode(game_main)
 
 
-static func unlock_adjacent_rooms(game_main: Node2D, room: RoomInfo) -> void:
+static func unlock_adjacent_rooms(game_main: Node2D, room: ArchivesRoomInfo) -> void:
 	var rooms: Array = game_main.get("_rooms")
 	var id_to_index: Dictionary = RoomLayoutHelper.build_id_to_index(rooms)
 	for adj_id in room.adjacent_ids:
@@ -256,8 +245,8 @@ static func handle_left_click(game_main: Node2D, rid: int) -> void:
 	var focus_camera: Callable = Callable(game_main, "_focus_camera_on_room")
 
 	if rid >= 0:
-		var room: RoomInfo = rooms[rid]
-		var is_selectable: bool = room.unlocked and room.clean_status == RoomInfo.CleanStatus.UNCLEANED
+		var room: ArchivesRoomInfo = rooms[rid]
+		var is_selectable: bool = room.unlocked and room.clean_status == ArchivesRoomInfo.CleanStatus.UNCLEANED
 		var not_cleaning: bool = not is_room_cleaning(game_main, rid)
 		if is_selectable and not_cleaning:
 			var resources: Dictionary = get_player_resources.call()

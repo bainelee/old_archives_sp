@@ -92,7 +92,7 @@ func _update_all_researchers(game_main: Node2D) -> void:
 			if id in ids:
 				var rooms: Array = game_main.get("_rooms")
 				if room_idx >= 0 and room_idx < rooms.size():
-					var room: RoomInfo = rooms[room_idx] as RoomInfo
+					var room: ArchivesRoomInfo = rooms[room_idx] as ArchivesRoomInfo
 					if room:
 						target_room_id = room.id if room.id else room.json_room_id
 				phase = LifePhase.CLEANUP
@@ -107,7 +107,7 @@ func _update_all_researchers(game_main: Node2D) -> void:
 				if id in ids:
 					var rooms: Array = game_main.get("_rooms")
 					if room_idx >= 0 and room_idx < rooms.size():
-						var room: RoomInfo = rooms[room_idx] as RoomInfo
+						var room: ArchivesRoomInfo = rooms[room_idx] as ArchivesRoomInfo
 						if room:
 							target_room_id = room.id if room.id else room.json_room_id
 					phase = LifePhase.CONSTRUCTION
@@ -267,10 +267,10 @@ func _build_wanderable_room_list(game_main: Node2D) -> Array[String]:
 	var out: Array[String] = ["room_00"]
 	var rooms: Array = game_main.get("_rooms")
 	for room in rooms:
-		var r: RoomInfo = room as RoomInfo
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if not r:
 			continue
-		if not r.unlocked or r.clean_status != RoomInfo.CleanStatus.CLEANED:
+		if not r.unlocked or r.clean_status != ArchivesRoomInfo.CleanStatus.CLEANED:
 			continue
 		var rid: String = r.id if r.id else r.json_room_id
 		if rid.is_empty():

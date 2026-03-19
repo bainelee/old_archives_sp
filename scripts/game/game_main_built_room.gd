@@ -8,19 +8,19 @@ const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 
 
-static func is_research_zone_room(room: RoomInfo) -> bool:
+static func is_research_zone_room(room: ArchivesRoomInfo) -> bool:
 	## 研究区/造物区可建设房间：清理完成时不一次性授予
 	var rt: int = room.room_type
-	return (rt == RoomInfo.RoomType.LIBRARY or rt == RoomInfo.RoomType.LAB or rt == RoomInfo.RoomType.ARCHIVE or rt == RoomInfo.RoomType.CLASSROOM
-		or rt == RoomInfo.RoomType.SERVER_ROOM or rt == RoomInfo.RoomType.REASONING)
+	return (rt == ArchivesRoomInfo.RoomType.LIBRARY or rt == ArchivesRoomInfo.RoomType.LAB or rt == ArchivesRoomInfo.RoomType.ARCHIVE or rt == ArchivesRoomInfo.RoomType.CLASSROOM
+		or rt == ArchivesRoomInfo.RoomType.SERVER_ROOM or rt == ArchivesRoomInfo.RoomType.REASONING)
 
 
-static func get_room_units(room: RoomInfo) -> int:
+static func get_room_units(room: ArchivesRoomInfo) -> int:
 	return room.get_room_units()
 
 
 ## 造物区 24 小时消耗量（意志）
-static func get_creation_zone_24h_consumption(room: RoomInfo) -> int:
+static func get_creation_zone_24h_consumption(room: ArchivesRoomInfo) -> int:
 	if room.zone_type != ZoneTypeScript.Type.CREATION:
 		return 0
 	var gv: Node = _GameValuesRef.get_singleton()
@@ -30,10 +30,10 @@ static func get_creation_zone_24h_consumption(room: RoomInfo) -> int:
 
 
 ## 造物区是否暂停研究：玩家意志不足 24h 消耗
-static func is_creation_zone_paused(room: RoomInfo, ui: Node) -> bool:
+static func is_creation_zone_paused(room: ArchivesRoomInfo, ui: Node) -> bool:
 	if room.zone_type != ZoneTypeScript.Type.CREATION:
 		return false
-	if room.room_type != RoomInfo.RoomType.SERVER_ROOM and room.room_type != RoomInfo.RoomType.REASONING:
+	if room.room_type != ArchivesRoomInfo.RoomType.SERVER_ROOM and room.room_type != ArchivesRoomInfo.RoomType.REASONING:
 		return false
 	var need: int = get_creation_zone_24h_consumption(room)
 	var have: int = ui.get_willpower() if ui.has_method("get_willpower") else int(ui.get("will_amount") or 0)
@@ -57,7 +57,7 @@ static func process_production(game_main: Node2D, game_hours_delta: float) -> vo
 		return
 	for _h in hours_to_process:
 		for i in rooms.size():
-			var room: RoomInfo = rooms[i]
+			var room: ArchivesRoomInfo = rooms[i]
 			if room.zone_type == ZoneTypeScript.Type.RESEARCH:
 				_produce_research_zone_hour(room, ui, game_main)
 			elif room.zone_type == ZoneTypeScript.Type.CREATION:
@@ -67,14 +67,14 @@ static func process_production(game_main: Node2D, game_hours_delta: float) -> vo
 
 static func _resource_name_to_type(name: String) -> int:
 	match name:
-		"cognition": return RoomInfo.ResourceType.COGNITION
-		"computation": return RoomInfo.ResourceType.COMPUTATION
-		"willpower": return RoomInfo.ResourceType.WILL
-		"permission": return RoomInfo.ResourceType.PERMISSION
-		_: return RoomInfo.ResourceType.NONE
+		"cognition": return ArchivesRoomInfo.ResourceType.COGNITION
+		"computation": return ArchivesRoomInfo.ResourceType.COMPUTATION
+		"willpower": return ArchivesRoomInfo.ResourceType.WILL
+		"permission": return ArchivesRoomInfo.ResourceType.PERMISSION
+		_: return ArchivesRoomInfo.ResourceType.NONE
 
 
-static func _produce_research_zone_hour(room: RoomInfo, ui: Node, game_main: Node2D) -> void:
+static func _produce_research_zone_hour(room: ArchivesRoomInfo, ui: Node, game_main: Node2D) -> void:
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
 		return
@@ -83,7 +83,7 @@ static func _produce_research_zone_hour(room: RoomInfo, ui: Node, game_main: Nod
 	if amt_per_unit <= 0:
 		return
 	var rt: int = _resource_name_to_type(gv.get_research_output_resource(room.room_type))
-	if rt == RoomInfo.ResourceType.NONE:
+	if rt == ArchivesRoomInfo.ResourceType.NONE:
 		return
 	var output_this_hour: int = units * amt_per_unit
 	var reserve_idx: int = -1
@@ -104,45 +104,28 @@ static func _produce_research_zone_hour(room: RoomInfo, ui: Node, game_main: Nod
 		_deplete_research_room(room, game_main)
 
 
-static func _deplete_research_room(room: RoomInfo, game_main: Node2D) -> void:
+static func _deplete_research_room(room: ArchivesRoomInfo, game_main: Node2D) -> void:
 	var n: int = room.get_construction_researcher_count(ZoneTypeScript.Type.RESEARCH)
 	room.zone_type = 0
-	room.room_type = RoomInfo.RoomType.EMPTY_ROOM
+	room.room_type = ArchivesRoomInfo.RoomType.EMPTY_ROOM
 	room.resources.clear()
 	var ui_node: Node = game_main.get_node_or_null("UIMain")
 	if ui_node and ui_node.get("researchers_working_in_rooms") != null:
 		ui_node.researchers_working_in_rooms = maxi(0, ui_node.researchers_working_in_rooms - n)
 
 
-static func _reserve_subtract(room: RoomInfo, reserve_idx: int, amt: int) -> void:
+static func _reserve_subtract(room: ArchivesRoomInfo, reserve_idx: int, amt: int) -> void:
 	var r: Dictionary = room.resources[reserve_idx]
 	var cur: int = int(r.get("resource_amount", 0))
 	r["resource_amount"] = maxi(0, cur - amt)
 
 
 static func _add_factor_to_player(ui: Node, resource_type: int, amt: int, game_main: Node2D) -> void:
-	var gv: Node = _GameValuesRef.get_singleton()
-	var cap: int = 999999
-	match resource_type:
-		RoomInfo.ResourceType.COGNITION:
-			cap = gv.get_factor_cap("cognition") if gv else 999999
-			ui.cognition_amount = mini(ui.cognition_amount + amt, cap)
-		RoomInfo.ResourceType.COMPUTATION:
-			cap = gv.get_factor_cap("computation") if gv else 999999
-			var cf_now: int = ui.get_computation() if ui.has_method("get_computation") else int(ui.get("computation_amount") or 0)
-			ui.computation_amount = mini(cf_now + amt, cap)
-		RoomInfo.ResourceType.WILL:
-			cap = gv.get_factor_cap("willpower") if gv else 999999
-			ui.will_amount = mini(ui.will_amount + amt, cap)
-		RoomInfo.ResourceType.PERMISSION:
-			cap = gv.get_factor_cap("permission") if gv else 999999
-			ui.permission_amount = mini(ui.permission_amount + amt, cap)
-		_:
-			return
+	ResourceLedger.add_by_type(ui, resource_type, amt)
 	game_main.call("_sync_resources_to_topbar")
 
 
-static func _produce_creation_zone_hour(room: RoomInfo, ui: Node, game_main: Node2D) -> void:
+static func _produce_creation_zone_hour(room: ArchivesRoomInfo, ui: Node, game_main: Node2D) -> void:
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
 		return
@@ -157,10 +140,10 @@ static func _produce_creation_zone_hour(room: RoomInfo, ui: Node, game_main: Nod
 	var output_amt: int = units * output_per_unit
 	ui.will_amount = maxi(0, player_will - will_needed)
 	match room.room_type:
-		RoomInfo.RoomType.SERVER_ROOM:
+		ArchivesRoomInfo.RoomType.SERVER_ROOM:
 			var perm_cap: int = gv.get_factor_cap("permission") if gv else 999999
 			ui.permission_amount = mini(ui.permission_amount + output_amt, perm_cap)
-		RoomInfo.RoomType.REASONING:
+		ArchivesRoomInfo.RoomType.REASONING:
 			ui.info_amount = ui.info_amount + output_amt
 		_:
 			return

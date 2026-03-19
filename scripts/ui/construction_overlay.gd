@@ -133,7 +133,7 @@ func hide_construction_selecting_ui() -> void:
 		_zone_buttons.visible = false
 
 
-func show_hover_for_room(room: RoomInfo, zone_type: int, player_resources: Dictionary, can_afford: bool, researchers_needed: int = 0, researchers_available: int = 0) -> void:
+func show_hover_for_room(room: ArchivesRoomInfo, zone_type: int, player_resources: Dictionary, can_afford: bool, researchers_needed: int = 0, researchers_available: int = 0) -> void:
 	if _hover_panel.has_method("show_for_room"):
 		_hover_panel.show_for_room(room, zone_type, player_resources, can_afford, researchers_needed, researchers_available)
 

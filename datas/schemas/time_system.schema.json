@@ -21,7 +21,7 @@
           "type": "number",
           "description": "现实时间换算倍率：多少秒现实时间等于 1 游戏小时。",
           "minimum": 0.01,
-          "default": 3.0
+          "default": 1.0
         }
       }
     },
@@ -46,7 +46,7 @@
           "type": "integer",
           "description": "每游戏月包含的天数。",
           "minimum": 1,
-          "default": 30
+          "default": 28
         },
         "months_per_year": {
           "type": "integer",

@@ -22,7 +22,7 @@ static func get_grid_size(size_id: String) -> Vector2i:
 
 ## 两矩形邻接类型："horizontal"（X 方向共边）| "vertical"（Y 方向共边）| ""
 ## 若未邻接返回空串。horizontal = 左右门；vertical = 楼梯传送
-static func get_adjacency_type(room_a: RoomInfo, room_b: RoomInfo) -> String:
+static func get_adjacency_type(room_a: ArchivesRoomInfo, room_b: ArchivesRoomInfo) -> String:
 	var gx_a: int = room_a.grid_x
 	var gy_a: int = room_a.grid_y
 	var size_a: String = (room_a.size_3d if room_a.size_3d else "base").to_lower()
@@ -54,7 +54,7 @@ static func get_adjacency_type(room_a: RoomInfo, room_b: RoomInfo) -> String:
 
 ## 返回 room_a 通往 room_b 时使用的门："left" | "right"（仅 horizontal 邻接有效）
 ## B 在 A 右侧 → right；B 在 A 左侧 → left
-static func get_door_side_to_adjacent(room_a: RoomInfo, room_b: RoomInfo) -> String:
+static func get_door_side_to_adjacent(room_a: ArchivesRoomInfo, room_b: ArchivesRoomInfo) -> String:
 	var gx_a: int = room_a.grid_x
 	var gy_a: int = room_a.grid_y
 	var size_a: String = (room_a.size_3d if room_a.size_3d else "base").to_lower()
@@ -107,22 +107,22 @@ static func rects_adjacent(ax1: int, ay1: int, aw: int, ah: int, bx1: int, by1: 
 
 
 ## 为房间数组计算邻接关系，写入各 room.adjacent_ids
-## rooms: Array[RoomInfo]，每个 room 需有 id、grid_x、grid_y、3d_size
+## rooms: Array[ArchivesRoomInfo]，每个 room 需有 id、grid_x、grid_y、3d_size
 ## room_3d_size_by_id: Optional Dictionary id -> "base"|"small" 等，若 room 无 3d_size 则从此表读取
 static func compute_adjacency(rooms: Array, room_3d_size_by_id: Dictionary = {}) -> void:
 	var n: int = rooms.size()
 	for i in n:
-		var room: RoomInfo = rooms[i]
+		var room: ArchivesRoomInfo = rooms[i]
 		room.adjacent_ids.clear()
 	var id_to_index: Dictionary = {}
 	for i in n:
-		var room: RoomInfo = rooms[i]
+		var room: ArchivesRoomInfo = rooms[i]
 		var rid: String = room.id if room.id else room.json_room_id
 		if rid.is_empty():
 			rid = "room_%d" % i
 		id_to_index[rid] = i
 	for i in n:
-		var room_a: RoomInfo = rooms[i]
+		var room_a: ArchivesRoomInfo = rooms[i]
 		var rid_a: String = room_a.id if room_a.id else room_a.json_room_id
 		if rid_a.is_empty():
 			rid_a = "room_%d" % i
@@ -136,7 +136,7 @@ static func compute_adjacency(rooms: Array, room_3d_size_by_id: Dictionary = {})
 		for j in n:
 			if i == j:
 				continue
-			var room_b: RoomInfo = rooms[j]
+			var room_b: ArchivesRoomInfo = rooms[j]
 			var rid_b: String = room_b.id if room_b.id else room_b.json_room_id
 			if rid_b.is_empty():
 				rid_b = "room_%d" % j
@@ -156,7 +156,7 @@ static func compute_adjacency(rooms: Array, room_3d_size_by_id: Dictionary = {})
 static func build_id_to_index(rooms: Array) -> Dictionary:
 	var id_to_index: Dictionary = {}
 	for i in rooms.size():
-		var room: RoomInfo = rooms[i]
+		var room: ArchivesRoomInfo = rooms[i]
 		var rid: String = room.id if room.id else room.json_room_id
 		if rid.is_empty():
 			rid = "room_%d" % i
@@ -166,7 +166,7 @@ static func build_id_to_index(rooms: Array) -> Dictionary:
 
 ## 应用开篇配置：开篇房间及其邻接房间设为已解锁；开篇房间设为已清理
 ## prologue_ids: Array[String] 如 ["room_00"]
-## rooms: Array[RoomInfo]
+## rooms: Array[ArchivesRoomInfo]
 ## id_to_index: Dictionary id -> int，用于按 id 查找房间
 static func apply_prologue(rooms: Array, prologue_ids: Array, id_to_index: Dictionary) -> void:
 	var unlocked_ids: Dictionary = {}
@@ -174,9 +174,9 @@ static func apply_prologue(rooms: Array, prologue_ids: Array, id_to_index: Dicti
 		unlocked_ids[pid] = true
 		var idx: Variant = id_to_index.get(pid)
 		if idx != null and idx >= 0 and idx < rooms.size():
-			var room: RoomInfo = rooms[idx]
+			var room: ArchivesRoomInfo = rooms[idx]
 			room.unlocked = true
-			room.clean_status = RoomInfo.CleanStatus.CLEANED
+			room.clean_status = ArchivesRoomInfo.CleanStatus.CLEANED
 			for adj_id in room.adjacent_ids:
 				unlocked_ids[adj_id] = true
 	for pid in unlocked_ids:
@@ -184,7 +184,7 @@ static func apply_prologue(rooms: Array, prologue_ids: Array, id_to_index: Dicti
 		if idx != null and idx >= 0 and idx < rooms.size():
 			rooms[idx].unlocked = true
 	for i in rooms.size():
-		var room: RoomInfo = rooms[i]
+		var room: ArchivesRoomInfo = rooms[i]
 		var rid: String = room.id if room.id else room.json_room_id
 		if rid.is_empty():
 			rid = "room_%d" % i

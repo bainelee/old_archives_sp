@@ -13,7 +13,7 @@ signal truth_data_changed
 
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
-const RoomInfoScript = preload("res://scripts/editor/room_info.gd")
+const RoomInfoScript = preload("res://scripts/core/room_info.gd")
 
 ## 缓存的上次数据（用于检测变化）
 var _last_factor_data: Dictionary = {}
@@ -197,13 +197,18 @@ func _get_factor_output(factor_key: String) -> Array:
 ## 计算因子状态
 ## 返回: dried_up / lacking / strained / normal / abundant
 func _calculate_factor_status(current: int, cap: int, daily_net: int) -> String:
-	if current <= 0 and daily_net <= 0:
-		return "dried_up"
-	if current <= 0 and daily_net < 0:
+	## 业务语义：
+	## stock_current 当前库存；net_per_week 每周净结余（每周总产出 - 每周总消耗）
+	## 设计口径：库存见底时，净结余<0 为 lacking；净结余==0 为 dried_up
+	var stock_current: int = current
+	var net_per_week: int = daily_net * 7
+	if stock_current <= 0 and net_per_week < 0:
 		return "lacking"
-	if current > 0 and daily_net < 0:
+	if stock_current <= 0 and net_per_week == 0:
+		return "dried_up"
+	if stock_current > 0 and daily_net < 0:
 		return "strained"
-	if current >= cap and daily_net > 0:
+	if stock_current >= cap and daily_net > 0:
 		return "abundant"
 	return "normal"
 

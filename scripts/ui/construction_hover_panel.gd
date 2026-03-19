@@ -4,7 +4,6 @@ extends "res://scripts/ui/detail_hover_panel_base.gd"
 
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
-
 @onready var _label_name: Label = $Margin/VBox/Name
 @onready var _label_room_type: Label = $Margin/VBox/RoomType
 @onready var _label_output: Label = $Margin/VBox/Output
@@ -18,12 +17,12 @@ const LABEL_COLOR_DIM := Color(0.7, 0.75, 0.85, 1)
 const INSUFFICIENT_COLOR := Color(0.95, 0.4, 0.35, 1)
 
 
-func show_for_room(room: RoomInfo, zone_type: int, player_resources: Dictionary, can_afford: bool, researchers_needed: int = 0, researchers_available: int = 0) -> void:
+func show_for_room(room: ArchivesRoomInfo, zone_type: int, player_resources: Dictionary, can_afford: bool, researchers_needed: int = 0, researchers_available: int = 0) -> void:
 	if room == null:
 		hide_panel()
 		return
 	_label_name.text = room.get_display_name()
-	_label_room_type.text = tr("HOVER_ROOM_TYPE") % RoomInfo.get_room_type_name(room.room_type)
+	_label_room_type.text = tr("HOVER_ROOM_TYPE") % ArchivesRoomInfo.get_room_type_name(room.room_type)
 	var cost: Dictionary = room.get_construction_cost(zone_type)
 	_label_cost.text = tr("HOVER_CONSTRUCTION_COST") % UIUtils.format_cost_with_have(cost, player_resources)
 	if _label_researcher:
@@ -39,7 +38,7 @@ func show_for_room(room: RoomInfo, zone_type: int, player_resources: Dictionary,
 	visible = true
 
 
-func _get_output_text(room: RoomInfo, zone_type: int) -> String:
+func _get_output_text(room: ArchivesRoomInfo, zone_type: int) -> String:
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
 		return tr("OUTPUT_NONE")
@@ -56,9 +55,9 @@ func _get_output_text(room: RoomInfo, zone_type: int) -> String:
 		if output_per_unit <= 0:
 			return tr("OUTPUT_NONE")
 		match room.room_type:
-			RoomInfo.RoomType.SERVER_ROOM:
+			ArchivesRoomInfo.RoomType.SERVER_ROOM:
 				return tr("LABEL_PERMISSION_H") % (output_per_unit * units)
-			RoomInfo.RoomType.REASONING:
+			ArchivesRoomInfo.RoomType.REASONING:
 				return tr("LABEL_INFO_H") % (output_per_unit * units)
 			_:
 				return tr("OUTPUT_NONE")
@@ -68,7 +67,7 @@ func _get_output_text(room: RoomInfo, zone_type: int) -> String:
 	return tr("OUTPUT_NONE")
 
 
-func _get_consume_text(room: RoomInfo, zone_type: int) -> String:
+func _get_consume_text(room: ArchivesRoomInfo, zone_type: int) -> String:
 	if zone_type != 2:  ## CREATION
 		return tr("OUTPUT_NONE")
 	var gv: Node = _GameValuesRef.get_singleton()

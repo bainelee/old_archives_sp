@@ -89,7 +89,7 @@ static func draw_all(canvas: CanvasItem, editor: Node) -> void:
 			draw_single_base_image(canvas, tex, room.rect, cell_size)
 
 	for i in rooms.size():
-		var room: RoomInfo = rooms[i]
+		var room: ArchivesRoomInfo = rooms[i]
 		var r: Rect2i = room.rect
 		var border_color: Color = Color(0.2, 0.6, 1, 0.8)
 		if i == selected_idx:

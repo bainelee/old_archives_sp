@@ -6,6 +6,8 @@
 
 **数据权威**：运行时以 `datas/*.json` 为准（`game_values.json`、`cleanup_system.json`、`construction_system.json`、`researcher_system.json` 等）。本文档为设计说明，修改数值时需同步更新对应 JSON 及 schema，见 [00-data-driven-index](00-data-driven-index.md)。
 
+**时间口径（当前）**：`1.0 秒 = 1 游戏小时`，`28 天 = 1 游戏月`（与 `datas/time_system.json`、`datas/schemas/time_system.schema.json` 保持一致）。
+
 ---
 
 ## 0. 因子储藏系统

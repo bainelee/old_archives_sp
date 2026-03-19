@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "res://datas/schemas/actor_table.schema.json",
+  "title": "ActorTable",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["actors"],
+  "properties": {
+    "actors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name_zh", "name_en"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": "string"
+          },
+          "name_en": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
