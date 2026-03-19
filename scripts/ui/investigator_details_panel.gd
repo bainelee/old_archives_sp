@@ -1,71 +1,202 @@
 @tool
-extends PanelContainer
+class_name InvestigatorDetailsPanel
+extends DetailPanelBase
 ## 调查员详细信息面板
 ## 结构：无储存条；可分配调查员、已分配调查员+探索节点细则、已招募调查员+事务所/事件细则；Figma 72:1259
 ## 编辑器可见逻辑禁止放在 _ready；见 .cursor/rules/ui-no-ready.mdc
 
-@export_group("布局配置")
-@export var content_margin_horizontal: int = 20:
-	set(v):
-		content_margin_horizontal = maxi(0, v)
-		_apply_content_margin()
-
-@export var separation: int = 4:
-	set(v):
-		separation = maxi(0, v)
-		_apply_separation()
-
-var _content_margin: MarginContainer
-var _content_vbox: VBoxContainer
-var _details_vbox: VBoxContainer
+var _title_label: Label
 
 func _enter_tree() -> void:
-	_details_vbox = get_node_or_null("DetailsVboxContainer") as VBoxContainer
-	_content_margin = get_node_or_null("DetailsVboxContainer/ContentMargin") as MarginContainer
-	_content_vbox = get_node_or_null("DetailsVboxContainer/ContentMargin/ContentVbox") as VBoxContainer
-	_apply_content_margin()
-	_apply_separation()
+	super._enter_tree()
+	_title_label = get_node_or_null("DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/TextTitleName") as Label
+	_update_title()
 
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
+	super._ready()
+
+
+## 显示调查员详细信息
+func show_panel(data: Dictionary) -> void:
+	super.show_panel(data)
+	_refresh_display(data)
+
+
+## 刷新当前显示的数据
+func refresh_data() -> void:
+	super.refresh_data()
+	if _data_provider:
+		var new_data: Dictionary = _data_provider.get_investigator_breakdown()
+		_refresh_display(new_data)
+
+
+func _refresh_display(data: Dictionary) -> void:
+	var content := _get_content_vbox()
+	if not content:
 		return
-	visible = false
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	## 清空现有内容
+	clear_container(content)
+
+	## 获取数据
+	var total: int = data.get("total", 0)
+	var assigned: int = data.get("assigned", 0)
+	var available: int = data.get("available", 0)
+	var assigned_details: Array = data.get("assigned_details", [])
+	var recruited_details: Array = data.get("recruited_details", [])
+
+	## 如果可分配未提供，计算它
+	if available == 0 and total > 0:
+		available = maxi(0, total - assigned)
+
+	## 可分配调查员数量
+	_add_section_title(content, tr("INVESTIGATOR_AVAILABLE"))
+	_add_info_row(content, tr("AVAILABLE_COUNT"), str(available))
+
+	## 已分配调查员数量
+	_add_split_line(content)
+	_add_section_title(content, tr("INVESTIGATOR_ASSIGNED"))
+	_add_info_row(content, tr("ASSIGNED_COUNT"), str(assigned))
+
+	## 已分配细则：探索节点名称+数量
+	if assigned_details.size() > 0:
+		for detail in assigned_details:
+			var node_name: String = detail.get("node_name", tr("UNKNOWN_NODE"))
+			var count: int = detail.get("count", 0)
+			_add_detail_row(content, node_name, str(count))
+	elif assigned > 0:
+		## 有分配但没有细则时显示占位文本
+		_add_detail_row(content, tr("EXPLORATION_NODES"), "...")
+
+	## 已招募调查员数量
+	_add_split_line(content)
+	_add_section_title(content, tr("INVESTIGATOR_RECRUITED"))
+	_add_info_row(content, tr("RECRUITED_COUNT"), str(total))
+
+	## 已招募细则：事务所区招募+事件/探索节点招募
+	if recruited_details.size() > 0:
+		for detail in recruited_details:
+			var source: String = detail.get("source", tr("UNKNOWN_SOURCE"))
+			var count: int = detail.get("count", 0)
+			_add_detail_row(content, source, str(count))
+	else:
+		## 默认显示两种来源占位
+		_add_detail_row(content, tr("OFFICE_RECRUITMENT"), "0")
+		_add_detail_row(content, tr("EVENT_RECRUITMENT"), "0")
+	
+	## 确保面板高度自适应内容
+	call_deferred("_force_layout_refresh")
 
 
-func _get_content_margin() -> MarginContainer:
-	return _content_margin if _content_margin else get_node_or_null("DetailsVboxContainer/ContentMargin") as MarginContainer
+## 强制刷新面板布局（延迟一帧确保内容更新完成）
+func _force_layout_refresh() -> void:
+	## 重置面板最小高度，让其根据内容自适应
+	custom_minimum_size.y = 0
+	custom_minimum_size.x = 320
+	## 强制重新计算大小
+	reset_size()
+	## 重新排序
+	queue_sort()
+	var content := _get_content_vbox()
+	if content:
+		content.reset_size()
+		content.queue_sort()
 
 
-func _get_details_vbox() -> VBoxContainer:
-	return _details_vbox if _details_vbox else get_node_or_null("DetailsVboxContainer") as VBoxContainer
+## 修复预置行的布局（确保Label不占满空间，数值右对齐）
+func _fix_predefined_rows_layout() -> void:
+	## 场景文件已正确设置size_flags，此函数只设置horizontal_alignment
+	var content := _get_content_vbox()
+	if not content:
+		return
+	
+	## 修复所有预置行的布局（只设置对齐，不覆盖size_flags）
+	var row_names := []
+	for row_name in row_names:
+		var row := content.get_node_or_null(row_name) as HBoxContainer
+		if not row:
+			continue
+		
+		for child in row.get_children():
+			if child is Label:
+				if child.name == "Value":
+					child.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+				else:
+					child.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 
 
-func _get_content_vbox() -> VBoxContainer:
-	return _content_vbox if _content_vbox else get_node_or_null("DetailsVboxContainer/ContentMargin/ContentVbox") as VBoxContainer
+## 添加分隔线
+func _add_split_line(container: VBoxContainer) -> void:
+	var line := ColorRect.new()
+	line.custom_minimum_size = Vector2(280, 2)
+	line.color = Color(0.3, 0.35, 0.4, 0.5)
+	container.add_child(line)
 
 
-func _apply_content_margin() -> void:
-	var m: MarginContainer = _get_content_margin()
-	if m:
-		m.add_theme_constant_override("margin_left", content_margin_horizontal)
-		m.add_theme_constant_override("margin_right", content_margin_horizontal)
+## 添加章节标题
+func _add_section_title(container: VBoxContainer, title: String) -> void:
+	var label := Label.new()
+	label.text = title
+	label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	container.add_child(label)
 
 
-func _apply_separation() -> void:
-	var dv: VBoxContainer = _get_details_vbox()
-	var cv: VBoxContainer = _get_content_vbox()
-	if dv:
-		dv.add_theme_constant_override("separation", separation)
-	if cv:
-		cv.add_theme_constant_override("separation", separation)
+## 添加信息行
+func _add_info_row(container: VBoxContainer, label: String, value: String, value_color: Color = Color(0.063, 0.063, 0.063)) -> void:
+	var hbox := HBoxContainer.new()
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(hbox)
+
+	var label_node := Label.new()
+	label_node.text = label
+	label_node.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	label_node.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(label_node)
+
+	## 弹性空间，将标签和数值推到两边
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer)
+
+	var value_node := Label.new()
+	value_node.text = value
+	value_node.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value_node.add_theme_color_override("font_color", value_color)
+	value_node.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(value_node)
 
 
-## 运行期：显示调查员详细信息
-func show_for_investigator(_data: Dictionary) -> void:
-	visible = true
+## 添加细则行
+func _add_detail_row(container: VBoxContainer, source: String, value: String) -> void:
+	var hbox := HBoxContainer.new()
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(hbox)
+
+	var source_label := Label.new()
+	source_label.text = "  " + source
+	source_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	source_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(source_label)
+
+	## 弹性空间，将来源和数值推到两边
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(spacer)
+
+	var value_label := Label.new()
+	value_label.text = value
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
+	value_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	hbox.add_child(value_label)
 
 
-func hide_panel() -> void:
-	visible = false
+## 更新标题（支持本地化）
+func _update_title() -> void:
+	if not _title_label:
+		return
+	var title_text := tr("LABEL_INVESTIGATOR")
+	if title_text == "LABEL_INVESTIGATOR" or title_text.is_empty():
+		title_text = "调查员"
+	_title_label.text = title_text

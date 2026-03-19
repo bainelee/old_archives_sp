@@ -26,6 +26,7 @@ ErosionCore="*res://scripts/core/erosion_core.gd"
 GameValues="*res://scripts/core/game_values.gd"
 PersonnelErosionCore="*res://scripts/core/personnel_erosion_core.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
+DataProviders="*res://scripts/core/data_providers.gd"
 
 [display]
 

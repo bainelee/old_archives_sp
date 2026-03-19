@@ -4,9 +4,17 @@
 [ext_resource type="Script" path="res://scripts/ui/ui_main_debug_panel.gd" id="1_debug_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/topbar_figma.tscn" id="2_topbar_figma"]
 [ext_resource type="PackedScene" path="res://scenes/ui/calamity_bar.tscn" id="4_calamity_bar"]
-[ext_resource type="PackedScene" path="res://scenes/ui/researcher_hover_panel.tscn" id="5_researcher_panel"]
-[ext_resource type="PackedScene" path="res://scenes/ui/factor_hover_panel.tscn" id="6_factor_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/researcher_list_panel.tscn" id="7_researcher_list"]
+[ext_resource type="PackedScene" path="res://scenes/ui/factor_details_panel.tscn" id="8_cognition_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/factor_details_panel_willpower.tscn" id="9_willpower_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/factor_details_panel_permission.tscn" id="10_permission_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/factor_details_panel_computation.tscn" id="11_computation_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/factor_details_panel_shelter.tscn" id="12_shelter_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/researcher_details_panel.tscn" id="13_researcher_detail_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/housing_details_panel.tscn" id="14_housing_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/information_details_panel.tscn" id="15_information_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/investigator_details_panel.tscn" id="16_investigator_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/truth_details_panel.tscn" id="17_truth_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
 bg_color = Color(0.12, 0.12, 0.18, 0.92)
@@ -190,9 +198,25 @@ text = "+"
 
 [node name="CalamityBar" parent="." unique_id=1203875538 instance=ExtResource("4_calamity_bar")]
 
-[node name="ResearcherHoverPanel" parent="." unique_id=994421564 instance=ExtResource("5_researcher_panel")]
+[node name="CognitionDetailPanel" parent="." unique_id=994421566 instance=ExtResource("8_cognition_panel")]
 
-[node name="FactorHoverPanel" parent="." unique_id=994421565 instance=ExtResource("6_factor_panel")]
+[node name="WillpowerDetailPanel" parent="." unique_id=994421567 instance=ExtResource("9_willpower_panel")]
+
+[node name="PermissionDetailPanel" parent="." unique_id=994421568 instance=ExtResource("10_permission_panel")]
+
+[node name="ComputationDetailPanel" parent="." unique_id=994421569 instance=ExtResource("11_computation_panel")]
+
+[node name="ShelterDetailPanel" parent="." unique_id=994421570 instance=ExtResource("12_shelter_panel")]
+
+[node name="ResearcherDetailPanel" parent="." unique_id=994421571 instance=ExtResource("13_researcher_detail_panel")]
+
+[node name="HousingDetailPanel" parent="." unique_id=994421572 instance=ExtResource("14_housing_panel")]
+
+[node name="InformationDetailPanel" parent="." unique_id=994421573 instance=ExtResource("15_information_panel")]
+
+[node name="InvestigatorDetailPanel" parent="." unique_id=994421574 instance=ExtResource("16_investigator_panel")]
+
+[node name="TruthDetailPanel" parent="." unique_id=994421575 instance=ExtResource("17_truth_panel")]
 
 [node name="BottomRightBar" type="HBoxContainer" parent="." unique_id=2046743287]
 anchors_preset = 3

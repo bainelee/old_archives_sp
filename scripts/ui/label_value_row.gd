@@ -10,15 +10,24 @@ func _init() -> void:
 ## 创建并配置一行，label_text 会追加 LABEL_SUFFIX
 static func create_row(label_text: String, value: String, value_color: Color) -> HBoxContainer:
 	var row: HBoxContainer = LabelValueRow.new()
+	
 	var lbl: Label = Label.new()
 	lbl.text = label_text + TranslationServer.translate("LABEL_SUFFIX")
-	lbl.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
+	lbl.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
 	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	
+	var spacer: Control = Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
 	var val: Label = Label.new()
 	val.text = value
 	val.add_theme_color_override("font_color", value_color)
 	val.add_theme_font_size_override("font_size", 13)
-	val.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	val.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	
 	row.add_child(lbl)
+	row.add_child(spacer)
 	row.add_child(val)
 	return row

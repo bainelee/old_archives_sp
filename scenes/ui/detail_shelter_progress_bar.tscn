@@ -1,0 +1,89 @@
+[gd_scene load_steps=3 format=3 uid="uid://shelter_progress_bar"]
+
+[ext_resource type="Script" path="res://scripts/ui/detail_shelter_progress_bar.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/storage_progress_bar_back.png" id="2_back"]
+
+[node name="DetailShelterProgressBar" type="MarginContainer"]
+custom_minimum_size = Vector2(280, 20)
+layout_mode = 2
+script = ExtResource("1_script")
+assigned = 1000.0
+deficit = 200.0
+capacity = 1200.0
+
+[node name="Content" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Back" type="TextureRect" parent="Content"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SegmentsWrap" type="Control" parent="Content"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 278.0
+offset_bottom = 18.0
+
+[node name="SegmentsHBox" type="HBoxContainer" parent="Content/SegmentsWrap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+custom_minimum_size = Vector2(0, 16)
+
+[node name="SegmentAssigned" type="ColorRect" parent="Content/SegmentsWrap/SegmentsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 83.33
+color = Color(0.886, 0.616, 0.176, 1)
+
+[node name="SegmentBack" type="ColorRect" parent="Content/SegmentsWrap/SegmentsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+color = Color(0.349, 0.349, 0.349, 1)
+
+[node name="SegmentDeficit" type="ColorRect" parent="Content/SegmentsWrap/SegmentsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 16.67
+color = Color(0.831, 0.118, 0.118, 1)
+
+[node name="CenterLabel" type="Label" parent="Content"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -6.0
+offset_right = 40.0
+offset_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
+theme_override_font_sizes/font_size = 12
+text = "1,000 / 1,200"
+horizontal_alignment = 1
+vertical_alignment = 1

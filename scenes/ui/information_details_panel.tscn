@@ -37,6 +37,7 @@ script = ExtResource("1_script")
 
 [node name="DetailsVboxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="HeaderVbox" type="VBoxContainer" parent="DetailsVboxContainer"]
@@ -91,6 +92,7 @@ stretch_mode = 5
 [node name="TextTitleName" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
 custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "INFORMATION"
@@ -101,11 +103,14 @@ size_flags_horizontal = 3
 
 [node name="ContentMargin" type="MarginContainer" parent="DetailsVboxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 20
 
 [node name="ContentVbox" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="ProductionWrap" type="MarginContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]

@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bclsm3813db14" path="res://assets/ui/factor_details/details_background.png" id="3_bg"]
 [ext_resource type="Texture2D" uid="uid://bmv8dxgvdbv80" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="4_frame"]
 [ext_resource type="Texture2D" uid="uid://nuagb3gxh68n" path="res://assets/icons/icon_shelter_white.png" id="5_icon"]
-[ext_resource type="PackedScene" path="res://scenes/ui/detail_storage_progress_bar.tscn" id="6_progress"]
+[ext_resource type="PackedScene" path="res://scenes/ui/detail_shelter_progress_bar.tscn" id="6_shelter_progress"]
 [ext_resource type="Texture2D" uid="uid://s27bd0p4dkjf" path="res://assets/ui/factor_details/up_pointer_cognition.png" id="8_up"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bg"]
@@ -38,6 +38,7 @@ script = ExtResource("1_script")
 
 [node name="DetailsVboxContainer" type="VBoxContainer" parent="." unique_id=414355052]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="HeaderVbox" type="VBoxContainer" parent="DetailsVboxContainer" unique_id=1907622868]
@@ -92,6 +93,7 @@ stretch_mode = 5
 [node name="TextTitleName" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=753009974]
 custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "SHELTER POWER"
@@ -102,21 +104,24 @@ size_flags_horizontal = 3
 
 [node name="ContentMargin" type="MarginContainer" parent="DetailsVboxContainer" unique_id=1991015468]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 20
 
 [node name="ContentVbox" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin" unique_id=306979442]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="DetailStorageInfo" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=70195235]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
 [node name="TextStorageTitle" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo" unique_id=511724618]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "庇护能量出力上限"
 
 [node name="ProgressBarWrapper" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo" unique_id=266475948]
@@ -125,15 +130,16 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="StorageProgressBar" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/ProgressBarWrapper" unique_id=268058832 instance=ExtResource("6_progress")]
+[node name="ShelterProgressBar" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/ProgressBarWrapper" unique_id=268058832 instance=ExtResource("6_shelter_progress")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-current_value = 1000.0
-max_value = 1200.0
+assigned = 1000.0
+deficit = 200.0
+capacity = 1200.0
 
 [node name="ProgressBarLabel" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/ProgressBarWrapper" unique_id=1920001142]
 layout_mode = 1
@@ -160,9 +166,11 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AllocatedRow" unique_id=1316968273]
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 16
 text = "已分配："
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AllocatedRow" unique_id=296809318]
 layout_mode = 2
@@ -170,6 +178,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AllocatedRow" unique_id=1687575028]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 16
 text = "1,000"
@@ -207,9 +216,11 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InherentAllocWrap/InherentAlloc/InherentAllocTitle" unique_id=1038361399]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
 text = "固有分配"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InherentAllocWrap/InherentAlloc/InherentAllocTitle" unique_id=417368769]
 layout_mode = 2
@@ -217,6 +228,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InherentAllocWrap/InherentAlloc/InherentAllocTitle" unique_id=580394898]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
 text = "200/天"
@@ -237,9 +249,11 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InherentAllocWrap/InherentAlloc/InherentEntries/Entry1/HBox" unique_id=32288126]
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 text = "上位者培养仓"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InherentAllocWrap/InherentAlloc/InherentEntries/Entry1/HBox" unique_id=1815805991]
 layout_mode = 2
@@ -247,6 +261,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/InherentAllocWrap/InherentAlloc/InherentEntries/Entry1/HBox" unique_id=897477361]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 text = "200/天"
@@ -280,9 +295,11 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ConstructionAllocWrap/ConstructionAllocTitle" unique_id=1298724593]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
 text = "建设分配"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ConstructionAllocWrap/ConstructionAllocTitle" unique_id=1298724594]
 layout_mode = 2
@@ -290,6 +307,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/ConstructionAllocWrap/ConstructionAllocTitle" unique_id=1298724595]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
 text = "800/天"
@@ -327,9 +345,11 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle" unique_id=1465748785]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
 text = "产出"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle" unique_id=1778714062]
 layout_mode = 2
@@ -337,6 +357,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle" unique_id=2142955686]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
 text = "1,000/天"
@@ -357,9 +378,11 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox" unique_id=1726037708]
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 text = "档案馆核心"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox" unique_id=1074374611]
 layout_mode = 2
@@ -367,6 +390,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox" unique_id=466161522]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 text = "1,000/天"

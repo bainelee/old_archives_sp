@@ -38,6 +38,7 @@ script = ExtResource("1_script")
 
 [node name="DetailsVboxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="HeaderVbox" type="VBoxContainer" parent="DetailsVboxContainer"]
@@ -92,9 +93,10 @@ stretch_mode = 5
 [node name="TextTitleName" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
 custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
-text = "HOUSING"
+text = "住房"
 
 [node name="SpacerTitle" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
 layout_mode = 2
@@ -102,21 +104,24 @@ size_flags_horizontal = 3
 
 [node name="ContentMargin" type="MarginContainer" parent="DetailsVboxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 20
 
 [node name="ContentVbox" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="DetailStorageInfo" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
 [node name="TextStorageTitle" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "住房信息总览"
 
 [node name="ProgressBarWrapper" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo"]
@@ -139,16 +144,20 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AvailableRow"]
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 16
 text = "可分配住房"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AvailableRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/AvailableRow"]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 16
 text = "0"
@@ -178,17 +187,21 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DeficitRow"]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 20
 text = "住房缺口"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DeficitRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DeficitRow"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 20
 text = "4"
 horizontal_alignment = 2
@@ -208,17 +221,21 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle"]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 20
 text = "住房产出"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 20
 text = "32"
 horizontal_alignment = 2
@@ -238,9 +255,11 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 14
 text = "居住区"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox"]
 layout_mode = 2
@@ -248,7 +267,8 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry1/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 14
 text = "30"
 horizontal_alignment = 2
@@ -264,9 +284,11 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry2/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 14
 text = "造物区"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry2/HBox"]
 layout_mode = 2
@@ -274,7 +296,8 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries/Entry2/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 14
 text = "2"
 horizontal_alignment = 2
@@ -303,17 +326,21 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalRow"]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 20
 text = "住房总数"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalRow"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalRow"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 20
 text = "32"
 horizontal_alignment = 2

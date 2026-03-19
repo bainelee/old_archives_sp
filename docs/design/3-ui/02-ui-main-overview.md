@@ -136,6 +136,52 @@
 | -4 | COLOR_SURGE 赤红 | 涌动阴霾 |
 | -8 | COLOR_LYCAON 深紫 | 莱卡昂的暗影 |
 
+### 4.4 详情面板通用布局规范
+
+适用于所有详情面板：因子详情（认知/计算/意志/权限/庇护）、住房详情、研究员详情、调查员详情、信息详情、真相详情等。
+
+#### 布局结构
+
+```
+标题栏 (40px 高，蓝色背景)
+    ↓ 8px (ContentMargin.margin_top)
+内容区
+    ├── DetailStorageInfo (如有"总览"标题 + 进度条)
+    │   ├── 总览标题 (如"住房信息总览") - 14px 字体
+    │   ↓ 4px (DetailStorageInfo.separation)
+    │   └── 进度条
+    └── 其他条目...
+```
+
+#### 间距规则（统一）
+
+| 位置 | 数值 | 节点/属性 |
+|------|------|-----------|
+| 标题栏 → 内容区 | 8px | ContentMargin.margin_top |
+| 总览标题 → 进度条 | 4px | DetailStorageInfo.separation |
+
+#### 字体规范（统一）
+
+| 元素 | 字号 |
+|------|------|
+| 总览标题 (TextStorageTitle) | 14px |
+| 面板标题 (DetailsTitle) | 20px |
+
+#### 关键文件
+
+| 面板类型 | 场景文件 |
+|----------|----------|
+| 认知因子 | `scenes/ui/factor_details_panel.tscn` |
+| 计算因子 | `scenes/ui/factor_details_panel_computation.tscn` |
+| 意志因子 | `scenes/ui/factor_details_panel_willpower.tscn` |
+| 权限因子 | `scenes/ui/factor_details_panel_permission.tscn` |
+| 庇护 | `scenes/ui/factor_details_panel_shelter.tscn` |
+| 住房 | `scenes/ui/housing_details_panel.tscn` |
+| 研究员 | `scenes/ui/researcher_details_panel.tscn` |
+| 调查员 | `scenes/ui/investigator_details_panel.tscn` |
+| 信息 | `scenes/ui/information_details_panel.tscn` |
+| 真相 | `scenes/ui/truth_details_panel.tscn` |
+
 ---
 
 ## 5. 关键文件索引

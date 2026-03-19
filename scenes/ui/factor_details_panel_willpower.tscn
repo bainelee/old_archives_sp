@@ -39,6 +39,7 @@ script = ExtResource("1_script")
 
 [node name="DetailsVboxContainer" type="VBoxContainer" parent="." unique_id=414355052]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="HeaderVbox" type="VBoxContainer" parent="DetailsVboxContainer" unique_id=1907622868]
@@ -93,6 +94,7 @@ stretch_mode = 5
 [node name="TextTitleName" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=753009974]
 custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "FACTOR-WILLPOWER"
@@ -103,6 +105,7 @@ size_flags_horizontal = 3
 
 [node name="TextTitleState" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout" unique_id=440404593]
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
 text = "SURPLUS"
@@ -110,21 +113,24 @@ horizontal_alignment = 2
 
 [node name="ContentMargin" type="MarginContainer" parent="DetailsVboxContainer" unique_id=1991015468]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 20
 
 [node name="ContentVbox" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin" unique_id=306979442]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="DetailStorageInfo" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox" unique_id=70195235]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
 [node name="TextStorageTitle" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo" unique_id=511724618]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Storage Server - Willpower Factor"
 
 [node name="ProgressBarWrapper" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo" unique_id=266475948]
@@ -184,9 +190,11 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalExpectedBurn" unique_id=1316968273]
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 16
 text = "预期总消耗："
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalExpectedBurn" unique_id=296809318]
 layout_mode = 2
@@ -194,6 +202,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/TotalExpectedBurn" unique_id=1687575028]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0.063, 0.063, 0.063, 1)
 theme_override_font_sizes/font_size = 16
 text = "480"
@@ -231,9 +240,11 @@ theme_override_constants/separation = 8
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadTitle" unique_id=1038361399]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
 text = "固有消耗"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadTitle" unique_id=417368769]
 layout_mode = 2
@@ -241,6 +252,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadTitle" unique_id=580394898]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 20
 text = "200/天"
@@ -261,9 +273,11 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry1/HBox" unique_id=32288126]
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 text = "区域基础意志消耗"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry1/HBox" unique_id=1815805991]
 layout_mode = 2
@@ -271,6 +285,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry1/HBox" unique_id=897477361]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 text = "120/天"
@@ -287,9 +302,11 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry2/HBox" unique_id=843745313]
 layout_mode = 2
+size_flags_horizontal = 0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 text = "探索-杜尔金矿区"
+horizontal_alignment = 0
 
 [node name="Spacer" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry2/HBox" unique_id=1262972523]
 layout_mode = 2
@@ -297,6 +314,7 @@ size_flags_horizontal = 3
 
 [node name="Value" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/FixedOverheadWrap/FixedOverhead/FixedOverheadEntries/Entry2/HBox" unique_id=1140841767]
 layout_mode = 2
+size_flags_horizontal = 8
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 14
 text = "80/天"

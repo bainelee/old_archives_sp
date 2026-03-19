@@ -1,92 +1,176 @@
 @tool
-extends PanelContainer
+extends DetailPanelBase
 ## 权限因子详细信息面板
-## 权限因子无资源消耗 list（均为即时瞬时消耗），仅含储存、产出、资源富余；见 [ui-detail-panel-design.md](docs/predesign/ui-detail-panel-design.md)
+## 继承自 DetailPanelBase，复用基类的布局配置与工具方法
+## 权限因子无资源消耗 list（均为即时瞬时消耗），仅含储存、产出、资源富余
 ## 复用 [ui-detail-panel-summary.md](docs/predesign/ui-detail-panel-summary.md) 的组件与资产；Figma 67:630
 ## 编辑器可见逻辑禁止放在 _ready；见 .cursor/rules/ui-no-ready.mdc / ui-editor-live.mdc
 
-@export_group("布局配置")
-@export var content_margin_horizontal: int = 20:
-	set(v):
-		content_margin_horizontal = maxi(0, v)
-		_apply_content_margin()
+## 因子类型标识
+const FACTOR_KEY := "permission"
 
-@export var separation: int = 4:
-	set(v):
-		separation = maxi(0, v)
-		_apply_separation()
-
-@export_group("编辑器")
-@export var editor_preview: bool = true:
-	set(v):
-		editor_preview = v
-		_update_editor_preview()
-
+## 节点路径配置（可在 Inspector 中调整）
+@export_group("节点路径")
+@export var title_name_label_path: NodePath = NodePath("DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/TextTitleName")
+@export var title_state_label_path: NodePath = NodePath("DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/TextTitleState")
 @export var storage_progress_wrapper_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/ProgressBarWrapper")
+@export var warning_text_label_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/StorageWarning/WarningText")
+@export var output_title_value_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputTitle/Value")
+@export var surplus_shortage_label_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/ResourceSurplus/Label")
+@export var surplus_shortage_value_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/ResourceSurplus/Value")
+@export var storage_row_value_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/ResourceStorageRow/HBox/Value")
+@export var storage_title_label_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/DetailStorageInfo/TextStorageTitle")
 
-var _content_margin: MarginContainer
-var _content_vbox: VBoxContainer
-var _details_vbox: VBoxContainer
+## 条目容器路径
+@export var output_entries_container_path: NodePath = NodePath("DetailsVboxContainer/ContentMargin/ContentVbox/OutputWrap/Output/OutputEntries")
+
+## 对象池引用
+var _entries_pool: DetailEntriesPool = null
+
 
 func _enter_tree() -> void:
-	_details_vbox = get_node_or_null("DetailsVboxContainer") as VBoxContainer
-	_content_margin = get_node_or_null("DetailsVboxContainer/ContentMargin") as MarginContainer
-	_content_vbox = get_node_or_null("DetailsVboxContainer/ContentMargin/ContentVbox") as VBoxContainer
-	_apply_content_margin()
-	_apply_separation()
+	super._enter_tree()
+	_update_title()
+	_update_storage_title()
 	if not Engine.is_editor_hint():
 		call_deferred("_sync_storage_progress_label")
 
 
 func _ready() -> void:
+	super._ready()
 	if Engine.is_editor_hint():
 		return
-	visible = false
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	## 初始化对象池
+	_entries_pool = DetailEntriesPool.new()
 
 
-func _get_content_margin() -> MarginContainer:
-	return _content_margin if _content_margin else get_node_or_null("DetailsVboxContainer/ContentMargin") as MarginContainer
+## ============================================================================
+## 数据展示接口（重写基类方法）
+## ============================================================================
+
+## 显示面板并绑定数据
+## 权限因子特殊处理：无消耗列表，仅显示储存、产出、资源富余
+func show_panel(data: Dictionary) -> void:
+	## 先调用基类设置可见性，确保子节点准备好
+	super.show_panel(data)
+	
+	## 从 DataProviders 获取最新数据
+	var factor_data: Dictionary = DataProviders.get_factor_breakdown(FACTOR_KEY)
+	
+	## 更新标题栏状态文本
+	_update_title_state(factor_data.get("status", ""))
+	
+	## 更新储存进度条（延迟一帧确保节点布局完成）
+	call_deferred("_update_storage_progress_deferred", factor_data.get("current", 0), factor_data.get("cap", 0))
+	
+	## 更新警告文本
+	_update_warning_text(factor_data.get("warning_text", ""))
+	
+	## 使用对象池动态生成条目
+	_clear_all_entries()
+	
+	## 产出条目
+	var output_entries: Array = factor_data.get("output", [])
+	_update_output(output_entries)
+	
+	## 更新资源富余/缺少
+	_update_surplus_shortage(factor_data.get("daily_net", 0))
+	
+	## 修复预置行的布局（确保Label不占满空间，数值右对齐）
+	call_deferred("_fix_predefined_rows_layout")
+	
+	## 确保面板高度自适应内容
+	call_deferred("_force_layout_refresh")
 
 
-func _get_details_vbox() -> VBoxContainer:
-	return _details_vbox if _details_vbox else get_node_or_null("DetailsVboxContainer") as VBoxContainer
+## 强制刷新面板布局（延迟一帧确保内容更新完成）
+func _force_layout_refresh() -> void:
+	## 重置面板最小高度，让其根据内容自适应
+	custom_minimum_size.y = 0
+	custom_minimum_size.x = 320
+	## 强制重新计算大小
+	reset_size()
+	## 重新排序
+	queue_sort()
+	var content := _get_content_vbox()
+	if content:
+		content.reset_size()
+		content.queue_sort()
 
 
-func _get_content_vbox() -> VBoxContainer:
-	return _content_vbox if _content_vbox else get_node_or_null("DetailsVboxContainer/ContentMargin/ContentVbox") as VBoxContainer
-
-
-func _apply_content_margin() -> void:
-	var m: MarginContainer = _get_content_margin()
-	if m:
-		m.add_theme_constant_override("margin_left", content_margin_horizontal)
-		m.add_theme_constant_override("margin_right", content_margin_horizontal)
-
-
-func _apply_separation() -> void:
-	var dv: VBoxContainer = _get_details_vbox()
-	var cv: VBoxContainer = _get_content_vbox()
-	if dv:
-		dv.add_theme_constant_override("separation", separation)
-	if cv:
-		cv.add_theme_constant_override("separation", separation)
-
-
-func _format_storage_num(n: float) -> String:
-	var i := int(n)
-	var s := str(abs(i))
-	var out := ""
-	for j in range(s.length()):
-		if j > 0 and (s.length() - j) % 3 == 0:
-			out += ","
-		out += s[j]
-	return "-" + out if i < 0 else out
-
-
-func _sync_storage_progress_label() -> void:
-	if Engine.is_editor_hint():
+## 修复预置行的布局（确保Label不占满空间，数值右对齐）
+func _fix_predefined_rows_layout() -> void:
+	## 首先确保 ContentVbox 填满 ContentMargin 的可用空间
+	var content_margin := _get_content_margin()
+	var content := _get_content_vbox()
+	
+	if content_margin and content:
+		## ContentVbox 应该填满 ContentMargin 减去边距后的宽度
+		## ContentMargin 宽度 = 316，边距 = 左右各 20，所以可用宽度 = 276
+		content.custom_minimum_size.x = 276
+		content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
+	if not content:
 		return
+	
+	## 修复所有预置行的布局 - 正确的布局策略：
+	## Label: SHRINK_BEGIN (0) - 只占用自身文本宽度
+	## Spacer: EXPAND_FILL (3) - 占据所有剩余空间
+	## Value: SHRINK_END (8) - 只占用自身文本宽度，但通过alignment右对齐
+	
+	## 注意：权限因子面板没有 TotalExpectedBurn 行，只有产出和资源富余
+	var row_names := ["ResourceSurplus", "ResourceStorageRow"]
+	for row_name in row_names:
+		var row := content.get_node_or_null(row_name) as HBoxContainer
+		if not row:
+			continue
+		
+		## 强制行填满 ContentVbox 宽度
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.custom_minimum_size.x = 276  ## ContentVbox 可用宽度
+		
+		## 遍历行的子节点
+		for child in row.get_children():
+			if child is Label:
+				if child.name == "Value":
+					## Value: SHRINK_END + 右对齐，不占满空间
+					child.size_flags_horizontal = Control.SIZE_SHRINK_END
+					child.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+				else:
+					## Label: SHRINK_BEGIN + 左对齐，不占满空间
+					child.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+					child.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+					
+			elif child is Control and child.name == "Spacer":
+				## Spacer应该占据所有剩余空间
+				child.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				child.size_flags_stretch_ratio = 1.0
+	
+	## 强制重新布局和排序
+	for row_name in row_names:
+		var row := content.get_node_or_null(row_name) as HBoxContainer
+		if row:
+			row.queue_sort()
+	queue_sort()
+
+
+## ============================================================================
+## 内部更新方法
+## ============================================================================
+
+func _update_title_state(status_text: String) -> void:
+	var label := get_node_or_null(title_state_label_path) as Label
+	if label:
+		## 如果状态文本包含 FACTOR_STATUS_ 前缀（翻译失败时），提取状态名
+		var display_text := status_text
+		if status_text.begins_with("FACTOR_STATUS_"):
+			display_text = status_text.substr("FACTOR_STATUS_".length())
+		label.text = display_text.to_upper()
+		## 确保标签不会扩展宽度
+		label.size_flags_horizontal = Control.SIZE_SHRINK_END
+
+
+func _update_storage_progress(current: int, max_value: int) -> void:
 	if not storage_progress_wrapper_path:
 		return
 	var wrapper := get_node_or_null(storage_progress_wrapper_path) as Control
@@ -94,25 +178,150 @@ func _sync_storage_progress_label() -> void:
 		return
 	var bar: Node = wrapper.get_node_or_null("StorageProgressBar")
 	var label: Label = wrapper.get_node_or_null("ProgressBarLabel") as Label
-	if not bar or not label:
+	if bar and "current_value" in bar and "max_value" in bar:
+		bar.set("current_value", current)
+		bar.set("max_value", max_value)
+	if label:
+		label.text = format_resource_amount(current) + " / " + format_resource_amount(max_value)
+
+
+func _sync_storage_progress_label() -> void:
+	## 运行期同步进度条标签（已在_update_storage_progress中处理）
+	pass
+
+
+## 延迟更新储存进度条（确保面板布局完成后更新）
+func _update_storage_progress_deferred(current: int, max_value: int) -> void:
+	_update_storage_progress(current, max_value)
+
+
+func _update_warning_text(warning: String) -> void:
+	var label := get_node_or_null(warning_text_label_path) as Label
+	if label:
+		label.text = warning
+		## 控制警告区域可见性 - 通过父节点
+		var warning_container := label.get_parent() as Control
+		if warning_container:
+			warning_container.visible = not warning.is_empty()
+
+
+func _update_output(entries: Array) -> void:
+	## 计算产出总计
+	var total := 0
+	for entry in entries:
+		total += entry.get("amount", 0)
+	
+	## 更新标题数值
+	var title_label := get_node_or_null(output_title_value_path) as Label
+	if title_label:
+		title_label.text = str(total) + "/天"
+	
+	## 获取容器
+	var container := get_node_or_null(output_entries_container_path) as VBoxContainer
+	if not container or not _entries_pool:
 		return
-	if not "current_value" in bar or not "max_value" in bar:
+	
+	## 动态生成产出条目
+	for entry in entries:
+		var row := _entries_pool.acquire_row()
+		row.custom_minimum_size = Vector2(0, 24)
+		
+		var hbox := _entries_pool.acquire_hbox()
+		hbox.add_theme_constant_override("separation", 8)
+		
+		var name_label := _entries_pool.acquire_label()
+		name_label.add_theme_font_size_override("font_size", 14)
+		name_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063, 1))
+		var source_name: String = entry.get("source", tr("UNKNOWN"))
+		var source_type: String = entry.get("source_type", "archives")
+		name_label.text = tr("SOURCE_TYPE_" + source_type.to_upper()) + "-" + source_name
+		name_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		
+		var spacer := Control.new()
+		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		
+		var value_label := _entries_pool.acquire_label()
+		value_label.add_theme_font_size_override("font_size", 14)
+		value_label.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063, 1))
+		value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		value_label.text = str(entry.get("amount", 0)) + "/天"
+		value_label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		
+		hbox.add_child(name_label)
+		hbox.add_child(spacer)
+		hbox.add_child(value_label)
+		row.add_child(hbox)
+		container.add_child(row)
+
+
+func _update_surplus_shortage(daily_net: int) -> void:
+	var label := get_node_or_null(surplus_shortage_label_path) as Label
+	var value_label := get_node_or_null(surplus_shortage_value_path) as Label
+	var storage_value := get_node_or_null(storage_row_value_path) as Label
+	
+	if daily_net >= 0:
+		## 资源富余
+		if label:
+			label.text = tr("FACTOR_RESOURCE_SURPLUS")
+		if value_label:
+			value_label.text = "+" + str(daily_net) + "/天"
+		if storage_value:
+			storage_value.text = "+" + str(daily_net) + "/天"
+	else:
+		## 资源缺少（权限因子通常不会出现，因为消耗是瞬时的）
+		if label:
+			label.text = tr("FACTOR_RESOURCE_SHORTAGE")
+		if value_label:
+			value_label.text = str(daily_net) + "/天"
+		if storage_value:
+			storage_value.text = str(daily_net) + "/天"
+
+
+func _clear_all_entries() -> void:
+	## 清空产出条目容器
+	if _entries_pool:
+		var output_container := get_node_or_null(output_entries_container_path) as VBoxContainer
+		if output_container:
+			_entries_pool.release_container_contents(output_container)
+
+
+## ============================================================================
+## 刷新接口
+## ============================================================================
+
+func refresh_data() -> void:
+	if not visible or _current_data.is_empty():
 		return
-	var cur: float = bar.get("current_value")
-	var mx: float = bar.get("max_value")
-	label.text = _format_storage_num(cur) + " / " + _format_storage_num(mx)
+	## 重新获取数据并刷新显示
+	show_panel(_current_data)
 
 
-func _update_editor_preview() -> void:
-	if not Engine.is_editor_hint():
-		return
-	_apply_content_margin()
-	_apply_separation()
+## ============================================================================
+## 兼容旧接口
+## ============================================================================
 
-
+## 运行期：显示指定因子的详细信息（兼容旧接口）
 func show_for_factor(_factor_key: String, _data: Dictionary) -> void:
-	visible = true
+	show_panel(_data)
 
 
-func hide_panel() -> void:
-	visible = false
+## 更新标题（支持本地化）
+func _update_title() -> void:
+	var title_label := get_node_or_null(title_name_label_path) as Label
+	if not title_label:
+		return
+	var title_text := tr("LABEL_PERMISSION")
+	if title_text == "LABEL_PERMISSION" or title_text.is_empty():
+		title_text = "权限因子"
+	title_label.text = title_text
+
+
+## 更新储存服务器标题（支持本地化）
+func _update_storage_title() -> void:
+	var storage_title_label := get_node_or_null(storage_title_label_path) as Label
+	if not storage_title_label:
+		return
+	var title_text := tr("DETAIL_STORAGE_TITLE_PERMISSION")
+	if title_text == "DETAIL_STORAGE_TITLE_PERMISSION" or title_text.is_empty():
+		title_text = "权限因子储存服务器"
+	storage_title_label.text = title_text

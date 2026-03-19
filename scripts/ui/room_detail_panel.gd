@@ -153,7 +153,7 @@ func _update_resources(room: RoomInfo) -> void:
 				var amt: int = int(r.get("resource_amount", 0))
 				var lbl: Label = Label.new()
 				lbl.text = RoomInfo.get_resource_type_name(rt) + "  %d" % amt
-				lbl.add_theme_color_override("font_color", Color(0.95, 0.9, 0.7))
+				lbl.add_theme_color_override("font_color", Color(0.063, 0.063, 0.063))
 				_resources_container.add_child(lbl)
 
 
