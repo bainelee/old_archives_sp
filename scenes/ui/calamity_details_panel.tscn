@@ -1,0 +1,352 @@
+[gd_scene format=3 uid="uid://bgf8epnw2t6m1"]
+
+[ext_resource type="Script" path="res://scripts/ui/calamity_details_panel.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/details_background.png" id="3_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/resource_block/icon_frame_blue_32x32.png" id="4_frame"]
+[ext_resource type="Texture2D" path="res://assets/icons/emoji/icon_emoji_erosion.png" id="5_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/icon_rise_0.png" id="6_rise0"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/icon_rise_1.png" id="7_rise1"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/icon_rise_2.png" id="8_rise2"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/icon_rise_3.png" id="9_rise3"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/icon_fall_2.png" id="10_fall2"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/icon_fall_3.png" id="11_fall3"]
+[ext_resource type="Texture2D" path="res://assets/ui/factor_details/down_pointer_calamity_value.png" id="12_down"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bg"]
+texture = ExtResource("3_bg")
+texture_margin_left = 2.0
+texture_margin_top = 2.0
+texture_margin_right = 2.0
+texture_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.0901961, 0.145098, 0.498039, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_row_dark"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.164706, 0.164706, 0.164706, 0.18)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_row_light"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.164706, 0.164706, 0.164706, 0.1)
+
+[node name="CalamityDetailsPanel" type="PanelContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(320, 480)
+theme = ExtResource("2_theme")
+theme_override_styles/panel = SubResource("StyleBoxTexture_bg")
+script = ExtResource("1_script")
+
+[node name="DetailsVboxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="HeaderVbox" type="VBoxContainer" parent="DetailsVboxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="DetailsTitle" type="PanelContainer" parent="DetailsVboxContainer/HeaderVbox"]
+custom_minimum_size = Vector2(316, 40)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_title")
+
+[node name="TitleLayout" type="HBoxContainer" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IconHolder" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+
+[node name="IconFrame" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/IconHolder"]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("4_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IconCalamity" type="TextureRect" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout/IconHolder"]
+modulate = Color(1.8, 1.8, 1.8, 1)
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("5_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TextTitleName" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "CALAMITY VALUE"
+
+[node name="SpacerTitle" type="Control" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TextTitleState" type="Label" parent="DetailsVboxContainer/HeaderVbox/DetailsTitle/TitleLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "WORSE"
+horizontal_alignment = 2
+
+[node name="ContentMargin" type="MarginContainer" parent="DetailsVboxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 20
+
+[node name="ContentVbox" type="VBoxContainer" parent="DetailsVboxContainer/ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SectionTemp" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "临时"
+vertical_alignment = 1
+
+[node name="EntryTemp1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row_dark")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTemp1"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTemp1/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("6_rise0")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTemp1/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "事件-算法缩减"
+vertical_alignment = 1
+
+[node name="EntryTemp2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row_light")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTemp2"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTemp2/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("7_rise1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTemp2/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "事件-核心电泳"
+vertical_alignment = 1
+
+[node name="SectionConstruction" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "建设"
+vertical_alignment = 1
+
+[node name="EntryConstruction1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row_dark")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryConstruction1"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryConstruction1/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("8_rise2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryConstruction1/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "上位者培育仓"
+vertical_alignment = 1
+
+[node name="SectionTech" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "技术"
+vertical_alignment = 1
+
+[node name="EntryTech1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row_dark")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech1"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech1/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("9_rise3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech1/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "秘迹反编译"
+vertical_alignment = 1
+
+[node name="EntryTech2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row_light")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech2"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech2/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("11_fall3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech2/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "高阶存在证明"
+vertical_alignment = 1
+
+[node name="EntryTech3" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row_light")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech3"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech3/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("10_fall2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryTech3/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "ASA+"
+vertical_alignment = 1
+
+[node name="SectionResolution" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "决议"
+vertical_alignment = 1
+
+[node name="EntryResolution1" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row_dark")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryResolution1"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryResolution1/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("9_rise3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryResolution1/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "人造上位者计划"
+vertical_alignment = 1
+
+[node name="EntryResolution2" type="PanelContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_row_light")
+
+[node name="HBox" type="HBoxContainer" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryResolution2"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryResolution2/HBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("10_fall2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="DetailsVboxContainer/ContentMargin/ContentVbox/EntryResolution2/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "第二类调查员计划"
+vertical_alignment = 1
+
+[node name="BottomPlaceholder" type="Control" parent="DetailsVboxContainer/ContentMargin/ContentVbox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="DownPointer" type="Control" parent="DetailsVboxContainer"]
+custom_minimum_size = Vector2(316, 20)
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="DetailsVboxContainer/DownPointer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_down")
+expand_mode = 1
+stretch_mode = 5

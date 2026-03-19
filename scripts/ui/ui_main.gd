@@ -8,6 +8,7 @@ signal build_button_pressed
 signal bottom_task_placeholder_pressed(button_id: String)
 
 @onready var _topbar_figma: Node = $TopBar/TopbarFigma
+@onready var _calamity_inline: Control = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline") as Control
 @onready var _calamity_progress: ProgressBar = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline/CalamityProgress") as ProgressBar
 @onready var _calamity_value_label: Label = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline/CalamityValue") as Label
 
@@ -22,13 +23,14 @@ signal bottom_task_placeholder_pressed(button_id: String)
 @onready var _information_panel: PanelContainer = $InformationDetailPanel
 @onready var _investigator_panel: PanelContainer = $InvestigatorDetailPanel
 @onready var _truth_panel: PanelContainer = $TruthDetailPanel
+@onready var _calamity_detail_panel: PanelContainer = $CalamityDetailPanel
 
 
 func _all_detail_panels() -> Array[PanelContainer]:
 	return [
 		_cognition_panel, _willpower_panel, _permission_panel, _computation_panel,
 		_shelter_panel, _researcher_detail_panel, _housing_panel,
-		_information_panel, _investigator_panel, _truth_panel,
+		_information_panel, _investigator_panel, _truth_panel, _calamity_detail_panel,
 	]
 
 
@@ -44,6 +46,7 @@ func _get_panel_for_block(block_id: String) -> PanelContainer:
 		"investigator": return _investigator_panel
 		"info": return _information_panel
 		"truth": return _truth_panel
+		"calamity": return _calamity_detail_panel
 	return null
 
 
@@ -71,6 +74,8 @@ func _fetch_panel_data(panel: PanelContainer) -> Dictionary:
 		return dp.get_investigator_breakdown()
 	if panel == _truth_panel and dp.has_method("get_truth_breakdown"):
 		return dp.get_truth_breakdown()
+	if panel == _calamity_detail_panel:
+		return _get_calamity_panel_data()
 	return {}
 
 
@@ -171,6 +176,10 @@ func _ready() -> void:
 		_topbar_figma.block_hovered.connect(_on_topbar_block_hovered)
 	if _topbar_figma and _topbar_figma.has_signal("block_unhovered"):
 		_topbar_figma.block_unhovered.connect(_on_topbar_block_unhovered)
+	if _calamity_inline:
+		_calamity_inline.mouse_filter = Control.MOUSE_FILTER_PASS
+		_calamity_inline.mouse_entered.connect(_on_calamity_hovered)
+		_calamity_inline.mouse_exited.connect(_on_calamity_unhovered)
 	if PersonnelErosionCore and PersonnelErosionCore.has_signal("calamity_updated"):
 		PersonnelErosionCore.calamity_updated.connect(_on_calamity_updated)
 	_sync_calamity_inline()
@@ -219,6 +228,19 @@ func _on_topbar_block_hovered(block_id: String) -> void:
 func _on_topbar_block_unhovered(_block_id: String) -> void:
 	## 鼠标离开资源块时立即隐藏所有详情面板
 	_hide_all_detail_panels()
+
+
+func _on_calamity_hovered() -> void:
+	_hide_all_detail_panels()
+	if not _calamity_detail_panel or not _calamity_detail_panel.has_method("show_panel"):
+		return
+	_calamity_detail_panel.show_panel(_get_calamity_panel_data())
+	call_deferred("_update_detail_panel_position_once", _calamity_detail_panel)
+
+
+func _on_calamity_unhovered() -> void:
+	## 由 _process 中的覆盖检测统一处理隐藏，避免在面板与来源之间移动时闪烁
+	pass
 
 
 func _process(_delta: float) -> void:
@@ -273,6 +295,8 @@ func _is_mouse_over_detail_source_or_panel(mouse_pos: Vector2) -> bool:
 			return true
 	var top_bar: Control = get_node_or_null("TopBar") as Control
 	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
+		return true
+	if _calamity_inline and _calamity_inline.visible and _calamity_inline.get_global_rect().has_point(mouse_pos):
 		return true
 	return false
 
@@ -409,6 +433,33 @@ func _on_calamity_updated(value: float) -> void:
 		_calamity_progress.value = ratio
 	if _calamity_value_label:
 		_calamity_value_label.text = str(int(value))
+	if _calamity_detail_panel and _calamity_detail_panel.visible:
+		_detail_panel_dirty = true
+
+
+func _get_calamity_panel_data() -> Dictionary:
+	var current_value: float = 0.0
+	var max_value: float = 30000.0
+	if PersonnelErosionCore:
+		current_value = PersonnelErosionCore.get_calamity_value()
+		max_value = float(PersonnelErosionCore.get_calamity_max())
+	var ratio: float = 0.0 if max_value <= 0.0 else clampf(current_value / max_value, 0.0, 1.0)
+	var status: String = "NULL"
+	if ratio <= 0.0:
+		status = "NULL"
+	elif ratio <= 0.10:
+		status = "MINIMAL"
+	elif ratio <= 0.30:
+		status = "WORSE"
+	elif ratio <= 0.80:
+		status = "CHECK"
+	elif ratio > 0.80:
+		status = "CHECKMATE"
+	return {
+		"current": current_value,
+		"max": max_value,
+		"status": status,
+	}
 
 
 ## 建设选择模式下禁用其余 UI、隐藏灾厄
@@ -423,7 +474,7 @@ func set_construction_blocking(blocked: bool) -> void:
 	var renovate_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnRenovate") as Button
 	if renovate_btn:
 		renovate_btn.disabled = blocked
-	var calamity: Control = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline") as Control
+	var calamity: Control = _calamity_inline
 	if calamity:
 		calamity.visible = not blocked
 
@@ -433,7 +484,7 @@ func set_cleanup_blocking(blocked: bool) -> void:
 	if blocked:
 		_hide_all_detail_panels()
 	_set_buttons_blocked($TopBar, blocked)
-	var calamity_inline: Control = get_node_or_null("BottomRightBar/Margin/Content/CalamityInline") as Control
+	var calamity_inline: Control = _calamity_inline
 	if calamity_inline:
 		_set_buttons_blocked(calamity_inline, blocked)
 	_set_control_mouse_filter($TopBar, blocked)

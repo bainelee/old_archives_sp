@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/information_details_panel.tscn" id="15_information_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/investigator_details_panel.tscn" id="16_investigator_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/truth_details_panel.tscn" id="17_truth_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/calamity_details_panel.tscn" id="24_calamity_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/bottom_task_button.tscn" id="18_generic_button"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_nor.png" id="19_bottom_bar_bg"]
 [ext_resource type="Texture2D" path="res://assets/ui/resource_block/progress_back.png" id="20_progress_bg"]
@@ -241,6 +242,8 @@ text = "+"
 [node name="InvestigatorDetailPanel" parent="." unique_id=994421574 instance=ExtResource("16_investigator_panel")]
 
 [node name="TruthDetailPanel" parent="." unique_id=994421575 instance=ExtResource("17_truth_panel")]
+
+[node name="CalamityDetailPanel" parent="." unique_id=994421576 instance=ExtResource("24_calamity_panel")]
 
 [node name="BottomRightBar" type="PanelContainer" parent="." unique_id=2046743287]
 anchors_preset = 14
