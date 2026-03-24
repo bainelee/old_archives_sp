@@ -5,6 +5,7 @@ extends PanelContainer
 
 @onready var _pan_speed_slider: HSlider = $Margin/VBox/PanSpeedRow/PanSpeedSlider
 @onready var _pan_speed_value_label: Label = $Margin/VBox/PanSpeedRow/Value
+@onready var _debug_log_label: Label = $Margin/VBox/DebugLogScroll/DebugLogLabel
 
 
 func _ready() -> void:
@@ -30,6 +31,21 @@ func _ready() -> void:
 	var show_room_info_btn: CheckButton = get_node_or_null("Margin/VBox/ShowRoomInfo") as CheckButton
 	if show_room_info_btn:
 		show_room_info_btn.toggled.connect(_on_show_room_info_toggled)
+	call_deferred("_connect_debug_frame_print")
+
+
+func _connect_debug_frame_print() -> void:
+	var dfp: Node = get_tree().root.get_node_or_null("DebugFramePrint")
+	if dfp == null or not dfp.has_signal("debug_display_text_changed"):
+		return
+	if dfp.debug_display_text_changed.is_connected(_on_debug_frame_print_text):
+		return
+	dfp.debug_display_text_changed.connect(_on_debug_frame_print_text)
+
+
+func _on_debug_frame_print_text(display_text: String) -> void:
+	if _debug_log_label:
+		_debug_log_label.text = display_text
 
 
 func _on_close_pressed() -> void:

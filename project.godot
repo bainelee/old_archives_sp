@@ -27,6 +27,7 @@ ErosionCore="*res://scripts/core/erosion_core.gd"
 PersonnelErosionCore="*res://scripts/core/personnel_erosion_core.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
 DataProviders="*res://scripts/core/data_providers.gd"
+DebugFramePrint="*res://scripts/core/debug_frame_print.gd"
 
 [display]
 
@@ -42,6 +43,12 @@ enabled=PackedStringArray("res://addons/room_items_grid_snap/plugin.cfg", "res:/
 
 locale/translations=PackedStringArray("res://translations/translations.en.translation", "res://translations/translations.zh_CN.translation")
 locale/fallback="zh_CN"
+
+[debug]
+
+file_logging/enable_file_logging=true
+file_logging/log_path="user://logs/godot.log"
+file_logging/max_log_files=5
 
 [physics]
 

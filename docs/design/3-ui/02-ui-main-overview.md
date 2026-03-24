@@ -182,6 +182,13 @@
 | 信息 | `scenes/ui/information_details_panel.tscn` |
 | 真相 | `scenes/ui/truth_details_panel.tscn` |
 
+### 4.5 Debug 信息面板（DebugInfoPanel）
+
+- **场景节点**：`UIMain/DebugInfoPanel`（`PanelContainer`），脚本 `scripts/ui/ui_main_debug_panel.gd`。
+- **尺寸**：约 **400×600**（`custom_minimum_size` + 偏移）；**标题栏下方**为 **DebugLogScroll**（高 **160**），内嵌 **DebugLogLabel**，用于显示 **DebugFramePrint** 逐帧聚合文本（信号 `debug_display_text_changed`）。
+- **打开方式**：游戏中 **`**（Tab 上方）切换显示（见 `game_main_input.gd`）。
+- **完整说明**（引擎日志、文件路径、开关、测试命令）：[99-tools/03-debug-logging-and-frame-print.md](../99-tools/03-debug-logging-and-frame-print.md)。
+
 ---
 
 ## 5. 关键文件索引
@@ -199,11 +206,14 @@
 | `scripts/ui/erosion_cycle_bar.gd` | 侵蚀周期长条 |
 | `scripts/core/game_time.gd` | 时间系统 |
 | `scripts/core/erosion_core.gd` | 侵蚀数据源 |
+| `scripts/ui/ui_main_debug_panel.gd` | Debug 面板逻辑与 DebugFramePrint 信号连接 |
+| `scripts/core/debug_frame_print.gd` | 逐帧调试 Autoload |
 
 ---
 
 ## 相关文档
 
+- [03 - 调试日志与逐帧 Debug](../99-tools/03-debug-logging-and-frame-print.md)
 - [02 - 时间流逝系统](../2-gameplay/02-time-system.md)
 - [01 - 庇护/侵蚀 UI](01-shelter-erosion-ui.md)
 - [名词解释](../../名词解释.md)

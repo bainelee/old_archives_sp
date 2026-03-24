@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Godot: Editor (tee to .godot/terminal_godot.log)",
+      "type": "shell",
+      "command": "& '${config:godotTools.editorPath.godot4}' --path '${workspaceFolder}' --editor 2>&1 | Tee-Object -FilePath '${workspaceFolder}\\.godot\\terminal_godot.log' -Append",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}

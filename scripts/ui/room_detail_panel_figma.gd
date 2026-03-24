@@ -314,11 +314,21 @@ func _update_shelter_visual_deferred() -> void:
 	_update_shelter_visual("deferred")
 
 func _write_size_to_file() -> void:
-	print("SHELTER_CHECK: _shelter_fill valid=", is_instance_valid(_shelter_fill))
+	var tree := get_tree()
+	if tree == null:
+		return
+	var dfp: Node = tree.root.get_node_or_null("DebugFramePrint")
+	if dfp == null or not dfp.has_method("line"):
+		return
+	dfp.call("line", "shelter_check", "valid=%s" % is_instance_valid(_shelter_fill))
 	if not is_instance_valid(_shelter_fill):
 		return
 	var gscale: Vector2 = _shelter_fill.get_global_transform().get_scale()
-	print("SHELTER_DATA: pos=", _shelter_fill.position, " size=", _shelter_fill.size, " gscale=", gscale, " eff_h=", _shelter_fill.size.y * gscale.y)
+	dfp.call(
+		"line",
+		"shelter_data",
+		"pos=%s size=%s gscale=%s eff_h=%s" % [_shelter_fill.position, _shelter_fill.size, gscale, _shelter_fill.size.y * gscale.y]
+	)
 
 
 
