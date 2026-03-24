@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/cleanup_overlay.tscn" id="7_cleanup"]
 [ext_resource type="PackedScene" path="res://scenes/ui/construction_overlay.tscn" id="8_construction"]
 [ext_resource type="Script" uid="uid://byid0yvkr2jei" path="res://scripts/game/game_main_input_handler.gd" id="10_input_handler"]
+[ext_resource type="PackedScene" path="res://scenes/ui/room_detail_panel_figma.tscn" id="11_room_detail_figma"]
 
 [node name="GameMain" type="Node2D" unique_id=857920342]
 script = ExtResource("1_game_main")
@@ -20,6 +21,9 @@ script = ExtResource("10_input_handler")
 [node name="PauseMenu" parent="." unique_id=830806540 instance=ExtResource("5_pause_menu")]
 
 [node name="RoomDetailPanel" parent="." unique_id=10596567 instance=ExtResource("6_room_detail")]
+
+[node name="RoomDetailPanelFigma" parent="." unique_id=100596567 instance=ExtResource("11_room_detail_figma")]
+visible = false
 
 [node name="CleanupOverlay" parent="." unique_id=516201649 instance=ExtResource("7_cleanup")]
 

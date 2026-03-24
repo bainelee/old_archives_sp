@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b71gsf1lhvmn8"]
 
 [ext_resource type="Script" uid="uid://b5urpraklylao" path="res://scripts/ui/shelter_erosion_panel.gd" id="1_shelter"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 [ext_resource type="Script" uid="uid://fiuvru7ik5f8" path="res://scripts/ui/erosion_cycle_bar.gd" id="2_cycle_bar"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_transparent"]
@@ -24,6 +25,7 @@ border_color = Color(0.25, 0.28, 0.35, 0.8)
 
 [node name="ShelterErosionPanel" type="HBoxContainer" unique_id=272129604]
 theme_override_constants/separation = 12
+theme = ExtResource("99_theme")
 script = ExtResource("1_shelter")
 
 [node name="Left" type="PanelContainer" parent="." unique_id=1166838319]

@@ -1,6 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://time_control_bar_01"]
+[gd_scene load_steps=13 format=3 uid="uid://time_control_bar_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/time_control_bar.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 [ext_resource type="Texture2D" path="res://assets/ui/topbar/background_topbar1_side.png" id="2_bg"]
 [ext_resource type="Texture2D" uid="uid://bv4k22xv4600y" path="res://assets/ui/buttons/button_48x32_disabled.png" id="tex_disabled"]
 [ext_resource type="Texture2D" uid="uid://imoadbd5cm6c" path="res://assets/ui/buttons/button_48x32_hover.png" id="tex_hover"]
@@ -14,6 +15,7 @@
 [node name="TimeControlBar" type="Control"]
 custom_minimum_size = Vector2(540, 32)
 layout_mode = 3
+theme = ExtResource("99_theme")
 script = ExtResource("1_script")
 
 [node name="Background" type="Control" parent="."]

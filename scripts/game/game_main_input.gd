@@ -11,13 +11,16 @@ const CONSTRUCTION_SELECTING_TARGET := 2
 const CONSTRUCTION_CONFIRMING := 3
 
 static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> bool:
+	var figma_panel_root: Control = game_main.get_node_or_null("RoomDetailPanelFigma/PanelRoot") as Control
+	if figma_panel_root and figma_panel_root.visible and figma_panel_root.get_global_rect().has_point(mouse_pos):
+		return true
+	var legacy_panel: Control = game_main.get_node_or_null("RoomDetailPanel/Panel") as Control
+	if legacy_panel and legacy_panel.visible and legacy_panel.get_global_rect().has_point(mouse_pos):
+		return true
 	var top_bar: Control = game_main.get_node_or_null("UIMain/TopBar") as Control
 	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
 		return true
-	var bar_below_top: Control = game_main.get_node_or_null("UIMain/BarBelowTop") as Control
-	if bar_below_top and bar_below_top.get_global_rect().has_point(mouse_pos):
-		return true
-	var researcher_panel: Control = game_main.get_node_or_null("UIMain/ResearcherListPanel") as Control
+	var researcher_panel: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel/Margin/VBox/ResearcherListPanel") as Control
 	if researcher_panel and researcher_panel.visible and researcher_panel.get_global_rect().has_point(mouse_pos):
 		return true
 	var bar: Control = game_main.get_node_or_null("UIMain/BottomRightBar") as Control
@@ -38,6 +41,22 @@ static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> b
 
 
 static func process_input(game_main: Node2D, event: InputEvent) -> void:
+	## Tab 上方 ` 键：切换 Debug 面板显示（与标题栏关闭一致）；文本框聚焦时不触发
+	if event is InputEventKey and event.pressed and not event.echo:
+		var k: Key = event.keycode as Key
+		var pk: Key = event.physical_keycode as Key
+		if k == KEY_QUOTELEFT or pk == KEY_QUOTELEFT:
+			var vp: Viewport = game_main.get_viewport()
+			var focus_owner: Control = vp.gui_get_focus_owner() as Control
+			if focus_owner and (focus_owner is LineEdit or focus_owner is TextEdit):
+				pass
+			else:
+				var debug_panel: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control
+				if debug_panel:
+					debug_panel.visible = not debug_panel.visible
+					vp.set_input_as_handled()
+					return
+
 	## 暂停菜单打开时完全跳过游戏输入，避免点击穿透到底层 UI/游戏世界
 	var pause_menu: CanvasLayer = game_main.get_node_or_null("PauseMenu") as CanvasLayer
 	if pause_menu and pause_menu.visible:

@@ -128,14 +128,15 @@ func get_erosion_name(value: int) -> String:
 
 
 ## 根据绝对游戏小时获取侵蚀值
-## 侵蚀按周期可变化（HOURS_PER_LEVEL），使用确定性的随机序列
-func get_erosion_at_game_hour(game_hour: float) -> int:
-	var phase := int(floor(game_hour / float(HOURS_PER_LEVEL)))
-	var seed_val := phase * 127 + 31  # 确定性种子，相邻相位不同
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_val
-	var idx := rng.randi_range(0, _EROSION_VALUES.size() - 1)
-	return _EROSION_VALUES[idx]
+## 当前固定为显性（-2）；若需按周期随机，恢复下方注释块并删除固定 return
+func get_erosion_at_game_hour(_game_hour: float) -> int:
+	return EROSION_VISIBLE
+	# var phase := int(floor(game_hour / float(HOURS_PER_LEVEL)))
+	# var seed_val := phase * 127 + 31  # 确定性种子，相邻相位不同
+	# var rng := RandomNumberGenerator.new()
+	# rng.seed = seed_val
+	# var idx := rng.randi_range(0, _EROSION_VALUES.size() - 1)
+	# return _EROSION_VALUES[idx]
 
 
 ## 获取未来 N 小时内某时刻的侵蚀值（兼容旧接口）
@@ -146,7 +147,7 @@ func get_forecast_at_hours(hours_from_now: float) -> Dictionary:
 
 ## 生成未来 84 天的侵蚀预测序列（基于绝对游戏时间起点）
 ## start_game_hour: 预测的起始游戏小时（用于保证时间流逝时序列连续不重置）
-## 每个元素为 {"value": int}，侵蚀最快 7 天可变化
+## 每个元素为 {"value": int}；当前全局固定显性 -2
 func get_forecast_segments(segment_count: int, start_game_hour: float = 0.0) -> Array:
 	var result: Array = []
 	var hours_per_segment := float(FORECAST_HOURS) / float(segment_count)

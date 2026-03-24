@@ -6,6 +6,8 @@ extends RefCounted
 
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
+const FIXED_WILL_COST_PER_DAY: int = 24
+const FIXED_WILL_COST_PER_HOUR: int = 1
 
 
 static func is_research_zone_room(room: ArchivesRoomInfo) -> bool:
@@ -35,6 +37,9 @@ static func is_creation_zone_paused(room: ArchivesRoomInfo, ui: Node) -> bool:
 		return false
 	if room.room_type != ArchivesRoomInfo.RoomType.SERVER_ROOM and room.room_type != ArchivesRoomInfo.RoomType.REASONING:
 		return false
+	var game_main: Node = ui.get_parent() if ui else null
+	if game_main and game_main.has_method("is_room_forced_shutdown") and game_main.is_room_forced_shutdown(room):
+		return true
 	var need: int = get_creation_zone_24h_consumption(room)
 	var have: int = ui.get_willpower() if ui.has_method("get_willpower") else int(ui.get("will_amount") or 0)
 	return have < need
@@ -56,6 +61,8 @@ static func process_production(game_main: Node2D, game_hours_delta: float) -> vo
 	if not ui:
 		return
 	for _h in hours_to_process:
+		# 固有消耗优先：每个已建设区域先扣 1 点意志（24/天）。
+		_consume_zone_fixed_cost_hour(rooms, ui, game_main)
 		for i in rooms.size():
 			var room: ArchivesRoomInfo = rooms[i]
 			if room.zone_type == ZoneTypeScript.Type.RESEARCH:
@@ -123,6 +130,24 @@ static func _reserve_subtract(room: ArchivesRoomInfo, reserve_idx: int, amt: int
 static func _add_factor_to_player(ui: Node, resource_type: int, amt: int, game_main: Node2D) -> void:
 	ResourceLedger.add_by_type(ui, resource_type, amt)
 	game_main.call("_sync_resources_to_topbar")
+
+
+static func _consume_zone_fixed_cost_hour(rooms: Array, ui: Node, game_main: Node2D) -> void:
+	var player_will: int = ui.get_willpower() if ui.has_method("get_willpower") else int(ui.get("will_amount") or 0)
+	var consume_total: int = 0
+	for room in rooms:
+		if not (room is ArchivesRoomInfo):
+			continue
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
+		if r.zone_type == ZoneTypeScript.Type.NONE:
+			continue
+		if player_will <= 0:
+			break
+		player_will -= FIXED_WILL_COST_PER_HOUR
+		consume_total += FIXED_WILL_COST_PER_HOUR
+	if consume_total > 0:
+		ui.will_amount = maxi(0, player_will)
+		game_main.call("_sync_resources_to_topbar")
 
 
 static func _produce_creation_zone_hour(room: ArchivesRoomInfo, ui: Node, game_main: Node2D) -> void:

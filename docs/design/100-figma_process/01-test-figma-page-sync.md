@@ -7,6 +7,7 @@
 1. **数据源**：Figma 的 Layout、Fills、Corner Radius、Layer Properties 等原始数据
 2. **目标**：`scenes/ui/test_figma_page.tscn`，引擎编辑器中直接可见
 3. **禁止**：截图作为参考、JSON 运行时加载、猜测数值
+4. **字体约束**：含文本节点的 UI 必须绑定项目字体（优先场景 `theme` 指向 `assets/ui/detail_panel_theme.tres`）
 
 ## 同步流程
 
@@ -44,3 +45,4 @@
 - `.cursor/commands/figma-sync-test-page.md`：同步命令
 - `scenes/ui/test_figma_page.tscn`：场景文件
 - `scripts/ui/test_figma_page.gd`：仅缩放与显示逻辑
+- `assets/ui/detail_panel_theme.tres`：统一字体主题（Sarasa）

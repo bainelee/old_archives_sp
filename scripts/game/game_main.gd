@@ -72,10 +72,17 @@ var _built_room_production_accumulator: float = 0.0
 
 ## 庇护能量：核心等级 1～5，存档持久化
 var _shelter_level: int = 1
+## 各房已分配庇护能量之和、当前总需求（每小时维度，与 tick 一致；供 TopBar / DataProviders）
+@warning_ignore("unused_private_class_variable")
+var _shelter_energy: int = 0
+@warning_ignore("unused_private_class_variable")
+var _shelter_demand: int = 0
 @warning_ignore("unused_private_class_variable")
 var _shelter_accumulator: float = 0.0
 @warning_ignore("unused_private_class_variable")
 var _shelter_helper: RefCounted = null
+## 房间强制关停状态（room_id -> true）；用于详情面板“关停/恢复”
+var _forced_shutdown_room_ids: Dictionary = {}
 
 ## 读档时待应用的研究员 3D 位置 [{id, room_id, pos}]，由 _setup_researchers 应用后清空
 var _pending_researchers_3d: Array = []
@@ -500,6 +507,54 @@ func get_room_info_by_id(room_id: String) -> ArchivesRoomInfo:
 		if rid == room_id:
 			return r
 	return null
+
+
+func is_room_forced_shutdown(room: ArchivesRoomInfo) -> bool:
+	if room == null:
+		return false
+	var rid: String = room.id if room.id else room.json_room_id
+	if rid.is_empty():
+		return false
+	return bool(_forced_shutdown_room_ids.get(rid, false))
+
+
+func toggle_room_forced_shutdown(room: ArchivesRoomInfo) -> bool:
+	if room == null or room.zone_type == 0:
+		return false
+	var rid: String = room.id if room.id else room.json_room_id
+	if rid.is_empty():
+		return false
+	var next_state: bool = not is_room_forced_shutdown(room)
+	if next_state:
+		_forced_shutdown_room_ids[rid] = true
+	else:
+		_forced_shutdown_room_ids.erase(rid)
+	_show_room_detail(room)
+	return next_state
+
+
+func request_demolish_room(room: ArchivesRoomInfo) -> bool:
+	if room == null or room.zone_type == 0:
+		return false
+	# 建设中房间不可拆除，避免与 construction 状态机冲突。
+	var room_index: int = -1
+	for i in _rooms.size():
+		if _rooms[i] == room:
+			room_index = i
+			break
+	if room_index >= 0 and _construction_rooms_in_progress.has(room_index):
+		return false
+	var occupied: int = room.get_construction_researcher_count(room.zone_type)
+	room.zone_type = 0
+	var rid: String = room.id if room.id else room.json_room_id
+	if not rid.is_empty():
+		_forced_shutdown_room_ids.erase(rid)
+	var ui: Node = get_node_or_null("UIMain")
+	if ui and ui.get("researchers_working_in_rooms") != null:
+		ui.researchers_working_in_rooms = maxi(0, int(ui.researchers_working_in_rooms) - occupied)
+	_sync_researchers_working_in_rooms_to_ui()
+	_show_room_detail(room)
+	return true
 
 
 ## 可闲逛房间：room_00 + 所有已解锁且已清理的房间（与 ResearcherLifecycle._build_wanderable_room_list 一致）
@@ -1071,13 +1126,17 @@ func _clear_room_selection() -> void:
 
 
 func _show_room_detail(room: ArchivesRoomInfo) -> void:
-	var panel: Node = get_node_or_null("RoomDetailPanel")
+	var panel: Node = get_node_or_null("RoomDetailPanelFigma")
+	if panel == null:
+		panel = get_node_or_null("RoomDetailPanel")
 	if panel and panel.has_method("show_room"):
 		panel.show_room(room)
 
 
 func _hide_room_detail() -> void:
-	var panel: Node = get_node_or_null("RoomDetailPanel")
+	var panel: Node = get_node_or_null("RoomDetailPanelFigma")
+	if panel == null:
+		panel = get_node_or_null("RoomDetailPanel")
 	if panel and panel.has_method("hide_panel"):
 		panel.hide_panel()
 

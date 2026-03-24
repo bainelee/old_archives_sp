@@ -23,13 +23,22 @@ static func process_shelter_tick(game_main: Node2D, game_hours_delta: float, she
 	helper._tick(game_main, game_hours_delta, shelter_level)
 
 
-## 获取房间庇护等级（raw_erosion + 分配的庇护能量）
+## 获取房间庇护等级（全局有效侵蚀 + 分配的庇护能量）
+## 全局基线与 TopBar 一致：ErosionCore.current_erosion（raw_mystery_erosion + shelter_bonus）
 static func get_room_shelter_level(game_main: Node2D, room_id: String) -> int:
 	var helper: GameMainShelterHelper = game_main.get("_shelter_helper")
 	if not helper:
-		return _get_raw_erosion()
+		return _get_global_erosion_for_shelter()
 	var energy: int = int(helper._room_shelter_energy.get(room_id, 0))
-	return _get_raw_erosion() + energy
+	return _get_global_erosion_for_shelter() + energy
+
+
+## 本房当前由核心分配的庇护能量（上一小时 tick 结果；与 get_room_shelter_level 中的加项一致）
+static func get_room_allocated_shelter_energy(game_main: Node2D, room_id: String) -> int:
+	var helper: Variant = game_main.get("_shelter_helper")
+	if not helper or not (helper is GameMainShelterHelper):
+		return 0
+	return int((helper as GameMainShelterHelper)._room_shelter_energy.get(room_id, 0))
 
 
 ## 根据研究员工作/住房返回有效庇护等级（用于侵蚀判定）
@@ -40,11 +49,11 @@ static func get_shelter_level_for_researcher(game_main: Node2D, researcher: Dict
 	var is_eroded: bool = bool(researcher.get("is_eroded", false))
 
 	if work_rid.is_empty() and housing_rid.is_empty():
-		return _get_raw_erosion()
+		return _get_global_erosion_for_shelter()
 	if work_rid.is_empty():
 		return get_room_shelter_level(game_main, housing_rid)
 	if is_eroded:
-		return get_room_shelter_level(game_main, housing_rid) if not housing_rid.is_empty() else _get_raw_erosion()
+		return get_room_shelter_level(game_main, housing_rid) if not housing_rid.is_empty() else _get_global_erosion_for_shelter()
 	return get_room_shelter_level(game_main, work_rid)
 
 
@@ -166,7 +175,7 @@ func _tick(game_main: Node2D, game_hours_delta: float, shelter_level: int) -> vo
 	## 无需庇护房间时，不累积、不处理，累计器清零
 	if need_shelter.is_empty():
 		game_main.set("_shelter_accumulator", 0.0)
-		_last_cf_consumed = 0
+		_clear_shelter_allocation_and_topbar(game_main)
 		return
 
 	var cf_cap: Dictionary = gv.get_shelter_cf_and_cap_for_level(shelter_level)
@@ -176,8 +185,8 @@ func _tick(game_main: Node2D, game_hours_delta: float, shelter_level: int) -> vo
 		if cf_per_day > 0:
 			energy_cap = mini(energy_cap, int(cf_per_day / 24.0))  # 日上限转每小时上限（72 -> 3）
 	var energy_per_room_max: int = gv.get_shelter_energy_per_room_max() if gv.has_method("get_shelter_energy_per_room_max") else 5
-	var raw_erosion: int = _get_raw_erosion()
-	var target_per_room: int = mini(maxi(0, 2 - raw_erosion), energy_per_room_max)
+	var global_erosion: int = _get_global_erosion_for_shelter()
+	var target_per_room: int = mini(maxi(0, 2 - global_erosion), energy_per_room_max)
 
 	var v_acc: Variant = game_main.get("_shelter_accumulator")
 	var accumulator: float = float(v_acc) if v_acc != null else 0.0
@@ -186,6 +195,7 @@ func _tick(game_main: Node2D, game_hours_delta: float, shelter_level: int) -> vo
 	game_main.set("_shelter_accumulator", accumulator - float(hours_to_process))
 
 	if hours_to_process <= 0:
+		_sync_topbar_shelter_totals(game_main, need_shelter, target_per_room)
 		return
 
 	for _h in hours_to_process:
@@ -211,10 +221,30 @@ func _collect_need_shelter(rooms: Array, ui: Node, game_main: Node2D, no_shelter
 	return need_shelter
 
 
+func _clear_shelter_allocation_and_topbar(game_main: Node2D) -> void:
+	_room_shelter_energy.clear()
+	_last_cf_consumed = 0
+	game_main.set("_shelter_energy", 0)
+	game_main.set("_shelter_demand", 0)
+	if DataProviders:
+		DataProviders.on_shelter_topbar_sync(game_main)
+
+
+func _sync_topbar_shelter_totals(game_main: Node2D, need_shelter: Array, target_per_room: int) -> void:
+	var demand: int = need_shelter.size() * target_per_room
+	var allocated_sum: int = 0
+	for v in _room_shelter_energy.values():
+		allocated_sum += int(v)
+	game_main.set("_shelter_energy", allocated_sum)
+	game_main.set("_shelter_demand", demand)
+	if DataProviders:
+		DataProviders.on_shelter_topbar_sync(game_main)
+
+
 func _compute_and_apply(game_main: Node2D, ui: Node, rooms: Array, energy_cap: int, target_per_room: int, no_shelter_types: Array) -> void:
 	var need_shelter: Array[Dictionary] = _collect_need_shelter(rooms, ui, game_main, no_shelter_types)
 	if need_shelter.is_empty():
-		_last_cf_consumed = 0
+		_clear_shelter_allocation_and_topbar(game_main)
 		return
 
 	var demand: int = need_shelter.size() * target_per_room
@@ -239,6 +269,7 @@ func _compute_and_apply(game_main: Node2D, ui: Node, rooms: Array, energy_cap: i
 		to_allocate -= give
 
 	_last_cf_consumed = cf_to_deduct
+	_sync_topbar_shelter_totals(game_main, need_shelter, target_per_room)
 
 
 static func _room_in_use(room: ArchivesRoomInfo, ui: Node, _game_main: Node2D) -> bool:
@@ -293,10 +324,16 @@ static func _zone_priority(zone_type: int) -> int:
 		_: return 99
 
 
-static func _get_raw_erosion() -> int:
+## 与 TopBar / 侵蚀 UI 一致的全局侵蚀基线（含 shelter_bonus「文明的庇佑」）
+static func _get_global_erosion_for_shelter() -> int:
 	if not ErosionCore:
 		return 0
-	return int(ErosionCore.raw_mystery_erosion)
+	return int(ErosionCore.current_erosion)
+
+
+## 供 UI 使用：与 `get_room_shelter_level` 中「未加本房分配」项相同（`current_erosion`）
+static func get_shelter_baseline_erosion() -> int:
+	return _get_global_erosion_for_shelter()
 
 
 ## 获取庇护消耗细则，用于 TopBar 因子悬停面板
@@ -349,8 +386,8 @@ static func get_shelter_consumption_breakdown(game_main: Node2D, shelter_level: 
 			energy_cap = mini(energy_cap, int(cf_per_day / 24.0))  # 日上限转每小时上限（72 -> 3）
 	var energy_per_room_max: int = gv.get_shelter_energy_per_room_max() if gv.has_method("get_shelter_energy_per_room_max") else 5
 	var no_shelter_types: Array = gv.get_shelter_room_types_no_shelter()
-	var raw_erosion: int = _get_raw_erosion()
-	var target_per_room: int = mini(maxi(0, 2 - raw_erosion), energy_per_room_max)
+	var global_erosion: int = _get_global_erosion_for_shelter()
+	var target_per_room: int = mini(maxi(0, 2 - global_erosion), energy_per_room_max)
 
 	var need_shelter: Array[Dictionary] = []
 	for room in rooms:

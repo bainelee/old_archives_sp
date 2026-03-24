@@ -1,5 +1,5 @@
 extends PanelContainer
-## 研究员列表面板：列表 + 详情，点击行聚焦镜头并切到详情；入口按钮在 ui_main 中
+## 研究员列表面板：列表 + 详情，点击行聚焦镜头并切到详情；入口按钮在 DebugInfoPanel 内
 
 var _game_main: Node = null
 var _showing_detail: bool = false

@@ -68,7 +68,8 @@ if gv:
 | `room_info.gd` | 清理花费、研究员、时间 |
 | `game_main_built_room.gd` | 研究区/造物区产出、24h 消耗 |
 | `construction_hover_panel.gd` | 建设悬停产出/消耗/住房显示 |
-| `room_detail_panel.gd` | 房间详情面板产出/消耗显示 |
+| `room_detail_panel.gd` | 旧房间详情面板产出/消耗显示（若仍使用） |
+| `room_detail_panel_figma.gd` | Figma 房间详情：四组消耗/产出、庇护数字与分配竖条（`get_shelter_energy_per_room_max` 等） |
 
 ---
 

@@ -75,13 +75,17 @@
 ### 2.5 房间庇护等级公式
 
 ```
-房间庇护等级 = 神秘侵蚀(raw_mystery_erosion) + 该房间获得的庇护能量
+房间庇护等级 = 全局有效侵蚀(ErosionCore.current_erosion) + 该房间获得的庇护能量
 ```
+
+- **全局有效侵蚀** = `raw_mystery_erosion + shelter_bonus`（与 TopBar 侵蚀/庇护展示一致；`shelter_bonus` 为「文明的庇佑」，作弊面板可改）。
+- **目标每房能量** `max(0, 2 - 全局有效侵蚀)`（封顶 `energy_per_room_max`）与上式使用**同一基线**，避免界面显示 -4 却仍按 raw=0 只分到 1 点的情况。
 
 ### 2.6 实现说明（当前）
 
 - **庇护消耗**：`process_shelter_tick` 按需消耗计算因子产出庇护能量，单帧最多处理 24 小时，防止 delta 尖峰导致瞬间耗尽
 - **已建设产出**：`process_production` 单帧最多处理 24 小时，防止意志等因子瞬间耗尽
+- **房间详情 UI**：`room_detail_panel_figma` 左侧「庇护」旁**数字**为 §2.5 房间庇护等级（含负值）；**竖条**仅表示核心对该房的**分配量**相对 `energy_per_room_max`，见 [`docs/design/3-ui/05-room-detail-panel-figma.md` §7](../3-ui/05-room-detail-panel-figma.md#7-庇护展示区左侧竖条与数字)
 
 ### 2.7 计算因子消耗汇总
 

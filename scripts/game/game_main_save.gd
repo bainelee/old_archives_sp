@@ -8,6 +8,7 @@ const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 
 const SAVE_KEY_TILES := "tiles"
 const SAVE_KEY_ROOMS := "rooms"
+const SAVE_KEY_FORCED_SHUTDOWN_ROOMS := "forced_shutdown_room_ids"
 const KEY_MAP := "map"
 const KEY_TIME := "time"
 const KEY_RESOURCES := "resources"
@@ -77,6 +78,14 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 		"next_room_id": next_room_id,
 		"map_name": map_name,
 	}
+	var forced_shutdown: Dictionary = game_main.get("_forced_shutdown_room_ids")
+	if forced_shutdown is Dictionary and not forced_shutdown.is_empty():
+		var room_ids: Array = []
+		for room_id in forced_shutdown.keys():
+			if bool(forced_shutdown.get(room_id, false)):
+				room_ids.append(str(room_id))
+		if not room_ids.is_empty():
+			map_data[SAVE_KEY_FORCED_SHUTDOWN_ROOMS] = room_ids
 	var total_hours: int = int(GameTime.get_total_hours()) if GameTime else 0
 	var resources: Dictionary = {"factors": {}, "currency": {}, "personnel": {}}
 	var ui: Node = game_main.get_node_or_null("UIMain")
@@ -173,9 +182,11 @@ static func apply_map(game_main: Node2D, d: Dictionary) -> void:
 	var rooms: Array = game_main.get("_rooms")
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
+	var forced_shutdown: Dictionary = game_main.get("_forced_shutdown_room_ids")
 	rooms.clear()
 	construction_rooms.clear()
 	cleanup_rooms.clear()
+	forced_shutdown.clear()
 	var rooms_data: Array = m.get(SAVE_KEY_ROOMS, []) as Array
 	for i in rooms_data.size():
 		var room_dict: Variant = rooms_data[i]
@@ -208,6 +219,10 @@ static func apply_map(game_main: Node2D, d: Dictionary) -> void:
 					if cpids is Array and not (cpids as Array).is_empty():
 						cpdata["researcher_ids"] = (cpids as Array).duplicate()
 					cleanup_rooms[i] = cpdata
+	var shutdown_ids: Variant = m.get(SAVE_KEY_FORCED_SHUTDOWN_ROOMS, null)
+	if shutdown_ids is Array:
+		for rid in shutdown_ids:
+			forced_shutdown[str(rid)] = true
 	ensure_layout_and_prologue(game_main)
 	game_main.call("_sync_researchers_working_in_rooms_to_ui")
 

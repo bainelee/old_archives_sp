@@ -502,6 +502,7 @@ FACTOR_RESOURCE_SHORTAGE,Resource Shortage,资源缺少
 UNKNOWN,Unknown,未知
 LABEL_TOTAL_CONSUMPTION,Total Consumption,预期总消耗
 LABEL_FIXED_CONSUMPTION,Fixed Consumption,固有消耗
+LABEL_DYNAMIC_CONSUMPTION,Dynamic Consumption,动态消耗
 LABEL_CORE_CONSUMPTION,Core Consumption,核心消耗
 LABEL_OUTPUT,Output,产出
 LABEL_OUTPUT_DETAILS,Output Details,产出细则
@@ -682,3 +683,10 @@ room_pass_5_DESC,Default corridor description,默认通道描述
 room_pass_6_NAME,Inner Corridor,内侧回廊
 room_pass_6_PRE_CLEAN,Default pre-clean text,默认清理前描述
 room_pass_6_DESC,Default corridor description,默认通道描述
+LABEL_PERSONNEL_OCCUPIED,Personnel Occupied,人员占用
+LABEL_PERSONNEL_COUNT,%d Researcher(s),%d 名研究员
+LABEL_CONSTRUCTION_COST,Construction Cost,建设消耗
+LABEL_NO_ZONE_BUILT,(Not Built),(未建设)
+LABEL_FIXED_COST_NOT_TAGGED,No fixed-cost tags yet,暂无固有消耗标注
+LABEL_FIXED_WILL_DAILY,Fixed Will Consumption,固有意志消耗
+LABEL_WILL_DAILY_COST,Willpower -%d/day,意志 -%d/天

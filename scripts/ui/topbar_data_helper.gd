@@ -102,16 +102,15 @@ static func get_shelter_data(gm: Node, gv: Node) -> Dictionary:
 		return result
 	if gm.get("_shelter_level") != null:
 		result.level = int(gm.get("_shelter_level"))
-	if gm.get("_shelter_energy") != null:
-		result.allocated = int(gm.get("_shelter_energy"))
+	result.allocated = UIUtils.safe_int(gm.get("_shelter_energy"))
 	if gv and gv.has_method("get_shelter_cf_and_cap_for_level"):
 		var level_data: Dictionary = gv.get_shelter_cf_and_cap_for_level(result.level)
 		result.cap = level_data.get("energy_cap", 30)
-	if gm.get("_shelter_demand") != null:
-		var demand: int = int(gm.get("_shelter_demand"))
-		result.shortage = maxi(0, demand - result.allocated)
-	elif gm.get("_shelter_shortage") != null:
+	var demand: int = UIUtils.safe_int(gm.get("_shelter_demand"))
+	if gm.get("_shelter_shortage") != null:
 		result.shortage = int(gm.get("_shelter_shortage"))
+	else:
+		result.shortage = maxi(0, demand - result.allocated)
 	return result
 
 

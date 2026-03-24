@@ -6,6 +6,8 @@
 
 **数据关系**：`room_info.json` 为运行时权威数据源；本文档为可读的设计参考。修改房间文案时，应优先更新 `room_info.json`，再同步至本文档（或通过 room-info-locale-sync 子代理同步翻译）。避免双源不同步，见 [05-room-info-3d-format](05-room-info-3d-format.md)。
 
+**字段类型与分层**（配置 / 存档 / 常量 / 派生）：见 [05 - §3 房间信息字段总表](05-room-info-3d-format.md#room-info-field-table)。
+
 ---
 
 ## 主楼房间

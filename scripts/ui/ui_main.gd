@@ -169,7 +169,7 @@ func _ready() -> void:
 	_connect_bottom_placeholder_button("BottomRightBar/Margin/Content/BtnCenter", "center")
 	_connect_bottom_placeholder_button("BottomRightBar/Margin/Content/BtnCouncil", "triple_council")
 	_connect_bottom_placeholder_button("BottomRightBar/Margin/Content/BtnTechStack", "tech_stack")
-	var btn_researcher_list: Button = get_node_or_null("BarBelowTop/BtnResearcherList")
+	var btn_researcher_list: Button = get_node_or_null("DebugInfoPanel/Margin/VBox/BtnResearcherList")
 	if btn_researcher_list:
 		btn_researcher_list.pressed.connect(_on_researcher_list_button_pressed)
 	if _topbar_figma and _topbar_figma.has_signal("block_hovered"):
@@ -209,7 +209,7 @@ func _on_bottom_task_placeholder_button_pressed(button_id: String) -> void:
 
 
 func _on_researcher_list_button_pressed() -> void:
-	var panel: Node = get_node_or_null("ResearcherListPanel")
+	var panel: Node = get_node_or_null("DebugInfoPanel/Margin/VBox/ResearcherListPanel")
 	if panel and panel.has_method("toggle_from_entry"):
 		panel.toggle_from_entry()
 

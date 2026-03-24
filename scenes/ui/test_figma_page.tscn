@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dejraui5mgkcg"]
 
 [ext_resource type="Script" uid="uid://ycnch3ptmkb4" path="res://scripts/ui/test_figma_page.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 [ext_resource type="PackedScene" path="res://scenes/ui/resource_block.tscn" id="5_rb"]
 [ext_resource type="PackedScene" uid="uid://52yph6wsc3mo" path="res://scenes/ui/corrosion_number.tscn" id="6_cn"]
 [ext_resource type="PackedScene" uid="uid://dttradv3t4x01" path="res://scenes/ui/forecast_warning.tscn" id="7_fw"]
@@ -46,6 +47,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("99_theme")
 
 [node name="Background" type="ColorRect" parent="Content" unique_id=1722630703]
 layout_mode = 1

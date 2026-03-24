@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b3xk7m2vq8nrp"]
 
 [ext_resource type="Script" uid="uid://b5uajm0ty58x7" path="res://scripts/ui/ui_main.gd" id="1_ui_main"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 [ext_resource type="Script" path="res://scripts/ui/ui_main_debug_panel.gd" id="1_debug_panel"]
 [ext_resource type="PackedScene" path="res://scenes/ui/topbar_figma.tscn" id="2_topbar_figma"]
 [ext_resource type="PackedScene" path="res://scenes/ui/researcher_list_panel.tscn" id="7_researcher_list"]
@@ -76,38 +77,18 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 108.0
 grow_horizontal = 2
+theme = ExtResource("99_theme")
 theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
 
 [node name="TopbarFigma" parent="TopBar" unique_id=1957265494 instance=ExtResource("2_topbar_figma")]
 layout_mode = 2
-
-[node name="BarBelowTop" type="HBoxContainer" parent="." unique_id=1921459747]
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 108.0
-offset_bottom = 84.0
-grow_horizontal = 2
-theme_override_constants/separation = 8
-
-[node name="Spacer" type="Control" parent="BarBelowTop" unique_id=2103366929]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="BtnResearcherList" type="Button" parent="BarBelowTop" unique_id=862029489]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
-text = "研究员"
-
-[node name="ResearcherListPanel" parent="." unique_id=1336601955 instance=ExtResource("7_researcher_list")]
 
 [node name="DebugInfoPanel" type="PanelContainer" parent="." unique_id=900002001]
 offset_left = 20.0
 offset_top = 55.0
 offset_right = 280.0
 offset_bottom = 200.0
+theme = ExtResource("99_theme")
 theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
 script = ExtResource("1_debug_panel")
 
@@ -122,11 +103,27 @@ theme_override_constants/margin_bottom = 6
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="DebugInfoPanel/Margin/VBox" unique_id=900002004]
+[node name="TitleBar" type="HBoxContainer" parent="DebugInfoPanel/Margin/VBox" unique_id=900002010]
 layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="DebugInfoPanel/Margin/VBox/TitleBar" unique_id=900002004]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
 theme_override_font_sizes/font_size = 12
 text = "Debug"
+vertical_alignment = 1
+
+[node name="BtnClose" type="Button" parent="DebugInfoPanel/Margin/VBox/TitleBar" unique_id=900002011]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+focus_mode = 0
+flat = true
+theme_override_colors/font_color = Color(0.85, 0.75, 0.75, 1)
+theme_override_colors/font_hover_color = Color(1, 0.45, 0.45, 1)
+theme_override_font_sizes/font_size = 18
+text = "×"
 
 [node name="Content" type="Label" parent="DebugInfoPanel/Margin/VBox" unique_id=900002005]
 layout_mode = 2
@@ -222,6 +219,16 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.9, 0.6, 1)
 theme_override_font_sizes/font_size = 14
 text = "+"
+
+[node name="BtnResearcherList" type="Button" parent="DebugInfoPanel/Margin/VBox" unique_id=862029489]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_bottom_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_bottom_btn_hover")
+text = "研究员"
+
+[node name="ResearcherListPanel" parent="DebugInfoPanel/Margin/VBox" unique_id=1336601955 instance=ExtResource("7_researcher_list")]
 
 [node name="CognitionDetailPanel" parent="." unique_id=994421566 instance=ExtResource("8_cognition_panel")]
 

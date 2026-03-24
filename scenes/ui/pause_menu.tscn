@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://pause_menu_001"]
+[gd_scene load_steps=4 format=3 uid="uid://pause_menu_001"]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_pause_menu"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.1, 0.1, 0.15, 0.95)
@@ -29,6 +30,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("99_theme")
 
 [node name="Overlay" type="ColorRect" parent="Panel"]
 layout_mode = 1

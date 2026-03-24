@@ -1,11 +1,13 @@
 [gd_scene format=3 uid="uid://dnym5k2x8qrwh"]
 
 [ext_resource type="Script" path="res://scripts/ui/time_panel.gd" id="1_time_panel"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 [ext_resource type="Script" path="res://scripts/ui/time_indicator.gd" id="2_time_indicator"]
 
 [node name="TimePanel" type="HBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
+theme = ExtResource("99_theme")
 script = ExtResource("1_time_panel")
 
 [node name="TimeIndicator" type="Control" parent="."]

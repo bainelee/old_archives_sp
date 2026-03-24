@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://researcher_list_panel_01"]
+[gd_scene load_steps=4 format=3 uid="uid://researcher_list_panel_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/researcher_list_panel.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.12, 0.12, 0.18, 0.95)
@@ -19,18 +20,11 @@ content_margin_right = 12.0
 content_margin_bottom = 12.0
 
 [node name="ResearcherListPanel" type="PanelContainer"]
-custom_minimum_size = Vector2(320, 280)
-layout_mode = 3
-anchors_preset = 1
-anchor_left = 1.0
-anchor_top = 0.0
-anchor_right = 1.0
-anchor_bottom = 0.0
-offset_left = -340.0
-offset_top = 88.0
-offset_right = -20.0
-offset_bottom = 368.0
-grow_horizontal = 0
+visible = false
+custom_minimum_size = Vector2(240, 280)
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("99_theme")
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 script = ExtResource("1_script")
 

@@ -33,6 +33,7 @@
 | **3-ui/** | [01 - 庇护/侵蚀 UI](3-ui/01-shelter-erosion-ui.md) | ShelterErosionPanel、ErosionCycleBar、侵蚀等级与周期 |
 | | [02 - 主 UI 设计概览](3-ui/02-ui-main-overview.md) | TopBar 布局、TimePanel、数据 API |
 | | [03 - TopBar UI 元素说明](3-ui/03-topbar-ui-elements.md) | 顶栏各项显示信息及游戏内作用 |
+| | [05 - 房间详细信息界面（Figma 同步）](3-ui/05-room-detail-panel-figma.md) | room_detail_panel_figma 当前已开发/未开发状态与约束 |
 | **99-tools/** | [01 - Framelink MCP 配置](99-tools/01-framelink-mcp-setup.md) | Figma Personal Access Token、Framelink MCP 配置 |
 | **100-figma_process/** | [README](100-figma_process/README.md) | Figma 设计与同步规则、MCP 配置（独立编号 01、02…） |
 | **locale/** | [01 - 本地化](locale/01-localization.md) | 中英双语、CSV 翻译表、tr()、语言切换（开始界面互斥按钮） |

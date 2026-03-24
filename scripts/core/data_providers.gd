@@ -12,12 +12,15 @@ signal investigator_data_changed
 signal truth_data_changed
 
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
+const _UIUtils = preload("res://scripts/core/ui_utils.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const RoomInfoScript = preload("res://scripts/core/room_info.gd")
 
 ## 缓存的上次数据（用于检测变化）
 var _last_factor_data: Dictionary = {}
-var _last_shelter_data: Dictionary = {}
+var _last_shelter_sync_energy: int = -999999
+var _last_shelter_sync_demand: int = -999999
+var _last_shelter_sync_level: int = -999999
 var _last_researcher_data: Dictionary = {}
 
 
@@ -29,6 +32,9 @@ func _ready() -> void:
 
 func _on_config_reloaded() -> void:
 	## 配置重载时发出所有数据变化信号
+	_last_shelter_sync_energy = -999999
+	_last_shelter_sync_demand = -999999
+	_last_shelter_sync_level = -999999
 	factor_data_changed.emit("all")
 	shelter_data_changed.emit()
 	researcher_data_changed.emit()
@@ -249,13 +255,13 @@ func _get_factor_warning(status_code: String, days: int, _current: int, daily_ne
 
 func get_shelter_breakdown() -> Dictionary:
 	var result := {
-		"capacity": 0,       # 出力上限
-		"assigned": 0,       # 已分配
-		"deficit": 0,        # 缺口
-		"innate": 0,         # 固有分配
-		"construction": 0,   # 建设分配
-		"output": 0,         # 产出
-		"region_status": {    # 各庇护状态房间数量
+		"capacity": 0.0,
+		"assigned": 0.0,
+		"deficit": 0.0,
+		"innate": 0.0,
+		"construction": 0.0,
+		"output": 0.0,
+		"region_status": {
 			"perfect": 0,
 			"adequate": 0,
 			"weak": 0,
@@ -263,25 +269,104 @@ func get_shelter_breakdown() -> Dictionary:
 			"critical": 0,
 			"shutdown": 0,
 		},
+		"innate_details": [],
+		"output_details": [],
 	}
 
 	var game_main := _get_game_main()
 	if not game_main:
 		return result
 
-	## 获取核心等级和出力
 	var shelter_level := 1
 	if game_main.get("_shelter_level") != null:
-		shelter_level = game_main.get("_shelter_level")
+		shelter_level = int(game_main.get("_shelter_level"))
 
 	if GameValues:
 		var cfg := GameValues.get_shelter_cf_and_cap_for_level(shelter_level)
-		result.capacity = cfg.get("energy_cap", 30)
+		result.capacity = float(cfg.get("energy_cap", 30))
 
-	## TODO: 计算已分配、缺口、各区域状态分布
-	## 需要 ShelterCore 或类似系统提供数据
+	var assigned_i: int = _UIUtils.safe_int(game_main.get("_shelter_energy"))
+	var demand_i: int = _UIUtils.safe_int(game_main.get("_shelter_demand"))
+	result.assigned = float(assigned_i)
+	result.deficit = float(maxi(0, demand_i - assigned_i))
+
+	var cf_hour: int = 0
+	var shelter_h: Variant = game_main.get("_shelter_helper")
+	if shelter_h is GameMainShelterHelper:
+		cf_hour = (shelter_h as GameMainShelterHelper)._last_cf_consumed
+	result.output = float(cf_hour * 24)
+	var output_details: Array = []
+	if result.output > 0.0:
+		output_details.append({
+			"source": tr("ARCHIVES_CORE"),
+			"amount": result.output,
+		})
+	result.output_details = output_details
+
+	var breakdown: Array = GameMainShelterHelper.get_shelter_consumption_breakdown(game_main, shelter_level)
+	var innate_details: Array = []
+	var per_day_sum: float = 0.0
+	for row in breakdown:
+		var zn: String = str(row.get("zone_name", ""))
+		var rn: String = str(row.get("room_name", ""))
+		var pd: float = float(row.get("per_day", 0))
+		per_day_sum += pd
+		var label: String = zn if rn.is_empty() else "%s - %s" % [zn, rn]
+		innate_details.append({"name": label, "amount": pd})
+	result.innate_details = innate_details
+	result.innate = per_day_sum if per_day_sum > 0.0 else float(assigned_i * 24)
+	result.construction = 0.0
+
+	var rs: Dictionary = result["region_status"]
+	var rooms: Variant = game_main.get("_rooms")
+	if rooms is Array:
+		for room in rooms as Array:
+			if not (room is ArchivesRoomInfo):
+				continue
+			var rm: ArchivesRoomInfo = room as ArchivesRoomInfo
+			if rm.zone_type == 0:
+				continue
+			var rid: String = rm.id if rm.id else rm.json_room_id
+			if rid.is_empty():
+				continue
+			if game_main.has_method("is_room_forced_shutdown") and bool(game_main.call("is_room_forced_shutdown", rm)):
+				rs["shutdown"] = int(rs.get("shutdown", 0)) + 1
+				continue
+			var sl: int = GameMainShelterHelper.get_room_shelter_level(game_main, rid)
+			var bucket: String = _shelter_status_bucket(sl)
+			rs[bucket] = int(rs.get(bucket, 0)) + 1
 
 	return result
+
+
+## 与 ErosionCore.get_shelter_status_name 阈值一致，用于房间综合庇护等级计数
+func _shelter_status_bucket(level: int) -> String:
+	if level <= -5:
+		return "critical"
+	if level >= -4 and level <= -2:
+		return "exposed"
+	if level >= -1 and level <= 1:
+		return "weak"
+	if level >= 2 and level <= 4:
+		return "adequate"
+	if level >= 5:
+		return "perfect"
+	return "weak"
+
+
+## 庇护 tick 写入 TopBar 汇总后调用：数值变化时通知详情面板刷新
+func on_shelter_topbar_sync(game_main: Node) -> void:
+	if not game_main:
+		return
+	var e: int = _UIUtils.safe_int(game_main.get("_shelter_energy"))
+	var d: int = _UIUtils.safe_int(game_main.get("_shelter_demand"))
+	var l: int = _UIUtils.safe_int(game_main.get("_shelter_level"), 1)
+	if e == _last_shelter_sync_energy and d == _last_shelter_sync_demand and l == _last_shelter_sync_level:
+		return
+	_last_shelter_sync_energy = e
+	_last_shelter_sync_demand = d
+	_last_shelter_sync_level = l
+	shelter_data_changed.emit()
 
 
 ## ============================================================================

@@ -44,7 +44,9 @@ static func get_breakdown(game_main: Node2D, factor_key: String) -> Dictionary:
 			for p in produce:
 				daily_produce += floori(p.get("per_day", 0))
 		"willpower":
-			consume = _get_creation_consumption(game_main)
+			consume = _get_zone_fixed_will_consumption(game_main)
+			for c in _get_creation_consumption(game_main):
+				consume.append(c)
 			for c in consume:
 				daily_consume += floori(c.get("per_day", 0))
 			produce = _get_research_production(game_main, "willpower")
@@ -187,6 +189,23 @@ static func _get_creation_production_permission(game_main: Node2D) -> Array:
 				"room_name": r.get_display_name(),
 				"per_day": per_day,
 			})
+	return result
+
+
+static func _get_zone_fixed_will_consumption(game_main: Node2D) -> Array:
+	var rooms: Array = game_main.get("_rooms")
+	var result: Array = []
+	for room in rooms:
+		if not (room is ArchivesRoomInfo):
+			continue
+		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
+		if r.zone_type == ZoneTypeScript.Type.NONE:
+			continue
+		result.append({
+			"zone_name": ZoneTypeScript.get_zone_name(r.zone_type),
+			"room_name": r.get_display_name(),
+			"per_day": GameMainBuiltRoomHelper.FIXED_WILL_COST_PER_DAY,
+		})
 	return result
 
 

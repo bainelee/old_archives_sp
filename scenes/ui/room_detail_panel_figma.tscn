@@ -1,0 +1,487 @@
+[gd_scene load_steps=32 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/room_detail_panel_figma.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/room_details_info_group.tscn" id="2_info_group"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/room_details_action_button.tscn" id="25_action_button"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="26_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/background_room_details_panel.png" id="3_bg_panel"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/room_shelter_progress_back.png" id="4_shelter_back"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/frame_room_image_show.png" id="5_frame_image"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/image_room_show.png" id="6_image_show"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/frame_room_details_desc.png" id="7_frame_desc"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/room_title_icon_frame.png" id="8_title_icon_frame"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/icon_room_type.png" id="9_icon_room_type"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/button_room_skill_nor.png" id="10_skill_nor"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/button_room_skill_press.png" id="11_skill_press"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/icon_room_skill_0.png" id="12_skill_icon_0"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/icon_room_skill_1.png" id="13_skill_icon_1"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/icon_frame_blue_20x20.png" id="14_frame_blue_20"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/button_room_details_nor_close.png" id="15_top_close_nor"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/icon_room_details_close.png" id="16_top_close_icon"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/image_placeholder_64.png" id="17_img64"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/select_slot_room_remodel.png" id="18_remodel_slot"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/button_room_details_bottombar_nor.png" id="19_bottom_nor"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/button_room_details_bottombar_press.png" id="20_bottom_press"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/icon_destroy_zone.png" id="21_icon_destroy"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/icon_close_zone.png" id="22_icon_close"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/room_shelter_handle.png" id="23_shelter_handle"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/icon_question_room_fixed_overhead.png" id="24_icon_question"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
+bg_color = Color(0.0509804, 0.227451, 0.698039, 1)
+
+[node name="RoomDetailPanelFigma" type="CanvasLayer"]
+layer = 12
+script = ExtResource("1_script")
+
+[node name="PanelRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -600.0
+offset_top = 148.0
+offset_right = -40.0
+offset_bottom = 988.0
+grow_horizontal = 0
+grow_vertical = 0
+theme = ExtResource("26_theme")
+
+[node name="background_room_details_panel" type="TextureRect" parent="PanelRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_bg_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="room_shelter_progress_back" type="TextureRect" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 18.0
+offset_top = 128.0
+offset_right = 52.0
+offset_bottom = 782.0
+texture = ExtResource("4_shelter_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="room_shelter_progress_inside" type="ColorRect" parent="PanelRoot"]
+layout_mode = 0
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 650.0
+mouse_filter = 2
+color = Color(0.0509804, 0.227451, 0.694118, 1)
+z_index = 1
+
+[node name="room_shelter_handle" type="TextureRect" parent="PanelRoot"]
+layout_mode = 0
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 645.0
+texture = ExtResource("23_shelter_handle")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+z_index = 2
+
+[node name="group_room_details_top_bar" type="Control" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 556.0
+offset_bottom = 36.0
+
+[node name="Back" type="PanelContainer" parent="PanelRoot/group_room_details_top_bar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
+
+[node name="icon_frame_blue_20x20" type="TextureRect" parent="PanelRoot/group_room_details_top_bar"]
+layout_mode = 1
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 26.0
+offset_bottom = 26.0
+texture = ExtResource("14_frame_blue_20")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="image_64" type="TextureRect" parent="PanelRoot/group_room_details_top_bar"]
+layout_mode = 1
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 26.0
+offset_bottom = 26.0
+texture = ExtResource("17_img64")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="text_roomname_details_top_bar" type="Label" parent="PanelRoot/group_room_details_top_bar"]
+layout_mode = 1
+offset_left = 32.0
+offset_top = 4.0
+offset_right = 300.0
+offset_bottom = 20.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "档案馆正厅"
+vertical_alignment = 1
+
+[node name="text_roomtype_details_top_bar" type="Label" parent="PanelRoot/group_room_details_top_bar"]
+layout_mode = 1
+offset_left = 32.0
+offset_top = 20.0
+offset_right = 300.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "研究区 - 资料库"
+vertical_alignment = 1
+
+[node name="button_room_details_top_bar" type="TextureButton" parent="PanelRoot/group_room_details_top_bar"]
+layout_mode = 1
+offset_left = 524.0
+offset_top = 4.0
+offset_right = 548.0
+offset_bottom = 28.0
+texture_normal = ExtResource("15_top_close_nor")
+texture_pressed = ExtResource("15_top_close_nor")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="icon_room_details_close" type="TextureRect" parent="PanelRoot/group_room_details_top_bar/button_room_details_top_bar"]
+layout_mode = 1
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 23.0
+offset_bottom = 23.0
+texture = ExtResource("16_top_close_icon")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="group_room_detials_title" type="Control" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 88.0
+offset_top = 44.0
+offset_right = 548.0
+offset_bottom = 100.0
+
+[node name="room_title_icon_frame" type="TextureRect" parent="PanelRoot/group_room_detials_title"]
+layout_mode = 1
+offset_right = 32.0
+offset_bottom = 32.0
+texture = ExtResource("8_title_icon_frame")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="icon_room_type" type="TextureRect" parent="PanelRoot/group_room_detials_title"]
+layout_mode = 1
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 31.0
+offset_bottom = 31.0
+texture = ExtResource("9_icon_room_type")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="text_room_title_big" type="Label" parent="PanelRoot/group_room_detials_title"]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 4.0
+offset_right = 340.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "档案馆正厅"
+vertical_alignment = 1
+
+[node name="text_room_type" type="Label" parent="PanelRoot/group_room_detials_title"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = 40.0
+offset_right = 330.0
+offset_bottom = 56.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 16
+text = "研究区 - 资料库"
+vertical_alignment = 1
+
+[node name="group_room_skill_buttons" type="Control" parent="PanelRoot/group_room_detials_title"]
+layout_mode = 1
+offset_left = 260.0
+offset_top = 0.0
+offset_right = 460.0
+offset_bottom = 56.0
+
+[node name="SkillButton0" type="TextureButton" parent="PanelRoot/group_room_detials_title/group_room_skill_buttons"]
+layout_mode = 1
+offset_right = 48.0
+offset_bottom = 48.0
+texture_normal = ExtResource("10_skill_nor")
+texture_pressed = ExtResource("11_skill_press")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="PanelRoot/group_room_detials_title/group_room_skill_buttons/SkillButton0"]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 46.0
+offset_bottom = 46.0
+texture = ExtResource("12_skill_icon_0")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="SkillButton1" type="TextureButton" parent="PanelRoot/group_room_detials_title/group_room_skill_buttons"]
+layout_mode = 1
+offset_left = 56.0
+offset_right = 104.0
+offset_bottom = 48.0
+texture_normal = ExtResource("10_skill_nor")
+texture_pressed = ExtResource("11_skill_press")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="PanelRoot/group_room_detials_title/group_room_skill_buttons/SkillButton1"]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 46.0
+offset_bottom = 46.0
+texture = ExtResource("13_skill_icon_1")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="SkillButton2" type="TextureButton" parent="PanelRoot/group_room_detials_title/group_room_skill_buttons"]
+layout_mode = 1
+offset_left = 112.0
+offset_right = 160.0
+offset_bottom = 48.0
+texture_normal = ExtResource("10_skill_nor")
+texture_pressed = ExtResource("11_skill_press")
+ignore_texture_size = true
+stretch_mode = 5
+visible = false
+
+[node name="Icon" type="TextureRect" parent="PanelRoot/group_room_detials_title/group_room_skill_buttons/SkillButton2"]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 46.0
+offset_bottom = 46.0
+texture = ExtResource("12_skill_icon_0")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="SkillButton3" type="TextureButton" parent="PanelRoot/group_room_detials_title/group_room_skill_buttons"]
+layout_mode = 1
+offset_left = 168.0
+offset_right = 216.0
+offset_bottom = 48.0
+texture_normal = ExtResource("10_skill_nor")
+texture_pressed = ExtResource("11_skill_press")
+ignore_texture_size = true
+stretch_mode = 5
+visible = false
+
+[node name="Icon" type="TextureRect" parent="PanelRoot/group_room_detials_title/group_room_skill_buttons/SkillButton3"]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 46.0
+offset_bottom = 46.0
+texture = ExtResource("13_skill_icon_1")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="group_room_image" type="Control" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 88.0
+offset_top = 118.0
+offset_right = 548.0
+offset_bottom = 218.0
+
+[node name="frame_room_image_show" type="TextureRect" parent="PanelRoot/group_room_image"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_frame_image")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="image_room_show" type="TextureRect" parent="PanelRoot/group_room_image"]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 458.0
+offset_bottom = 98.0
+texture = ExtResource("6_image_show")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="group_room_desc" type="Control" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 88.0
+offset_top = 226.0
+offset_right = 548.0
+offset_bottom = 326.0
+
+[node name="frame_room_details_desc" type="TextureRect" parent="PanelRoot/group_room_desc"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_frame_desc")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="scroll_room_desc" type="ScrollContainer" parent="PanelRoot/group_room_desc"]
+layout_mode = 1
+offset_left = 9.0
+offset_top = 10.0
+offset_right = 451.0
+offset_bottom = 94.0
+horizontal_scroll_mode = 0
+
+[node name="text_room_desc" type="RichTextLabel" parent="PanelRoot/group_room_desc/scroll_room_desc"]
+layout_mode = 2
+size_flags_horizontal = 3
+fit_content = true
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "（无描述）"
+autowrap_mode = 3
+scroll_active = false
+
+[node name="text_shelter" type="Label" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 18.0
+offset_top = 84.0
+offset_right = 52.0
+offset_bottom = 98.0
+theme_override_font_sizes/font_size = 14
+text = "庇护"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="text_shelter_value" type="Label" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 18.0
+offset_top = 105.0
+offset_right = 52.0
+offset_bottom = 119.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="group_room_fixed_overhead" parent="PanelRoot" instance=ExtResource("2_info_group")]
+layout_mode = 1
+offset_left = 88.0
+offset_top = 346.0
+offset_right = 308.0
+offset_bottom = 466.0
+group_title = "固有消耗:"
+question_icon = ExtResource("24_icon_question")
+
+[node name="group_room_resource_reserve" parent="PanelRoot" instance=ExtResource("2_info_group")]
+layout_mode = 1
+offset_left = 328.0
+offset_top = 346.0
+offset_right = 548.0
+offset_bottom = 466.0
+group_title = "资源储备:"
+question_icon = ExtResource("24_icon_question")
+
+[node name="group_room_dynamic_overhead" parent="PanelRoot" instance=ExtResource("2_info_group")]
+layout_mode = 1
+offset_left = 88.0
+offset_top = 486.0
+offset_right = 308.0
+offset_bottom = 606.0
+group_title = "动态消耗:"
+question_icon = ExtResource("24_icon_question")
+
+[node name="group_room_total_output" parent="PanelRoot" instance=ExtResource("2_info_group")]
+layout_mode = 1
+offset_left = 328.0
+offset_top = 486.0
+offset_right = 548.0
+offset_bottom = 606.0
+group_title = "总产出"
+question_icon = ExtResource("24_icon_question")
+
+[node name="select_slot_room_remodel_0" type="TextureRect" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 156.0
+offset_top = 626.0
+offset_right = 276.0
+offset_bottom = 786.0
+texture = ExtResource("18_remodel_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="select_slot_room_remodel_1" type="TextureRect" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 292.0
+offset_top = 626.0
+offset_right = 412.0
+offset_bottom = 786.0
+texture = ExtResource("18_remodel_slot")
+expand_mode = 1
+stretch_mode = 5
+visible = false
+
+[node name="select_slot_room_remodel_2" type="TextureRect" parent="PanelRoot"]
+layout_mode = 1
+offset_left = 428.0
+offset_top = 626.0
+offset_right = 548.0
+offset_bottom = 786.0
+texture = ExtResource("18_remodel_slot")
+expand_mode = 1
+stretch_mode = 5
+visible = false
+
+[node name="group_room_details_bottombar_destroy" parent="PanelRoot" instance=ExtResource("25_action_button")]
+layout_mode = 1
+offset_left = 418.0
+offset_top = 809.0
+offset_right = 482.0
+offset_bottom = 833.0
+normal_texture = ExtResource("19_bottom_nor")
+pressed_state_texture = ExtResource("20_bottom_press")
+label_text = "拆除"
+icon_texture = ExtResource("21_icon_destroy")
+
+[node name="group_room_details_bottombar_close" parent="PanelRoot" instance=ExtResource("25_action_button")]
+layout_mode = 1
+offset_left = 486.0
+offset_top = 809.0
+offset_right = 550.0
+offset_bottom = 833.0
+normal_texture = ExtResource("19_bottom_nor")
+pressed_state_texture = ExtResource("20_bottom_press")
+label_text = "关停"
+icon_texture = ExtResource("22_icon_close")

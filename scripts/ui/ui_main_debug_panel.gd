@@ -1,12 +1,16 @@
 extends PanelContainer
-## Debug 信息面板 - 镜头控制、96x、庇护等级、射线/房间信息开关
+## Debug 信息面板 - 标题栏关闭、镜头控制、96x、庇护等级、射线/房间信息开关
 ## 挂载于 DebugInfoPanel 节点；通过 get_parent().get_parent() 获取 GameMain
+## 热键：`（Tab 上方）切换显示，见 GameMainInputHelper.process_input
 
 @onready var _pan_speed_slider: HSlider = $Margin/VBox/PanSpeedRow/PanSpeedSlider
 @onready var _pan_speed_value_label: Label = $Margin/VBox/PanSpeedRow/Value
 
 
 func _ready() -> void:
+	var btn_close: Button = get_node_or_null("Margin/VBox/TitleBar/BtnClose") as Button
+	if btn_close:
+		btn_close.pressed.connect(_on_close_pressed)
 	var pan_label: Label = get_node_or_null("Margin/VBox/PanSpeedRow/Label") as Label
 	if pan_label:
 		pan_label.text = tr("LABEL_PAN_SPEED")
@@ -26,6 +30,10 @@ func _ready() -> void:
 	var show_room_info_btn: CheckButton = get_node_or_null("Margin/VBox/ShowRoomInfo") as CheckButton
 	if show_room_info_btn:
 		show_room_info_btn.toggled.connect(_on_show_room_info_toggled)
+
+
+func _on_close_pressed() -> void:
+	visible = false
 
 
 func _get_game_main() -> Node:

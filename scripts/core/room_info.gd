@@ -64,6 +64,7 @@ var adjacent_ids: Array = []  ## 邻接房间 id 列表
 var grid_x: int = 0  ## 布局网格 X
 var grid_y: int = 0  ## 布局网格 Y
 var size_3d: String = ""  ## 3d_size：base|small|tall|small_tall|long
+var remodel_slot_count: int = 1  ## 改造槽位数量（最小 1，最大 3）
 
 
 ## 获取显示用房间名称：有 json_room_id 时用 tr(ROOM_XXX_NAME)，否则用原始 room_name
@@ -227,6 +228,7 @@ func to_json_room_dict(json_id: String) -> Dictionary:
 		"resources": res_list,
 		"pre_clean_text": format_text_for_json(pre_clean_text),
 		"desc": format_text_for_json(desc),
+		"remodel_slot_count": remodel_slot_count,
 	}
 
 
@@ -297,6 +299,7 @@ func to_dict() -> Dictionary:
 		"grid_x": grid_x,
 		"grid_y": grid_y,
 		"size_3d": size_3d,
+		"remodel_slot_count": clampi(remodel_slot_count, 1, 3),
 	}
 
 
@@ -343,4 +346,5 @@ static func from_dict(d: Dictionary) -> ArchivesRoomInfo:
 	info.grid_x = int(d.get("grid_x", 0))
 	info.grid_y = int(d.get("grid_y", 0))
 	info.size_3d = str(d.get("size_3d", d.get("3d_size", "")))
+	info.remodel_slot_count = clampi(int(d.get("remodel_slot_count", d.get("remodel_slots", 1))), 1, 3)
 	return info

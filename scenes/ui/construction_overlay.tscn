@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://construction_overlay_01"]
+[gd_scene load_steps=5 format=3 uid="uid://construction_overlay_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/construction_overlay.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 [ext_resource type="PackedScene" uid="uid://construction_hover_panel_01" path="res://scenes/ui/construction_hover_panel.tscn" id="2_hover"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dim"]
@@ -30,6 +31,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("99_theme")
 
 [node name="BlockTopBar" type="Control" parent="BlockedUIOverlay"]
 layout_mode = 1
@@ -71,6 +73,7 @@ offset_right = 180.0
 offset_bottom = -70.0
 grow_horizontal = 2
 grow_vertical = 0
+theme = ExtResource("99_theme")
 theme_override_constants/separation = 12
 alignment = 1
 
@@ -88,6 +91,7 @@ offset_right = 280.0
 offset_bottom = -120.0
 grow_horizontal = 2
 grow_vertical = 0
+theme = ExtResource("99_theme")
 theme_override_constants/separation = 16
 alignment = 1
 
@@ -105,6 +109,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 80.0
 offset_bottom = 80.0
+theme = ExtResource("99_theme")
 
 [node name="ConfirmButton" type="Button" parent="ConfirmContainer"]
 layout_mode = 1

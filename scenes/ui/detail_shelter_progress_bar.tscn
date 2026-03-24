@@ -1,11 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://shelter_progress_bar"]
+[gd_scene load_steps=4 format=3 uid="uid://shelter_progress_bar"]
 
 [ext_resource type="Script" path="res://scripts/ui/detail_shelter_progress_bar.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="99_theme"]
 [ext_resource type="Texture2D" path="res://assets/ui/factor_details/storage_progress_bar_back.png" id="2_back"]
 
 [node name="DetailShelterProgressBar" type="MarginContainer"]
 custom_minimum_size = Vector2(280, 20)
 layout_mode = 2
+theme = ExtResource("99_theme")
 script = ExtResource("1_script")
 assigned = 1000.0
 deficit = 200.0

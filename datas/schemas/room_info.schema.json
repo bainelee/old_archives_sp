@@ -109,6 +109,13 @@
                 "items": { "type": "string" }
               }
             ]
+          },
+          "remodel_slot_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "default": 1,
+            "description": "房间改造槽位数量。"
           }
         }
       }

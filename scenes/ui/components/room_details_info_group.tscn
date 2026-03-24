@@ -1,0 +1,77 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/components/room_details_info_group.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/room_details_info_entry.tscn" id="2_entry"]
+[ext_resource type="Texture2D" path="res://assets/ui/room_details_figma/back_room_details_info_group.png" id="3_back"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="4_theme"]
+
+[node name="RoomDetailsInfoGroup" type="Control"]
+custom_minimum_size = Vector2(220, 120)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 220.0
+offset_bottom = 120.0
+theme = ExtResource("4_theme")
+script = ExtResource("1_script")
+
+[node name="Back" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 1
+offset_left = 5.0
+offset_top = 8.0
+offset_right = 176.0
+offset_bottom = 22.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "固有消耗:"
+vertical_alignment = 1
+
+[node name="QuestionIcon" type="TextureRect" parent="."]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 1
+offset_left = 198.0
+offset_top = 6.0
+offset_right = 214.0
+offset_bottom = 22.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Entries" type="Control" parent="."]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 32.0
+offset_right = 218.0
+offset_bottom = 112.0
+
+[node name="Entry0" parent="Entries" instance=ExtResource("2_entry")]
+layout_mode = 1
+offset_right = 216.0
+offset_bottom = 20.0
+
+[node name="Entry1" parent="Entries" instance=ExtResource("2_entry")]
+layout_mode = 1
+offset_top = 20.0
+offset_right = 216.0
+offset_bottom = 40.0
+
+[node name="Entry2" parent="Entries" instance=ExtResource("2_entry")]
+layout_mode = 1
+offset_top = 40.0
+offset_right = 216.0
+offset_bottom = 60.0
+
+[node name="Entry3" parent="Entries" instance=ExtResource("2_entry")]
+layout_mode = 1
+offset_top = 60.0
+offset_right = 216.0
+offset_bottom = 80.0
