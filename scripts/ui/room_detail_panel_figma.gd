@@ -36,6 +36,7 @@ const _SHELTER_HANDLE_HALF_H := 5.0
 @onready var _top_type: Label = $PanelRoot/group_room_details_top_bar/text_roomtype_details_top_bar
 @onready var _desc_label: RichTextLabel = $PanelRoot/group_room_desc/scroll_room_desc/text_room_desc
 @onready var _shelter_value: Label = $PanelRoot/text_shelter_value
+@onready var _shelter_back: TextureRect = $PanelRoot/room_shelter_progress_back
 @onready var _shelter_fill: ColorRect = $PanelRoot/room_shelter_progress_inside
 @onready var _shelter_handle: TextureRect = $PanelRoot/room_shelter_handle
 @onready var _skill_buttons: Array[TextureButton] = [
@@ -61,6 +62,12 @@ const _SHELTER_HANDLE_HALF_H := 5.0
 var _current_room: ArchivesRoomInfo = null
 var _last_dynamic_hash: int = -1
 var _active_skills: Array[Dictionary] = []
+var _is_dragging_shelter: bool = false
+var _drag_room_id: String = ""
+var _drag_preview_energy: int = 0
+## 松手提交后先保持目标显示，直到 tick 分配追上，避免“先回弹再前进”闪烁
+var _pending_manual_visual_room_id: String = ""
+var _pending_manual_visual_energy: int = -1
 
 
 
@@ -88,6 +95,7 @@ func _ready() -> void:
 		_btn_destroy.pressed.connect(_on_destroy_pressed)
 	if _btn_shutdown:
 		_btn_shutdown.pressed.connect(_on_shutdown_pressed)
+	_setup_shelter_drag_input()
 
 
 func _process(_delta: float) -> void:
@@ -129,6 +137,11 @@ func hide_panel() -> void:
 	_current_room = null
 	_last_dynamic_hash = -1
 	_active_skills.clear()
+	_is_dragging_shelter = false
+	_drag_room_id = ""
+	_drag_preview_energy = 0
+	_pending_manual_visual_room_id = ""
+	_pending_manual_visual_energy = -1
 	visible = false
 
 
@@ -259,7 +272,7 @@ func _get_remodel_slot_count(room: ArchivesRoomInfo) -> int:
 	return clampi(room.remodel_slot_count, 1, 3)
 
 
-func _update_shelter_visual(caller: String = "unknown") -> void:
+func _update_shelter_visual(_caller: String = "unknown") -> void:
 	
 	if not _shelter_fill:
 		return
@@ -283,6 +296,16 @@ func _update_shelter_visual(caller: String = "unknown") -> void:
 		tick_alloc = ShelterHelper.get_room_allocated_shelter_energy(gm, rid)
 		## 条表示「本房获得的庇护能量」：由等级与全局基线反推，与数字自洽
 		allocated_for_bar = clampi(level - baseline, 0, per_room_max)
+	if rid == _pending_manual_visual_room_id and _pending_manual_visual_energy >= 0:
+		allocated_for_bar = clampi(_pending_manual_visual_energy, 0, per_room_max)
+		level = baseline + allocated_for_bar
+		## tick 已追上目标后，清理临时视觉锁定
+		if tick_alloc == _pending_manual_visual_energy:
+			_pending_manual_visual_room_id = ""
+			_pending_manual_visual_energy = -1
+	if _is_dragging_shelter and rid == _drag_room_id:
+		allocated_for_bar = clampi(_drag_preview_energy, 0, per_room_max)
+		level = baseline + allocated_for_bar
 	
 	
 	
@@ -305,6 +328,78 @@ func _update_shelter_visual(caller: String = "unknown") -> void:
 	
 	## 直接检查尺寸
 	_write_size_to_file()
+
+
+func _setup_shelter_drag_input() -> void:
+	if _shelter_handle:
+		_shelter_handle.mouse_filter = Control.MOUSE_FILTER_STOP
+		if not _shelter_handle.gui_input.is_connected(_on_shelter_drag_gui_input):
+			_shelter_handle.gui_input.connect(_on_shelter_drag_gui_input)
+	if _shelter_back:
+		_shelter_back.mouse_filter = Control.MOUSE_FILTER_STOP
+		if not _shelter_back.gui_input.is_connected(_on_shelter_drag_gui_input):
+			_shelter_back.gui_input.connect(_on_shelter_drag_gui_input)
+
+
+func _on_shelter_drag_gui_input(event: InputEvent) -> void:
+	if not visible or _current_room == null:
+		return
+	if not (event is InputEventMouseButton or event is InputEventMouseMotion):
+		return
+	var rid: String = _current_room.id if _current_room.id else _current_room.json_room_id
+	if rid.is_empty():
+		return
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
+			_is_dragging_shelter = true
+			_drag_room_id = rid
+			_update_drag_preview_from_mouse()
+			get_viewport().set_input_as_handled()
+		elif mb.button_index == MOUSE_BUTTON_LEFT and (not mb.pressed) and _is_dragging_shelter:
+			_commit_shelter_drag()
+			get_viewport().set_input_as_handled()
+	elif event is InputEventMouseMotion and _is_dragging_shelter:
+		_update_drag_preview_from_mouse()
+		get_viewport().set_input_as_handled()
+
+
+func _update_drag_preview_from_mouse() -> void:
+	if _current_room == null:
+		return
+	var rid: String = _current_room.id if _current_room.id else _current_room.json_room_id
+	if rid.is_empty():
+		return
+	var gm: Node2D = get_parent() as Node2D
+	if gm == null or not gm.has_method("get_room_manual_shelter_max_assignable"):
+		return
+	var local_mouse: Vector2 = _panel_root.get_local_mouse_position()
+	var ratio: float = clampf((_SHELTER_FILL_BOTTOM - local_mouse.y) / _SHELTER_FILL_MAX_H, 0.0, 1.0)
+	var gv: Node = _GameValuesRef.get_singleton()
+	var per_room_max: int = 5
+	if gv and gv.has_method("get_shelter_energy_per_room_max"):
+		per_room_max = maxi(1, int(gv.get_shelter_energy_per_room_max()))
+	var wanted: int = int(round(ratio * float(per_room_max)))
+	var max_assignable: int = int(gm.get_room_manual_shelter_max_assignable(rid))
+	_drag_preview_energy = clampi(wanted, 0, max_assignable)
+	_update_shelter_visual("drag_preview")
+
+
+func _commit_shelter_drag() -> void:
+	if _current_room == null:
+		_is_dragging_shelter = false
+		return
+	var rid: String = _current_room.id if _current_room.id else _current_room.json_room_id
+	var gm: Node2D = get_parent() as Node2D
+	if gm and gm.has_method("set_room_manual_shelter_target") and rid == _drag_room_id:
+		var result: Dictionary = gm.set_room_manual_shelter_target(rid, _drag_preview_energy)
+		_drag_preview_energy = int(result.get("applied", _drag_preview_energy))
+		_pending_manual_visual_room_id = rid
+		_pending_manual_visual_energy = _drag_preview_energy
+	_is_dragging_shelter = false
+	_drag_room_id = ""
+	_refresh_dynamic_data()
+	_update_shelter_visual("drag_commit")
 
 
 

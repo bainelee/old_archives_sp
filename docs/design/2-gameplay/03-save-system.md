@@ -149,7 +149,13 @@
 - **每元素**：`{days_from_now: int, level: int, sign_type: int, pixel_offset: float}`
 - **说明**：仅侵蚀变化点生成 handle；恶化→sign_type=1 红标，好转→sign_type=2 绿标；handle 每日右移 3px，到达今日后消失；最多 12 个
 
-### 3.6 数据类型约定
+### 3.6 房间手动庇护目标（RoomDetail handle）
+
+- **字段**：`erosion.manual_room_shelter_targets`，Dictionary 类型
+- **键值**：`room_id -> int`（目标能量，整数）
+- **说明**：来源于房间详情左侧庇护 handle 的玩家手动操控；读档后恢复并参与每小时庇护分配
+
+### 3.7 数据类型约定
 
 所有存档内的数值采用**整数**存储，避免浮点误差与跨平台不一致。
 
@@ -166,7 +172,7 @@
 
 ---
 
-### 3.7 版本与迁移
+### 3.8 版本与迁移
 
 | version | 说明 | 迁移策略 |
 |---------|------|----------|

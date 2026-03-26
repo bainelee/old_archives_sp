@@ -144,6 +144,21 @@
   - 竖条比例：由 `等级 - 基线` 反推分配量，与 tick 写入的 `_room_shelter_energy` 在一致状态下相同；避免仅读字典时与布局刷新不同步导致条、数不一致。
 - **刷新**：打开面板时更新；因 `show_room` 常在 `_input` 中早于 `GameMain._process` 的 `process_shelter_tick`，首帧 `_room_shelter_energy` 可能仍空，故在 `visible = true` 后 **`call_deferred("_update_shelter_visual")`**，在本帧 `_process`（含 tick）之后再画一次条/数。面板可见期间若动态 hash 变化，仍会 `_refresh_dynamic_data()` 并 `_update_shelter_visual()`。
 
-### 7.3 与数值文档的关系
+### 7.3 handle 手动操控规则（已接入）
+
+- **交互方式**：玩家可在房间详情中拖动左侧 `room_shelter_handle`（或其背景槽）调整该房手动目标值。
+- **提交时机**：拖动中仅预览；**松手提交**到运行时分配器。
+- **数值粒度**：整数步长 `1`，范围 `0..energy_per_room_max`。
+- **总量限制**：采用**严格总量限制**。拖动上限由当前总可分配量减去其它手动锁定值决定，handle 到上限后硬停止。
+- **冲突处理**：若手动锁定总和超过本 tick 可分配总量，按比例缩放并向下取整，余量丢弃。
+- **房间失效**：房间不再需要庇护（拆除/未建设/不在需求列表）时，自动清除该房手动目标值。
+- **上限变更**：`energy_per_room_max` 变化时，清空全部手动目标值。
+
+### 7.4 存档
+
+- 手动目标值写入 `erosion.manual_room_shelter_targets`（`room_id -> int`）。
+- 读档后恢复该字典并参与后续 `process_shelter_tick` 分配。
+
+### 7.5 与数值文档的关系
 
 庇护能量产出、分配规则、每房上限见 [`docs/design/0-values/01-game-values.md` §2](../0-values/01-game-values.md#2-档案馆核心庇护能量与计算因子消耗)。

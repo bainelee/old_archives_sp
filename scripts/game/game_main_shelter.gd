@@ -11,15 +11,16 @@ const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 var _room_shelter_energy: Dictionary = {}
 ## 本小时实际消耗的计算因子
 var _last_cf_consumed: int = 0
+## 玩家手动设置的房间庇护目标值（room_id -> target_energy）
+var _manual_room_shelter_target: Dictionary = {}
+## 记录最近一次每房上限；变化时按规则清空全部手动目标
+var _last_energy_per_room_max: int = -1
 
 
 ## 执行庇护 tick，计算分配并扣除计算因子
 ## shelter_level: 核心能耗等级 1～5
 static func process_shelter_tick(game_main: Node2D, game_hours_delta: float, shelter_level: int) -> void:
-	var helper: GameMainShelterHelper = game_main.get("_shelter_helper")
-	if not helper:
-		helper = GameMainShelterHelper.new()
-		game_main.set("_shelter_helper", helper)
+	var helper: GameMainShelterHelper = _get_or_create_helper(game_main)
 	helper._tick(game_main, game_hours_delta, shelter_level)
 
 
@@ -39,6 +40,87 @@ static func get_room_allocated_shelter_energy(game_main: Node2D, room_id: String
 	if not helper or not (helper is GameMainShelterHelper):
 		return 0
 	return int((helper as GameMainShelterHelper)._room_shelter_energy.get(room_id, 0))
+
+
+## 设置房间手动庇护目标值（严格总量限制）
+## 返回 {applied, clamped, max_assignable, reason}
+static func set_room_manual_shelter_target(game_main: Node2D, room_id: String, target: int) -> Dictionary:
+	var result: Dictionary = {
+		"applied": 0,
+		"clamped": false,
+		"max_assignable": 0,
+		"reason": "ok",
+	}
+	if room_id.is_empty():
+		result["reason"] = "invalid_room_id"
+		return result
+	var helper: GameMainShelterHelper = _get_or_create_helper(game_main)
+	var ctx: Dictionary = helper._build_manual_context(game_main)
+	if not bool(ctx.get("valid", false)):
+		result["reason"] = "invalid_context"
+		return result
+	var need_ids: Dictionary = ctx.get("need_room_ids", {})
+	if not need_ids.has(room_id):
+		helper._manual_room_shelter_target.erase(room_id)
+		result["reason"] = "room_not_need_shelter"
+		return result
+	var per_room_max: int = int(ctx.get("per_room_max", 0))
+	var safe_target: int = clampi(target, 0, per_room_max)
+	var max_assignable: int = helper._compute_manual_max_assignable(room_id, ctx)
+	var applied: int = mini(safe_target, max_assignable)
+	helper._manual_room_shelter_target[room_id] = applied
+	result["applied"] = applied
+	result["max_assignable"] = max_assignable
+	result["clamped"] = applied != target
+	if applied < target:
+		result["reason"] = "clamped_by_total_cap"
+	return result
+
+
+## 查询当前房间在严格总量限制下可手动设置的最大值
+static func get_room_manual_shelter_max_assignable(game_main: Node2D, room_id: String) -> int:
+	if room_id.is_empty():
+		return 0
+	var helper: GameMainShelterHelper = _get_or_create_helper(game_main)
+	var ctx: Dictionary = helper._build_manual_context(game_main)
+	if not bool(ctx.get("valid", false)):
+		return 0
+	var need_ids: Dictionary = ctx.get("need_room_ids", {})
+	if not need_ids.has(room_id):
+		return 0
+	return helper._compute_manual_max_assignable(room_id, ctx)
+
+
+static func get_room_manual_shelter_target(game_main: Node2D, room_id: String) -> int:
+	var helper: Variant = game_main.get("_shelter_helper")
+	if not helper or not (helper is GameMainShelterHelper):
+		return 0
+	return int((helper as GameMainShelterHelper)._manual_room_shelter_target.get(room_id, 0))
+
+
+static func clear_room_manual_shelter_target(game_main: Node2D, room_id: String) -> void:
+	if room_id.is_empty():
+		return
+	var helper: Variant = game_main.get("_shelter_helper")
+	if helper and helper is GameMainShelterHelper:
+		(helper as GameMainShelterHelper)._manual_room_shelter_target.erase(room_id)
+
+
+static func get_manual_room_shelter_targets_for_save(game_main: Node2D) -> Dictionary:
+	var helper: Variant = game_main.get("_shelter_helper")
+	if not helper or not (helper is GameMainShelterHelper):
+		return {}
+	return ((helper as GameMainShelterHelper)._manual_room_shelter_target).duplicate(true)
+
+
+static func load_manual_room_shelter_targets(game_main: Node2D, data: Dictionary) -> void:
+	var helper: GameMainShelterHelper = _get_or_create_helper(game_main)
+	helper._manual_room_shelter_target.clear()
+	for k in data.keys():
+		var room_id: String = str(k)
+		if room_id.is_empty():
+			continue
+		helper._manual_room_shelter_target[room_id] = maxi(0, int(data.get(k, 0)))
 
 
 ## 根据研究员工作/住房返回有效庇护等级（用于侵蚀判定）
@@ -185,8 +267,13 @@ func _tick(game_main: Node2D, game_hours_delta: float, shelter_level: int) -> vo
 		if cf_per_day > 0:
 			energy_cap = mini(energy_cap, int(cf_per_day / 24.0))  # 日上限转每小时上限（72 -> 3）
 	var energy_per_room_max: int = gv.get_shelter_energy_per_room_max() if gv.has_method("get_shelter_energy_per_room_max") else 5
+	if _last_energy_per_room_max >= 0 and _last_energy_per_room_max != energy_per_room_max:
+		## 规则：每房上限变化时，清空全部手动目标，避免旧配置越界污染
+		_manual_room_shelter_target.clear()
+	_last_energy_per_room_max = energy_per_room_max
 	var global_erosion: int = _get_global_erosion_for_shelter()
 	var target_per_room: int = mini(maxi(0, 2 - global_erosion), energy_per_room_max)
+	_prune_manual_targets(need_shelter)
 
 	var v_acc: Variant = game_main.get("_shelter_accumulator")
 	var accumulator: float = float(v_acc) if v_acc != null else 0.0
@@ -195,11 +282,12 @@ func _tick(game_main: Node2D, game_hours_delta: float, shelter_level: int) -> vo
 	game_main.set("_shelter_accumulator", accumulator - float(hours_to_process))
 
 	if hours_to_process <= 0:
-		_sync_topbar_shelter_totals(game_main, need_shelter, target_per_room)
+		var demand_preview: int = _compute_total_demand(need_shelter, target_per_room, energy_per_room_max)
+		_sync_topbar_shelter_totals(game_main, demand_preview)
 		return
 
 	for _h in hours_to_process:
-		_compute_and_apply(game_main, ui, rooms, energy_cap, target_per_room, no_shelter_types)
+		_compute_and_apply(game_main, ui, rooms, energy_cap, target_per_room, energy_per_room_max, no_shelter_types)
 
 
 func _collect_need_shelter(rooms: Array, ui: Node, game_main: Node2D, no_shelter_types: Array) -> Array[Dictionary]:
@@ -223,6 +311,7 @@ func _collect_need_shelter(rooms: Array, ui: Node, game_main: Node2D, no_shelter
 
 func _clear_shelter_allocation_and_topbar(game_main: Node2D) -> void:
 	_room_shelter_energy.clear()
+	_manual_room_shelter_target.clear()
 	_last_cf_consumed = 0
 	game_main.set("_shelter_energy", 0)
 	game_main.set("_shelter_demand", 0)
@@ -230,8 +319,7 @@ func _clear_shelter_allocation_and_topbar(game_main: Node2D) -> void:
 		DataProviders.on_shelter_topbar_sync(game_main)
 
 
-func _sync_topbar_shelter_totals(game_main: Node2D, need_shelter: Array, target_per_room: int) -> void:
-	var demand: int = need_shelter.size() * target_per_room
+func _sync_topbar_shelter_totals(game_main: Node2D, demand: int) -> void:
 	var allocated_sum: int = 0
 	for v in _room_shelter_energy.values():
 		allocated_sum += int(v)
@@ -241,13 +329,14 @@ func _sync_topbar_shelter_totals(game_main: Node2D, need_shelter: Array, target_
 		DataProviders.on_shelter_topbar_sync(game_main)
 
 
-func _compute_and_apply(game_main: Node2D, ui: Node, rooms: Array, energy_cap: int, target_per_room: int, no_shelter_types: Array) -> void:
+func _compute_and_apply(game_main: Node2D, ui: Node, rooms: Array, energy_cap: int, target_per_room: int, energy_per_room_max: int, no_shelter_types: Array) -> void:
 	var need_shelter: Array[Dictionary] = _collect_need_shelter(rooms, ui, game_main, no_shelter_types)
+	_prune_manual_targets(need_shelter)
 	if need_shelter.is_empty():
 		_clear_shelter_allocation_and_topbar(game_main)
 		return
 
-	var demand: int = need_shelter.size() * target_per_room
+	var demand: int = _compute_total_demand(need_shelter, target_per_room, energy_per_room_max)
 	var cf_needed: int = mini(demand, energy_cap)
 	var player_cf: int = ui.get_computation() if ui.has_method("get_computation") else floori(ui.get("computation_amount") or 0)
 	var cf_to_deduct: int = mini(cf_needed, player_cf)
@@ -259,17 +348,32 @@ func _compute_and_apply(game_main: Node2D, ui: Node, rooms: Array, energy_cap: i
 
 	## 分配能量（不足时按优先级）
 	_room_shelter_energy.clear()
+	var manual_effective: Dictionary = _build_effective_manual_targets(need_shelter, actual_output, energy_per_room_max)
 	var to_allocate: int = actual_output
 	_sort_rooms_by_priority(need_shelter)
 	for entry in need_shelter:
+		var rid: String = str(entry.get("rid", ""))
+		if rid.is_empty() or not manual_effective.has(rid):
+			continue
+		var give_manual: int = maxi(0, int(manual_effective.get(rid, 0)))
+		if give_manual <= 0:
+			continue
+		_room_shelter_energy[rid] = give_manual
+		to_allocate -= give_manual
+	for entry in need_shelter:
 		if to_allocate <= 0:
 			break
+		var rid: String = str(entry.get("rid", ""))
+		if manual_effective.has(rid):
+			continue
 		var give: int = mini(target_per_room, to_allocate)
-		_room_shelter_energy[entry.rid] = give
+		if give <= 0:
+			continue
+		_room_shelter_energy[rid] = give
 		to_allocate -= give
 
 	_last_cf_consumed = cf_to_deduct
-	_sync_topbar_shelter_totals(game_main, need_shelter, target_per_room)
+	_sync_topbar_shelter_totals(game_main, demand)
 
 
 static func _room_in_use(room: ArchivesRoomInfo, ui: Node, _game_main: Node2D) -> bool:
@@ -334,6 +438,109 @@ static func _get_global_erosion_for_shelter() -> int:
 ## 供 UI 使用：与 `get_room_shelter_level` 中「未加本房分配」项相同（`current_erosion`）
 static func get_shelter_baseline_erosion() -> int:
 	return _get_global_erosion_for_shelter()
+
+
+static func _get_or_create_helper(game_main: Node2D) -> GameMainShelterHelper:
+	var helper: Variant = game_main.get("_shelter_helper")
+	if helper and helper is GameMainShelterHelper:
+		return helper as GameMainShelterHelper
+	var created: GameMainShelterHelper = GameMainShelterHelper.new()
+	game_main.set("_shelter_helper", created)
+	return created
+
+
+func _build_manual_context(game_main: Node2D) -> Dictionary:
+	var rooms: Array = game_main.get("_rooms")
+	var ui: Node = game_main.get_node_or_null("UIMain")
+	var gv: Node = _GameValuesRef.get_singleton()
+	if rooms.is_empty() or ui == null or gv == null:
+		return {"valid": false}
+	var no_shelter_types: Array = gv.get_shelter_room_types_no_shelter()
+	var need_shelter: Array[Dictionary] = _collect_need_shelter(rooms, ui, game_main, no_shelter_types)
+	_prune_manual_targets(need_shelter)
+	var need_ids: Dictionary = {}
+	for e in need_shelter:
+		var rid: String = str(e.get("rid", ""))
+		if not rid.is_empty():
+			need_ids[rid] = true
+	var cf_cap: Dictionary = gv.get_shelter_cf_and_cap_for_level(int(game_main.get("_shelter_level")))
+	var energy_cap: int = int(cf_cap.get("energy_cap", 30))
+	if cf_cap.has("cf_per_day"):
+		var cf_per_day: int = int(cf_cap.get("cf_per_day", 0))
+		if cf_per_day > 0:
+			energy_cap = mini(energy_cap, int(cf_per_day / 24.0))
+	var player_cf: int = ui.get_computation() if ui.has_method("get_computation") else floori(ui.get("computation_amount") or 0)
+	var energy_per_room_max: int = gv.get_shelter_energy_per_room_max() if gv.has_method("get_shelter_energy_per_room_max") else 5
+	return {
+		"valid": true,
+		"need_room_ids": need_ids,
+		"per_room_max": maxi(0, energy_per_room_max),
+		"total_available": maxi(0, mini(energy_cap, player_cf)),
+	}
+
+
+func _compute_manual_max_assignable(room_id: String, ctx: Dictionary) -> int:
+	var per_room_max: int = int(ctx.get("per_room_max", 0))
+	var total_available: int = int(ctx.get("total_available", 0))
+	var need_ids: Dictionary = ctx.get("need_room_ids", {})
+	var other_manual_sum: int = 0
+	for k in _manual_room_shelter_target.keys():
+		var rid: String = str(k)
+		if rid == room_id:
+			continue
+		if not need_ids.has(rid):
+			continue
+		other_manual_sum += clampi(int(_manual_room_shelter_target.get(rid, 0)), 0, per_room_max)
+	return clampi(total_available - other_manual_sum, 0, per_room_max)
+
+
+func _prune_manual_targets(need_shelter: Array[Dictionary]) -> void:
+	var need_ids: Dictionary = {}
+	for entry in need_shelter:
+		var rid: String = str(entry.get("rid", ""))
+		if not rid.is_empty():
+			need_ids[rid] = true
+	var keys: Array = _manual_room_shelter_target.keys()
+	for k in keys:
+		var rid: String = str(k)
+		if not need_ids.has(rid):
+			_manual_room_shelter_target.erase(rid)
+
+
+func _compute_total_demand(need_shelter: Array[Dictionary], target_per_room: int, per_room_max: int) -> int:
+	var demand: int = 0
+	for entry in need_shelter:
+		var rid: String = str(entry.get("rid", ""))
+		if _manual_room_shelter_target.has(rid):
+			demand += clampi(int(_manual_room_shelter_target.get(rid, 0)), 0, per_room_max)
+		else:
+			demand += clampi(target_per_room, 0, per_room_max)
+	return demand
+
+
+func _build_effective_manual_targets(need_shelter: Array[Dictionary], total_available: int, per_room_max: int) -> Dictionary:
+	var requested: Dictionary = {}
+	var request_sum: int = 0
+	for entry in need_shelter:
+		var rid: String = str(entry.get("rid", ""))
+		if rid.is_empty() or not _manual_room_shelter_target.has(rid):
+			continue
+		var t: int = clampi(int(_manual_room_shelter_target.get(rid, 0)), 0, per_room_max)
+		requested[rid] = t
+		request_sum += t
+	if request_sum <= total_available:
+		return requested
+	if request_sum <= 0 or total_available <= 0:
+		var all_zero: Dictionary = {}
+		for rid in requested.keys():
+			all_zero[rid] = 0
+		return all_zero
+	var scale: float = float(total_available) / float(request_sum)
+	var scaled: Dictionary = {}
+	for rid in requested.keys():
+		var scaled_val: int = int(floor(float(int(requested.get(rid, 0))) * scale))
+		scaled[rid] = maxi(0, scaled_val)
+	return scaled
 
 
 ## 获取庇护消耗细则，用于 TopBar 因子悬停面板

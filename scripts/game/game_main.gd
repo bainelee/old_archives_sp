@@ -1029,6 +1029,18 @@ func _sync_resources_to_topbar() -> void:
 		ui.refresh_display()
 
 
+func set_room_manual_shelter_target(room_id: String, target: int) -> Dictionary:
+	return GameMainShelterHelper.set_room_manual_shelter_target(self, room_id, target)
+
+
+func get_room_manual_shelter_target(room_id: String) -> int:
+	return GameMainShelterHelper.get_room_manual_shelter_target(self, room_id)
+
+
+func get_room_manual_shelter_max_assignable(room_id: String) -> int:
+	return GameMainShelterHelper.get_room_manual_shelter_max_assignable(self, room_id)
+
+
 ## 获取因子消耗/产出细则，供 TopBar 因子悬停面板使用
 func get_factor_breakdown(factor_key: String) -> Dictionary:
 	return GameMainFactorBreakdownHelper.get_breakdown(self, factor_key)

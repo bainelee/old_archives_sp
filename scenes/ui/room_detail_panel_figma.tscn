@@ -69,6 +69,7 @@ offset_bottom = 782.0
 texture = ExtResource("4_shelter_back")
 expand_mode = 1
 stretch_mode = 5
+mouse_filter = 0
 
 [node name="room_shelter_progress_inside" type="ColorRect" parent="PanelRoot"]
 layout_mode = 0
@@ -87,7 +88,7 @@ offset_top = 645.0
 texture = ExtResource("23_shelter_handle")
 expand_mode = 1
 stretch_mode = 5
-mouse_filter = 2
+mouse_filter = 0
 z_index = 2
 
 [node name="group_room_details_top_bar" type="Control" parent="PanelRoot"]

@@ -28,6 +28,7 @@ static func _collect_erosion_for_save(game_main: Node2D) -> Dictionary:
 	var erosion: Dictionary = {"shelter_level": _get_shelter_level_from_game_main(game_main)}
 	if ErosionCore and ErosionCore.has_method("get_forecast_handles_for_save"):
 		erosion["forecast_handles"] = ErosionCore.get_forecast_handles_for_save()
+	erosion["manual_room_shelter_targets"] = GameMainShelterHelper.get_manual_room_shelter_targets_for_save(game_main)
 	return erosion
 
 
@@ -282,6 +283,13 @@ static func apply_resources(game_main: Node2D, d: Dictionary) -> void:
 				ErosionCore.load_forecast_handles(handles as Array, total_hours)
 			else:
 				ErosionCore.load_forecast_handles([], total_hours)
+		var manual_targets: Variant = ed.get("manual_room_shelter_targets", null)
+		if manual_targets is Dictionary:
+			GameMainShelterHelper.load_manual_room_shelter_targets(game_main, manual_targets as Dictionary)
+		else:
+			GameMainShelterHelper.load_manual_room_shelter_targets(game_main, {})
+	else:
+		GameMainShelterHelper.load_manual_room_shelter_targets(game_main, {})
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv and gv.has_method("get_shelter_level_min"):
 		shelter_level = clampi(shelter_level, gv.get_shelter_level_min(), gv.get_shelter_level_max())
