@@ -16,6 +16,7 @@ const KEY_VERSION := "version"
 const KEY_MAP_NAME := "map_name"
 const KEY_SAVED_AT_GAME_HOUR := "saved_at_game_hour"
 const KEY_EROSION := "erosion"
+const KEY_EXPLORATION := "exploration"
 const KEY_PERSONNEL_EROSION := "personnel_erosion"
 
 
@@ -95,7 +96,7 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 	if PersonnelErosionCore:
 		resources["personnel"] = PersonnelErosionCore.get_personnel()
 	var state: Dictionary = {
-		KEY_VERSION: 1,
+		KEY_VERSION: SaveManager.SAVE_VERSION_CURRENT,
 		KEY_MAP_NAME: map_name,
 		KEY_SAVED_AT_GAME_HOUR: total_hours,
 		KEY_MAP: map_data,
@@ -119,6 +120,11 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 			var pos: Vector3 = r3d.position
 			researchers_3d.append({"id": i, "room_id": rid, "pos": [pos.x, pos.y, pos.z]})
 	state["researchers_3d"] = researchers_3d
+	var exploration_svc: Variant = game_main.get("_exploration_service")
+	if exploration_svc != null and exploration_svc.has_method("to_save_dict"):
+		state[KEY_EXPLORATION] = exploration_svc.call("to_save_dict")
+	else:
+		state[KEY_EXPLORATION] = SaveManager.default_exploration_dict().duplicate(true)
 	return state
 
 
@@ -294,3 +300,11 @@ static func apply_resources(game_main: Node2D, d: Dictionary) -> void:
 	if gv and gv.has_method("get_shelter_level_min"):
 		shelter_level = clampi(shelter_level, gv.get_shelter_level_min(), gv.get_shelter_level_max())
 	game_main.set("_shelter_level", shelter_level)
+
+
+static func apply_exploration(game_main: Node2D, d: Dictionary) -> void:
+	var exploration_svc: Variant = game_main.get("_exploration_service")
+	if exploration_svc == null or not exploration_svc.has_method("load_from_save_dict"):
+		return
+	var ex: Variant = d.get(KEY_EXPLORATION, null)
+	exploration_svc.call("load_from_save_dict", ex)

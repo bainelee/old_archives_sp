@@ -10,3 +10,7 @@ local_cache/
 # 本地密钥（不推送）
 .cursor/local/figma-token.txt
 /android/
+
+# Python
+__pycache__/
+*.py[cod]

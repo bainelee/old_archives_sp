@@ -41,7 +41,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/room_items_grid_snap/plugin.cfg", "res://addons/snappy/plugin.cfg")
+enabled=PackedStringArray("res://addons/room_items_grid_snap/plugin.cfg", "res://addons/snappy/plugin.cfg", "res://addons/test_orchestrator/plugin.cfg")
 
 [internationalization]
 

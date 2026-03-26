@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "description": "探索系统静态配置（P1）。玩法闭环与 UI 另阶段接入。",
+  "hub_region_id": "old_archives",
+  "default_initial_investigator_count_debug": 5,
+  "initial_unlock_region_ids": [
+    "white_cliff",
+    "durkin_mine",
+    "mandos_industrial"
+  ],
+  "regions_placeholder": [
+    { "id": "old_archives", "display_name_zh": "旧日档案馆" },
+    { "id": "white_cliff", "display_name_zh": "白崖镇" },
+    { "id": "durkin_mine", "display_name_zh": "杜尔金矿区" },
+    { "id": "mandos_industrial", "display_name_zh": "曼多斯工业区" },
+    { "id": "bolero_port", "display_name_zh": "波莱罗港" },
+    { "id": "saint_river_afv", "display_name_zh": "圣河亚弗" },
+    { "id": "andal_town", "display_name_zh": "安达尔镇" },
+    { "id": "korloh_sea", "display_name_zh": "科尔洛海" },
+    { "id": "bluewood_transit", "display_name_zh": "蓝木跃迁线" },
+    { "id": "grey_town", "display_name_zh": "格雷镇" },
+    { "id": "ural_mountain", "display_name_zh": "乌拉尔山" },
+    { "id": "new_barguzin", "display_name_zh": "新巴尔古津" },
+    { "id": "morku_industrial", "display_name_zh": "莫尔库工业区" },
+    { "id": "mason_port", "display_name_zh": "石匠港" },
+    { "id": "west_202_port", "display_name_zh": "西202港" },
+    { "id": "korborko", "display_name_zh": "科尔博柯" }
+  ]
+}

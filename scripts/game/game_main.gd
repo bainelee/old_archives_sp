@@ -6,12 +6,16 @@ extends Node2D
 
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 const _ResearcherLifecycle = preload("res://scripts/game/researcher_lifecycle.gd")
+const _ExplorationServiceScript = preload("res://scripts/game/exploration/exploration_service.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const GRID_WIDTH := 80
 const GRID_HEIGHT := 60
 const CELL_SIZE := 20
 const DEFAULT_SLOT := 0
+## 底栏占位：中枢按钮 → P1 探索地图入口（无独立场景，仅状态与存档）
+const BOTTOM_PLACEHOLDER_EXPLORATION_MAP := "center"
 
+var _exploration_service: RefCounted = null
 var _tiles: Array[Array] = []
 var _current_slot: int = 0
 var _rooms: Array = []
@@ -108,6 +112,7 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	_reset_cursor_to_standard()
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_exploration_service = _ExplorationServiceScript.new()
 	_setup_grid()
 	var slot: int = DEFAULT_SLOT
 	if SaveManager.pending_load_slot >= 0:
@@ -891,10 +896,19 @@ func _load_from_slot(slot: int) -> void:
 	GameMainSaveHelper.apply_map(self, d)
 	GameMainSaveHelper.apply_time(d)
 	GameMainSaveHelper.apply_resources(self, d)
+	GameMainSaveHelper.apply_exploration(self, d)
 
 
 func collect_game_state() -> Dictionary:
 	return GameMainSaveHelper.collect_game_state(self)
+
+
+func save_current_slot_quiet() -> void:
+	## 与暂停菜单/退出前保存相同接口：收集状态写入当前槽位
+	if _current_slot < 0 or _current_slot >= SaveManager.SLOT_COUNT:
+		return
+	var game_state: Dictionary = collect_game_state()
+	SaveManager.save_to_slot(_current_slot, game_state)
 
 
 func _process(delta: float) -> void:
@@ -907,6 +921,8 @@ func _process(delta: float) -> void:
 		var game_hours_delta: float = (delta / GameTime.REAL_SECONDS_PER_GAME_HOUR) * GameTime.speed_multiplier
 		GameMainBuiltRoomHelper.process_production(self, game_hours_delta)
 		GameMainShelterHelper.process_shelter_tick(self, game_hours_delta, _shelter_level)
+		if _exploration_service and _exploration_service.has_method("tick"):
+			_exploration_service.call("tick", game_hours_delta)
 		_sync_resources_to_topbar()  ## 时间流逝时每帧刷新因子显示，确保各倍速下都能实时看到消耗
 	_sync_cleanup_researchers_to_ui()
 	_sync_construction_researchers_to_ui()
@@ -1193,7 +1209,13 @@ func _on_build_button_pressed() -> void:
 
 
 func _on_bottom_task_placeholder_pressed(button_id: String) -> void:
-	## 底栏占位入口：中枢/三重评议会/技术栈功能后续再接入
+	## 底栏占位入口：中枢 → P1 探索地图（首批三地区解锁仅一次，并写档）
+	if button_id == BOTTOM_PLACEHOLDER_EXPLORATION_MAP and _exploration_service:
+		var did_init: bool = bool(_exploration_service.call("ensure_starter_neighbors_on_first_map_open"))
+		if did_init:
+			save_current_slot_quiet()
+		print("[ExplorationMap] placeholder open (center), starter_unlocks=%s" % str(did_init))
+		return
 	print("[BottomTaskPlaceholder] pressed: %s" % button_id)
 
 

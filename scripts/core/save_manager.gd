@@ -7,7 +7,8 @@ extends Node
 const SAVES_DIR := "user://saves/"
 const MAPS_DIR := "user://maps/"
 const SLOT_COUNT := 5
-const SAVE_VERSION_CURRENT := 1
+## 存档格式主版本；与旧版不兼容时递增，旧档读取即删槽，不做迁移
+const SAVE_VERSION_CURRENT := 2
 
 const KEY_VERSION := "version"
 const KEY_MAP_NAME := "map_name"
@@ -16,6 +17,7 @@ const KEY_MAP := "map"
 const KEY_TIME := "time"
 const KEY_RESOURCES := "resources"
 const KEY_EROSION := "erosion"
+const KEY_EXPLORATION := "exploration"
 const GAME_BASE_PATH := "res://datas/game_base.json"
 const GRID_WIDTH := 80
 const GRID_HEIGHT := 60
@@ -63,24 +65,47 @@ func get_slot_metadata(slot: int) -> Variant:
 	if not (data is Dictionary):
 		return null
 	var d: Dictionary = data as Dictionary
+	if not _is_supported_save_version(d):
+		push_warning("SaveManager: 槽位 %d 存档版本过旧或无效，已清理。" % slot)
+		delete_slot(slot)
+		return null
 	var map_name: String = _get_map_name_from_data(d)
 	if map_name.is_empty() and not d.has(KEY_MAP):
 		return null
 	return {
 		"map_name": map_name,
 		"saved_at_game_hour": d.get(KEY_SAVED_AT_GAME_HOUR, 0),
-		"version": d.get(KEY_VERSION, 0),
+		"version": d.get(KEY_VERSION, SAVE_VERSION_CURRENT),
 		"has_save": true,
 	}
 
 
+func default_exploration_dict() -> Dictionary:
+	## 与 ExplorationService.to_save_dict 同形（P1 骨架）
+	return {
+		"save_version": 1,
+		"first_open_done": false,
+		"unlocked_region_ids": [],
+		"explored_region_ids": [],
+		"debug_investigator_pool": 5,
+	}
+
+
+func exploration_from_state(game_state: Dictionary) -> Dictionary:
+	var raw: Variant = game_state.get(KEY_EXPLORATION, null)
+	if raw is Dictionary:
+		return (raw as Dictionary).duplicate(true)
+	return default_exploration_dict().duplicate(true)
+
+
 func validate_save(data: Dictionary) -> bool:
 	var ver: int = int(data.get(KEY_VERSION, 0))
-	if ver > SAVE_VERSION_CURRENT:
+	if ver != SAVE_VERSION_CURRENT:
 		return false
-	var has_map := data.has(KEY_MAP)
-	var has_legacy_map := data.has("tiles") or data.has("rooms")
-	return has_map or has_legacy_map
+	var map_raw: Variant = data.get(KEY_MAP, null)
+	if not (map_raw is Dictionary):
+		return false
+	return true
 
 
 func create_new_game_state(map_name: String = "") -> Dictionary:
@@ -115,6 +140,7 @@ func create_new_game_state(map_name: String = "") -> Dictionary:
 		},
 		KEY_RESOURCES: resources,
 		KEY_EROSION: {},
+		KEY_EXPLORATION: default_exploration_dict().duplicate(true),
 	}
 
 
@@ -177,7 +203,7 @@ func save_to_slot(slot: int, game_state: Dictionary) -> bool:
 
 func load_from_slot(slot: int) -> Variant:
 	## 加载槽位存档，返回完整 GameState Dictionary，失败或空槽位返回 null
-	## 仅读取游戏存档（user://saves/）
+	## 仅读取游戏存档（user://saves/）；版本不符则删槽并返回 null（不做旧结构迁移）
 	var raw: Variant = _read_save_json(slot)
 	if raw == null:
 		return null
@@ -185,58 +211,26 @@ func load_from_slot(slot: int) -> Variant:
 		return null
 	var d: Dictionary = (raw as Dictionary).duplicate(true)
 	if not validate_save(d):
+		push_warning("SaveManager: 槽位 %d 存档无效或版本非 %d，已清理。" % [slot, SAVE_VERSION_CURRENT])
+		delete_slot(slot)
 		return null
-	_migrate_to_game_state(d)
+	_ensure_current_format_branches(d)
 	return d
 
 
-func _migrate_to_game_state(d: Dictionary) -> void:
-	## 将原始数据迁移为完整 GameState 格式
-	# 1. 旧版纯地图：根级 tiles/rooms 放入 map
-	if d.has("tiles") or d.has("rooms"):
-		if not d.has(KEY_MAP):
-			var map_obj: Dictionary = {}
-			for key in ["grid_width", "grid_height", "cell_size", "tiles", "rooms", "next_room_id", "map_name"]:
-				if d.has(key):
-					map_obj[key] = d[key]
-			if d.has(KEY_MAP_NAME):
-				map_obj[KEY_MAP_NAME] = d[KEY_MAP_NAME]
-			d[KEY_MAP] = map_obj
-	# 2. 确保 version
-	if not d.has(KEY_VERSION):
-		d[KEY_VERSION] = 0
-	var ver: int = int(d.get(KEY_VERSION, 0))
-	if ver < 1:
-		_fill_defaults(d)
-		d[KEY_VERSION] = SAVE_VERSION_CURRENT
-	# 3. 确保 map_name 在根级（便于元数据）
+func _is_supported_save_version(d: Dictionary) -> bool:
+	return int(d.get(KEY_VERSION, 0)) == SAVE_VERSION_CURRENT
+
+
+func _ensure_current_format_branches(d: Dictionary) -> void:
+	## 当前版本内补全可选分支（非旧版迁移）；缺 exploration 时补默认子树
 	if not d.has(KEY_MAP_NAME) and d.has(KEY_MAP):
 		var m: Variant = d[KEY_MAP]
 		if m is Dictionary:
 			d[KEY_MAP_NAME] = (m as Dictionary).get(KEY_MAP_NAME, tr("DEFAULT_UNTITLED"))
-
-
-func _fill_defaults(d: Dictionary) -> void:
-	## 补全 time、resources、erosion 默认值
-	if not d.has(KEY_TIME):
-		d[KEY_TIME] = {
-			"total_game_hours": 0,
-			"is_flowing": true,
-			"speed_multiplier": 1.0,
-		}
-	var base: Dictionary = _load_game_base()
-	if base.is_empty():
-		if not d.has(KEY_RESOURCES):
-			d[KEY_RESOURCES] = {
-				"factors": {"cognition": 6000, "computation": 60000, "willpower": 4000, "permission": 4000},
-				"currency": {"info": 500, "truth": 0},
-				"personnel": {"researcher": 10, "labor": 0, "eroded": 0, "investigator": 0},
-			}
-	else:
-		if not d.has(KEY_RESOURCES):
-			d[KEY_RESOURCES] = base.get("initial_resources", {}).duplicate(true)
-	if not d.has(KEY_EROSION):
-		d[KEY_EROSION] = {}
+	var ex: Variant = d.get(KEY_EXPLORATION, null)
+	if not (ex is Dictionary):
+		d[KEY_EXPLORATION] = default_exploration_dict().duplicate(true)
 
 
 func _load_game_base() -> Dictionary:
