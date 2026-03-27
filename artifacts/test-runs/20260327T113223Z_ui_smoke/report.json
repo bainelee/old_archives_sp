@@ -1,0 +1,49 @@
+{
+  "runId": "20260327T113223Z_ui_smoke",
+  "status": "failed",
+  "scenario": "ui_smoke",
+  "environment": {
+    "mode": "local",
+    "godotVersion": "unknown"
+  },
+  "summary": {
+    "totalAssertions": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "artifactIndex": {
+    "artifactRoot": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T113223Z_ui_smoke",
+    "logsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T113223Z_ui_smoke\\logs",
+    "screenshotsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T113223Z_ui_smoke\\screenshots",
+    "saveSnapshotsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T113223Z_ui_smoke\\save_snapshots",
+    "copiedLogs": [],
+    "copiedScreenshots": [],
+    "saveFiles": [],
+    "screenshotPrefixFilter": ""
+  },
+  "failures": [
+    {
+      "stepId": "step_process_exec",
+      "category": "runtime_error",
+      "expected": "process exit code == 0",
+      "actual": "test driver did not become ready in time",
+      "details": {
+        "runtimeErrors": [
+          "SCRIPT ERROR: Parse Error: Unexpected \"?\" in source. If you want a ternary operator, use \"truthy_value if true_condition else falsy_value\".",
+          "ERROR: Failed to load script \"res://scripts/test/test_driver.gd\" with error \"Parse error\".",
+          "ERROR: Failed to instantiate an autoload, script 'res://scripts/test/test_driver.gd' does not inherit from 'Node'."
+        ],
+        "flowAssertions": {
+          "total": 0,
+          "passed": 0,
+          "failed": 0
+        }
+      },
+      "artifacts": [
+        "logs/stdout.log",
+        "logs/stderr.log",
+        "run_meta.json"
+      ]
+    }
+  ]
+}

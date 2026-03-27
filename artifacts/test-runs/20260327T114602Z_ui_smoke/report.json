@@ -1,0 +1,44 @@
+{
+  "runId": "20260327T114602Z_ui_smoke",
+  "status": "failed",
+  "scenario": "ui_smoke",
+  "environment": {
+    "mode": "local",
+    "godotVersion": "unknown"
+  },
+  "summary": {
+    "totalAssertions": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "artifactIndex": {
+    "artifactRoot": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T114602Z_ui_smoke",
+    "logsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T114602Z_ui_smoke\\logs",
+    "screenshotsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T114602Z_ui_smoke\\screenshots",
+    "saveSnapshotsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T114602Z_ui_smoke\\save_snapshots",
+    "copiedLogs": [],
+    "copiedScreenshots": [],
+    "saveFiles": [],
+    "screenshotPrefixFilter": ""
+  },
+  "failures": [
+    {
+      "stepId": "step_process_exec",
+      "category": "runtime_error",
+      "expected": "process exit code == 0",
+      "actual": "test driver no activity timeout after 5s",
+      "details": {
+        "flowAssertions": {
+          "total": 0,
+          "passed": 0,
+          "failed": 0
+        }
+      },
+      "artifacts": [
+        "logs/stdout.log",
+        "logs/stderr.log",
+        "run_meta.json"
+      ]
+    }
+  ]
+}

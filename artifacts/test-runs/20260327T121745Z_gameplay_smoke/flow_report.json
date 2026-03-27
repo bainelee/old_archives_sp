@@ -1,0 +1,237 @@
+{
+  "flow_id": "build_clean_wait_linked_acceptance",
+  "flow_file": "D:\\GODOT_Test\\old-archives-sp\\flows\\build_clean_wait_linked_acceptance.json",
+  "status": "failed",
+  "started_at": "2026-03-27T12:17:45.727131+00:00",
+  "finished_at": "2026-03-27T12:19:17.008216+00:00",
+  "run_id": "20260327T121745Z_gameplay_smoke",
+  "driver_steps": [
+    {
+      "id": "sleep_boot",
+      "action": "sleep",
+      "params": {
+        "ms": 800
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "click_new_game",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "btn_new_game"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "click_slot0",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "save_slot_0"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "wait_ingame",
+      "action": "wait",
+      "params": {
+        "until": {
+          "scene": "game_main"
+        },
+        "timeoutMs": 20000
+      },
+      "timeoutSec": 22
+    },
+    {
+      "id": "start_cleanup_mode",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "btn_cleanup"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "select_cleanup_room",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "room_node_room_01"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "confirm_cleanup",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "cleanup_confirm_button"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "t0_clean_shot",
+      "action": "screenshot",
+      "params": {
+        "name": "clean_t0"
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "t0_clean_logic",
+      "action": "check",
+      "params": {
+        "kind": "logic_state",
+        "roomId": "room_01",
+        "expect": {
+          "room_clean_status": "cleaning"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "tmid_wait_2s",
+      "action": "sleep",
+      "params": {
+        "ms": 2000
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "tmid_clean_shot",
+      "action": "screenshot",
+      "params": {
+        "name": "clean_tmid"
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "wait_clean_done",
+      "action": "wait",
+      "params": {
+        "until": {
+          "stateEquals": {
+            "key": "room_clean_status",
+            "value": "cleaned",
+            "roomId": "room_01"
+          }
+        },
+        "timeoutMs": 60000
+      },
+      "timeoutSec": 62
+    },
+    {
+      "id": "tdone_clean_shot",
+      "action": "screenshot",
+      "params": {
+        "name": "clean_tdone"
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "start_build_mode",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "btn_build"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "select_build_zone",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "construction_zone_1"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "select_build_room",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "room_node_room_00"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "confirm_build",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "construction_confirm_button"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "t0_build_shot",
+      "action": "screenshot",
+      "params": {
+        "name": "build_t0"
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "t0_build_logic",
+      "action": "check",
+      "params": {
+        "kind": "logic_state",
+        "roomId": "room_00",
+        "expect": {
+          "build_status": "building"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "tmid_build_wait",
+      "action": "sleep",
+      "params": {
+        "ms": 2000
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "tmid_build_shot",
+      "action": "screenshot",
+      "params": {
+        "name": "build_tmid"
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "wait_build_done",
+      "action": "wait",
+      "params": {
+        "until": {
+          "stateEquals": {
+            "key": "build_status",
+            "value": "built",
+            "roomId": "room_00"
+          }
+        },
+        "timeoutMs": 60000
+      },
+      "timeoutSec": 62
+    },
+    {
+      "id": "tdone_build_shot",
+      "action": "screenshot",
+      "params": {
+        "name": "build_tdone"
+      },
+      "timeoutSec": 20
+    }
+  ]
+}

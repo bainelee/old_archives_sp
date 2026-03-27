@@ -1,0 +1,64 @@
+{
+  "runId": "20260327T121745Z_gameplay_smoke",
+  "status": "failed",
+  "scenario": "gameplay_smoke",
+  "environment": {
+    "mode": "local",
+    "godotVersion": "unknown"
+  },
+  "summary": {
+    "totalAssertions": 23,
+    "passed": 21,
+    "failed": 2
+  },
+  "artifactIndex": {
+    "artifactRoot": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T121745Z_gameplay_smoke",
+    "logsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T121745Z_gameplay_smoke\\logs",
+    "screenshotsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T121745Z_gameplay_smoke\\screenshots",
+    "saveSnapshotsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T121745Z_gameplay_smoke\\save_snapshots",
+    "copiedLogs": [
+      "logs/godot.log",
+      "logs/debug_frame_overlay.txt"
+    ],
+    "copiedScreenshots": [
+      "screenshots/build_t0.png",
+      "screenshots/build_tdone.png",
+      "screenshots/build_tmid.png",
+      "screenshots/clean_t0.png",
+      "screenshots/clean_tdone.png",
+      "screenshots/clean_tmid.png",
+      "screenshots/flow_exploration_step_01_bootstrap.png",
+      "screenshots/flow_exploration_step_02_enter_map.png",
+      "screenshots/flow_exploration_step_03_explore_action.png",
+      "screenshots/room_detail_opened.png",
+      "screenshots/visual_ui_button_baseline.png",
+      "screenshots/visual_ui_button_current.png",
+      "screenshots/visual_ui_button_diff.png",
+      "screenshots/visual_ui_button_diff_annotated.png"
+    ],
+    "saveFiles": [],
+    "screenshotPrefixFilter": ""
+  },
+  "failures": [
+    {
+      "stepId": "step_process_exec",
+      "category": "runtime_error",
+      "expected": "process exit code == 0",
+      "actual": "driver step failed: wait",
+      "details": {
+        "flowAssertions": {
+          "total": 23,
+          "passed": 21,
+          "failed": 2
+        }
+      },
+      "artifacts": [
+        "logs/stdout.log",
+        "logs/stderr.log",
+        "run_meta.json",
+        "screenshots/visual_ui_button_diff.png",
+        "screenshots/visual_ui_button_diff_annotated.png"
+      ]
+    }
+  ]
+}

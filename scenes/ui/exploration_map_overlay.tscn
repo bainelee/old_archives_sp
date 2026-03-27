@@ -1,0 +1,102 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/exploration_map_overlay.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/detail_panel_theme.tres" id="2_theme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_map_frame"]
+bg_color = Color(0.85, 0.85, 0.85, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.08, 0.08, 0.08, 0.95)
+
+[node name="ExplorationMapOverlay" type="CanvasLayer"]
+layer = 9
+script = ExtResource("1_script")
+
+[node name="OverlayRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+theme = ExtResource("2_theme")
+
+[node name="Backdrop" type="ColorRect" parent="OverlayRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.05, 0.05, 0.45)
+
+[node name="MapFrame" type="PanelContainer" parent="OverlayRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 116.0
+offset_right = -20.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_map_frame")
+
+[node name="TopRow" type="HBoxContainer" parent="OverlayRoot/MapFrame"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SelectedRegionLabel" type="Label" parent="OverlayRoot/MapFrame/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.06, 0.06, 0.06, 1)
+theme_override_font_sizes/font_size = 18
+text = "当前地区: -"
+vertical_alignment = 1
+
+[node name="BtnClose" type="Button" parent="OverlayRoot/MapFrame/TopRow"]
+custom_minimum_size = Vector2(120, 34)
+layout_mode = 2
+text = "关闭探索"
+
+[node name="HintLabel" type="Label" parent="OverlayRoot/MapFrame"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.12, 0.12, 1)
+theme_override_font_sizes/font_size = 14
+text = "未解锁地区显示 ?；已解锁地区可点击"
+
+[node name="MapTexture" type="TextureRect" parent="OverlayRoot/MapFrame"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 6
+
+[node name="MapCanvas" type="Control" parent="OverlayRoot/MapFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 76.0
+offset_right = -360.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="LineRoot" type="Node2D" parent="OverlayRoot/MapFrame/MapCanvas"]
+
+[node name="DetailAnchor" type="Control" parent="OverlayRoot/MapFrame"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -360.0
+grow_horizontal = 0
+grow_vertical = 2

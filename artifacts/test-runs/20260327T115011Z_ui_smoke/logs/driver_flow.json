@@ -1,0 +1,105 @@
+{
+  "steps": [
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 0,
+        "seq": 1,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/StartMenu/Center/VBox/BtnNewGame"
+        },
+        "elapsed_ms": 2,
+        "seq": 2,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": ""
+        },
+        "elapsed_ms": 884,
+        "seq": 3,
+        "status": "ok"
+      },
+      "duration_ms": 913
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 0,
+        "seq": 4,
+        "status": "ok"
+      },
+      "duration_ms": 304
+    },
+    {
+      "action": "dragCamera",
+      "status": "passed",
+      "response": {
+        "action": "dragCamera",
+        "data": {
+          "end": [
+            740.0,
+            660.0
+          ],
+          "start": [
+            960.0,
+            540.0
+          ]
+        },
+        "elapsed_ms": 0,
+        "seq": 5,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 0,
+        "seq": 6,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "click",
+      "status": "failed",
+      "response": {
+        "action": "click",
+        "data": {},
+        "elapsed_ms": 2,
+        "error": {
+          "code": "UNSUPPORTED_TARGET",
+          "message": "click target is not Button/Control"
+        },
+        "seq": 7,
+        "status": "error"
+      },
+      "duration_ms": 51
+    }
+  ]
+}

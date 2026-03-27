@@ -1,0 +1,143 @@
+{
+  "flowId": "build_clean_wait_linked_acceptance",
+  "name": "Build and clean wait linked acceptance",
+  "system": "gameplay",
+  "profile": "regression",
+  "mode": "local",
+  "scene": "res://scenes/ui/start_menu.tscn",
+  "flowStepTimeoutSec": 20,
+  "env": {
+    "CLEAN_ROOM_ID": "room_01",
+    "CLEAN_ROOM_TEST_ID": "room_node_room_01",
+    "BUILD_ROOM_ID": "room_01",
+    "BUILD_ROOM_TEST_ID": "room_node_room_01"
+  },
+  "steps": [
+    {
+      "id": "prepare_new_game",
+      "action": "runSubflow",
+      "file": "common/new_game_enter_world.json"
+    },
+    {
+      "id": "start_cleanup_mode",
+      "action": "click",
+      "target": { "testId": "btn_cleanup" }
+    },
+    {
+      "id": "select_cleanup_room",
+      "action": "click",
+      "target": { "testId": "${CLEAN_ROOM_TEST_ID}" }
+    },
+    {
+      "id": "confirm_cleanup",
+      "action": "click",
+      "target": { "testId": "cleanup_confirm_button" }
+    },
+    {
+      "id": "t0_clean_shot",
+      "action": "screenshot",
+      "name": "clean_t0"
+    },
+    {
+      "id": "t0_clean_logic",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${CLEAN_ROOM_ID}",
+      "expect": { "room_clean_status": "cleaning" }
+    },
+    {
+      "id": "tmid_wait_2s",
+      "action": "sleep",
+      "ms": 2000
+    },
+    {
+      "id": "tmid_clean_shot",
+      "action": "screenshot",
+      "name": "clean_tmid"
+    },
+    {
+      "id": "wait_clean_done",
+      "action": "wait",
+      "until": {
+        "stateEquals": { "key": "room_clean_status", "value": "cleaned", "roomId": "${CLEAN_ROOM_ID}" }
+      },
+      "timeoutMs": 60000
+    },
+    {
+      "id": "tdone_clean_shot",
+      "action": "screenshot",
+      "name": "clean_tdone"
+    },
+    {
+      "id": "start_build_mode",
+      "action": "click",
+      "target": { "testId": "btn_build" }
+    },
+    {
+      "id": "wait_research_zone_visible",
+      "action": "wait",
+      "until": {
+        "nodeVisible": { "testId": "construction_zone_1" }
+      },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "select_build_zone",
+      "action": "click",
+      "target": { "testId": "construction_zone_1" }
+    },
+    {
+      "id": "select_build_room",
+      "action": "click",
+      "target": { "testId": "${BUILD_ROOM_TEST_ID}" }
+    },
+    {
+      "id": "wait_build_confirm_visible",
+      "action": "wait",
+      "until": {
+        "nodeVisible": { "testId": "construction_confirm_button" }
+      },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "confirm_build",
+      "action": "click",
+      "target": { "testId": "construction_confirm_button" }
+    },
+    {
+      "id": "t0_build_shot",
+      "action": "screenshot",
+      "name": "build_t0"
+    },
+    {
+      "id": "t0_build_logic",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${BUILD_ROOM_ID}",
+      "expect": { "build_status": "building" }
+    },
+    {
+      "id": "tmid_build_wait",
+      "action": "sleep",
+      "ms": 2000
+    },
+    {
+      "id": "tmid_build_shot",
+      "action": "screenshot",
+      "name": "build_tmid"
+    },
+    {
+      "id": "wait_build_done",
+      "action": "wait",
+      "until": {
+        "stateEquals": { "key": "build_status", "value": "built", "roomId": "${BUILD_ROOM_ID}" }
+      },
+      "timeoutMs": 120000
+    },
+    {
+      "id": "tdone_build_shot",
+      "action": "screenshot",
+      "name": "build_tdone"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "steps": [
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 2124,
+        "seq": 1,
+        "status": "ok"
+      },
+      "duration_ms": 2183
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/StartMenu/Center/VBox/BtnNewGame"
+        },
+        "elapsed_ms": 1002,
+        "seq": 2,
+        "status": "ok"
+      },
+      "duration_ms": 1019
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": ""
+        },
+        "elapsed_ms": 1770,
+        "seq": 3,
+        "status": "ok"
+      },
+      "duration_ms": 1827
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 848,
+        "seq": 4,
+        "status": "ok"
+      },
+      "duration_ms": 1115
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/UIMain/BottomRightBar/Margin/Content/BtnCleanup"
+        },
+        "elapsed_ms": 996,
+        "seq": 5,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ArchivesBase0/archives_rooms/base_rooms/room_01",
+          "position": [
+            960.0,
+            918.27978515625
+          ]
+        },
+        "elapsed_ms": 995,
+        "seq": 6,
+        "status": "ok"
+      },
+      "duration_ms": 1014
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/CleanupOverlay/ConfirmContainer/ConfirmButton"
+        },
+        "elapsed_ms": 995,
+        "seq": 7,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "setGameTimeSpeed",
+      "status": "passed",
+      "response": {
+        "action": "setGameTimeSpeed",
+        "data": {
+          "speed_multiplier": 80.0
+        },
+        "elapsed_ms": 993,
+        "seq": 8,
+        "status": "ok"
+      },
+      "duration_ms": 1014
+    },
+    {
+      "action": "wait",
+      "status": "failed",
+      "error": "timeout waiting response seq=9",
+      "duration_ms": 70011
+    }
+  ]
+}

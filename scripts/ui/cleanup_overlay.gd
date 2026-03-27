@@ -23,6 +23,9 @@ func _ready() -> void:
 	## 清理模式时 is_flowing=false 会触发 tree.paused，覆盖层需 ALWAYS 以便用户可操作
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 11
+	_confirm_container.set_meta("test_id", "cleanup_confirm_container")
+	_confirm_button.set_meta("test_id", "cleanup_confirm_button")
+	_progress_ring.set_meta("test_id", "cleanup_progress_ring")
 	_progress_rings_container = get_node_or_null("ProgressRingsContainer") as Control
 	_confirm_container.visible = false
 	_progress_ring.visible = false

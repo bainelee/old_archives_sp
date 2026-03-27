@@ -1,0 +1,27 @@
+{
+  "run_id": "20260327T122808Z_gameplay_smoke",
+  "status": "finished",
+  "system": "gameplay",
+  "scenario": "gameplay_smoke",
+  "profile": "regression",
+  "mode": "local",
+  "timeoutSec": 300,
+  "retry": 0,
+  "projectRoot": "D:\\GODOT_Test\\old-archives-sp",
+  "command": [
+    "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe",
+    "--path",
+    "D:\\GODOT_Test\\old-archives-sp",
+    "--user-data-dir",
+    "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T122808Z_gameplay_smoke\\user_data",
+    "res://scenes/ui/start_menu.tscn",
+    "--",
+    "--test-driver",
+    "--test-driver-session=20260327T122808Z_gameplay_smoke"
+  ],
+  "startedAt": "2026-03-27T12:28:08.676751+00:00",
+  "dryRun": false,
+  "screenshotPrefix": "",
+  "finishedAt": "2026-03-27T12:28:16.967572+00:00",
+  "exitCode": 1
+}

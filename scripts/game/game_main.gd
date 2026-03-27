@@ -7,6 +7,7 @@ extends Node2D
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 const _ResearcherLifecycle = preload("res://scripts/game/researcher_lifecycle.gd")
 const _ExplorationServiceScript = preload("res://scripts/game/exploration/exploration_service.gd")
+const _ExplorationMapOverlayScene = preload("res://scenes/ui/exploration_map_overlay.tscn")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const GRID_WIDTH := 80
 const GRID_HEIGHT := 60
@@ -16,6 +17,7 @@ const DEFAULT_SLOT := 0
 const BOTTOM_PLACEHOLDER_EXPLORATION_MAP := "center"
 
 var _exploration_service: RefCounted = null
+var _exploration_map_overlay: CanvasLayer = null
 var _tiles: Array[Array] = []
 var _current_slot: int = 0
 var _rooms: Array = []
@@ -113,6 +115,7 @@ func _ready() -> void:
 	_reset_cursor_to_standard()
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_exploration_service = _ExplorationServiceScript.new()
+	_setup_exploration_map_overlay()
 	_setup_grid()
 	var slot: int = DEFAULT_SLOT
 	if SaveManager.pending_load_slot >= 0:
@@ -127,11 +130,45 @@ func _ready() -> void:
 	call_deferred("_setup_construction_mode")
 	call_deferred("_setup_room_highlights")
 	call_deferred("_setup_room_overlays")
+	call_deferred("_mark_room_test_ids")
 	call_deferred("_setup_room_info_labels")
 	call_deferred("_update_room_highlights")
 	call_deferred("_setup_researchers")
 	call_deferred("_setup_researcher_lifecycle")
 	queue_redraw()
+
+
+func _mark_room_test_ids() -> void:
+	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
+	if not archives:
+		return
+	for i in _rooms.size():
+		var room: ArchivesRoomInfo = _rooms[i]
+		var rid: String = room.id if room.id else room.json_room_id
+		if rid.is_empty():
+			continue
+		var room_node: Node3D = _find_room_node_in_archives(archives, rid)
+		if room_node:
+			room_node.set_meta("test_id", "room_node_%s" % rid)
+
+
+func _setup_exploration_map_overlay() -> void:
+	if _exploration_map_overlay != null:
+		return
+	var overlay_node: Node = _ExplorationMapOverlayScene.instantiate()
+	var overlay: CanvasLayer = overlay_node as CanvasLayer
+	if overlay == null:
+		return
+	add_child(overlay)
+	_exploration_map_overlay = overlay
+	if _exploration_map_overlay.has_method("set_context"):
+		_exploration_map_overlay.call("set_context", _exploration_service)
+
+
+func _toggle_exploration_map_overlay() -> void:
+	if _exploration_map_overlay == null or not _exploration_map_overlay.has_method("toggle_overlay"):
+		return
+	_exploration_map_overlay.call("toggle_overlay")
 
 
 func _setup_camera3d() -> void:
@@ -1214,7 +1251,10 @@ func _on_bottom_task_placeholder_pressed(button_id: String) -> void:
 		var did_init: bool = bool(_exploration_service.call("ensure_starter_neighbors_on_first_map_open"))
 		if did_init:
 			save_current_slot_quiet()
-		print("[ExplorationMap] placeholder open (center), starter_unlocks=%s" % str(did_init))
+		if _exploration_map_overlay and _exploration_map_overlay.has_method("refresh_regions"):
+			_exploration_map_overlay.call("refresh_regions")
+		_toggle_exploration_map_overlay()
+		print("[ExplorationMap] toggle overlay (center), starter_unlocks=%s" % str(did_init))
 		return
 	print("[BottomTaskPlaceholder] pressed: %s" % button_id)
 

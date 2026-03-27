@@ -1,0 +1,51 @@
+{
+  "runId": "20260327T111418Z_gameplay_smoke",
+  "status": "failed",
+  "scenario": "gameplay_smoke",
+  "environment": {
+    "mode": "local",
+    "godotVersion": "unknown"
+  },
+  "summary": {
+    "totalAssertions": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "artifactIndex": {
+    "artifactRoot": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T111418Z_gameplay_smoke",
+    "logsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T111418Z_gameplay_smoke\\logs",
+    "screenshotsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T111418Z_gameplay_smoke\\screenshots",
+    "saveSnapshotsDir": "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T111418Z_gameplay_smoke\\save_snapshots",
+    "copiedLogs": [
+      "logs/godot.log",
+      "logs/debug_frame_overlay.txt"
+    ],
+    "copiedScreenshots": [
+      "screenshots/flow_exploration_step_01_bootstrap.png",
+      "screenshots/flow_exploration_step_02_enter_map.png",
+      "screenshots/flow_exploration_step_03_explore_action.png",
+      "screenshots/visual_ui_button_baseline.png",
+      "screenshots/visual_ui_button_current.png",
+      "screenshots/visual_ui_button_diff.png",
+      "screenshots/visual_ui_button_diff_annotated.png"
+    ],
+    "saveFiles": [],
+    "screenshotPrefixFilter": ""
+  },
+  "failures": [
+    {
+      "stepId": "step_process_exec",
+      "category": "runtime_error",
+      "expected": "process exit code == 0",
+      "actual": "os error on attempt 1: [WinError 5] 拒绝访问。",
+      "details": {},
+      "artifacts": [
+        "logs/stdout.log",
+        "logs/stderr.log",
+        "run_meta.json",
+        "screenshots/visual_ui_button_diff.png",
+        "screenshots/visual_ui_button_diff_annotated.png"
+      ]
+    }
+  ]
+}

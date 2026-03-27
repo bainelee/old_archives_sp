@@ -1,0 +1,312 @@
+{
+  "steps": [
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 2283,
+        "seq": 1,
+        "status": "ok"
+      },
+      "duration_ms": 2331
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/StartMenu/Center/VBox/BtnNewGame"
+        },
+        "elapsed_ms": 996,
+        "seq": 2,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": ""
+        },
+        "elapsed_ms": 1800,
+        "seq": 3,
+        "status": "ok"
+      },
+      "duration_ms": 1825
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 1084,
+        "seq": 4,
+        "status": "ok"
+      },
+      "duration_ms": 1122
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/UIMain/BottomRightBar/Margin/Content/BtnCleanup"
+        },
+        "elapsed_ms": 997,
+        "seq": 5,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ArchivesBase0/archives_rooms/base_rooms/room_01",
+          "strategy": "game_logic"
+        },
+        "elapsed_ms": 996,
+        "seq": 6,
+        "status": "ok"
+      },
+      "duration_ms": 1013
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/CleanupOverlay/ConfirmContainer/ConfirmButton"
+        },
+        "elapsed_ms": 1039,
+        "seq": 7,
+        "status": "ok"
+      },
+      "duration_ms": 1068
+    },
+    {
+      "action": "screenshot",
+      "status": "passed",
+      "response": {
+        "action": "screenshot",
+        "data": {
+          "path": "user://test_screenshots/clean_t0.png"
+        },
+        "elapsed_ms": 1071,
+        "screenshot": "user://test_screenshots/clean_t0.png",
+        "seq": 8,
+        "status": "ok"
+      },
+      "duration_ms": 1116
+    },
+    {
+      "action": "check",
+      "status": "passed",
+      "response": {
+        "action": "check",
+        "data": {
+          "expect": {
+            "room_clean_status": "cleaning"
+          },
+          "kind": "logic_state"
+        },
+        "elapsed_ms": 978,
+        "seq": 9,
+        "status": "ok"
+      },
+      "duration_ms": 1016
+    },
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 3239,
+        "seq": 10,
+        "status": "ok"
+      },
+      "duration_ms": 3294
+    },
+    {
+      "action": "screenshot",
+      "status": "passed",
+      "response": {
+        "action": "screenshot",
+        "data": {
+          "path": "user://test_screenshots/clean_tmid.png"
+        },
+        "elapsed_ms": 1088,
+        "screenshot": "user://test_screenshots/clean_tmid.png",
+        "seq": 11,
+        "status": "ok"
+      },
+      "duration_ms": 1116
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 989,
+        "seq": 12,
+        "status": "ok"
+      },
+      "duration_ms": 1016
+    },
+    {
+      "action": "screenshot",
+      "status": "passed",
+      "response": {
+        "action": "screenshot",
+        "data": {
+          "path": "user://test_screenshots/clean_tdone.png"
+        },
+        "elapsed_ms": 1089,
+        "screenshot": "user://test_screenshots/clean_tdone.png",
+        "seq": 13,
+        "status": "ok"
+      },
+      "duration_ms": 1116
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/UIMain/BottomRightBar/Margin/Content/BtnBuild"
+        },
+        "elapsed_ms": 1142,
+        "seq": 14,
+        "status": "ok"
+      },
+      "duration_ms": 1166
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ConstructionOverlay/ConstructionZoneButtons/@Button@174"
+        },
+        "elapsed_ms": 996,
+        "seq": 15,
+        "status": "ok"
+      },
+      "duration_ms": 1013
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ArchivesBase0/archives_rooms/base_rooms/room_00",
+          "strategy": "game_logic"
+        },
+        "elapsed_ms": 997,
+        "seq": 16,
+        "status": "ok"
+      },
+      "duration_ms": 1014
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ConstructionOverlay/ConfirmContainer/ConfirmButton"
+        },
+        "elapsed_ms": 995,
+        "seq": 17,
+        "status": "ok"
+      },
+      "duration_ms": 1014
+    },
+    {
+      "action": "screenshot",
+      "status": "passed",
+      "response": {
+        "action": "screenshot",
+        "data": {
+          "path": "user://test_screenshots/build_t0.png"
+        },
+        "elapsed_ms": 1195,
+        "screenshot": "user://test_screenshots/build_t0.png",
+        "seq": 18,
+        "status": "ok"
+      },
+      "duration_ms": 1218
+    },
+    {
+      "action": "check",
+      "status": "passed",
+      "response": {
+        "action": "check",
+        "data": {},
+        "elapsed_ms": 983,
+        "seq": 19,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 3000,
+        "seq": 20,
+        "status": "ok"
+      },
+      "duration_ms": 3045
+    },
+    {
+      "action": "screenshot",
+      "status": "passed",
+      "response": {
+        "action": "screenshot",
+        "data": {
+          "path": "user://test_screenshots/build_tmid.png"
+        },
+        "elapsed_ms": 1092,
+        "screenshot": "user://test_screenshots/build_tmid.png",
+        "seq": 21,
+        "status": "ok"
+      },
+      "duration_ms": 1116
+    },
+    {
+      "action": "wait",
+      "status": "failed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 61022,
+        "error": {
+          "code": "TIMEOUT",
+          "message": "wait condition timeout"
+        },
+        "seq": 22,
+        "status": "error"
+      },
+      "duration_ms": 61055
+    }
+  ]
+}

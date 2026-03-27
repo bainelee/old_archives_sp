@@ -1,0 +1,25 @@
+{
+  "run_id": "20260327T111418Z_gameplay_smoke",
+  "status": "failed",
+  "system": "gameplay",
+  "scenario": "gameplay_smoke",
+  "profile": "regression",
+  "mode": "local",
+  "timeoutSec": 300,
+  "retry": 0,
+  "projectRoot": "D:\\GODOT_Test\\old-archives-sp",
+  "command": [
+    "D:/GODOT/Godot_v4.6.1-stable_win64.exe",
+    "--path",
+    "D:\\GODOT_Test\\old-archives-sp",
+    "res://scenes/ui/start_menu.tscn",
+    "--",
+    "--test-driver"
+  ],
+  "startedAt": "2026-03-27T11:14:18.879908+00:00",
+  "dryRun": false,
+  "screenshotPrefix": "",
+  "finishedAt": "2026-03-27T11:14:18.881279+00:00",
+  "exitCode": null,
+  "error": "os error on attempt 1: [WinError 5] 拒绝访问。"
+}

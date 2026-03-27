@@ -24,6 +24,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--artifact-root", default=None, help="Override artifact root directory")
     parser.add_argument("--extra-arg", action="append", default=[], help="Extra command arg")
     parser.add_argument("--dry-run", action="store_true", help="Skip process execution")
+    parser.add_argument("--test-driver", action="store_true", help="Enable TestDriver autoload mode")
+    parser.add_argument("--flow-steps-json", default=None, help="Path to JSON file containing flow steps")
+    parser.add_argument("--flow-step-timeout-sec", type=int, default=15, help="Timeout per driver flow step")
     return parser
 
 
@@ -31,6 +34,14 @@ def main() -> int:
     args = build_parser().parse_args()
     project_root = Path(args.project_root).resolve()
     artifact_root = Path(args.artifact_root).resolve() if args.artifact_root else None
+
+    flow_steps_payload = []
+    if args.flow_steps_json:
+        raw_payload = json.loads(Path(args.flow_steps_json).read_text(encoding="utf-8"))
+        if isinstance(raw_payload, dict):
+            flow_steps_payload = list(raw_payload.get("steps", []))
+        elif isinstance(raw_payload, list):
+            flow_steps_payload = raw_payload
 
     req = RunRequest(
         system=args.system,
@@ -44,6 +55,9 @@ def main() -> int:
         scene=args.scene,
         extra_args=args.extra_arg,
         dry_run=args.dry_run,
+        enable_test_driver=args.test_driver,
+        flow_steps=flow_steps_payload,
+        flow_step_timeout_sec=args.flow_step_timeout_sec,
     )
     runner = GameTestRunner(project_root=project_root, artifact_base=artifact_root)
     result = runner.run(req)

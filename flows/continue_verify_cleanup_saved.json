@@ -1,0 +1,40 @@
+{
+  "flowId": "continue_verify_cleanup_saved",
+  "name": "Continue game and verify cleaned room persisted",
+  "system": "gameplay",
+  "profile": "regression",
+  "mode": "local",
+  "scene": "res://scenes/ui/start_menu.tscn",
+  "flowStepTimeoutSec": 20,
+  "driverReadyTimeoutSec": 20,
+  "driverNoActivityTimeoutSec": 5,
+  "env": {
+    "CLEAN_ROOM_ID": "room_01"
+  },
+  "steps": [
+    {
+      "id": "sleep_boot",
+      "action": "sleep",
+      "ms": 800
+    },
+    {
+      "id": "click_continue",
+      "action": "click",
+      "target": { "testId": "btn_continue" }
+    },
+    {
+      "id": "wait_ingame",
+      "action": "wait",
+      "until": { "scene": "game_main" },
+      "timeoutMs": 20000
+    },
+    {
+      "id": "verify_room_cleaned",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${CLEAN_ROOM_ID}",
+      "expect": { "room_clean_status": "cleaned" },
+      "timeoutMs": 5000
+    }
+  ]
+}

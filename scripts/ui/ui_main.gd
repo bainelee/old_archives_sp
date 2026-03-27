@@ -157,6 +157,7 @@ var _suspend_auto_refresh: bool = false
 func _ready() -> void:
 	## 暂停时保持可点击，以便用户可通过时间面板播放按钮恢复时间
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_mark_test_ids()
 	if _topbar_figma and _topbar_figma.has_method("set_ui_root"):
 		_topbar_figma.set_ui_root(self)
 	_refresh_all()
@@ -186,6 +187,18 @@ func _ready() -> void:
 	
 	## 连接 DataProviders 信号实现实时刷新
 	_connect_data_providers_signals()
+
+
+func _mark_test_ids() -> void:
+	var cleanup_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnCleanup") as Button
+	if cleanup_btn:
+		cleanup_btn.set_meta("test_id", "btn_cleanup")
+	var build_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnBuild") as Button
+	if build_btn:
+		build_btn.set_meta("test_id", "btn_build")
+	var center_btn: Button = get_node_or_null("BottomRightBar/Margin/Content/BtnCenter") as Button
+	if center_btn:
+		center_btn.set_meta("test_id", "btn_center")
 
 
 func _on_cleanup_button_pressed() -> void:

@@ -1,0 +1,28 @@
+{
+  "run_id": "20260327T120014Z_ui_smoke",
+  "status": "failed",
+  "system": "ui",
+  "scenario": "ui_smoke",
+  "profile": "strict_ui",
+  "mode": "local",
+  "timeoutSec": 30,
+  "retry": 0,
+  "projectRoot": "D:\\GODOT_Test\\old-archives-sp",
+  "command": [
+    "D:/not-exists/godot.exe",
+    "--path",
+    "D:\\GODOT_Test\\old-archives-sp",
+    "--user-data-dir",
+    "D:\\GODOT_Test\\old-archives-sp\\artifacts\\test-runs\\20260327T120014Z_ui_smoke\\user_data",
+    "res://scenes/ui/start_menu.tscn",
+    "--",
+    "--test-driver",
+    "--test-driver-session=20260327T120014Z_ui_smoke"
+  ],
+  "startedAt": "2026-03-27T12:00:14.514728+00:00",
+  "dryRun": false,
+  "screenshotPrefix": "",
+  "finishedAt": "2026-03-27T12:00:14.517044+00:00",
+  "exitCode": null,
+  "error": "executable not found on attempt 1: [WinError 2] 系统找不到指定的文件。"
+}

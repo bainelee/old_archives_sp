@@ -1,0 +1,154 @@
+{
+  "steps": [
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 0,
+        "seq": 1,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/StartMenu/Center/VBox/BtnNewGame"
+        },
+        "elapsed_ms": 2,
+        "seq": 2,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": ""
+        },
+        "elapsed_ms": 787,
+        "seq": 3,
+        "status": "ok"
+      },
+      "duration_ms": 812
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 0,
+        "seq": 4,
+        "status": "ok"
+      },
+      "duration_ms": 305
+    },
+    {
+      "action": "dragCamera",
+      "status": "passed",
+      "response": {
+        "action": "dragCamera",
+        "data": {
+          "end": [
+            740.0,
+            660.0
+          ],
+          "start": [
+            960.0,
+            540.0
+          ]
+        },
+        "elapsed_ms": 0,
+        "seq": 5,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 0,
+        "seq": 6,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ArchivesBase0/archives_rooms/base_rooms/room_00",
+          "position": [
+            960.0,
+            710.813720703125
+          ]
+        },
+        "elapsed_ms": 2,
+        "seq": 7,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "screenshot",
+      "status": "passed",
+      "response": {
+        "action": "screenshot",
+        "data": {
+          "path": "user://test_screenshots/room_detail_opened.png"
+        },
+        "elapsed_ms": 106,
+        "screenshot": "user://test_screenshots/room_detail_opened.png",
+        "seq": 8,
+        "status": "ok"
+      },
+      "duration_ms": 153
+    },
+    {
+      "action": "exportUiSpec",
+      "status": "passed",
+      "response": {
+        "action": "exportUiSpec",
+        "data": {
+          "count": 145,
+          "path": "user://test_driver/20260327T115959Z_ui_smoke/room_detail_spec.json"
+        },
+        "elapsed_ms": 4,
+        "seq": 9,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    },
+    {
+      "action": "check",
+      "status": "passed",
+      "response": {
+        "action": "check",
+        "data": {
+          "expect": {
+            "nodeVisible": "room_detail_panel"
+          },
+          "kind": "visual_hard"
+        },
+        "elapsed_ms": 1,
+        "seq": 10,
+        "status": "ok"
+      },
+      "duration_ms": 51
+    }
+  ]
+}

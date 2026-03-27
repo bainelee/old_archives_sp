@@ -57,6 +57,8 @@ func _ready() -> void:
 	if gv and gv.has_signal("config_reloaded"):
 		gv.config_reloaded.connect(_on_config_reloaded)
 	layer = 11
+	_confirm_container.set_meta("test_id", "construction_confirm_container")
+	_confirm_button.set_meta("test_id", "construction_confirm_button")
 	_progress_rings_container = get_node_or_null("ProgressRingsContainer") as Control
 	_confirm_container.visible = false
 	_confirm_button.visible = true
@@ -72,6 +74,7 @@ func _setup_category_tags() -> void:
 	for cat in [ZoneTypeScript.CATEGORY_WORK, ZoneTypeScript.CATEGORY_LOGISTICS, ZoneTypeScript.CATEGORY_MYSTERY]:
 		var btn: Button = Button.new()
 		btn.text = ZoneTypeScript.get_category_display_name(cat)
+		btn.set_meta("test_id", "construction_category_%s" % cat)
 		btn.pressed.connect(_on_category_tag_pressed.bind(cat))
 		_category_tags.add_child(btn)
 
@@ -98,6 +101,7 @@ func _show_zone_buttons_for_category(cat: String) -> void:
 		var btn: Button = Button.new()
 		btn.text = ZoneTypeScript.get_zone_name(z)
 		btn.custom_minimum_size = Vector2(120, 48)
+		btn.set_meta("test_id", "construction_zone_%d" % z)
 		btn.pressed.connect(_on_zone_button_pressed.bind(z))
 		_zone_buttons.add_child(btn)
 

@@ -34,10 +34,19 @@ var _pending_delete_slot: int = -1
 
 
 func _ready() -> void:
+	_mark_test_ids()
 	_setup_buttons()
 	_setup_lang_buttons()
 	_setup_slot_panel()
 	_update_continue_availability()
+
+
+func _mark_test_ids() -> void:
+	_btn_new_game.set_meta("test_id", "btn_new_game")
+	_btn_continue.set_meta("test_id", "btn_continue")
+	_slot_panel.set_meta("test_id", "slot_select_panel")
+	_slot_buttons[0].set_meta("test_id", "save_slot_0")
+	_btn_cancel.set_meta("test_id", "slot_select_cancel")
 
 
 func _setup_buttons() -> void:

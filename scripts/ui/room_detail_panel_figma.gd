@@ -79,6 +79,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	visible = false
+	_mark_test_ids()
 	_apply_skill_button_layout(2)
 	_layout_topbar_texts()
 	var close_btn: BaseButton = $PanelRoot/group_room_details_top_bar/button_room_details_top_bar as BaseButton
@@ -96,6 +97,15 @@ func _ready() -> void:
 	if _btn_shutdown:
 		_btn_shutdown.pressed.connect(_on_shutdown_pressed)
 	_setup_shelter_drag_input()
+
+
+func _mark_test_ids() -> void:
+	if _panel_root:
+		_panel_root.set_meta("test_id", "room_detail_panel")
+	if _btn_destroy:
+		_btn_destroy.set_meta("test_id", "room_detail_btn_destroy")
+	if _btn_shutdown:
+		_btn_shutdown.set_meta("test_id", "room_detail_btn_shutdown")
 
 
 func _process(_delta: float) -> void:
