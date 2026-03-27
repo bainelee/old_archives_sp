@@ -14,3 +14,7 @@ local_cache/
 # Python
 __pycache__/
 *.py[cod]
+
+# Test runner artifacts (local only)
+artifacts/test-runs/
+artifacts/tmp/
