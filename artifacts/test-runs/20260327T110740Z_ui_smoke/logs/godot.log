@@ -1,7 +1,0 @@
-Godot Engine v4.6.1.stable.official.14d19694e - https://godotengine.org
-D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 3060 Ti
-
-[ExplorationMap] toggle overlay (center), starter_unlocks=true
-WARNING: 17 RIDs of type "CanvasItem" were leaked.
-   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
-ERROR: 1 RID allocations of type 'N10RendererRD14TextureStorage7TextureE' were leaked at exit.

@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><testsuite name="ui_smoke" tests="1" failures="1" errors="0" skipped="0"><testcase classname="ui_smoke" name="ui_smoke.strict_ui" time="0"><failure message="test driver no activity timeout after 5s" type="runtime_error">{"flowAssertions": {"total": 0, "passed": 0, "failed": 0}}</failure><system-out></system-out></testcase></testsuite>

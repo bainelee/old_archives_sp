@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><testsuite name="ui_smoke" tests="1" failures="0" errors="0" skipped="0"><testcase classname="ui_smoke" name="ui_smoke.strict_ui" time="0"><system-out>ERROR: 1 RID allocations of type 'N10RendererRD14TextureStorage7TextureE' were leaked at exit.
-ERROR: Parameter "RenderingServer::get_singleton()" is null.</system-out></testcase></testsuite>
