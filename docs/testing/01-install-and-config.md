@@ -1,9 +1,21 @@
 # 安装与配置（v1）
 
+## 0. 模式速查（先看这个）
+
+| 场景 | 推荐命令 |
+|---|---|
+| 只检查环境（最快） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -OnlyPreflight` |
+| 快速门禁（环境 + 契约） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
+| 完整验收（环境 + 两条 acceptance） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"` |
+| 完整验收 + 契约回归 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -IncludeContractRegression` |
+
 ## 1. 前置条件
 - Godot 4.6 已安装并可命令行调用
 - Python 3.10+ 可用（`python --version`）
 - 项目根目录：`D:/GODOT_Test/old-archives-sp`
+
+推荐（分发环境）：
+- 使用环境变量 `GODOT_BIN` 指向 Godot 可执行文件，不依赖调用方传绝对路径参数
 
 ## 2. 快速验证（CLI）
 在项目根目录执行：
@@ -28,9 +40,90 @@ python "tools/game-test-runner/mcp/server.py" --tool list_test_scenarios --args 
 python "tools/game-test-runner/mcp/server.py" --tool run_game_test --system exploration --dry-run
 ```
 
+### 3.3 环境预检（建议接入 CI）
+```powershell
+python "tools/game-test-runner/mcp/server.py" --tool check_test_runner_environment --project-root "D:/GODOT_Test/old-archives-sp"
+```
+
 期望：
-- 返回 `ok=true`
-- `result` 包含 `run_id`、`status`、`artifact_root`
+- 返回 `ok=true` 且 `ci_ready=true`
+- `checks` 中 `godot_bin`、`project_root` 均为 `passed`
+
+若 `godot_bin` 失败，先设置环境变量：
+```powershell
+setx GODOT_BIN "D:\GODOT\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64.exe"
+```
+然后重开终端再执行 3.3。
+
+## 6. 一键 CI 命令模板（PowerShell）
+
+脚本路径：
+- `tools/game-test-runner/scripts/run_acceptance_ci.ps1`
+
+执行：
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" `
+  -ProjectRoot "D:/GODOT_Test/old-archives-sp"
+```
+
+可选参数：
+- `-GodotBin`：临时覆盖当前会话 `GODOT_BIN`
+- `-PythonExe`：指定 Python 可执行文件
+- `-OutputJson`：指定汇总报告输出路径
+- `-IncludeContractRegression`：附加执行闭环契约回归（`contract_regression.py`）
+- `-Fast`：快速门禁模式（跳过 acceptance flows，仅 preflight + contract）
+- `-OnlyPreflight`：只做环境检查（不跑 acceptance、不跑 contract）
+
+脚本行为：
+1. 调用 `check_test_runner_environment` 做前置检查（失败则退出码 2）
+2. 串行执行两个 acceptance flow：
+   - `flows/ui_room_detail_sync_acceptance.json`
+   - `flows/build_clean_wait_linked_acceptance.json`
+3. 生成汇总 JSON（默认输出到 `artifacts/test-runs/acceptance_ci_<timestamp>.json`）
+4. 任一 flow 非 `resolved` 则退出码 3
+5. 若启用 `-IncludeContractRegression` 且契约回归失败，则退出码 4
+
+快速门禁示例：
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" `
+  -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
+  -Fast
+```
+
+说明：
+- `-Fast` 默认会启用 contract regression（即使未显式传 `-IncludeContractRegression`）
+
+仅环境预检示例（最快）：
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" `
+  -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
+  -OnlyPreflight
+```
+
+汇总 JSON（每个 run）包含关键字段：
+- `status`（MCP 闭环状态）
+- `report_status` / `report_result_status`
+- `effective_exit_code`（语义退出码）
+- `process_exit_code`（真实进程退出码）
+
+run 目录新增快速失败摘要：
+- `failure_summary.json`（聚合 `primary_failure` + `key_files` + 退出码语义）
+
+## 7. 闭环契约回归（fix-loop）
+
+脚本：
+- `tools/game-test-runner/core/contract_regression.py`
+
+执行：
+```powershell
+python "tools/game-test-runner/core/contract_regression.py" --project-root "D:/GODOT_Test/old-archives-sp" --godot-bin "$env:GODOT_BIN"
+```
+
+覆盖点：
+- waiting_approval 状态契约
+- resume_fix_loop -> exhausted + stop_reason
+- cancel_test_run -> cancelled
+- resume_fix_loop 在 cancelled 后保持 cancelled
 
 ## 4. Godot 插件启用
 1. 打开项目。

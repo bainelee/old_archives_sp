@@ -11,11 +11,12 @@
 - 核心运行器（Python）
   - `tools/game-test-runner/core/runner.py`
   - `tools/game-test-runner/core/cli.py`
+  - `tools/game-test-runner/core/contract_regression.py`
 - 场景注册表
   - `tools/game-test-runner/core/scenario_registry.py`
 - MCP 最小入口
   - `tools/game-test-runner/mcp/server.py`
-  - tools: `list_test_scenarios`、`run_game_test`、`get_test_artifacts`、`get_test_report`
+  - tools: `list_test_scenarios`、`run_game_test`、`run_game_flow`、`check_test_runner_environment`、`get_test_run_status`、`cancel_test_run`、`resume_fix_loop`、`get_test_artifacts`、`get_test_report`
 - Godot 编辑器插件（MVP）
   - `addons/test_orchestrator/plugin.cfg`
   - `addons/test_orchestrator/plugin.gd`

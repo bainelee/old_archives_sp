@@ -17,4 +17,5 @@ __pycache__/
 
 # Test runner artifacts (local only)
 artifacts/test-runs/
+artifacts/test-suites/
 artifacts/tmp/

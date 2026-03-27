@@ -28,6 +28,7 @@
   - 场景A 首次端到端可执行
 - 退出标准：
   - 场景A 在本地可一键跑通，失败有截图和日志。
+  - （已达成）MCP 闭环工具可用：`run_game_flow/get_test_run_status/cancel_test_run/resume_fix_loop`。
 
 ## Phase 2：稳定性增强（2 周）
 - 目标：让流程“可长期回归”。
@@ -47,6 +48,9 @@
   - `smoke` 同步门禁 + `strict_ui/regression` 异步回归
 - 退出标准：
   - PR 可直接看到失败用例、截图链接、错误摘要。
+  - （已达成）提供一键 CI 脚本：
+    - `tools/game-test-runner/scripts/run_acceptance_ci.ps1`
+    - 内置 preflight + 两条 acceptance flow + 汇总 JSON 产出。
 
 ## Phase 4：产品化与规模化（持续）
 - 目标：形成团队可持续使用的测试产品能力。
@@ -65,12 +69,12 @@
 artifacts/test-runs/<run_id>/
   screenshots/
   logs/
-  state_snapshots/
-  diff/
+  save_snapshots/
   report.json
   report.md
   junit.xml
-  html/
+  flow_report.json
+  fix_loop_state.json
 ```
 
 命名规则：
@@ -82,20 +86,34 @@ artifacts/test-runs/<run_id>/
 - `junit.xml`：CI 门禁与测试统计。
 - `report.json`：机器可读，供 MCP 与 Agent 二次分析。
 - `report.md`：给开发/策划快速阅读。
-- `html/`：人工排查视图（步骤 + 证据链接）。
+- `flow_report.json`：流程步骤与 driver step 视图。
+- `logs/driver_flow.json`：driver 执行序列与每步响应。
 
 ## 3.3 报告最小字段
 
 ```json
 {
+  "run_id": "string",
   "runId": "string",
   "scenario": "string",
-  "profile": "smoke|strict_ui|regression",
   "status": "passed|failed",
+  "result_status": "passed|failed",
+  "summary_v2": {
+    "total_assertions": 0,
+    "passed": 0,
+    "failed": 0
+  },
   "summary": {
-    "totalSteps": 0,
-    "checksPassed": 0,
-    "checksFailed": 0
+    "totalAssertions": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "primary_failure": {
+    "step": "string",
+    "category": "string",
+    "expected": "string",
+    "actual": "string",
+    "artifacts": ["string"]
   },
   "failures": [
     {

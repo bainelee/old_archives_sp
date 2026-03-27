@@ -100,20 +100,24 @@ steps:
 
 ---
 
-## 4. MCP 契约（Todo: design-mcp-contract）
+## 4. MCP 契约（已落地到当前代码）
 
-在 v1 工具基础上扩展，保留兼容：
+在 v1 工具基础上已扩展，保持兼容：
 
 - `list_test_scenarios`
 - `run_game_test`
 - `get_test_artifacts`
 - `get_test_report`
 
-新增：
+新增（已实现）：
+- `run_game_flow`：执行 flow 文件（json/yaml）并返回闭环状态。
+- `check_test_runner_environment`：运行前环境预检（CI 可直接调用）。
 - `get_test_run_status`：轮询运行状态与当前 step。
-- `cancel_test_run`：取消长任务。
-- `approve_fix_plan`：用户审批修复计划后继续执行。
+- `cancel_test_run`：取消等待审批/闭环任务。
 - `resume_fix_loop`：从审批点恢复自动闭环。
+
+说明：
+- `approve_fix_plan` 不再单独保留；通过 `resume_fix_loop` 完成“人工确认后续跑”。
 
 ## 4.1 `run_game_test` v2 请求草案
 
@@ -145,14 +149,14 @@ steps:
 }
 ```
 
-## 4.2 统一响应骨架
+## 4.2 统一响应骨架（当前）
 
 ```json
 {
   "ok": true,
   "run_id": "2026-03-27_ui_room_detail_sync_acceptance_001",
   "status": "running",
-  "current_step_id": "open_room_detail",
+  "current_step": "waiting_approval",
   "fix_loop_round": 1,
   "approval_required": false
 }
@@ -172,33 +176,35 @@ steps:
 
 ---
 
-## 5. 运行状态机与修复闭环
+## 5. 运行状态机与修复闭环（当前）
 
 ```mermaid
 stateDiagram-v2
-  [*] --> queued
-  queued --> running
-  running --> validating
-  validating --> passed
-  validating --> failed
-  failed --> analyzing
-  analyzing --> planReady
-  planReady --> waitingApproval
-  waitingApproval --> fixing: approved
-  waitingApproval --> failedFinal: rejected
-  fixing --> rerun
-  rerun --> running
-  failed --> failedFinal: maxRoundsReached
-  failedFinal --> [*]
-  passed --> [*]
+  [*] --> running
+  running --> resolved
+  running --> analyzing: failed
+  analyzing --> waiting_approval
+  waiting_approval --> rerun: resume_fix_loop
+  rerun --> resolved
+  rerun --> exhausted
+  waiting_approval --> cancelled: cancel_test_run
+  resolved --> [*]
+  exhausted --> [*]
+  cancelled --> [*]
 ```
 
 状态定义：
-- `queued/running/validating`：执行主流程。
-- `failed/analyzing/planReady`：失败归因与修复方案阶段。
-- `waitingApproval`：等待用户确认。
-- `fixing/rerun`：修复并复验。
-- `failedFinal/passed`：终态。
+- `running`：主流程执行中。
+- `analyzing`：已失败，收集首个失败原因并生成修复轮次上下文。
+- `waiting_approval`：等待人工确认是否继续闭环。
+- `rerun`：闭环重跑中。
+- `resolved/exhausted/cancelled`：终态。
+
+当前策略：
+- `fix_loop.rounds[*]` 输出统一摘要：
+  - `round/run_id/status/reason/primary_failure(step/category/expected/actual/artifacts)`
+- 连续两轮同类失败且 `actual` 无改善则自动停止：
+  - `stop_reason = same_failure_without_improvement_for_2_rounds`
 
 ---
 
@@ -265,4 +271,6 @@ stateDiagram-v2
 
 - 兼容现有 `run_game_test` 入口，新增字段采用可选参数。
 - 若调用方未传 `boundedAutoFixMaxRounds`，默认 `0`（关闭自动修复循环）。
-- v1 报告字段不删，仅在 `report.json` 增补 `fix_loop` 与 `runtime_heal` 区块。
+- 兼容旧参数：`bounded_auto_fix_max_rounds`（映射到 `bounded_auto_fix`）。
+- v1 报告字段不删，`report.json` 已增加 v2 字段：
+  - `run_id/result_status/environment_v2/summary_v2/artifact_index/primary_failure`

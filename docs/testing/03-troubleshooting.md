@@ -1,5 +1,12 @@
 # 常见问题排查（v1）
 
+## 0. 看不懂时先做这一步（最快）
+- 先跑：
+  - `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -OnlyPreflight`
+- 结果判断：
+  - `status=passed`：环境可跑，问题多半在业务 flow 或断言
+  - `status=failed_preflight`：先修环境（通常是 `GODOT_BIN` 或项目路径）
+
 ## 1. `missing cli.py`
 - 现象：插件显示 `Status: fail - missing cli.py`
 - 原因：`res://tools/game-test-runner/core/cli.py` 不存在或路径错误

@@ -70,8 +70,17 @@
   - `failures[]`（含 `step_id`、`category`、`expected`、`actual`、`artifacts[]`）
 
 ### 4.5 当前 MCP 实现状态
-- 已实现：`list_test_scenarios`、`run_game_test`、`get_test_artifacts`、`get_test_report`
-- 说明：当前实现可通过 `run_id` 查询产物列表与报告内容（json/md）。
+- 已实现：
+  - `list_test_scenarios`
+  - `run_game_test`
+  - `run_game_flow`
+  - `check_test_runner_environment`
+  - `get_test_run_status`
+  - `cancel_test_run`
+  - `resume_fix_loop`
+  - `get_test_artifacts`
+  - `get_test_report`
+- 说明：当前实现可通过 `run_id` 查询状态、产物列表与报告内容（json/md）。
 
 ### 4.6 错误返回与路径规范（当前）
 - 错误返回统一结构：
@@ -82,6 +91,7 @@
   - `UNKNOWN_SCENARIO`
   - `UNKNOWN_SYSTEM`
   - `UNSUPPORTED_TOOL`
+  - `MISSING_GODOT_BIN`
   - `INTERNAL_ERROR`
 - 路径规范：
   - MCP 返回路径统一使用 `/` 分隔符，避免平台差异导致解析问题。
@@ -117,9 +127,31 @@
 ## 6. `report.json` 输出 schema（草案）
 ```json
 {
+  "run_id": "2026-03-27T12-00-00Z_exploration_smoke",
   "runId": "2026-03-27T12-00-00Z_exploration_smoke",
+  "result_status": "failed",
   "status": "failed",
   "scenario": "exploration_smoke",
+  "environment_v2": {
+    "mode": "vm",
+    "godot_version": "4.6"
+  },
+  "summary_v2": {
+    "total_assertions": 12,
+    "passed": 10,
+    "failed": 2
+  },
+  "primary_failure": {
+    "step": "step_open_exploration",
+    "step_id": "step_open_exploration",
+    "category": "visual_regression",
+    "expected": "探索按钮可见",
+    "actual": "按钮被遮挡",
+    "artifacts": [
+      "screenshots/step_open_exploration_fail.png",
+      "logs/godot.log"
+    ]
+  },
   "environment": {
     "mode": "vm",
     "godotVersion": "4.6"
@@ -143,6 +175,12 @@
   ]
 }
 ```
+
+## 6.1 闭环状态扩展（v2）
+- 统一状态字段：`run_id/status/current_step/fix_loop_round/approval_required`
+- 闭环轮次：`fix_loop.rounds[*]` 固定输出
+  - `round/run_id/status/reason/primary_failure`
+- 停止策略：连续两轮同类失败且 `actual` 无改善，置 `status=exhausted` 并写入 `stop_reason`。
 
 ## 7. 失败分类枚举（v1）
 - `visual_regression`

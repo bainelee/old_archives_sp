@@ -151,6 +151,24 @@ def execute_flow_file(
     }
     flow_report_path = run_root / "flow_report.json"
     flow_report_path.write_text(json.dumps(flow_report, ensure_ascii=False, indent=2), encoding="utf-8")
+    failure_summary_path = run_root / "failure_summary.json"
+    if failure_summary_path.exists():
+        try:
+            failure_summary = json.loads(failure_summary_path.read_text(encoding="utf-8"))
+            if isinstance(failure_summary, dict):
+                key_files = failure_summary.get("key_files", [])
+                if not isinstance(key_files, list):
+                    key_files = []
+                flow_rel = "flow_report.json"
+                if flow_rel not in key_files:
+                    key_files.append(flow_rel)
+                failure_summary["key_files"] = key_files
+                failure_summary_path.write_text(
+                    json.dumps(failure_summary, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+        except json.JSONDecodeError:
+            pass
     payload = {
         "flow_id": flow_report["flow_id"],
         "status": flow_report["status"],

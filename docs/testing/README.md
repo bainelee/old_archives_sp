@@ -2,13 +2,28 @@
 
 这是一份给团队成员的 5 分钟上手说明。
 
+## 0) 先选执行模式（推荐）
+
+| 你要做什么 | 用哪个模式 | 命令 |
+|---|---|---|
+| 只确认环境是否可跑（最快） | `OnlyPreflight` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -OnlyPreflight` |
+| 做快速门禁（环境 + 契约） | `Fast` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
+| 做完整验收（环境 + 2 条 acceptance） | 默认模式 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"` |
+| 做完整验收 + 契约回归 | 默认 + 契约 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -IncludeContractRegression` |
+
 ## 1) 启用插件
 - 打开项目后进入 `Project > Project Settings > Plugins`
 - 启用 `Test Orchestrator`
 
-## 2) 配置运行路径
-- 在插件面板 `Godot Bin` 填你的 Godot 可执行文件路径
+## 2) 配置运行路径（推荐环境变量）
+- 推荐设置环境变量 `GODOT_BIN` 指向 Godot 可执行文件
+- 插件面板 `Godot Bin` 仍可手动覆盖
 - 建议关闭 `Dry Run` 进行真实验证
+
+示例（PowerShell）：
+```powershell
+setx GODOT_BIN "D:\GODOT\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64.exe"
+```
 
 ## 3) 常用按钮
 - `Run Exploration Smoke`：探索系统冒烟
@@ -27,6 +42,7 @@
 ## 5) 产物目录
 - 单次 run：`artifacts/test-runs/<run_id>/`
 - 套件汇总：`artifacts/test-suites/<suite_id>/`
+- CI 汇总：`artifacts/test-runs/acceptance_ci_<timestamp>.json`
 
 ## 6) 预期说明
 - `visual_regression_probe` 当前是“故意带错位”的 canary 用例  
@@ -36,3 +52,37 @@
 ## 7) 交接与继续开发
 - 当前状态文档：`docs/testing/04-handoff-current-state.md`
 - 下一对话提示词：`docs/testing/NEXT_CHAT_PROMPT.md`
+
+## 8) 一键 CI（preflight + acceptance）
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" `
+  -ProjectRoot "D:/GODOT_Test/old-archives-sp"
+```
+
+说明：
+- 脚本会先执行 `check_test_runner_environment`
+- 然后串行执行：
+  - `flows/ui_room_detail_sync_acceptance.json`
+  - `flows/build_clean_wait_linked_acceptance.json`
+- 输出汇总 JSON，包含 `run_id`、关键产物路径、`effective_exit_code/process_exit_code`
+
+可选：附加闭环契约回归
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" `
+  -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
+  -IncludeContractRegression
+```
+
+可选：快速门禁（仅 preflight + contract regression）
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" `
+  -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
+  -Fast
+```
+
+可选：仅环境预检（最快）
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" `
+  -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
+  -OnlyPreflight
+```

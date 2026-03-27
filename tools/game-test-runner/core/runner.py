@@ -24,7 +24,7 @@ def _utc_now_iso() -> str:
 
 
 def _run_id(scenario: str) -> str:
-    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     safe = scenario.replace(" ", "_")
     return f"{ts}_{safe}"
 
@@ -104,14 +104,40 @@ class RunResult:
             if isinstance(primary_artifacts, list):
                 merged = list(dict.fromkeys(primary_artifacts + default_artifacts))
                 failure_payload["artifacts"] = merged
+        result_status = "passed" if self.status == "finished" else "failed"
+        process_exit_code = self.exit_code
+        effective_exit_code = 0 if result_status == "passed" else self.exit_code
+        failures = [] if self.status == "finished" else [failure_payload]
+        primary_failure = failure_payload if failures else {}
+        artifact_index = artifact_index or {}
         return {
-            "runId": self.run_id,
-            "status": "passed" if self.status == "finished" else "failed",
+            # v2 canonical fields
+            "run_id": self.run_id,
+            "result_status": result_status,
+            "process_exit_code": process_exit_code,
+            "effective_exit_code": effective_exit_code,
             "scenario": request.normalized_scenario(),
+            "environment_v2": {"mode": request.mode, "godot_version": "unknown"},
+            "summary_v2": {"total_assertions": total_assertions, "passed": passed_assertions, "failed": failed_assertions},
+            "artifact_index": artifact_index,
+            "primary_failure": {
+                "step": str(primary_failure.get("stepId", "")),
+                "step_id": str(primary_failure.get("stepId", "")),
+                "category": str(primary_failure.get("category", "")),
+                "expected": str(primary_failure.get("expected", "")),
+                "actual": str(primary_failure.get("actual", "")),
+                "artifacts": list(primary_failure.get("artifacts", []))
+                if isinstance(primary_failure.get("artifacts", []), list)
+                else [],
+            },
+            "failures": failures,
+            # backward compatibility fields
+            "runId": self.run_id,
+            "status": result_status,
+            "exitCode": effective_exit_code,
             "environment": {"mode": request.mode, "godotVersion": "unknown"},
             "summary": {"totalAssertions": total_assertions, "passed": passed_assertions, "failed": failed_assertions},
-            "artifactIndex": artifact_index or {},
-            "failures": ([] if self.status == "finished" else [failure_payload]),
+            "artifactIndex": artifact_index,
         }
 
     @staticmethod
@@ -420,6 +446,72 @@ class GameTestRunner:
         )
         (run_root / "junit.xml").write_text(xml, encoding="utf-8")
 
+    def _write_report_md(self, run_root: Path, req: RunRequest, result: RunResult, report_payload: dict) -> None:
+        effective_exit_code = report_payload.get("effective_exit_code", 0 if result.status == "finished" else result.exit_code)
+        process_exit_code = report_payload.get("process_exit_code", result.exit_code)
+        lines = [
+            "# Test Report",
+            "",
+            f"- run_id: `{result.run_id}`",
+            f"- status: `{'passed' if result.status == 'finished' else 'failed'}`",
+            f"- mode: `{req.mode}`",
+            f"- effective_exit_code: `{effective_exit_code}`",
+            f"- process_exit_code: `{process_exit_code}`",
+            f"- error: `{result.error or ''}`",
+        ]
+        failures = report_payload.get("failures", [])
+        f0 = failures[0] if failures else {}
+        lines.extend(
+            [
+                "",
+                "## Primary Failure",
+                f"- step_id: `{str(f0.get('stepId', 'n/a'))}`",
+                f"- category: `{str(f0.get('category', 'n/a'))}`",
+                f"- expected: `{str(f0.get('expected', 'n/a'))}`",
+                f"- actual: `{str(f0.get('actual', 'n/a'))}`",
+            ]
+        )
+        artifacts = f0.get("artifacts", []) if isinstance(f0, dict) else []
+        if isinstance(artifacts, list) and artifacts:
+            lines.append("- artifacts:")
+            for item in artifacts[:10]:
+                lines.append(f"  - `{str(item)}`")
+        (run_root / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    def _write_failure_summary(self, run_root: Path, report_payload: dict) -> None:
+        primary_failure = report_payload.get("primary_failure", {})
+        if not isinstance(primary_failure, dict):
+            primary_failure = {}
+        key_files = [
+            name
+            for name in (
+                "report.json",
+                "report.md",
+                "junit.xml",
+                "flow_report.json",
+                "logs/driver_flow.json",
+            )
+            if (run_root / name).exists()
+        ]
+        summary_payload = {
+            "run_id": str(report_payload.get("run_id", report_payload.get("runId", ""))),
+            "status": str(report_payload.get("status", "")),
+            "result_status": str(report_payload.get("result_status", "")),
+            "effective_exit_code": report_payload.get("effective_exit_code"),
+            "process_exit_code": report_payload.get("process_exit_code"),
+            "primary_failure": {
+                "step": str(primary_failure.get("step", primary_failure.get("step_id", ""))),
+                "category": str(primary_failure.get("category", "")),
+                "expected": str(primary_failure.get("expected", "")),
+                "actual": str(primary_failure.get("actual", "")),
+                "artifacts": list(primary_failure.get("artifacts", []))
+                if isinstance(primary_failure.get("artifacts", []), list)
+                else [],
+            },
+            "key_files": key_files,
+        }
+        self._write_json(run_root / "failure_summary.json", summary_payload)
+
     def _reload_project(self, req: RunRequest, run_root: Path) -> Optional[str]:
         reload_cmd = [
             req.godot_bin,
@@ -509,12 +601,11 @@ class GameTestRunner:
             artifact_index = self._collect_artifact_index(
                 run_root, effective_screenshot_prefix, user_data_dir=effective_user_data_dir
             )
-            self._write_json(run_root / "report.json", result.to_report(req, artifact_index))
+            report_payload = result.to_report(req, artifact_index)
+            self._write_json(run_root / "report.json", report_payload)
             self._write_junit_report(run_root, req, result)
-            (run_root / "report.md").write_text(
-                f"# Test Report\n\n- run_id: `{run_id}`\n- status: `passed`\n- mode: `{req.mode}`\n- dry_run: `true`\n",
-                encoding="utf-8",
-            )
+            self._write_report_md(run_root, req, result, report_payload)
+            self._write_failure_summary(run_root, report_payload)
             return result
 
         if req.reload_project_before_run:
@@ -536,8 +627,11 @@ class GameTestRunner:
                 artifact_index = self._collect_artifact_index(
                     run_root, effective_screenshot_prefix, user_data_dir=effective_user_data_dir
                 )
-                self._write_json(run_root / "report.json", failed.to_report(req, artifact_index))
+                report_payload = failed.to_report(req, artifact_index)
+                self._write_json(run_root / "report.json", report_payload)
                 self._write_junit_report(run_root, req, failed)
+                self._write_report_md(run_root, req, failed, report_payload)
+                self._write_failure_summary(run_root, report_payload)
                 return failed
 
         attempts = max(req.retry, 0) + 1
@@ -692,34 +786,8 @@ class GameTestRunner:
         report_payload = last_result.to_report(req, artifact_index)
         self._write_json(run_root / "report.json", report_payload)
         self._write_junit_report(run_root, req, last_result)
-        lines = [
-            "# Test Report",
-            "",
-            f"- run_id: `{last_result.run_id}`",
-            f"- status: `{'passed' if last_result.status == 'finished' else 'failed'}`",
-            f"- mode: `{req.mode}`",
-            f"- exit_code: `{last_result.exit_code}`",
-            f"- error: `{last_result.error or ''}`",
-        ]
-        failures = report_payload.get("failures", [])
-        if failures:
-            f0 = failures[0]
-            lines.extend(
-                [
-                    "",
-                    "## Primary Failure",
-                    f"- step_id: `{str(f0.get('stepId', ''))}`",
-                    f"- category: `{str(f0.get('category', ''))}`",
-                    f"- expected: `{str(f0.get('expected', ''))}`",
-                    f"- actual: `{str(f0.get('actual', ''))}`",
-                ]
-            )
-            artifacts = f0.get("artifacts", [])
-            if isinstance(artifacts, list) and artifacts:
-                lines.append("- artifacts:")
-                for item in artifacts[:10]:
-                    lines.append(f"  - `{str(item)}`")
-        (run_root / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        self._write_report_md(run_root, req, last_result, report_payload)
+        self._write_failure_summary(run_root, report_payload)
         return last_result
 
     def _execute_driver_flow(
