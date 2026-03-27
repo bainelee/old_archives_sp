@@ -1,0 +1,9 @@
+ERROR: [TestFault] build_confirm_abort_once triggered
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] on_confirm_pressed (res://scripts/game/game_main_construction.gd:234)
+       [1] _on_construction_confirm_pressed (res://scripts/game/game_main.gd:1268)
+       [2] _on_confirm_pressed (res://scripts/ui/construction_overlay.gd:114)
+       [3] _handle_click (res://scripts/test/test_driver.gd:109)
+       [4] _execute_command (res://scripts/test/test_driver.gd:59)
+       [5] _before_step (res://scripts/test/test_driver.gd:274)

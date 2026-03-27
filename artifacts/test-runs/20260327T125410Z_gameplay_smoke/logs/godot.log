@@ -1,0 +1,21 @@
+Godot Engine v4.6.1.stable.official.14d19694e - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 3060 Ti
+
+ERROR: [TestFault] build_confirm_assert_once triggered
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] on_confirm_pressed (res://scripts/game/game_main_construction.gd:234)
+       [1] _on_construction_confirm_pressed (res://scripts/game/game_main.gd:1268)
+       [2] _on_confirm_pressed (res://scripts/ui/construction_overlay.gd:114)
+       [3] _handle_click (res://scripts/test/test_driver.gd:109)
+       [4] _execute_command (res://scripts/test/test_driver.gd:59)
+       [5] _before_step (res://scripts/test/test_driver.gd:274)
+SCRIPT ERROR: Assertion failed: [TestFault] build_confirm_assert_once triggered
+   at: on_confirm_pressed (res://scripts/game/game_main_construction.gd:235)
+   GDScript backtrace (most recent call first):
+       [0] on_confirm_pressed (res://scripts/game/game_main_construction.gd:235)
+       [1] _on_construction_confirm_pressed (res://scripts/game/game_main.gd:1268)
+       [2] _on_confirm_pressed (res://scripts/ui/construction_overlay.gd:114)
+       [3] _handle_click (res://scripts/test/test_driver.gd:109)
+       [4] _execute_command (res://scripts/test/test_driver.gd:59)
+       [5] _before_step (res://scripts/test/test_driver.gd:274)

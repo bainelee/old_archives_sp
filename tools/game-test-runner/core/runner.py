@@ -51,6 +51,8 @@ class RunRequest:
     driver_no_activity_timeout_sec: int = 5
     test_driver_session: Optional[str] = None
     user_data_dir: Optional[Path] = None
+    reload_project_before_run: bool = False
+    reload_timeout_sec: int = 20
 
     def normalized_scenario(self) -> str:
         if self.scenario:
@@ -76,6 +78,32 @@ class RunResult:
         total_assertions = int(flow_assertions.get("total", 0))
         passed_assertions = int(flow_assertions.get("passed", 0))
         failed_assertions = int(flow_assertions.get("failed", 0))
+        details = dict(self.failure_details or {})
+        primary_failure = details.pop("primaryFailure", None)
+        default_artifacts = [
+            "logs/stdout.log",
+            "logs/stderr.log",
+            "run_meta.json",
+        ] + self._visual_artifact_refs(artifact_index)
+        failure_payload = {
+            "stepId": "step_process_exec",
+            "category": self.failure_category
+            if self.failure_category
+            else ("timeout" if self.status == "timeout" else "runtime_error"),
+            "expected": "process exit code == 0",
+            "actual": self.error or f"exit code {self.exit_code}",
+            "details": details,
+            "artifacts": default_artifacts,
+        }
+        if isinstance(primary_failure, dict):
+            failure_payload["stepId"] = str(primary_failure.get("stepId", failure_payload["stepId"]))
+            failure_payload["category"] = str(primary_failure.get("category", failure_payload["category"]))
+            failure_payload["expected"] = str(primary_failure.get("expected", failure_payload["expected"]))
+            failure_payload["actual"] = str(primary_failure.get("actual", failure_payload["actual"]))
+            primary_artifacts = primary_failure.get("artifacts", [])
+            if isinstance(primary_artifacts, list):
+                merged = list(dict.fromkeys(primary_artifacts + default_artifacts))
+                failure_payload["artifacts"] = merged
         return {
             "runId": self.run_id,
             "status": "passed" if self.status == "finished" else "failed",
@@ -83,26 +111,7 @@ class RunResult:
             "environment": {"mode": request.mode, "godotVersion": "unknown"},
             "summary": {"totalAssertions": total_assertions, "passed": passed_assertions, "failed": failed_assertions},
             "artifactIndex": artifact_index or {},
-            "failures": (
-                []
-                if self.status == "finished"
-                else [
-                    {
-                        "stepId": "step_process_exec",
-                        "category": self.failure_category
-                        if self.failure_category
-                        else ("timeout" if self.status == "timeout" else "runtime_error"),
-                        "expected": "process exit code == 0",
-                        "actual": self.error or f"exit code {self.exit_code}",
-                        "details": self.failure_details or {},
-                        "artifacts": [
-                            "logs/stdout.log",
-                            "logs/stderr.log",
-                            "run_meta.json",
-                        ] + self._visual_artifact_refs(artifact_index),
-                    }
-                ]
-            ),
+            "failures": ([] if self.status == "finished" else [failure_payload]),
         }
 
     @staticmethod
@@ -313,6 +322,66 @@ class GameTestRunner:
                 break
         return findings
 
+    def _build_primary_failure(self, flow_failure: Optional[dict], fallback_error: str) -> Optional[dict]:
+        if not isinstance(flow_failure, dict):
+            return None
+        step_id = str(flow_failure.get("stepId", "step_process_exec"))
+        action = str(flow_failure.get("action", ""))
+        code = str(flow_failure.get("errorCode", ""))
+        message = str(flow_failure.get("errorMessage", "")).strip() or fallback_error
+        check_kind = str(flow_failure.get("checkKind", ""))
+        category = "driver_step_failed"
+        expected = "driver step should return status ok"
+        if action == "wait" and code == "TIMEOUT":
+            category = "wait_timeout"
+            expected = "wait condition should be satisfied within timeout"
+        elif action == "click":
+            expected = "target should be clickable and accepted by gameplay logic"
+            if code == "TARGET_NOT_FOUND":
+                category = "click_target_missing"
+                expected = "target should exist in scene tree for this step"
+            elif code == "TARGET_NOT_VISIBLE":
+                category = "click_target_not_visible"
+                expected = "target should be visible in tree when click executes"
+            elif code == "TARGET_DISABLED":
+                category = "click_target_disabled"
+                expected = "target should be enabled before click"
+            elif code == "ROOM_SELECTION_FAILED":
+                category = "room_selection_not_confirmed"
+                expected = "room click should enter cleanup/build confirm state"
+            elif code == "UNSUPPORTED_TARGET":
+                category = "click_unsupported_target"
+                expected = "target type should support click injection"
+            else:
+                category = "click_injection_failed"
+        elif action == "check":
+            expected = "check expectation should match current game state"
+            if code == "CHECK_FAILED":
+                if check_kind == "logic_state" or "logic_state" in message:
+                    category = "logic_state_mismatch"
+                    expected = "logic state should converge to expected key/value"
+                elif check_kind == "visual_hard" or "expected node visible" in message or "expected button disabled" in message:
+                    category = "visual_hard_mismatch"
+                    expected = "visual hard rule should match current UI state"
+                else:
+                    category = "assertion_failed"
+            else:
+                category = "assertion_failed"
+        elif action == "setFault":
+            category = "fault_injection_failed"
+            expected = "fault marker should be configured before probe step"
+        return {
+            "stepId": step_id,
+            "category": category,
+            "expected": expected,
+            "actual": f"{action} failed: {code} {message}".strip(),
+            "artifacts": [
+                "logs/driver_flow.json",
+                "logs/godot.log",
+                "logs/stderr.log",
+            ],
+        }
+
     def _reset_driver_ipc(self, user_data_dir: Optional[Path], session: str) -> None:
         if not session:
             return
@@ -350,6 +419,49 @@ class GameTestRunner:
             f"{failure_xml}<system-out>{system_out}</system-out></testcase></testsuite>"
         )
         (run_root / "junit.xml").write_text(xml, encoding="utf-8")
+
+    def _reload_project(self, req: RunRequest, run_root: Path) -> Optional[str]:
+        reload_cmd = [
+            req.godot_bin,
+            "--path",
+            str(req.project_root),
+            "--headless",
+            "--quit",
+        ]
+        reload_stdout_path = run_root / "logs" / "reload_stdout.log"
+        reload_stderr_path = run_root / "logs" / "reload_stderr.log"
+        try:
+            completed = subprocess.run(
+                reload_cmd,
+                cwd=str(req.project_root),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=max(3, int(req.reload_timeout_sec)),
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            reload_stdout_path.write_text("", encoding="utf-8")
+            reload_stderr_path.write_text(
+                f"project reload timed out after {max(3, int(req.reload_timeout_sec))}s",
+                encoding="utf-8",
+            )
+            return "project reload timeout"
+        except FileNotFoundError as exc:
+            reload_stdout_path.write_text("", encoding="utf-8")
+            reload_stderr_path.write_text(str(exc), encoding="utf-8")
+            return f"project reload executable not found: {exc}"
+        except OSError as exc:
+            reload_stdout_path.write_text("", encoding="utf-8")
+            reload_stderr_path.write_text(str(exc), encoding="utf-8")
+            return f"project reload os error: {exc}"
+
+        reload_stdout_path.write_text(completed.stdout or "", encoding="utf-8")
+        reload_stderr_path.write_text(completed.stderr or "", encoding="utf-8")
+        if completed.returncode != 0:
+            return f"project reload failed with exit code {completed.returncode}"
+        return None
 
     def run(self, req: RunRequest) -> RunResult:
         scenario = req.normalized_scenario()
@@ -405,6 +517,29 @@ class GameTestRunner:
             )
             return result
 
+        if req.reload_project_before_run:
+            reload_error = self._reload_project(req, run_root)
+            if reload_error:
+                failed = RunResult(
+                    run_id=run_id,
+                    status="failed",
+                    exit_code=None,
+                    started_at=started_at,
+                    finished_at=_utc_now_iso(),
+                    artifact_root=str(run_root),
+                    command=cmd,
+                    error=reload_error,
+                    failure_category="runtime_error",
+                    failure_details={},
+                )
+                self._write_final_meta(run_root, meta, failed)
+                artifact_index = self._collect_artifact_index(
+                    run_root, effective_screenshot_prefix, user_data_dir=effective_user_data_dir
+                )
+                self._write_json(run_root / "report.json", failed.to_report(req, artifact_index))
+                self._write_junit_report(run_root, req, failed)
+                return failed
+
         attempts = max(req.retry, 0) + 1
         last_result: Optional[RunResult] = None
         for attempt in range(1, attempts + 1):
@@ -425,8 +560,9 @@ class GameTestRunner:
 
                     flow_assertions: dict = {"total": 0, "passed": 0, "failed": 0}
                     flow_error: Optional[str] = None
+                    flow_failure: Optional[dict] = None
                     if req.enable_test_driver and req.flow_steps:
-                        flow_assertions, flow_error = self._execute_driver_flow(
+                        flow_assertions, flow_error, flow_failure = self._execute_driver_flow(
                             req=req,
                             run_root=run_root,
                             expected_pid=proc.pid,
@@ -487,10 +623,15 @@ class GameTestRunner:
                 runtime_errors = self._extract_runtime_errors(stdout_text or "", stderr_text or "")
                 if runtime_errors:
                     details["runtimeErrors"] = runtime_errors
+                primary_failure = self._build_primary_failure(flow_failure, err or "")
+                if primary_failure:
+                    details["primaryFailure"] = primary_failure
                 if category == "visual_regression":
                     details = self._extract_visual_details(stderr_text or "")
                     if runtime_errors:
                         details["runtimeErrors"] = runtime_errors
+                    if primary_failure:
+                        details["primaryFailure"] = primary_failure
                     if details:
                         err = (
                             f"visual baseline mismatch diff={details['diff']:.6f} "
@@ -548,23 +689,37 @@ class GameTestRunner:
         artifact_index = self._collect_artifact_index(
             run_root, effective_screenshot_prefix, user_data_dir=effective_user_data_dir
         )
-        self._write_json(run_root / "report.json", last_result.to_report(req, artifact_index))
+        report_payload = last_result.to_report(req, artifact_index)
+        self._write_json(run_root / "report.json", report_payload)
         self._write_junit_report(run_root, req, last_result)
-        (run_root / "report.md").write_text(
-            "\n".join(
+        lines = [
+            "# Test Report",
+            "",
+            f"- run_id: `{last_result.run_id}`",
+            f"- status: `{'passed' if last_result.status == 'finished' else 'failed'}`",
+            f"- mode: `{req.mode}`",
+            f"- exit_code: `{last_result.exit_code}`",
+            f"- error: `{last_result.error or ''}`",
+        ]
+        failures = report_payload.get("failures", [])
+        if failures:
+            f0 = failures[0]
+            lines.extend(
                 [
-                    "# Test Report",
                     "",
-                    f"- run_id: `{last_result.run_id}`",
-                    f"- status: `{'passed' if last_result.status == 'finished' else 'failed'}`",
-                    f"- mode: `{req.mode}`",
-                    f"- exit_code: `{last_result.exit_code}`",
-                    f"- error: `{last_result.error or ''}`",
+                    "## Primary Failure",
+                    f"- step_id: `{str(f0.get('stepId', ''))}`",
+                    f"- category: `{str(f0.get('category', ''))}`",
+                    f"- expected: `{str(f0.get('expected', ''))}`",
+                    f"- actual: `{str(f0.get('actual', ''))}`",
                 ]
             )
-            + "\n",
-            encoding="utf-8",
-        )
+            artifacts = f0.get("artifacts", [])
+            if isinstance(artifacts, list) and artifacts:
+                lines.append("- artifacts:")
+                for item in artifacts[:10]:
+                    lines.append(f"  - `{str(item)}`")
+        (run_root / "report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
         return last_result
 
     def _execute_driver_flow(
@@ -575,12 +730,12 @@ class GameTestRunner:
         proc: Optional[subprocess.Popen] = None,
         user_data_dir: Optional[Path] = None,
         session: str = "",
-    ) -> tuple[dict, Optional[str]]:
+    ) -> tuple[dict, Optional[str], Optional[dict]]:
         if not session:
-            return {"total": 0, "passed": 0, "failed": 0}, "test driver session is required"
+            return {"total": 0, "passed": 0, "failed": 0}, "test driver session is required", None
         candidate_dirs = self._candidate_user_data_dirs(user_data_dir)
         if not candidate_dirs:
-            return {"total": 0, "passed": 0, "failed": 0}, "test driver requires APPDATA user dir"
+            return {"total": 0, "passed": 0, "failed": 0}, "test driver requires APPDATA user dir", None
         session_safe = re.sub(r"[^A-Za-z0-9._-]+", "_", session)
         driver_dirs: list[Path] = []
         for root in candidate_dirs:
@@ -596,6 +751,7 @@ class GameTestRunner:
                 return (
                     {"total": 0, "passed": 0, "failed": 0},
                     f"test driver process exited before ready (exit={proc.returncode})",
+                    None,
                 )
             if (
                 req.driver_no_activity_timeout_sec > 0
@@ -610,6 +766,7 @@ class GameTestRunner:
                         "test driver no activity timeout after "
                         f"{int(req.driver_no_activity_timeout_sec)}s"
                     ),
+                    None,
                 )
             for d in driver_dirs:
                 resp_file = d / "response.json"
@@ -626,12 +783,13 @@ class GameTestRunner:
                 break
             time.sleep(0.05)
         else:
-            return {"total": 0, "passed": 0, "failed": 0}, "test driver did not become ready in time"
+            return {"total": 0, "passed": 0, "failed": 0}, "test driver did not become ready in time", None
         assert active_client is not None
 
         step_results: list[dict] = []
         passed = 0
         for step in req.flow_steps:
+            step_id = str(step.get("id", ""))
             action = str(step.get("action", ""))
             params = dict(step.get("params", {}))
             timeout = float(step.get("timeoutSec", req.flow_step_timeout_sec))
@@ -643,6 +801,7 @@ class GameTestRunner:
                     passed += 1
                 step_results.append(
                     {
+                        "step_id": step_id,
                         "action": action,
                         "status": "passed" if ok else "failed",
                         "response": resp,
@@ -650,29 +809,49 @@ class GameTestRunner:
                     }
                 )
                 if not ok:
+                    err_obj = resp.get("error", {}) if isinstance(resp.get("error", {}), dict) else {}
+                    flow_failure = {
+                        "stepId": step_id or "driver_step",
+                        "action": action,
+                        "errorCode": str(err_obj.get("code", "")),
+                        "errorMessage": str(err_obj.get("message", "")),
+                        "checkKind": str(params.get("kind", "")) if action == "check" else "",
+                    }
                     (run_root / "logs" / "driver_flow.json").write_text(
                         json.dumps({"steps": step_results}, ensure_ascii=False, indent=2), encoding="utf-8"
                     )
-                    return {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed}, (
-                        "driver step failed: %s" % action
+                    return (
+                        {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed},
+                        "driver step failed: %s" % action,
+                        flow_failure,
                     )
             except Exception as exc:  # pylint: disable=broad-except
                 step_results.append(
                     {
+                        "step_id": step_id,
                         "action": action,
                         "status": "failed",
                         "error": str(exc),
                         "duration_ms": int((time.time() - started) * 1000),
                     }
                 )
+                flow_failure = {
+                    "stepId": step_id or "driver_step",
+                    "action": action,
+                    "errorCode": "EXCEPTION",
+                    "errorMessage": str(exc),
+                    "checkKind": str(params.get("kind", "")) if action == "check" else "",
+                }
                 (run_root / "logs" / "driver_flow.json").write_text(
                     json.dumps({"steps": step_results}, ensure_ascii=False, indent=2), encoding="utf-8"
                 )
-                return {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed}, (
-                    "driver flow exception: %s" % exc
+                return (
+                    {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed},
+                    "driver flow exception: %s" % exc,
+                    flow_failure,
                 )
 
         (run_root / "logs" / "driver_flow.json").write_text(
             json.dumps({"steps": step_results}, ensure_ascii=False, indent=2), encoding="utf-8"
         )
-        return {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed}, None
+        return {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed}, None, None

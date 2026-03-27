@@ -1,0 +1,73 @@
+{
+  "steps": [
+    {
+      "step_id": "sleep_boot",
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 1644,
+        "seq": 1,
+        "status": "ok"
+      },
+      "duration_ms": 1674
+    },
+    {
+      "step_id": "click_new_game",
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/StartMenu/Center/VBox/BtnNewGame"
+        },
+        "elapsed_ms": 997,
+        "seq": 2,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "step_id": "click_slot0",
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": ""
+        },
+        "elapsed_ms": 1766,
+        "seq": 3,
+        "status": "ok"
+      },
+      "duration_ms": 1826
+    },
+    {
+      "step_id": "wait_ingame",
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 884,
+        "seq": 4,
+        "status": "ok"
+      },
+      "duration_ms": 1168
+    },
+    {
+      "step_id": "check_logic_mismatch_probe",
+      "action": "check",
+      "status": "passed",
+      "response": {
+        "action": "check",
+        "data": {},
+        "elapsed_ms": 988,
+        "seq": 5,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    }
+  ]
+}

@@ -191,6 +191,8 @@ class GameTestMcpServer:
             driver_no_activity_timeout_sec=driver_no_activity_timeout_sec,
         )
         payload["exit_code"] = code
+        initial_report = _load_report(Path(payload["artifact_root"]))
+        payload["primary_failure"] = _primary_failure_summary(initial_report)
         payload["fix_loop"] = {
             "enabled": False,
             "max_rounds": 0,
@@ -220,7 +222,6 @@ class GameTestMcpServer:
             payload["fix_loop"] = fix_loop
             return payload
 
-        initial_report = _load_report(Path(payload["artifact_root"]))
         initial_reason = _first_failure_reason(initial_report)
         fix_loop["rounds"].append(
             {
@@ -228,6 +229,7 @@ class GameTestMcpServer:
                 "run_id": payload.get("run_id", ""),
                 "status": payload.get("status", "failed"),
                 "reason": initial_reason,
+                "primary_failure": _primary_failure_summary(initial_report),
             }
         )
 
@@ -258,12 +260,14 @@ class GameTestMcpServer:
             retry_payload["exit_code"] = retry_code
             retry_report = _load_report(Path(retry_payload["artifact_root"]))
             retry_reason = _first_failure_reason(retry_report)
+            retry_payload["primary_failure"] = _primary_failure_summary(retry_report)
             fix_rounds.append(
                 {
                     "round": round_idx,
                     "run_id": retry_payload.get("run_id", ""),
                     "status": retry_payload.get("status", "failed"),
                     "reason": retry_reason,
+                    "primary_failure": _primary_failure_summary(retry_report),
                 }
             )
             fix_loop["rounds_executed"] = round_idx
@@ -327,6 +331,22 @@ def _first_failure_reason(report_payload: dict[str, Any]) -> str:
     if reason and category:
         return f"{category}: {reason}"
     return reason or category
+
+
+def _primary_failure_summary(report_payload: dict[str, Any]) -> dict[str, Any]:
+    failures = report_payload.get("failures", [])
+    if not isinstance(failures, list) or not failures:
+        return {}
+    first = failures[0] if isinstance(failures[0], dict) else {}
+    return {
+        "step_id": str(first.get("stepId", "")),
+        "category": str(first.get("category", "")),
+        "expected": str(first.get("expected", "")),
+        "actual": str(first.get("actual", "")),
+        "artifacts": list(first.get("artifacts", []))
+        if isinstance(first.get("artifacts", []), list)
+        else [],
+    }
 
 
 def _to_posix(value: str | Path) -> str:

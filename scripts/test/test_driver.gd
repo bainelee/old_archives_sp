@@ -72,11 +72,13 @@ func _execute_command(cmd: Dictionary) -> Dictionary:
 		"exportUiSpec":
 			_handle_export_ui_spec(params, out)
 		"check":
-			_handle_check(params, out)
+			await _handle_check(params, out)
 		"saveGame":
 			_handle_save_game(params, out)
 		"setGameTimeSpeed":
 			_handle_set_game_time_speed(params, out)
+		"setFault":
+			_handle_set_fault(params, out)
 		_:
 			_fail(out, "UNSUPPORTED_ACTION", "unsupported action: %s" % action)
 
@@ -452,6 +454,29 @@ func _handle_set_game_time_speed(params: Dictionary, out: Dictionary) -> void:
 	if GameTime.get_tree():
 		GameTime.get_tree().paused = false
 	out["data"] = {"speed_multiplier": speed}
+
+
+func _handle_set_fault(params: Dictionary, out: Dictionary) -> void:
+	var gm: Node2D = _get_game_main()
+	if gm == null:
+		_fail(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+		return
+	var fault_name: String = str(params.get("name", "")).strip_edges()
+	if fault_name.is_empty():
+		_fail(out, "INVALID_ARGUMENT", "setFault requires name")
+		return
+	var enabled: bool = bool(params.get("enabled", true))
+	var faults: Dictionary = {}
+	if gm.has_meta("_test_faults"):
+		var v: Variant = gm.get_meta("_test_faults")
+		if v is Dictionary:
+			faults = (v as Dictionary).duplicate(true)
+	if enabled:
+		faults[fault_name] = true
+	else:
+		faults.erase(fault_name)
+	gm.set_meta("_test_faults", faults)
+	out["data"] = {"name": fault_name, "enabled": enabled}
 
 
 func _wait_until(until: Dictionary, timeout_ms: int) -> bool:

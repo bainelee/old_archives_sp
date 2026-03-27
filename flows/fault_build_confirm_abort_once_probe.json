@@ -1,0 +1,91 @@
+{
+  "flowId": "fault_build_confirm_assert_once_probe",
+  "name": "Fault assert probe after build confirm click",
+  "system": "gameplay",
+  "profile": "regression",
+  "mode": "local",
+  "scene": "res://scenes/ui/start_menu.tscn",
+  "flowStepTimeoutSec": 20,
+  "driverReadyTimeoutSec": 20,
+  "driverNoActivityTimeoutSec": 5,
+  "env": {
+    "BUILD_ROOM_ID": "room_01",
+    "BUILD_ROOM_TEST_ID": "room_node_room_01"
+  },
+  "steps": [
+    {
+      "id": "prepare_new_game",
+      "action": "runSubflow",
+      "file": "common/new_game_enter_world.json"
+    },
+    {
+      "id": "start_cleanup_mode",
+      "action": "click",
+      "target": { "testId": "btn_cleanup" }
+    },
+    {
+      "id": "select_cleanup_room",
+      "action": "click",
+      "target": { "testId": "${BUILD_ROOM_TEST_ID}" }
+    },
+    {
+      "id": "confirm_cleanup",
+      "action": "click",
+      "target": { "testId": "cleanup_confirm_button" }
+    },
+    {
+      "id": "wait_clean_done",
+      "action": "wait",
+      "until": {
+        "stateEquals": { "key": "room_clean_status", "value": "cleaned", "roomId": "${BUILD_ROOM_ID}" }
+      },
+      "timeoutMs": 60000
+    },
+    {
+      "id": "start_build_mode",
+      "action": "click",
+      "target": { "testId": "btn_build" }
+    },
+    {
+      "id": "wait_research_zone_visible",
+      "action": "wait",
+      "until": { "nodeVisible": { "testId": "construction_zone_1" } },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "select_build_zone",
+      "action": "click",
+      "target": { "testId": "construction_zone_1" }
+    },
+    {
+      "id": "select_build_room",
+      "action": "click",
+      "target": { "testId": "${BUILD_ROOM_TEST_ID}" }
+    },
+    {
+      "id": "wait_build_confirm_visible",
+      "action": "wait",
+      "until": { "nodeVisible": { "testId": "construction_confirm_button" } },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "inject_fault_build_confirm_assert_once",
+      "action": "setFault",
+      "name": "build_confirm_assert_once",
+      "enabled": true
+    },
+    {
+      "id": "confirm_build",
+      "action": "click",
+      "target": { "testId": "construction_confirm_button" }
+    },
+    {
+      "id": "wait_build_started_should_fail",
+      "action": "wait",
+      "until": {
+        "stateEquals": { "key": "build_status", "value": "building", "roomId": "${BUILD_ROOM_ID}" }
+      },
+      "timeoutMs": 5000
+    }
+  ]
+}

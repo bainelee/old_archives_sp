@@ -1,0 +1,62 @@
+{
+  "flow_id": "fault_check_logic_state_mismatch_probe",
+  "flow_file": "D:\\GODOT_Test\\old-archives-sp\\flows\\fault_check_logic_state_mismatch_probe.json",
+  "status": "failed",
+  "started_at": "2026-03-27T12:58:27.888263+00:00",
+  "finished_at": "2026-03-27T12:58:37.446792+00:00",
+  "run_id": "20260327T125827Z_gameplay_smoke",
+  "driver_steps": [
+    {
+      "id": "sleep_boot",
+      "action": "sleep",
+      "params": {
+        "ms": 800
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "click_new_game",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "btn_new_game"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "click_slot0",
+      "action": "click",
+      "params": {
+        "target": {
+          "testId": "save_slot_0"
+        }
+      },
+      "timeoutSec": 20
+    },
+    {
+      "id": "wait_ingame",
+      "action": "wait",
+      "params": {
+        "until": {
+          "scene": "game_main"
+        },
+        "timeoutMs": 20000
+      },
+      "timeoutSec": 22
+    },
+    {
+      "id": "check_logic_mismatch_probe",
+      "action": "check",
+      "params": {
+        "kind": "logic_state",
+        "roomId": "room_01",
+        "expect": {
+          "room_clean_status": "never_happens_state"
+        },
+        "timeoutMs": 1000
+      },
+      "timeoutSec": 20
+    }
+  ]
+}

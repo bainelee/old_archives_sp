@@ -1,0 +1,26 @@
+{
+  "flowId": "fault_check_logic_state_mismatch_probe",
+  "name": "Fault probe logic_state check mismatch",
+  "system": "gameplay",
+  "profile": "regression",
+  "mode": "local",
+  "scene": "res://scenes/ui/start_menu.tscn",
+  "flowStepTimeoutSec": 20,
+  "driverReadyTimeoutSec": 20,
+  "driverNoActivityTimeoutSec": 5,
+  "steps": [
+    {
+      "id": "prepare_new_game",
+      "action": "runSubflow",
+      "file": "common/new_game_enter_world.json"
+    },
+    {
+      "id": "check_logic_mismatch_probe",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "room_01",
+      "expect": { "room_clean_status": "never_happens_state" },
+      "timeoutMs": 1000
+    }
+  ]
+}

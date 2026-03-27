@@ -131,6 +131,8 @@ def execute_flow_file(
             if driver_no_activity_timeout_sec is not None
             else int(flow.get("driverNoActivityTimeoutSec", 5))
         ),
+        reload_project_before_run=bool(flow.get("reloadProjectBeforeRun", True)),
+        reload_timeout_sec=int(flow.get("reloadTimeoutSec", 20)),
     )
 
     started_at = _utc_now_iso()

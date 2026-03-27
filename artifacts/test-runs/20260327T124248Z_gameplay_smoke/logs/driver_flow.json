@@ -1,0 +1,223 @@
+{
+  "steps": [
+    {
+      "action": "sleep",
+      "status": "passed",
+      "response": {
+        "action": "sleep",
+        "data": {},
+        "elapsed_ms": 1800,
+        "seq": 1,
+        "status": "ok"
+      },
+      "duration_ms": 1828
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/StartMenu/Center/VBox/BtnNewGame"
+        },
+        "elapsed_ms": 990,
+        "seq": 2,
+        "status": "ok"
+      },
+      "duration_ms": 1013
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": ""
+        },
+        "elapsed_ms": 1773,
+        "seq": 3,
+        "status": "ok"
+      },
+      "duration_ms": 1826
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 884,
+        "seq": 4,
+        "status": "ok"
+      },
+      "duration_ms": 1167
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/UIMain/BottomRightBar/Margin/Content/BtnCleanup"
+        },
+        "elapsed_ms": 991,
+        "seq": 5,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ArchivesBase0/archives_rooms/base_rooms/room_01",
+          "strategy": "game_logic"
+        },
+        "elapsed_ms": 989,
+        "seq": 6,
+        "status": "ok"
+      },
+      "duration_ms": 1017
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/CleanupOverlay/ConfirmContainer/ConfirmButton"
+        },
+        "elapsed_ms": 991,
+        "seq": 7,
+        "status": "ok"
+      },
+      "duration_ms": 1017
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 4995,
+        "seq": 8,
+        "status": "ok"
+      },
+      "duration_ms": 5019
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/UIMain/BottomRightBar/Margin/Content/BtnBuild"
+        },
+        "elapsed_ms": 997,
+        "seq": 9,
+        "status": "ok"
+      },
+      "duration_ms": 1014
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 987,
+        "seq": 10,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ConstructionOverlay/ConstructionZoneButtons/@Button@163"
+        },
+        "elapsed_ms": 996,
+        "seq": 11,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ArchivesBase0/archives_rooms/base_rooms/room_01",
+          "strategy": "game_logic"
+        },
+        "elapsed_ms": 997,
+        "seq": 12,
+        "status": "ok"
+      },
+      "duration_ms": 1015
+    },
+    {
+      "action": "wait",
+      "status": "passed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 995,
+        "seq": 13,
+        "status": "ok"
+      },
+      "duration_ms": 1014
+    },
+    {
+      "action": "setFault",
+      "status": "passed",
+      "response": {
+        "action": "setFault",
+        "data": {
+          "enabled": true,
+          "name": "build_confirm_abort_once"
+        },
+        "elapsed_ms": 995,
+        "seq": 14,
+        "status": "ok"
+      },
+      "duration_ms": 1014
+    },
+    {
+      "action": "click",
+      "status": "passed",
+      "response": {
+        "action": "click",
+        "data": {
+          "node_path": "/root/GameMain/ConstructionOverlay/ConfirmContainer/ConfirmButton"
+        },
+        "elapsed_ms": 1082,
+        "seq": 15,
+        "status": "ok"
+      },
+      "duration_ms": 1116
+    },
+    {
+      "action": "wait",
+      "status": "failed",
+      "response": {
+        "action": "wait",
+        "data": {},
+        "elapsed_ms": 6028,
+        "error": {
+          "code": "TIMEOUT",
+          "message": "wait condition timeout"
+        },
+        "seq": 16,
+        "status": "error"
+      },
+      "duration_ms": 6083
+    }
+  ]
+}

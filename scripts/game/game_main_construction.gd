@@ -10,6 +10,20 @@ const CONSTRUCTION_SELECTING_TARGET := 2
 const CONSTRUCTION_CONFIRMING := 3
 
 
+static func _consume_test_fault(game_main: Node2D, fault_name: String) -> bool:
+	if not game_main.has_meta("_test_faults"):
+		return false
+	var raw: Variant = game_main.get_meta("_test_faults")
+	if not (raw is Dictionary):
+		return false
+	var faults: Dictionary = (raw as Dictionary).duplicate(true)
+	if not bool(faults.get(fault_name, false)):
+		return false
+	faults.erase(fault_name)
+	game_main.set_meta("_test_faults", faults)
+	return true
+
+
 static func on_build_button_pressed(game_main: Node2D) -> void:
 	var cleanup_mode: int = game_main.get("_cleanup_mode")
 	if cleanup_mode != 0:  # CleanupMode.NONE
@@ -215,6 +229,15 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 	var zone_type: int = construction_selected_zone
 	var resources: Dictionary = game_main.call("_get_player_resources")
 	if not can_afford_construction(room, zone_type, resources, game_main):
+		return
+	if _consume_test_fault(game_main, "build_confirm_assert_once"):
+		push_error("[TestFault] build_confirm_assert_once triggered")
+		assert(false, "[TestFault] build_confirm_assert_once triggered")
+		return
+	if _consume_test_fault(game_main, "build_confirm_abort_once"):
+		push_error("[TestFault] build_confirm_abort_once triggered")
+		game_main.set("_construction_confirm_room_index", -1)
+		exit_mode(game_main)
 		return
 	consume_construction_cost(game_main, room, zone_type)
 	var n_researchers: int = room.get_construction_researcher_count(zone_type)
