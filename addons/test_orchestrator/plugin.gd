@@ -4,10 +4,16 @@ extends EditorPlugin
 const CLI_PATH := "res://tools/game-test-runner/core/cli.py"
 const SUITE_PATH := "res://tools/game-test-runner/core/regression_suite.py"
 const FLOW_PATH := "res://tools/game-test-runner/core/flow_runner.py"
+const DEFAULT_GAMEPLAY_FLOW_FILE := "res://flows/build_clean_wait_linked_acceptance.json"
 const RUNS_DIR_REL := "res://artifacts/test-runs"
+const FlowTimelineUtils := preload("res://addons/test_orchestrator/flow_timeline_utils.gd")
+const PluginHistoryController := preload("res://addons/test_orchestrator/plugin_history_controller.gd")
+const PluginLiveFlowController := preload("res://addons/test_orchestrator/plugin_live_flow_controller.gd")
+const PluginUiBuilder := preload("res://addons/test_orchestrator/plugin_ui_builder.gd")
 const SETTINGS_GODOT_BIN := "test_orchestrator/godot_bin"
 const SETTINGS_DRY_RUN := "test_orchestrator/dry_run"
 const SETTINGS_LAST_SUITE_ROOT := "test_orchestrator/last_suite_root"
+const LIVE_FLOW_POLL_SEC := 0.8
 
 var _dock: VBoxContainer
 var _status_label: Label
@@ -20,6 +26,20 @@ var _history_entries: Array = []
 var _editor_settings: EditorSettings
 var _last_suite_root := ""
 var _suite_label: Label
+var _failure_summary_label: Label
+var _flow_steps_list: ItemList
+var _flow_step_detail_label: Label
+var _flow_step_evidence_label: Label
+var _flow_step_preview: TextureRect
+var _flow_step_preview_label: Label
+var _flow_step_entries: Array = []
+var _live_poll_timer: Timer
+var _live_flow_pid := -1
+var _live_flow_active := false
+var _live_flow_started_unix := 0.0
+var _live_flow_run_id := ""
+var _live_flow_run_abs := ""
+var _live_flow_expected_steps: Array = []
 
 
 func _enter_tree() -> void:
@@ -120,6 +140,7 @@ func _enter_tree() -> void:
 	_history_list = ItemList.new()
 	_history_list.custom_minimum_size = Vector2(0, 140)
 	_history_list.select_mode = ItemList.SELECT_SINGLE
+	_history_list.item_selected.connect(_on_history_item_selected)
 	_dock.add_child(_history_list)
 
 	var history_actions := HBoxContainer.new()
@@ -143,6 +164,16 @@ func _enter_tree() -> void:
 	open_flow_report_button.pressed.connect(_open_selected_flow_report_json)
 	history_actions.add_child(open_flow_report_button)
 
+	var open_failure_summary_button := Button.new()
+	open_failure_summary_button.text = "Open failure_summary.json"
+	open_failure_summary_button.pressed.connect(_open_selected_failure_summary_json)
+	history_actions.add_child(open_failure_summary_button)
+
+	var open_step_timeline_button := Button.new()
+	open_step_timeline_button.text = "Open step_timeline.json"
+	open_step_timeline_button.pressed.connect(_open_selected_step_timeline_json)
+	history_actions.add_child(open_step_timeline_button)
+
 	var open_diff_button := Button.new()
 	open_diff_button.text = "Open diff.png"
 	open_diff_button.pressed.connect(_open_selected_diff_png)
@@ -154,6 +185,48 @@ func _enter_tree() -> void:
 	history_actions.add_child(open_diff_annotated_button)
 	_dock.add_child(history_actions)
 
+	_failure_summary_label = Label.new()
+	_failure_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_failure_summary_label.text = "Latest failure: -"
+	_dock.add_child(_failure_summary_label)
+
+	var flow_steps_title := Label.new()
+	flow_steps_title.text = "Flow Steps (Timeline)"
+	_dock.add_child(flow_steps_title)
+
+	_flow_steps_list = ItemList.new()
+	_flow_steps_list.custom_minimum_size = Vector2(0, 150)
+	_flow_steps_list.select_mode = ItemList.SELECT_SINGLE
+	_flow_steps_list.item_selected.connect(_on_flow_step_selected)
+	_dock.add_child(_flow_steps_list)
+
+	var flow_steps_actions := HBoxContainer.new()
+	var open_step_evidence_button := Button.new()
+	open_step_evidence_button.text = "Open Step Evidence"
+	open_step_evidence_button.pressed.connect(_open_selected_step_evidence)
+	flow_steps_actions.add_child(open_step_evidence_button)
+	_dock.add_child(flow_steps_actions)
+
+	_flow_step_detail_label = Label.new()
+	_flow_step_detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_flow_step_detail_label.text = "Step detail: -"
+	_dock.add_child(_flow_step_detail_label)
+
+	_flow_step_evidence_label = Label.new()
+	_flow_step_evidence_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_flow_step_evidence_label.text = "Step evidence: -"
+	_dock.add_child(_flow_step_evidence_label)
+
+	_flow_step_preview_label = Label.new()
+	_flow_step_preview_label.text = "Step screenshot preview:"
+	_dock.add_child(_flow_step_preview_label)
+
+	_flow_step_preview = TextureRect.new()
+	_flow_step_preview.custom_minimum_size = Vector2(0, 160)
+	_flow_step_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_flow_step_preview.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	_dock.add_child(_flow_step_preview)
+
 	_file_dialog = FileDialog.new()
 	_file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
 	_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
@@ -162,12 +235,20 @@ func _enter_tree() -> void:
 	_file_dialog.file_selected.connect(_on_godot_bin_selected)
 	_dock.add_child(_file_dialog)
 
+	_live_poll_timer = Timer.new()
+	_live_poll_timer.one_shot = false
+	_live_poll_timer.wait_time = LIVE_FLOW_POLL_SEC
+	_live_poll_timer.timeout.connect(_on_live_poll_timeout)
+	_dock.add_child(_live_poll_timer)
+
 	add_control_to_dock(DOCK_SLOT_RIGHT_UL, _dock)
 	_load_saved_preferences()
 	_refresh_history()
 
 
 func _exit_tree() -> void:
+	if _live_poll_timer != null:
+		_live_poll_timer.stop()
 	if _dock != null:
 		remove_control_from_docks(_dock)
 		_dock.queue_free()
@@ -258,12 +339,19 @@ func _on_run_quick_regression_suite_pressed() -> void:
 
 
 func _on_run_gameplay_debug_flow_pressed() -> void:
+	if _live_flow_active:
+		_set_status("Status: gameplay flow already running")
+		return
 	if _dry_run_checkbox != null and _dry_run_checkbox.button_pressed:
 		_set_status("Status: fail - Gameplay debug flow requires Dry Run off")
 		return
 	var flow_abs := ProjectSettings.globalize_path(FLOW_PATH)
 	if not FileAccess.file_exists(flow_abs):
 		_set_status("Status: fail - missing flow_runner.py")
+		return
+	var gameplay_flow_file_abs := ProjectSettings.globalize_path(DEFAULT_GAMEPLAY_FLOW_FILE)
+	if not FileAccess.file_exists(gameplay_flow_file_abs):
+		_set_status("Status: fail - missing gameplay flow json")
 		return
 	var project_root := ProjectSettings.globalize_path("res://")
 	var godot_bin := ""
@@ -280,11 +368,10 @@ func _on_run_gameplay_debug_flow_pressed() -> void:
 		_godot_bin_input.text = resolved_godot_bin
 	_save_preferences()
 
-	var output: Array = []
 	var args := PackedStringArray(
 		[
 			flow_abs,
-			"--flow-id", "exploration_gameplay_flow_v1",
+			"--flow-file", gameplay_flow_file_abs,
 			"--project-root", project_root,
 			"--godot-bin", resolved_godot_bin,
 			"--timeout-sec", "120"
@@ -292,18 +379,72 @@ func _on_run_gameplay_debug_flow_pressed() -> void:
 	)
 	_set_status("Status: running gameplay flow...")
 	_set_artifact("Artifacts: -")
-	var exit_code := OS.execute("python", args, output, true, false)
-	var payload := _extract_json_payload(output)
-	if payload.is_empty():
-		_set_status("Status: fail - gameplay flow no JSON output, py_exit=%d" % exit_code)
+	var pid := OS.create_process("python", args, false)
+	if pid <= 0:
+		_set_status("Status: fail - unable to start gameplay flow process")
 		return
-	var flow_id := str(payload.get("flow_id", "exploration_gameplay_flow_v1"))
-	var flow_status := str(payload.get("status", "unknown"))
-	var run_id := str(payload.get("run_id", ""))
-	var artifact_root := str(payload.get("artifact_root", ""))
-	_set_status("Status: flow %s, flow_id=%s, run_id=%s, py_exit=%d" % [flow_status, flow_id, run_id, exit_code])
-	_set_artifact("Artifacts: %s" % artifact_root)
-	_refresh_history(run_id)
+	_live_flow_pid = pid
+	_live_flow_active = true
+	_live_flow_started_unix = Time.get_unix_time_from_system()
+	_live_flow_run_id = ""
+	_live_flow_run_abs = ""
+	_live_flow_expected_steps = FlowTimelineUtils.load_expected_flow_steps(gameplay_flow_file_abs)
+	_show_live_expected_bootstrap()
+	if _live_poll_timer != null:
+		_live_poll_timer.start()
+	_set_status("Status: running gameplay flow (live), pid=%d" % pid)
+
+
+func _on_live_poll_timeout() -> void:
+	if not _live_flow_active:
+		if _live_poll_timer != null:
+			_live_poll_timer.stop()
+		return
+	_detect_live_flow_run()
+	_refresh_live_flow_view()
+	if _live_flow_pid > 0 and OS.is_process_running(_live_flow_pid):
+		return
+	var exit_code := 0
+	if _live_flow_pid > 0:
+		exit_code = OS.get_process_exit_code(_live_flow_pid)
+	_live_flow_active = false
+	_live_flow_pid = -1
+	if _live_poll_timer != null:
+		_live_poll_timer.stop()
+	if not _live_flow_run_id.is_empty():
+		_refresh_history(_live_flow_run_id)
+		var final_status := _read_run_status(_live_flow_run_abs)
+		_set_status(
+			"Status: flow %s, flow_id=%s, run_id=%s, py_exit=%d"
+			% [final_status, "build_clean_wait_linked_acceptance", _live_flow_run_id, exit_code]
+		)
+		_set_artifact("Artifacts: %s" % _live_flow_run_abs)
+	else:
+		_refresh_history()
+		_set_status("Status: gameplay flow finished, py_exit=%d" % exit_code)
+
+
+func _detect_live_flow_run() -> void:
+	if not _live_flow_run_abs.is_empty() and DirAccess.dir_exists_absolute(_live_flow_run_abs):
+		return
+	var runs_abs := ProjectSettings.globalize_path(RUNS_DIR_REL)
+	var match := PluginLiveFlowController.detect_live_run(runs_abs, _live_flow_started_unix)
+	if match.is_empty():
+		return
+	_live_flow_run_id = str(match.get("run_id", ""))
+	_live_flow_run_abs = str(match.get("run_abs", ""))
+	if _live_flow_run_id.is_empty() or _live_flow_run_abs.is_empty():
+		return
+	_set_artifact("Artifacts: %s" % _live_flow_run_abs)
+
+
+func _refresh_live_flow_view() -> void:
+	if _live_flow_run_abs.is_empty():
+		return
+	_update_failure_summary_from_run_abs(_live_flow_run_abs)
+	_update_flow_steps_from_run_abs(_live_flow_run_abs)
+	if not _live_flow_run_id.is_empty():
+		_set_status("Status: running gameplay flow, run_id=%s" % _live_flow_run_id)
 
 
 func _run_scenario(system: String, scenario: String, extra_user_args: Array) -> void:
@@ -390,6 +531,11 @@ func _set_artifact(text: String) -> void:
 func _set_suite_label(text: String) -> void:
 	if _suite_label != null:
 		_suite_label.text = text
+
+
+func _set_failure_summary(text: String) -> void:
+	if _failure_summary_label != null:
+		_failure_summary_label.text = text
 
 
 func _resolve_godot_bin(path: String) -> String:
@@ -480,6 +626,8 @@ func _refresh_history(preferred_run_id: String = "") -> void:
 	var dir := DirAccess.open(runs_abs)
 	if dir == null:
 		_history_list.add_item("(no runs directory)")
+		_set_failure_summary("Latest failure: no runs directory")
+		_clear_flow_steps("Flow steps: no runs directory")
 		return
 
 	var run_ids: Array = []
@@ -498,6 +646,8 @@ func _refresh_history(preferred_run_id: String = "") -> void:
 	run_ids.reverse()
 	if run_ids.is_empty():
 		_history_list.add_item("(no runs yet)")
+		_set_failure_summary("Latest failure: no runs yet")
+		_clear_flow_steps("Flow steps: no runs yet")
 		return
 
 	var select_index := -1
@@ -513,17 +663,282 @@ func _refresh_history(preferred_run_id: String = "") -> void:
 	if select_index < 0:
 		select_index = 0
 	_history_list.select(select_index)
+	_update_failure_summary_for_selected()
+	_update_flow_steps_for_selected()
+
+
+func _on_history_item_selected(_index: int) -> void:
+	_update_failure_summary_for_selected()
+	_update_flow_steps_for_selected()
+
+
+func _update_failure_summary_for_selected() -> void:
+	var entry := _get_selected_run_entry()
+	if entry.is_empty():
+		_set_failure_summary("Latest failure: no run selected")
+		return
+	var run_abs := str(entry.get("run_abs", ""))
+	if run_abs.is_empty():
+		_set_failure_summary("Latest failure: selected run invalid")
+		return
+	_update_failure_summary_from_run_abs(run_abs)
+
+
+func _update_failure_summary_from_run_abs(run_abs: String) -> void:
+	_set_failure_summary(PluginHistoryController.build_failure_summary_text(run_abs))
+
+
+func _clear_flow_steps(reason: String) -> void:
+	_flow_step_entries.clear()
+	if _flow_steps_list != null:
+		_flow_steps_list.clear()
+		_flow_steps_list.add_item("(no flow steps)")
+	if _flow_step_detail_label != null:
+		_flow_step_detail_label.text = "Step detail: %s" % reason
+	if _flow_step_evidence_label != null:
+		_flow_step_evidence_label.text = "Step evidence: -"
+	if _flow_step_preview != null:
+		_flow_step_preview.texture = null
+	if _flow_step_preview_label != null:
+		_flow_step_preview_label.text = "Step screenshot preview: -"
+
+
+func _update_flow_steps_for_selected() -> void:
+	var entry := _get_selected_run_entry()
+	if entry.is_empty():
+		_clear_flow_steps("no run selected")
+		return
+	var run_abs := str(entry.get("run_abs", ""))
+	if run_abs.is_empty():
+		_clear_flow_steps("selected run invalid")
+		return
+	_update_flow_steps_from_run_abs(run_abs)
+
+
+func _update_flow_steps_from_run_abs(run_abs: String) -> void:
+	_flow_step_entries = FlowTimelineUtils.load_flow_step_entries(run_abs)
+	if _flow_steps_list == null:
+		return
+	_flow_steps_list.clear()
+	if _flow_step_entries.is_empty():
+		_flow_steps_list.add_item("(no flow steps)")
+		if _flow_step_detail_label != null:
+			_flow_step_detail_label.text = "Step detail: no step_timeline/driver_flow data"
+		if _flow_step_evidence_label != null:
+			_flow_step_evidence_label.text = "Step evidence: -"
+		return
+	var select_idx := 0
+	var has_failed := false
+	for i in range(_flow_step_entries.size()):
+		var raw: Variant = _flow_step_entries[i]
+		if not (raw is Dictionary):
+			continue
+		var item := raw as Dictionary
+		var step_id := str(item.get("step_id", ""))
+		var status := str(item.get("status", "unknown"))
+		var icon := "•"
+		if status == "passed":
+			icon = "OK"
+		elif status == "failed":
+			icon = "FAIL"
+			has_failed = true
+			select_idx = i
+		elif status == "skipped":
+			icon = "SKIP"
+		elif status == "running":
+			icon = "RUN"
+		elif status == "pending":
+			icon = "TODO"
+		_flow_steps_list.add_item("%s %s | %s" % [icon, step_id, status])
+	var live_for_run := (
+		_live_flow_active
+		and not _live_flow_run_abs.is_empty()
+		and run_abs == _live_flow_run_abs
+		and _live_flow_pid > 0
+		and OS.is_process_running(_live_flow_pid)
+	)
+	if live_for_run and not has_failed:
+		var seen: Dictionary = {}
+		for step_raw in _flow_step_entries:
+			if step_raw is Dictionary:
+				var sid := str((step_raw as Dictionary).get("step_id", ""))
+				if not sid.is_empty():
+					seen[sid] = true
+		var predicted_next := ""
+		for step_id in _live_flow_expected_steps:
+			var sid := str(step_id)
+			if sid.is_empty():
+				continue
+			if not seen.has(sid):
+				predicted_next = sid
+				break
+		if predicted_next.is_empty():
+			predicted_next = "current_step"
+		_flow_step_entries.append(
+			{
+				"step_id": predicted_next,
+				"action": "running",
+				"description": "Predicted next step from flow file while process is still running.",
+				"status": "running",
+				"expected": "next step result persisted to logs/driver_flow.json",
+				"actual": "process still running",
+				"evidence_files": ["logs/driver_flow.json"],
+			}
+		)
+		_flow_steps_list.add_item("RUN %s | running" % predicted_next)
+		select_idx = _flow_step_entries.size() - 1
+	_flow_steps_list.select(select_idx)
+	if _flow_steps_list.has_method("ensure_current_is_visible"):
+		_flow_steps_list.call("ensure_current_is_visible")
+	_update_selected_flow_step_detail()
+
+
+func _on_flow_step_selected(_index: int) -> void:
+	_update_selected_flow_step_detail()
+
+
+func _update_selected_flow_step_detail() -> void:
+	var entry := _get_selected_run_entry()
+	var run_abs := ""
+	if not entry.is_empty():
+		run_abs = str(entry.get("run_abs", ""))
+	if run_abs.is_empty() and not _live_flow_run_abs.is_empty():
+		run_abs = _live_flow_run_abs
+	if _flow_steps_list == null:
+		return
+	var selected := _flow_steps_list.get_selected_items()
+	if selected.is_empty():
+		if _flow_step_detail_label != null:
+			_flow_step_detail_label.text = "Step detail: no step selected"
+		if _flow_step_evidence_label != null:
+			_flow_step_evidence_label.text = "Step evidence: -"
+		return
+	var idx := int(selected[0])
+	if idx < 0 or idx >= _flow_step_entries.size():
+		return
+	var raw: Variant = _flow_step_entries[idx]
+	if not (raw is Dictionary):
+		return
+	var step := raw as Dictionary
+	if _flow_step_detail_label != null:
+		_flow_step_detail_label.text = PluginUiBuilder.build_step_detail_text(step)
+	var evidence_files: Array = []
+	var raw_evidence: Variant = step.get("evidence_files", [])
+	if raw_evidence is Array:
+		evidence_files = raw_evidence as Array
+	var evidence_text := "-"
+	if not evidence_files.is_empty():
+		evidence_text = str(evidence_files[0])
+	if _flow_step_evidence_label != null:
+		_flow_step_evidence_label.text = "Step evidence: %s" % evidence_text
+	if not run_abs.is_empty():
+		_update_flow_step_preview(step, run_abs)
+
+
+func _open_selected_step_evidence() -> void:
+	var entry := _get_selected_run_entry()
+	if entry.is_empty():
+		_set_status("Status: no run selected")
+		return
+	var run_abs := str(entry.get("run_abs", ""))
+	if run_abs.is_empty():
+		_set_status("Status: selected run invalid")
+		return
+	if _flow_steps_list == null:
+		_set_status("Status: step list unavailable")
+		return
+	var selected := _flow_steps_list.get_selected_items()
+	if selected.is_empty():
+		_set_status("Status: no step selected")
+		return
+	var idx := int(selected[0])
+	if idx < 0 or idx >= _flow_step_entries.size():
+		_set_status("Status: selected step invalid")
+		return
+	var raw: Variant = _flow_step_entries[idx]
+	if not (raw is Dictionary):
+		_set_status("Status: selected step invalid")
+		return
+	var step := raw as Dictionary
+	var raw_evidence: Variant = step.get("evidence_files", [])
+	if not (raw_evidence is Array):
+		_set_status("Status: step has no evidence")
+		return
+	var evidence_files := raw_evidence as Array
+	if evidence_files.is_empty():
+		_set_status("Status: step has no evidence")
+		return
+	var rel := str(evidence_files[0])
+	var abs := run_abs.path_join(rel)
+	if not FileAccess.file_exists(abs) and not DirAccess.dir_exists_absolute(abs):
+		_set_status("Status: step evidence missing")
+		return
+	OS.shell_open(abs)
+
+
+func _update_flow_step_preview(step: Dictionary, run_abs: String) -> void:
+	if _flow_step_preview == null:
+		return
+	_flow_step_preview.texture = null
+	if _flow_step_preview_label != null:
+		_flow_step_preview_label.text = "Step screenshot preview: -"
+	var raw_evidence: Variant = step.get("evidence_files", [])
+	if not (raw_evidence is Array):
+		return
+	var evidence_files := raw_evidence as Array
+	for item in evidence_files:
+		var rel := str(item)
+		if not rel.to_lower().ends_with(".png"):
+			continue
+		var abs := run_abs.path_join(rel)
+		if not FileAccess.file_exists(abs):
+			continue
+		var img := Image.new()
+		var err := img.load(abs)
+		if err != OK:
+			continue
+		var tex := ImageTexture.create_from_image(img)
+		_flow_step_preview.texture = tex
+		if _flow_step_preview_label != null:
+			_flow_step_preview_label.text = "Step screenshot preview: %s" % rel
+		return
+
+
+func _show_live_expected_bootstrap() -> void:
+	if _flow_steps_list == null:
+		return
+	if _live_flow_expected_steps.is_empty():
+		_clear_flow_steps("flow started; waiting for first driver step")
+		return
+	_flow_step_entries.clear()
+	_flow_steps_list.clear()
+	for i in range(_live_flow_expected_steps.size()):
+		var step_id := str(_live_flow_expected_steps[i])
+		var status := "pending"
+		var icon := "TODO"
+		if i == 0:
+			status = "running"
+			icon = "RUN"
+		_flow_step_entries.append(
+			{
+				"step_id": step_id,
+				"action": "planned",
+				"description": "Planned step from flow definition.",
+				"status": status,
+				"expected": "step result persisted to logs/driver_flow.json",
+				"actual": "waiting for execution",
+				"evidence_files": ["logs/driver_flow.json"],
+			}
+		)
+		_flow_steps_list.add_item("%s %s | %s" % [icon, step_id, status])
+	_flow_steps_list.select(0)
+	if _flow_steps_list.has_method("ensure_current_is_visible"):
+		_flow_steps_list.call("ensure_current_is_visible")
+	_update_selected_flow_step_detail()
 
 
 func _read_run_status(run_abs: String) -> String:
-	var report_path := run_abs.path_join("report.json")
-	if not FileAccess.file_exists(report_path):
-		return "unknown"
-	var text := FileAccess.get_file_as_string(report_path)
-	var parsed: Variant = JSON.parse_string(text)
-	if parsed is Dictionary:
-		return str((parsed as Dictionary).get("status", "unknown"))
-	return "unknown"
+	return PluginHistoryController.read_run_status(run_abs)
 
 
 func _get_selected_run_entry() -> Dictionary:
@@ -583,6 +998,38 @@ func _open_selected_flow_report_json() -> void:
 		_set_status("Status: flow_report.json missing")
 		return
 	OS.shell_open(flow_report_json)
+
+
+func _open_selected_failure_summary_json() -> void:
+	var entry := _get_selected_run_entry()
+	if entry.is_empty():
+		_set_status("Status: no run selected")
+		return
+	var run_abs := str(entry.get("run_abs", ""))
+	if run_abs.is_empty():
+		_set_status("Status: selected run invalid")
+		return
+	var summary_json := run_abs.path_join("failure_summary.json")
+	if not FileAccess.file_exists(summary_json):
+		_set_status("Status: failure_summary.json missing")
+		return
+	OS.shell_open(summary_json)
+
+
+func _open_selected_step_timeline_json() -> void:
+	var entry := _get_selected_run_entry()
+	if entry.is_empty():
+		_set_status("Status: no run selected")
+		return
+	var run_abs := str(entry.get("run_abs", ""))
+	if run_abs.is_empty():
+		_set_status("Status: selected run invalid")
+		return
+	var timeline_json := run_abs.path_join("step_timeline.json")
+	if not FileAccess.file_exists(timeline_json):
+		_set_status("Status: step_timeline.json missing")
+		return
+	OS.shell_open(timeline_json)
 
 
 func _open_selected_diff_png() -> void:

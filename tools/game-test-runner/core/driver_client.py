@@ -25,9 +25,27 @@ class DriverClient:
         )
         self._seq = 0
         self.base_dir.mkdir(parents=True, exist_ok=True)
+        self._seq = self._detect_existing_seq()
+
+    def _detect_existing_seq(self) -> int:
+        seq = 0
+        for p in (self.paths.cmd_file, self.paths.resp_file):
+            if not p.exists():
+                continue
+            try:
+                data = json.loads(p.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+            try:
+                seq = max(seq, int(data.get("seq", 0)))
+            except (TypeError, ValueError):
+                continue
+        return seq
 
     def send_command(self, action: str, params: dict[str, Any] | None = None) -> int:
         self._seq += 1
+        if self.paths.resp_file.exists():
+            self.paths.resp_file.unlink(missing_ok=True)
         payload = {
             "seq": self._seq,
             "action": action,

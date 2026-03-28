@@ -3,7 +3,7 @@
   "name": "Contract regression: force deterministic failure",
   "system": "contract",
   "profile": "smoke",
-  "mode": "local",
+  "mode": "headless",
   "scene": "res://scenes/__contract__/missing_scene_for_failure.tscn",
   "flowStepTimeoutSec": 5,
   "reloadProjectBeforeRun": true,

@@ -53,6 +53,22 @@ def run_contract_suite(project_root: Path, godot_bin: str, timeout_sec: int) -> 
         }
     )
     run_id_wait = str(waiting_payload.get("run_id", ""))
+    has_effective_exit_code = "effective_exit_code" in waiting_payload
+    has_process_exit_code = "process_exit_code" in waiting_payload
+    run_exit_fields_ok = has_effective_exit_code and has_process_exit_code
+    cases.append(
+        _record_case(
+            "run_game_flow_exit_code_fields",
+            run_exit_fields_ok,
+            {
+                "run_id": run_id_wait,
+                "has_effective_exit_code": has_effective_exit_code,
+                "has_process_exit_code": has_process_exit_code,
+                "effective_exit_code": waiting_payload.get("effective_exit_code"),
+                "process_exit_code": waiting_payload.get("process_exit_code"),
+            },
+        )
+    )
     waiting_ok = (
         waiting_payload.get("status") == "waiting_approval"
         and bool(waiting_payload.get("approval_required", False))
@@ -86,6 +102,117 @@ def run_contract_suite(project_root: Path, godot_bin: str, timeout_sec: int) -> 
                 "status": status_payload.get("status"),
                 "current_step": status_payload.get("current_step"),
                 "approval_required": status_payload.get("approval_required"),
+            },
+        )
+    )
+
+    artifacts_payload = server.get_test_artifacts({"run_id": run_id_wait, "project_root": str(project_root)})
+    failure_summary_json = str(artifacts_payload.get("failure_summary_json", ""))
+    key_files = artifacts_payload.get("key_files", [])
+    if not isinstance(key_files, list):
+        key_files = []
+    artifacts_failure_summary_ok = bool(failure_summary_json) and failure_summary_json in key_files
+    cases.append(
+        _record_case(
+            "artifacts_expose_failure_summary",
+            artifacts_failure_summary_ok,
+            {
+                "run_id": run_id_wait,
+                "failure_summary_json": failure_summary_json,
+                "key_files": key_files,
+            },
+        )
+    )
+    step_timeline_json = str(artifacts_payload.get("step_timeline_json", ""))
+    artifacts_step_timeline_ok = bool(step_timeline_json) and step_timeline_json in key_files
+    cases.append(
+        _record_case(
+            "artifacts_expose_step_timeline",
+            artifacts_step_timeline_ok,
+            {
+                "run_id": run_id_wait,
+                "step_timeline_json": step_timeline_json,
+                "key_files": key_files,
+            },
+        )
+    )
+
+    # Case 1.5: run_and_stream_flow contract in chat short mode.
+    stream_payload = server.run_and_stream_flow(
+        {
+            "flow_file": str(flow_file),
+            "project_root": str(project_root),
+            "godot_bin": godot_bin,
+            "timeout_sec": timeout_sec,
+            "dry_run": True,
+            "chat_mode": "short",
+            "poll_interval_sec": 0.3,
+            "max_wait_sec": max(30, timeout_sec),
+            "recent_steps_limit": 2,
+            "stream_limit": 20,
+        }
+    )
+    stream_status = str(stream_payload.get("status", ""))
+    stream_final = stream_payload.get("final", {})
+    if not isinstance(stream_final, dict):
+        stream_final = {}
+    stream_chat_progress = stream_final.get("chat_progress", {})
+    if not isinstance(stream_chat_progress, dict):
+        stream_chat_progress = {}
+    stream_short_lines = stream_chat_progress.get("截图简报", [])
+    if not isinstance(stream_short_lines, list):
+        stream_short_lines = []
+    stream_contract_ok = (
+        stream_status == "finished"
+        and str(stream_payload.get("run_id", "")).strip() != ""
+        and isinstance(stream_payload.get("stream", []), list)
+        and str(stream_final.get("chat_mode", "")) == "short"
+        and "当前步骤" in stream_chat_progress
+        and "下一步" in stream_chat_progress
+        and len(stream_short_lines) <= 1
+    )
+    cases.append(
+        _record_case(
+            "run_and_stream_flow_short_chat_contract",
+            stream_contract_ok,
+            {
+                "run_id": stream_payload.get("run_id"),
+                "status": stream_status,
+                "final_state": stream_final.get("state"),
+                "final_chat_mode": stream_final.get("chat_mode"),
+                "stream_count": len(stream_payload.get("stream", []))
+                if isinstance(stream_payload.get("stream", []), list)
+                else -1,
+                "short_screenshot_lines": len(stream_short_lines),
+            },
+        )
+    )
+    # Case 1.6: chat_progress human-readable structure contract.
+    current_line = str(stream_chat_progress.get("当前步骤", "")).strip()
+    purpose_line = str(stream_chat_progress.get("目的", "")).strip()
+    result_line = str(stream_chat_progress.get("结果", "")).strip()
+    next_line = str(stream_chat_progress.get("下一步", "")).strip()
+    has_human_current = current_line.startswith("正在") or "unknown_step" in current_line
+    has_human_purpose = purpose_line.startswith("目标：")
+    human_contract_ok = (
+        stream_contract_ok
+        and has_human_current
+        and has_human_purpose
+        and bool(result_line)
+        and bool(next_line)
+    )
+    cases.append(
+        _record_case(
+            "chat_progress_human_structure_contract",
+            human_contract_ok,
+            {
+                "run_id": stream_payload.get("run_id"),
+                "current": current_line,
+                "purpose": purpose_line,
+                "result": result_line,
+                "next": next_line,
+                "has_human_current": has_human_current,
+                "has_human_purpose": has_human_purpose,
             },
         )
     )

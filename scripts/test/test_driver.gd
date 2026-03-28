@@ -77,6 +77,8 @@ func _execute_command(cmd: Dictionary) -> Dictionary:
 			_handle_save_game(params, out)
 		"setGameTimeSpeed":
 			_handle_set_game_time_speed(params, out)
+		"setGlobalPause":
+			_handle_set_global_pause(params, out)
 		"setFault":
 			_handle_set_fault(params, out)
 		_:
@@ -454,6 +456,16 @@ func _handle_set_game_time_speed(params: Dictionary, out: Dictionary) -> void:
 	if GameTime.get_tree():
 		GameTime.get_tree().paused = false
 	out["data"] = {"speed_multiplier": speed}
+
+
+func _handle_set_global_pause(params: Dictionary, out: Dictionary) -> void:
+	var paused: bool = bool(params.get("paused", true))
+	var tree := get_tree()
+	if tree == null:
+		_fail(out, "TREE_NOT_FOUND", "scene tree not found")
+		return
+	tree.paused = paused
+	out["data"] = {"tree_paused": tree.paused}
 
 
 func _handle_set_fault(params: Dictionary, out: Dictionary) -> void:

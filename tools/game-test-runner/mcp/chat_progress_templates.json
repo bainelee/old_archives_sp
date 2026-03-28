@@ -1,0 +1,110 @@
+{
+  "step_map": {
+    "prepare_new_game": {
+      "doing": "正在开始新游戏流程",
+      "goal": "目标：进入游戏世界并初始化本轮测试。"
+    },
+    "click_new_game": {
+      "doing": "正在点击“新游戏”",
+      "goal": "目标：进入存档选择并创建新流程。"
+    },
+    "click_slot0": {
+      "doing": "正在新建并覆盖存档0",
+      "goal": "目标：确保测试使用固定存档槽位。"
+    },
+    "wait_ingame": {
+      "doing": "正在等待进入游戏主场景",
+      "goal": "目标：确认已成功进入可操作状态。"
+    },
+    "set_game_speed_x6": {
+      "doing": "正在切换为六倍速",
+      "goal": "目标：加快流程验证时间。"
+    },
+    "start_cleanup_mode": {
+      "doing": "正在进入清理模式",
+      "goal": "目标：准备对目标房间发起清理。"
+    },
+    "select_cleanup_room": {
+      "doing": "正在选择清理房间",
+      "goal": "目标：锁定要清理的房间。"
+    },
+    "confirm_cleanup": {
+      "doing": "正在确认清理",
+      "goal": "目标：正式启动房间清理。"
+    },
+    "wait_clean_done": {
+      "doing": "正在等待清理房间完成",
+      "goal": "目标：确认房间状态变为 cleaned。"
+    },
+    "start_build_mode": {
+      "doing": "正在进入建设模式",
+      "goal": "目标：准备建造目标房间。"
+    },
+    "wait_research_zone_visible": {
+      "doing": "正在等待建设分区可见",
+      "goal": "目标：确认可选择建造分区。"
+    },
+    "select_build_zone": {
+      "doing": "正在选择建设分区",
+      "goal": "目标：进入指定建造类别。"
+    },
+    "select_build_room": {
+      "doing": "正在选择建设房间",
+      "goal": "目标：锁定要建设的房间。"
+    },
+    "wait_build_confirm_visible": {
+      "doing": "正在等待建设确认按钮出现",
+      "goal": "目标：确保建造可提交。"
+    },
+    "confirm_build": {
+      "doing": "正在确认建设",
+      "goal": "目标：正式启动建造流程。"
+    },
+    "wait_build_done": {
+      "doing": "正在等待建设房间完成",
+      "goal": "目标：确认房间状态变为 built。"
+    },
+    "save_game_slot0": {
+      "doing": "正在保存游戏到存档0",
+      "goal": "目标：写入持久化数据供继续游戏验证。"
+    },
+    "save_current_slot": {
+      "doing": "正在保存当前存档",
+      "goal": "目标：写入持久化数据供继续游戏验证。"
+    },
+    "click_continue": {
+      "doing": "正在点击“继续游戏”",
+      "goal": "目标：从已有存档恢复游戏状态。"
+    },
+    "verify_room_cleaned": {
+      "doing": "正在验证清理结果已持久化",
+      "goal": "目标：继续游戏后仍保持 cleaned。"
+    },
+    "verify_room_built": {
+      "doing": "正在验证建设结果已持久化",
+      "goal": "目标：继续游戏后仍保持 built。"
+    }
+  },
+  "action_map": {
+    "click": {
+      "doing": "正在执行点击操作",
+      "goal": "目标：推进到下一交互步骤。"
+    },
+    "wait": {
+      "doing": "正在等待条件满足",
+      "goal": "目标：确保状态达到断言前置条件。"
+    },
+    "check": {
+      "doing": "正在执行状态校验",
+      "goal": "目标：验证当前状态符合预期。"
+    },
+    "savegame": {
+      "doing": "正在保存游戏",
+      "goal": "目标：写入持久化数据供继续游戏验证。"
+    },
+    "sleep": {
+      "doing": "正在等待短延时",
+      "goal": "目标：给界面与状态变更留出缓冲。"
+    }
+  }
+}

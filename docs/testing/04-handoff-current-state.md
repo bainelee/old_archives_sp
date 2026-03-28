@@ -1,111 +1,102 @@
-# 当前状态与交接（v3）
+# 当前状态与交接（v6）
 
-本文档用于快速交接“游戏自动测试插件 + 运行器”当前状态，供下一次对话直接继续开发。
+本文档用于交接当前“GameplayFlow + MCP + Cursor 对话窗口实时播报”能力，下一次对话可直接续做。
 
-## 0. 交接后先跑哪条命令（先确认再开发）
+## 0) 交接后先跑哪条命令
 
 | 场景 | 推荐命令 |
 |---|---|
 | 只确认环境（最快） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -OnlyPreflight` |
-| 快速门禁（环境 + 契约） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
-| 完整验收（环境 + 两条 acceptance） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"` |
-| 完整验收 + 契约回归 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -IncludeContractRegression` |
+| 快速门禁（环境 + 契约） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe" -Fast` |
+| 完整验收（环境 + 两条 acceptance） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe"` |
 
-结果判断：
-- `status=passed`：继续开发目标
-- `status=failed_preflight`：先修环境（优先 `GODOT_BIN`）
-- `status=failed` 且 `contract_regression` 失败：先修闭环契约
+最近一次快速门禁（通过）：
+- `artifacts/test-runs/acceptance_ci_20260327T160943859Z.json`
 
-## 已完成能力
-- 运行器（`runner.py` + `cli.py`）可执行真实 Godot 流程，产出统一 run 报告。
-- MCP 接口可用：
-  - `list_test_scenarios`
-  - `run_game_test`
-  - `run_game_flow`
-  - `check_test_runner_environment`
-  - `get_test_run_status`
-  - `cancel_test_run`
-  - `resume_fix_loop`
-  - `get_test_artifacts`
-  - `get_test_report`
-- `run_game_flow` 已支持闭环状态字段统一：
-  - `run_id/status/current_step/fix_loop_round/approval_required`
-- `bounded_auto_fix` 已升级为可审计闭环：
-  - `analyzing -> waiting_approval -> rerun -> resolved/exhausted`
-  - 连续两轮同类失败且 `actual` 无改善自动停止
-- 插件 `Test Orchestrator` 可完成：
-  - 运行 `exploration_smoke`
-  - 录制视觉基线（`Record Visual Baseline`）
-  - 执行视觉检查（`Run Visual Check`）
-  - 运行快速回归套件（`Run Quick Regression Suite`）
-  - 运行真实流程（`Run Gameplay Debug Flow`）
-  - 打开 run/suite 报告与视觉差异图
-  - 打开 flow 报告（`Open flow_report.json`）
-  - 复制状态与产物路径
-- 视觉回归能力：
-  - 生成 `baseline/current/diff/diff_annotated` 四类图片
-  - 在 `report.json` 中写入 `diff` 与 `threshold`
-  - canary 用例默认故意失败，用于证明视觉检测链路有效
-- 流程编排能力（已落地）：
-  - flow 执行器：`tools/game-test-runner/core/flow_runner.py`
-  - flow 模板：`tools/game-test-runner/core/flows/exploration_gameplay_flow_v1.py`
-  - 流程报告：`flow_report.json`（`flow_id`、`run_id`、步骤断言与证据）
-  - 步骤类型：`run_scenario`、`wait_for_file`、`assert_files`、`assert_log_markers`、`assert_files_distinct`
-- 真实流程测试场景（已落地）：
-  - 场景：`scenes/test/exploration_gameplay_flow_test.tscn`
-  - 脚本：`scripts/test/exploration_gameplay_flow_test.gd`
-  - 输出 marker、步骤截图、探索状态校验（含“模拟一次探索动作提交”）
-- 截图归档隔离（已落地）：
-  - `RunRequest` 支持 `screenshot_prefix`
-  - 场景注册支持默认前缀（`scenario_registry.py` 中 `screenshot_prefix`）
-  - `exploration_gameplay_flow_test` 使用 `flow_exploration_`
-  - `visual_regression_probe` 使用 `visual_ui_button_`
+## 已完成能力（重点）
 
-## 关键路径
-- 插件：`addons/test_orchestrator/plugin.gd`
-- 运行器：`tools/game-test-runner/core/runner.py`
-- 场景注册：`tools/game-test-runner/core/scenario_registry.py`
-- 回归套件：`tools/game-test-runner/core/regression_suite.py`
-- flow 执行器：`tools/game-test-runner/core/flow_runner.py`
-- flow 模板：`tools/game-test-runner/core/flows/exploration_gameplay_flow_v1.py`
-- flow 测试场景：`scenes/test/exploration_gameplay_flow_test.tscn`
-- flow 测试脚本：`scripts/test/exploration_gameplay_flow_test.gd`
-- 视觉探针场景：`scenes/test/visual_regression_probe_test.tscn`
-- 视觉探针脚本：`scripts/test/visual_regression_probe_test.gd`
+### A. 测试产物与契约
+- `failure_summary.json`、`flow_report.json`、`step_timeline.json` 已稳定产出。
+- `get_test_artifacts` 已返回：
+  - `failure_summary_json`
+  - `step_timeline_json`
+  - `key_files`（包含上述关键文件）
+- 契约回归已覆盖：
+  - `run_game_flow` 字段：`effective_exit_code/process_exit_code`
+  - `artifacts_expose_failure_summary`
+  - `artifacts_expose_step_timeline`
+  - `run_and_stream_flow_short_chat_contract`
+  - `chat_progress_human_structure_contract`
+
+### B. 插件可视化（Godot 面板）
+- 失败摘要：`step/category/actual`
+- 关键文件快捷打开：
+  - `report.json`
+  - `flow_report.json`
+  - `failure_summary.json`
+  - `step_timeline.json`
+- Flow Steps 区块：
+  - 步骤列表（OK/FAIL/SKIP/RUN/TODO）
+  - 详情（id/status/action/validation/expected/actual）
+  - 证据打开
+  - 截图预览
+- 运行中轮询刷新与“预测下一步 step_id”已接入。
+
+### C. Cursor 对话窗口优先（chat-first）
+- MCP 新增工具：
+  - `get_flow_timeline`（支持 `view=full|chat`）
+  - `start_game_flow_live`（异步启动 flow）
+  - `get_live_flow_progress`（按 run_id 轮询进度）
+  - `run_and_stream_flow`（单入口：启动 + 轮询 + 聚合播报）
+- `view=chat` 返回：
+  - `chat_card`
+  - `recent_steps`
+  - `key_screenshots`
+  - `key_screenshot_cards`（path + label + source_step_id）
+  - `chat_progress`（当前步骤/目的/结果/下一步/截图简报）
+  - `chat_progress_short`（短播报模式）
+- 可在 Cursor 对话里实现“边跑边播报”。
+- 通用默认播报脚本（任意 gameplay flow）：
+  - `tools/game-test-runner/scripts/run_gameplay_flow_live_chat.ps1`
+  - 默认实时播报，显式关闭用 `-NoChatProgress`
+  - 对话内执行优先：AI 直接 MCP 轮询并逐条回复，不依赖 PowerShell 输出
+
+### D. 基础流程模板（已定版）
+- 基线语义：`新游戏覆盖存档0 -> 清理等待 -> 建设等待 -> 保存 -> 退出 -> 继续游戏验证`
+- 采用双阶段模板固化：
+  - `flows/base_validation_slot0_phase1.json`（游戏内六倍速）
+  - `flows/base_validation_slot0_phase2.json`（继续游戏后六倍速）
+- 一键执行脚本：
+  - `tools/game-test-runner/scripts/run_gameplay_base_template.ps1`
+  - 已切换为 `chat-first + strict stepwise` 主路径
+  - 每步固定 5 段：即将开始 / 开始执行 / 执行结果 / 验证结论 / 通过后进入下一步
+  - 验证失败立即停止并收尾会话（不继续下一步）
+  - `-NoChatProgress` 为兼容参数（当前不会关闭 stepwise 阶段播报）
+  - 播报文案映射：`tools/game-test-runner/mcp/chat_progress_templates.json`（可直接改）
+
+## 关键路径（更新后）
+- 插件主入口：`addons/test_orchestrator/plugin.gd`
+- 插件时间线工具：`addons/test_orchestrator/flow_timeline_utils.gd`
 - MCP 服务：`tools/game-test-runner/mcp/server.py`
+- MCP 时间线读取：`tools/game-test-runner/mcp/flow_timeline_reader.py`
+- 流程执行器：`tools/game-test-runner/core/flow_runner.py`
+- 运行器：`tools/game-test-runner/core/runner.py`
+- 契约回归：`tools/game-test-runner/core/contract_regression.py`
 - CI 脚本：`tools/game-test-runner/scripts/run_acceptance_ci.ps1`
 
-## 重要行为说明
-- `visual_regression_probe` 是 canary，当前逻辑故意包含 icon 错位，`Run Visual Check` 失败为预期。
-- `Run Quick Regression Suite` 的通过条件是：
-  - exploration 通过
-  - baseline 录制通过
-  - visual canary 失败且分类为 `visual_regression`
-- 测试产物：
-  - 单 run：`artifacts/test-runs/<run_id>/`
-  - 套件：`artifacts/test-suites/<suite_id>/`
-- `exploration_gameplay_flow_v1` 当前步骤：
-  1) 运行 `exploration_gameplay_flow_test`
-  2) 断言 stdout marker
-  3) 等待 run 报告
-  4) 校验证据文件（日志 + 三张步骤图）
-  5) 断言三张步骤图互不相同（hash）
-- flow 步骤截图可视化已修复：不再是纯灰图，画面含步骤标题、状态和关键信息。
-- 旧产物可能包含历史 run 的遗留截图；若需干净验证，先清 `artifacts/test-runs/`。
-- 环境变量策略：
-  - 推荐使用 `GODOT_BIN`，非 dry-run 未解析时会快速失败并提示配置。
-- 报告退出码语义已对齐：
-  - `effective_exit_code`：测试语义退出码（passed 时为 0）
-  - `process_exit_code`：真实进程退出码（可能为 1）
+## 已验证的 live 会话样例
 
-## 现阶段主要缺口（下一步建议）
-1. 将 `check_test_runner_environment` 接入正式 CI 流水线 YAML（当前仅提供本地/CI 通用脚本）。
-2. 增加“失败快照摘要”产物（例如 `failure_summary.json`），减少人工翻 report 成本。
-3. 插件面板可增加“当前 latest run 的 primary_failure 摘要展示”。
-4. 补一组针对 `resume_fix_loop/cancel_test_run` 的自动化回归用例（契约防回归）。
-5. 将 acceptance 脚本输出汇总进一步上传为 CI artifact（平台相关配置待接入）。
+1) build/clean 验收 live：
+- run_id：`20260327T161244541970Z_build_clean_wait_linked_acceptance_live`
+- 轮询结果：`running -> finished`，最终 `flow_status=passed`，`25/25` 通过
 
-## 下个对话建议目标（v4）
-1. 增加 `failure_summary.json` 产物，并把 `primary_failure + stop_reason + key_files` 聚合输出。
-2. 为闭环契约补自动化测试（至少覆盖 waiting_approval、resume、cancel、exhausted stop_reason）。
-3. 在插件中展示“最近一次 flow 的 primary failure 摘要与关键文件快捷打开”。
+2) UI 房间详情 live：
+- run_id：`20260327T161600083813Z_ui_room_detail_sync_acceptance_live`
+- 轮询结果：`running -> finished`，最终 `flow_status=passed`，`10/10` 通过
+- 关键截图示例：`.../screenshots/room_detail_opened.png`
+
+## 仍需继续推进（下阶段建议）
+1. 继续拆分超大文件（第二轮）：
+   - `addons/test_orchestrator/plugin.gd`
+2. 增加 `chat_progress_short` 的多语言模板（zh/en）切换。
+3. 在对话侧支持“截图路径 -> 直接内联展示”桥接（目前已稳定返回绝对路径）。

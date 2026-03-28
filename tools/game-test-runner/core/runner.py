@@ -53,6 +53,9 @@ class RunRequest:
     user_data_dir: Optional[Path] = None
     reload_project_before_run: bool = False
     reload_timeout_sec: int = 20
+    requested_run_id: Optional[str] = None
+    step_prepare_pause_ms: int = 0
+    step_verify_pause_ms: int = 0
 
     def normalized_scenario(self) -> str:
         if self.scenario:
@@ -197,6 +200,18 @@ class GameTestRunner:
 
     def _write_json(self, path: Path, payload: dict) -> None:
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def _write_driver_flow_snapshot(self, run_root: Path, step_results: list[dict]) -> None:
+        (run_root / "logs" / "driver_flow.json").write_text(
+            json.dumps({"steps": step_results}, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+    def _append_driver_flow_event(self, run_root: Path, event: dict) -> None:
+        logs_dir = run_root / "logs"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        path = logs_dir / "driver_flow_events.jsonl"
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(event, ensure_ascii=False) + "\n")
 
     def _write_final_meta(self, run_root: Path, meta: dict, result: RunResult) -> None:
         final_meta = dict(meta)
@@ -563,7 +578,7 @@ class GameTestRunner:
             if req.screenshot_prefix is not None
             else (scenario_def.screenshot_prefix if scenario_def else None)
         )
-        run_id = _run_id(scenario)
+        run_id = str(req.requested_run_id or "").strip() or _run_id(scenario)
         run_root = self._prepare_artifacts(run_id)
         test_driver_session = req.test_driver_session or run_id
         effective_user_data_dir = req.user_data_dir or (run_root / "user_data")
@@ -856,11 +871,33 @@ class GameTestRunner:
 
         step_results: list[dict] = []
         passed = 0
-        for step in req.flow_steps:
+        for idx, step in enumerate(req.flow_steps):
             step_id = str(step.get("id", ""))
             action = str(step.get("action", ""))
             params = dict(step.get("params", {}))
             timeout = float(step.get("timeoutSec", req.flow_step_timeout_sec))
+            self._append_driver_flow_event(
+                run_root,
+                {
+                    "type": "step_ready",
+                    "ts": _utc_now_iso(),
+                    "index": idx,
+                    "step_id": step_id,
+                    "action": action,
+                },
+            )
+            if req.step_prepare_pause_ms > 0:
+                time.sleep(max(0.0, float(req.step_prepare_pause_ms) / 1000.0))
+            self._append_driver_flow_event(
+                run_root,
+                {
+                    "type": "step_started",
+                    "ts": _utc_now_iso(),
+                    "index": idx,
+                    "step_id": step_id,
+                    "action": action,
+                },
+            )
             started = time.time()
             try:
                 resp = active_client.send_and_wait(action=action, params=params, timeout_sec=timeout)
@@ -876,6 +913,19 @@ class GameTestRunner:
                         "duration_ms": int((time.time() - started) * 1000),
                     }
                 )
+                self._write_driver_flow_snapshot(run_root, step_results)
+                self._append_driver_flow_event(
+                    run_root,
+                    {
+                        "type": "step_completed",
+                        "ts": _utc_now_iso(),
+                        "index": idx,
+                        "step_id": step_id,
+                        "action": action,
+                        "status": "passed" if ok else "failed",
+                        "duration_ms": int((time.time() - started) * 1000),
+                    },
+                )
                 if not ok:
                     err_obj = resp.get("error", {}) if isinstance(resp.get("error", {}), dict) else {}
                     flow_failure = {
@@ -885,14 +935,13 @@ class GameTestRunner:
                         "errorMessage": str(err_obj.get("message", "")),
                         "checkKind": str(params.get("kind", "")) if action == "check" else "",
                     }
-                    (run_root / "logs" / "driver_flow.json").write_text(
-                        json.dumps({"steps": step_results}, ensure_ascii=False, indent=2), encoding="utf-8"
-                    )
                     return (
                         {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed},
                         "driver step failed: %s" % action,
                         flow_failure,
                     )
+                if req.step_verify_pause_ms > 0:
+                    time.sleep(max(0.0, float(req.step_verify_pause_ms) / 1000.0))
             except Exception as exc:  # pylint: disable=broad-except
                 step_results.append(
                     {
@@ -903,6 +952,20 @@ class GameTestRunner:
                         "duration_ms": int((time.time() - started) * 1000),
                     }
                 )
+                self._write_driver_flow_snapshot(run_root, step_results)
+                self._append_driver_flow_event(
+                    run_root,
+                    {
+                        "type": "step_completed",
+                        "ts": _utc_now_iso(),
+                        "index": idx,
+                        "step_id": step_id,
+                        "action": action,
+                        "status": "failed",
+                        "duration_ms": int((time.time() - started) * 1000),
+                        "error": str(exc),
+                    },
+                )
                 flow_failure = {
                     "stepId": step_id or "driver_step",
                     "action": action,
@@ -910,16 +973,11 @@ class GameTestRunner:
                     "errorMessage": str(exc),
                     "checkKind": str(params.get("kind", "")) if action == "check" else "",
                 }
-                (run_root / "logs" / "driver_flow.json").write_text(
-                    json.dumps({"steps": step_results}, ensure_ascii=False, indent=2), encoding="utf-8"
-                )
                 return (
                     {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed},
                     "driver flow exception: %s" % exc,
                     flow_failure,
                 )
 
-        (run_root / "logs" / "driver_flow.json").write_text(
-            json.dumps({"steps": step_results}, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        self._write_driver_flow_snapshot(run_root, step_results)
         return {"total": len(req.flow_steps), "passed": passed, "failed": len(req.flow_steps) - passed}, None, None

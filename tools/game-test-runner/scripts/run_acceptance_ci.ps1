@@ -123,8 +123,13 @@ if (-not $Fast -and -not $skipAllRuns) {
         $effectiveExitCode = $null
         $processExitCode = $null
         $reportStatus = ""
-        $reportResultStatus = ""
         if ($null -ne $reportPayload) {
+            if ($null -ne $reportPayload.result_status) {
+                $reportStatus = [string]$reportPayload.result_status
+            }
+            elseif ($null -ne $reportPayload.status) {
+                $reportStatus = [string]$reportPayload.status
+            }
             if ($null -ne $reportPayload.effective_exit_code) {
                 $effectiveExitCode = $reportPayload.effective_exit_code
             }
@@ -134,15 +139,12 @@ if (-not $Fast -and -not $skipAllRuns) {
             if ($null -ne $reportPayload.process_exit_code) {
                 $processExitCode = $reportPayload.process_exit_code
             }
-            $reportStatus = [string]$reportPayload.status
-            $reportResultStatus = [string]$reportPayload.result_status
         }
         $summary.runs += [ordered]@{
             flow_file = $flow
             run_id = $runRes.run_id
             status = $runRes.status
             report_status = $reportStatus
-            report_result_status = $reportResultStatus
             current_step = $runRes.current_step
             approval_required = $runRes.approval_required
             effective_exit_code = $effectiveExitCode
@@ -161,11 +163,23 @@ if (-not $Fast -and -not $skipAllRuns) {
 
 if ($runContractRegression -and -not $skipAllRuns) {
     $contract = Invoke-ContractRegression
+    $contractCases = @()
+    if ($null -ne $contract.cases) {
+        $contractCases = @($contract.cases)
+    }
+    $hasRunAndStreamCase = $false
+    foreach ($c in $contractCases) {
+        if ($null -ne $c -and [string]$c.name -eq "run_and_stream_flow_short_chat_contract") {
+            $hasRunAndStreamCase = $true
+            break
+        }
+    }
     $summary.contract_regression = [ordered]@{
         suite_id = $contract.suite_id
         status = $contract.status
         flow_file = $contract.flow_file
-        cases = $contract.cases
+        cases = $contractCases
+        has_run_and_stream_short_chat_case = $hasRunAndStreamCase
     }
 }
 
@@ -178,7 +192,10 @@ foreach ($item in $summary.runs) {
 }
 $contractPassed = $true
 if ($runContractRegression -and $null -ne $summary.contract_regression) {
-    $contractPassed = ([string]$summary.contract_regression.status -eq "passed")
+    $contractPassed = (
+        [string]$summary.contract_regression.status -eq "passed" `
+        -and [bool]$summary.contract_regression.has_run_and_stream_short_chat_case
+    )
 }
 
 $summary.finished_at = (Get-Date).ToString("o")

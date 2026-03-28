@@ -54,3 +54,12 @@
   - `UNKNOWN_SCENARIO` / `UNKNOWN_SYSTEM`：场景或系统未注册
   - `UNSUPPORTED_TOOL`：调用了未实现工具
   - `INTERNAL_ERROR`：未归类异常（需看 message 定位）
+
+## 9. 运行时“卡在主界面”但无步骤推进
+- 现象：窗口停在开始界面，`get_live_flow_progress` 长时间无有效 step
+- 常见原因：
+  - 误跑了内部契约故障 flow（如 `flows/internal/contract_force_fail_invalid_scene.json`）
+  - flow 文件步骤为空或场景无效
+- 处理建议：
+  - 日常验证优先使用基础模板或业务 flow，不直接跑 `internal/*`
+  - 内部契约 flow 建议使用 `headless`（本项目已设置）

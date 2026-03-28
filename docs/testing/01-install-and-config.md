@@ -55,6 +55,33 @@ setx GODOT_BIN "D:\GODOT\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64
 ```
 然后重开终端再执行 3.3。
 
+### 3.4 单入口实时播报（推荐）
+```powershell
+python "tools/game-test-runner/mcp/server.py" --tool run_and_stream_flow --project-root "D:/GODOT_Test/old-archives-sp" --flow-file "D:/GODOT_Test/old-archives-sp/flows/ui_room_detail_sync_acceptance.json" --godot-bin "$env:GODOT_BIN" --chat-mode short --poll-interval-sec 0.8 --max-wait-sec 600 --stream-limit 60
+```
+
+参数说明：
+- `chat-mode`：`normal|short`（`short` 用于站会式简报）
+- `poll-interval-sec`：轮询间隔
+- `max-wait-sec`：最大等待秒数
+- `stream-limit`：返回快照上限（防止输出过大）
+
+### 3.5 Cursor 本地 MCP 配置（示例）
+在 Cursor 的 MCP 配置中加入 game-test-runner 服务（命令示例）：
+
+```json
+{
+  "mcpServers": {
+    "game-test-runner": {
+      "command": "python",
+      "args": [
+        "D:/GODOT_Test/old-archives-sp/tools/game-test-runner/mcp/server.py"
+      ]
+    }
+  }
+}
+```
+
 ## 6. 一键 CI 命令模板（PowerShell）
 
 脚本路径：
@@ -102,9 +129,13 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acc
 
 汇总 JSON（每个 run）包含关键字段：
 - `status`（MCP 闭环状态）
-- `report_status` / `report_result_status`
+- `report_status`（报告结果状态，来自 report.result_status，回退到 report.status）
 - `effective_exit_code`（语义退出码）
 - `process_exit_code`（真实进程退出码）
+
+汇总 JSON 顶层关键字段：
+- `status`
+- `contract_regression`（启用契约回归时包含 `suite_id/status/cases`）
 
 run 目录新增快速失败摘要：
 - `failure_summary.json`（聚合 `primary_failure` + `key_files` + 退出码语义）
@@ -145,6 +176,8 @@ python "tools/game-test-runner/core/contract_regression.py" --project-root "D:/G
 10. 流程调试按钮：
    - `Run Gameplay Debug Flow`：运行 `exploration_gameplay_flow_v1`
    - `Open flow_report.json`：打开流程步骤报告
+   - `Open step_timeline.json`：打开步骤时间线（step 状态/说明/证据）
+   - `Flow Steps (Timeline)`：在插件内查看 step 状态、明细与截图预览（若有）
 
 期望：
 - 面板显示 `Status: ..., run_id=...`
@@ -169,6 +202,7 @@ python "tools/game-test-runner/core/contract_regression.py" --project-root "D:/G
 流程调试提示：
 - `Run Gameplay Debug Flow` 需要 `Dry Run` 关闭，且需要有效 `Godot Bin`。
 - flow 会输出 `flow_report.json`，包含每个步骤的断言与证据文件路径。
+- flow 还会输出 `step_timeline.json`，用于 IDE 内按步骤查看执行状态与验证证据。
 - flow 运行时仅归档前缀 `flow_exploration_` 的截图，避免混入视觉 canary 图片。
 
 ## 5. 可选：Godot 命令路径
