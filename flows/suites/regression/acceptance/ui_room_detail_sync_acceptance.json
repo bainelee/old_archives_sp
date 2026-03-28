@@ -1,0 +1,46 @@
+{
+  "flowId": "ui_room_detail_sync_acceptance",
+  "name": "Room detail panel strict acceptance",
+  "system": "ui",
+  "profile": "strict_ui",
+  "mode": "local",
+  "scene": "res://scenes/ui/start_menu.tscn",
+  "flowStepTimeoutSec": 20,
+  "env": {
+    "ROOM_TEST_ID": "room_node_room_00"
+  },
+  "steps": [
+    {
+      "id": "prepare_new_game",
+      "action": "runSubflow",
+      "file": "../../../fragments/common/new_game_enter_world.json"
+    },
+    {
+      "id": "navigate_room",
+      "action": "runSubflow",
+      "file": "../../../fragments/common/navigate_to_room.json",
+      "env": {
+        "ROOM_TEST_ID": "${ROOM_TEST_ID}"
+      }
+    },
+    {
+      "id": "shot_room_detail",
+      "action": "screenshot",
+      "name": "room_detail_opened"
+    },
+    {
+      "id": "export_room_detail_spec",
+      "action": "exportUiSpec",
+      "target": { "testId": "room_detail_panel" },
+      "name": "room_detail_spec"
+    },
+    {
+      "id": "check_room_detail_visible",
+      "action": "check",
+      "kind": "visual_hard",
+      "expect": {
+        "nodeVisible": "room_detail_panel"
+      }
+    }
+  ]
+}

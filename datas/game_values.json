@@ -8,7 +8,7 @@
     "_moved_to_split_configs": "researcher_cognition/cleanup/construction/housing/shelter 已迁移到独立 json：researcher_system/cleanup_system/construction_system/shelter_system"
   },
   "factor_caps": {
-    "cognition": 6000,
+    "cognition": 60000,
     "computation": 60000,
     "willpower": 6000,
     "permission": 6000

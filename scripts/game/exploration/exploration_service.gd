@@ -6,7 +6,7 @@ extends RefCounted
 ## 呈现层决策：探索地图 UI 应由 **overlay / 独立 Canvas 层** 承载（与主基地画布解耦）。
 ## 本阶段不创建场景、不接线；打开探索地图时由流程挂接本服务并读取状态即可。
 ## ---------------------------------------------------------------------------
-## 时间与离线：P1 **不做** 离线时长补算；`tick` 仅为占位，供后续与 GameTime 对齐。
+## 时间与离线：**不做** 离线现实时间补算；`tick` 接收 `GameMain` 汇总的 `game_hours_delta` 推进探索中计时；完成后解锁邻接（见 exploration_tick）。
 ## ---------------------------------------------------------------------------
 
 const CONFIG_PATH := "res://datas/exploration_config.json"
@@ -34,6 +34,8 @@ func init_default_state() -> void:
 func ensure_first_open_initialized() -> void:
 	if _state.is_empty():
 		init_default_state()
+	if not _state.has(_Codec.KEY_EXPLORING_BY_REGION):
+		_state[_Codec.KEY_EXPLORING_BY_REGION] = {}
 	if bool(_state.get(_Codec.KEY_FIRST_OPEN_DONE, false)):
 		return
 	var hub: String = _Rules.get_hub_region_id(_config)
@@ -90,7 +92,40 @@ func get_config_readonly() -> Dictionary:
 
 
 func tick(delta_game_hours: float) -> void:
-	_TickScript.tick(self, delta_game_hours)
+	_TickScript.apply_tick(_state, _config, delta_game_hours)
+
+
+## 发起地区探索：占用调查员、写入计时；完成后由 tick 迁移并解锁邻接。
+func explore_region(region_id: String) -> Dictionary:
+	ensure_first_open_initialized()
+	var rid: String = region_id.strip_edges()
+	if rid.is_empty():
+		return {"ok": false, "reason": "empty_region_id", "hours_total": 0.0}
+	if not _Rules.catalog_has_region_id(_config, rid):
+		return {"ok": false, "reason": "unknown_region", "hours_total": 0.0}
+	var explored: Variant = _state.get(_Codec.KEY_EXPLORED_REGION_IDS, [])
+	if explored is Array and (explored as Array).has(rid):
+		return {"ok": false, "reason": "already_explored", "hours_total": 0.0}
+	var unlocked: Variant = _state.get(_Codec.KEY_UNLOCKED_REGION_IDS, [])
+	if not (unlocked is Array) or not (unlocked as Array).has(rid):
+		return {"ok": false, "reason": "not_unlocked", "hours_total": 0.0}
+	var exploring: Variant = _state.get(_Codec.KEY_EXPLORING_BY_REGION, {})
+	if exploring is Dictionary and (exploring as Dictionary).has(rid):
+		return {"ok": false, "reason": "already_exploring", "hours_total": 0.0}
+	var need_inv: int = int(_config.get("explore_investigators_per_region", 1))
+	var pool: int = int(_state.get(_Codec.KEY_DEBUG_INVESTIGATOR_POOL, 0))
+	if pool < need_inv:
+		return {"ok": false, "reason": "no_investigators", "hours_total": 0.0}
+	var hours: float = _Rules.get_region_explore_game_hours(_config, rid)
+	if hours <= 0.0:
+		hours = float(_config.get("default_explore_game_hours", 24.0))
+	var ex: Dictionary = {}
+	if exploring is Dictionary:
+		ex = (exploring as Dictionary).duplicate(true)
+	ex[rid] = {"hours_remaining": hours, "investigators_reserved": need_inv}
+	_state[_Codec.KEY_EXPLORING_BY_REGION] = ex
+	_state[_Codec.KEY_DEBUG_INVESTIGATOR_POOL] = pool - need_inv
+	return {"ok": true, "reason": "", "hours_total": hours}
 
 
 static func _load_config_file() -> Dictionary:

@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Optional
 
 from driver_client import DriverClient
+from runtime_lock import acquire_runtime_lock, release_runtime_lock
 from scenario_registry import get_scenario_by_name
 
 
@@ -56,6 +57,7 @@ class RunRequest:
     requested_run_id: Optional[str] = None
     step_prepare_pause_ms: int = 0
     step_verify_pause_ms: int = 0
+    allow_parallel: bool = False
 
     def normalized_scenario(self) -> str:
         if self.scenario:
@@ -666,48 +668,79 @@ class GameTestRunner:
                         stdout=stdout_file,
                         stderr=stderr_file,
                     )
-
-                    flow_assertions: dict = {"total": 0, "passed": 0, "failed": 0}
-                    flow_error: Optional[str] = None
-                    flow_failure: Optional[dict] = None
-                    if req.enable_test_driver and req.flow_steps:
-                        flow_assertions, flow_error, flow_failure = self._execute_driver_flow(
-                            req=req,
-                            run_root=run_root,
-                            expected_pid=proc.pid,
-                            proc=proc,
-                            user_data_dir=effective_user_data_dir,
-                            session=test_driver_session,
-                        )
-                        if proc.poll() is None:
-                            if flow_error:
-                                proc.kill()
-                            else:
-                                # Flow is complete: end this dedicated test game process
-                                # immediately to avoid waiting for manual window close.
-                                proc.terminate()
-                                try:
-                                    proc.wait(timeout=5)
-                                except subprocess.TimeoutExpired:
-                                    proc.kill()
+                    lock_acquired = False
                     try:
-                        proc.wait(timeout=req.timeout_sec)
-                    except subprocess.TimeoutExpired:
+                        acquire_runtime_lock(
+                            project_root=req.project_root,
+                            pid=int(proc.pid),
+                            run_id=run_id,
+                            owner="runner",
+                            allow_parallel=bool(req.allow_parallel),
+                        )
+                        lock_acquired = True
+                    except RuntimeError as exc:
                         proc.kill()
                         proc.wait(timeout=5)
+                        err = str(exc)
                         last_result = RunResult(
                             run_id=run_id,
-                            status="timeout",
+                            status="failed",
                             exit_code=None,
                             started_at=started_at,
                             finished_at=_utc_now_iso(),
                             artifact_root=str(run_root),
                             command=cmd,
-                            error=f"process timed out on attempt {attempt}",
-                            failure_category="timeout",
+                            error=f"test runtime already active: {err}",
+                            failure_category="runtime_error",
                             failure_details={},
                         )
                         break
+
+                    flow_assertions: dict = {"total": 0, "passed": 0, "failed": 0}
+                    flow_error: Optional[str] = None
+                    flow_failure: Optional[dict] = None
+                    try:
+                        if req.enable_test_driver and req.flow_steps:
+                            flow_assertions, flow_error, flow_failure = self._execute_driver_flow(
+                                req=req,
+                                run_root=run_root,
+                                expected_pid=proc.pid,
+                                proc=proc,
+                                user_data_dir=effective_user_data_dir,
+                                session=test_driver_session,
+                            )
+                            if proc.poll() is None:
+                                if flow_error:
+                                    proc.kill()
+                                else:
+                                    # Flow is complete: end this dedicated test game process
+                                    # immediately to avoid waiting for manual window close.
+                                    proc.terminate()
+                                    try:
+                                        proc.wait(timeout=5)
+                                    except subprocess.TimeoutExpired:
+                                        proc.kill()
+                        try:
+                            proc.wait(timeout=req.timeout_sec)
+                        except subprocess.TimeoutExpired:
+                            proc.kill()
+                            proc.wait(timeout=5)
+                            last_result = RunResult(
+                                run_id=run_id,
+                                status="timeout",
+                                exit_code=None,
+                                started_at=started_at,
+                                finished_at=_utc_now_iso(),
+                                artifact_root=str(run_root),
+                                command=cmd,
+                                error=f"process timed out on attempt {attempt}",
+                                failure_category="timeout",
+                                failure_details={},
+                            )
+                            break
+                    finally:
+                        if lock_acquired:
+                            release_runtime_lock(req.project_root, int(proc.pid))
                 stdout_text = stdout_path.read_text(encoding="utf-8", errors="replace")
                 stderr_text = stderr_path.read_text(encoding="utf-8", errors="replace")
                 status = "finished" if proc.returncode == 0 and flow_error is None else "failed"

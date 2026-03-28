@@ -4,16 +4,21 @@ param(
     [string]$GodotBin = "",
     [string]$OutputJson = "",
     [int]$TimeoutSec = 300,
+    [double]$MaxSilentSec = 10.0,
     [int]$MaxBatch = 3,
-    [double]$WaitScale = 0.2,
-    [double]$ResumeSpeed = 6.0,
+    [double]$WaitScale = 1.0,
+    [double]$ResumeSpeed = 1.0,
     [switch]$DisableThinkPause,
     [switch]$EmitShellChat,
     [double]$PollIntervalSec = 0.8,
     [double]$BroadcastMergeWindowSec = 1.5,
     [int]$MaxWaitSec = 900,
     [int]$StreamLimit = 120,
-    [switch]$NoChatProgress
+    [switch]$NoChatProgress,
+    [ValidateSet("three_phase","legacy_five_phase")]
+    [string]$ChatProtocolMode = "three_phase",
+    [ValidateSet("strict","legacy")]
+    [string]$PausePolicy = "strict"
 )
 
 Set-StrictMode -Version Latest
@@ -41,17 +46,22 @@ $argsList = @(
     "--project-root", $ProjectRoot,
     "--godot-bin", $GodotBin,
     "--timeout-sec", [string]$TimeoutSec,
+    "--max-silent-sec", [string]$MaxSilentSec,
     "--max-batch", [string]$MaxBatch,
-    "--wait-scale", [string]$WaitScale,
+    "--wait-scale", "1.0",
     "--resume-speed", [string]$ResumeSpeed,
-    "--template"
+    "--chat-protocol-mode", [string]$ChatProtocolMode,
+    "--pause-policy", [string]$PausePolicy,
+    "--template",
+    "--emit-shell-chat"
 )
 if ($DisableThinkPause) {
     $argsList += "--disable-think-pause"
 }
-if ($EmitShellChat) {
-    $argsList += "--emit-shell-chat"
-}
+# Step output is mandatory; keep -EmitShellChat for backward-compatible CLI.
+$null = $EmitShellChat
+# Wait scale is fixed at 1.0; keep -WaitScale for backward-compatible CLI.
+$null = $WaitScale
 if (-not [string]::IsNullOrWhiteSpace($OutputJson)) {
     $argsList += @("--output-json", $OutputJson)
 }

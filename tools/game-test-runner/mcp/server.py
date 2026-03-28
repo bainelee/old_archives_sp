@@ -60,6 +60,15 @@ class GameTestMcpServer(
         "start_cursor_chat_plugin": "start_cursor_chat_plugin",
         "pull_cursor_chat_plugin": "pull_cursor_chat_plugin",
     }
+    SNAPSHOT_REQUIRED_TOOLS: set[str] = {
+        "check_test_runner_environment",
+        "run_game_flow",
+        "get_test_artifacts",
+        "get_test_report",
+        "get_mcp_runtime_info",
+        "start_cursor_chat_plugin",
+        "pull_cursor_chat_plugin",
+    }
 
     RELAY_ALLOWED_TOOLS: set[str] = {
         "list_test_scenarios",
@@ -72,10 +81,59 @@ class GameTestMcpServer(
         "pull_cursor_chat_plugin",
         "start_cursor_chat_plugin",
     }
+    RELAY_SESSION_ALLOWED_TOOLS: set[str] = {
+        "pull_cursor_chat_plugin",
+        "get_test_artifacts",
+        "get_test_report",
+        "get_flow_timeline",
+        "get_test_run_status",
+        "cancel_test_run",
+    }
+    BROADCAST_REQUIRED_TOOLS: set[str] = {
+        "run_game_test",
+        "run_game_flow",
+        "start_game_flow_live",
+        "run_and_stream_flow",
+        "start_stepwise_flow",
+        "prepare_step",
+        "execute_step",
+        "verify_step",
+        "step_once",
+        "run_stepwise_autopilot",
+    }
+    MIXIN_OVERRIDES_ALLOWED: set[str] = {"__init__"}
 
     def __init__(self, default_project_root: Path) -> None:
+        self._assert_no_mixin_method_collisions()
         self.default_project_root = default_project_root.resolve()
         self.core_dir = CORE_DIR
+
+    @classmethod
+    def _assert_no_mixin_method_collisions(cls) -> None:
+        owners: dict[str, str] = {}
+        collisions: dict[str, list[str]] = {}
+        for mixin in (
+            CoreHandlersMixin,
+            FixLoopHandlersMixin,
+            LiveHandlersMixin,
+            StepwiseSupportMixin,
+            StepwiseOpsHandlersMixin,
+            StepwiseAutopilotHandlersMixin,
+            CursorChatPluginHandlersMixin,
+        ):
+            mixin_name = mixin.__name__
+            for name, value in mixin.__dict__.items():
+                if name in cls.MIXIN_OVERRIDES_ALLOWED:
+                    continue
+                if not callable(value):
+                    continue
+                if name in owners:
+                    collisions.setdefault(name, [owners[name]]).append(mixin_name)
+                else:
+                    owners[name] = mixin_name
+        if collisions:
+            details = "; ".join(f"{name}: {', '.join(owning)}" for name, owning in sorted(collisions.items()))
+            raise RuntimeError(f"mixin method name collision detected: {details}")
 
     def _enforce_chat_relay_gate(self, tool_name: str, arguments: dict[str, Any]) -> None:
         relay_required = bool(arguments.get("chat_relay_required", False))
@@ -89,6 +147,65 @@ class GameTestMcpServer(
             {
                 "tool": tool_name,
                 "allowed_tools": sorted(self.RELAY_ALLOWED_TOOLS),
+            },
+        )
+
+    @staticmethod
+    def _extract_run_id(arguments: dict[str, Any]) -> str:
+        return str(arguments.get("run_id", "")).strip()
+
+    def _load_plugin_state_by_run_id(self, run_id: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        if not run_id:
+            return {}
+        try:
+            run_root = self._resolve_run_root(run_id, arguments)
+        except AppError:
+            return {}
+        state_path = run_root / "cursor_chat_plugin_state.json"
+        if not state_path.exists():
+            return {}
+        try:
+            payload = json.loads(state_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return {}
+        return payload if isinstance(payload, dict) else {}
+
+    def _enforce_chat_relay_session_gate(self, tool_name: str, arguments: dict[str, Any]) -> None:
+        run_id = self._extract_run_id(arguments)
+        if not run_id:
+            return
+        plugin_state = self._load_plugin_state_by_run_id(run_id, arguments)
+        if not plugin_state:
+            return
+        relay_locked = bool(plugin_state.get("relay_required", False)) or (
+            str(plugin_state.get("relay_policy", "")).strip() == "session_locked"
+        )
+        if not relay_locked:
+            return
+        if tool_name in self.RELAY_SESSION_ALLOWED_TOOLS:
+            return
+        raise AppError(
+            "CHAT_RELAY_SESSION_REQUIRED",
+            "this run_id is locked to chat relay session policy",
+            {
+                "run_id": run_id,
+                "tool": tool_name,
+                "allowed_tools": sorted(self.RELAY_SESSION_ALLOWED_TOOLS),
+            },
+        )
+
+    def _enforce_broadcast_entry_gate(self, tool_name: str, arguments: dict[str, Any]) -> None:
+        if tool_name not in self.BROADCAST_REQUIRED_TOOLS:
+            return
+        if bool(arguments.get("allow_non_broadcast", False)):
+            return
+        raise AppError(
+            "BROADCAST_ENTRY_REQUIRED",
+            "this execution tool is disabled by default; use start_cursor_chat_plugin for guaranteed broadcast",
+            {
+                "tool": tool_name,
+                "preferred_tool": "start_cursor_chat_plugin",
+                "bypass_argument": "allow_non_broadcast=true",
             },
         )
 
@@ -108,6 +225,8 @@ class GameTestMcpServer(
             "tool_count": len(self.TOOL_TO_METHOD),
             "tools": sorted(self.TOOL_TO_METHOD.keys()),
             "relay_allowed_tools": sorted(self.RELAY_ALLOWED_TOOLS),
+            "broadcast_required_tools": sorted(self.BROADCAST_REQUIRED_TOOLS),
+            "broadcast_policy_default": "chat_plugin_only",
             "version_manifest_path": str(VERSION_MANIFEST_PATH),
             "version_manifest_loaded": bool(manifest_payload),
             "update_policy": manifest_payload.get("update_policy", {}),
@@ -119,6 +238,8 @@ class GameTestMcpServer(
         if not method_name:
             raise AppError("UNSUPPORTED_TOOL", f"unsupported tool: {tool_name}")
         self._enforce_chat_relay_gate(tool_name, arguments)
+        self._enforce_chat_relay_session_gate(tool_name, arguments)
+        self._enforce_broadcast_entry_gate(tool_name, arguments)
         method = getattr(self, method_name, None)
         if not callable(method):
             raise AppError("INTERNAL_ERROR", f"tool handler not implemented: {tool_name}")
@@ -136,6 +257,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--run-id", default=None, help="Shortcut for report/artifact query run_id")
     parser.add_argument("--format", default=None, help="Shortcut for get_test_report format")
     parser.add_argument("--flow-file", default=None, help="Shortcut for run_game_flow flow_file")
+    parser.add_argument(
+        "--allow-non-broadcast",
+        action="store_true",
+        help="Shortcut to set allow_non_broadcast=true for broadcast-gated tools",
+    )
     return parser
 
 
@@ -186,6 +312,8 @@ def main() -> int:
             tool_args["flow_file"] = args.flow_file
             if args.dry_run:
                 tool_args["dry_run"] = True
+        if args.allow_non_broadcast:
+            tool_args["allow_non_broadcast"] = True
         if args.tool == "get_test_report" and args.format is not None:
             tool_args["format"] = args.format
         result = server.invoke(args.tool, tool_args)

@@ -77,6 +77,7 @@ class CoreHandlersMixin:
             enable_test_driver=bool(arguments.get("enable_test_driver", False)),
             flow_steps=list(arguments.get("flow_steps", [])),
             flow_step_timeout_sec=int(arguments.get("flow_step_timeout_sec", 15)),
+            allow_parallel=bool(arguments.get("allow_parallel", False)),
         )
         runner = GameTestRunner(project_root=project_root)
         result = runner.run(req)

@@ -1,6 +1,6 @@
 {
   "flowId": "shotq",
-  "name": "shot quick",
+  "name": "shot quick (legacy alias)",
   "system": "gameplay",
   "profile": "regression",
   "mode": "local",
@@ -9,14 +9,10 @@
   "driverReadyTimeoutSec": 20,
   "driverNoActivityTimeoutSec": 20,
   "steps": [
-    { "id": "sleep_boot", "action": "sleep", "ms": 800 },
-    { "id": "click_continue", "action": "click", "target": { "testId": "btn_continue" } },
     {
-      "id": "wait_ingame",
-      "action": "wait",
-      "until": { "scene": "game_main" },
-      "timeoutMs": 20000
-    },
-    { "id": "shot_ingame", "action": "screenshot", "name": "phase2_ingame_quick" }
+      "id": "legacy_redirect_quick_shot",
+      "action": "runSubflow",
+      "file": "suites/regression/gameplay/variants/base_validation_slot0_phase2_step_verify_chat_shot_quick.json"
+    }
   ]
 }

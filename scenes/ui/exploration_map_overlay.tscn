@@ -22,7 +22,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
+mouse_filter = 0
 theme = ExtResource("2_theme")
 
 [node name="Backdrop" type="ColorRect" parent="OverlayRoot"]
@@ -32,7 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 0
 color = Color(0.05, 0.05, 0.05, 0.45)
 
 [node name="MapFrame" type="PanelContainer" parent="OverlayRoot"]
@@ -48,11 +48,16 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_map_frame")
 
-[node name="TopRow" type="HBoxContainer" parent="OverlayRoot/MapFrame"]
+[node name="VBox" type="VBoxContainer" parent="OverlayRoot/MapFrame"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TopRow" type="HBoxContainer" parent="OverlayRoot/MapFrame/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SelectedRegionLabel" type="Label" parent="OverlayRoot/MapFrame/TopRow"]
+[node name="SelectedRegionLabel" type="Label" parent="OverlayRoot/MapFrame/VBox/TopRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.06, 0.06, 0.06, 1)
@@ -60,43 +65,51 @@ theme_override_font_sizes/font_size = 18
 text = "当前地区: -"
 vertical_alignment = 1
 
-[node name="BtnClose" type="Button" parent="OverlayRoot/MapFrame/TopRow"]
+[node name="BtnClose" type="Button" parent="OverlayRoot/MapFrame/VBox/TopRow"]
 custom_minimum_size = Vector2(120, 34)
 layout_mode = 2
 text = "关闭探索"
 
-[node name="HintLabel" type="Label" parent="OverlayRoot/MapFrame"]
+[node name="HintLabel" type="Label" parent="OverlayRoot/MapFrame/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.12, 0.12, 1)
 theme_override_font_sizes/font_size = 14
-text = "未解锁地区显示 ?；已解锁地区可点击"
+text = "未解锁地区显示 ?；已解锁地区可点击打开右侧地区信息"
 
-[node name="MapTexture" type="TextureRect" parent="OverlayRoot/MapFrame"]
+[node name="BodyRow" type="HBoxContainer" parent="OverlayRoot/MapFrame/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-expand_mode = 1
-stretch_mode = 6
+theme_override_constants/separation = 8
 
-[node name="MapCanvas" type="Control" parent="OverlayRoot/MapFrame"]
+[node name="MapStack" type="Control" parent="OverlayRoot/MapFrame/VBox/BodyRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MapTexture" type="TextureRect" parent="OverlayRoot/MapFrame/VBox/BodyRow/MapStack"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 76.0
-offset_right = -360.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
 
-[node name="LineRoot" type="Node2D" parent="OverlayRoot/MapFrame/MapCanvas"]
-
-[node name="DetailAnchor" type="Control" parent="OverlayRoot/MapFrame"]
+[node name="MapCanvas" type="Control" parent="OverlayRoot/MapFrame/VBox/BodyRow/MapStack"]
 layout_mode = 1
-anchor_left = 1.0
-anchor_top = 0.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -360.0
-grow_horizontal = 0
+grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 0
+
+[node name="LineRoot" type="Node2D" parent="OverlayRoot/MapFrame/VBox/BodyRow/MapStack/MapCanvas"]
+
+[node name="DetailAnchor" type="Control" parent="OverlayRoot/MapFrame/VBox/BodyRow"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_vertical = 3

@@ -10,6 +10,7 @@
 | 做快速门禁（环境 + 契约 + 工具面） | `Fast` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
 | 做完整验收（环境 + 2 条 acceptance） | 默认模式 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"` |
 | 做完整验收 + 契约回归 | 默认 + 契约 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -IncludeContractRegression` |
+| 探索系统当前阶段专项验证（L1+L2+门禁） | `ExplorationValidation` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_exploration_validation.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "<GodotExePath>"` |
 
 非技术同学建议先用这一条（仓库根目录执行）：
 ```powershell
@@ -140,8 +141,8 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gam
 基础流程模板（推荐作为后续 flow 的基线）：
 - 流程语义：新游戏覆盖存档0 -> 清理房间等待 -> 建设房间等待 -> 保存游戏 -> 退出 -> 继续游戏验证
 - 实现方式：双阶段执行（phase1 + phase2）
-  - phase1: `flows/base_validation_slot0_phase1.json`（进入游戏后设置 `setGameTimeSpeed speed=6.0`）
-  - phase2: `flows/base_validation_slot0_phase2.json`（继续游戏后再次设置 `setGameTimeSpeed speed=6.0`）
+  - phase1: `flows/base_validation_slot0_phase1.json`（按设计时长等待清理/建设，保存前强制 `setGameTimeSpeed speed=1.0`）
+  - phase2: `flows/base_validation_slot0_phase2.json`（继续游戏后保持 `setGameTimeSpeed speed=1.0` 并验证状态）
 - 一键脚本：
 ```powershell
 powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_base_template.ps1" `
@@ -150,7 +151,9 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gam
 ```
 - 说明：
   - 该脚本默认走 `cursor_chat_plugin` 主链路（`start_cursor_chat_plugin + pull_cursor_chat_plugin`）。
-  - 每一步固定输出 5 段：`即将开始 -> 开始执行 -> 执行结果 -> 验证结论 -> 通过后进入下一步`。
+  - `WaitScale` 执行口径固定为 `1.0`，不得用于缩短等待；需调优时请修改 flow 的显式等待参数。
+  - 每步固定前置延迟当前为 `0.1s`（`scripts/test/test_driver.gd`），用于减少无意义等待且保持动作稳定。
+  - 每一步固定输出 3 段：`开始执行 -> 执行结果 -> 验证结论`。
   - 若验证失败会立即停止，不继续后续步骤。
   - 轮询支持 `max_batch`（默认 3）以减少往返调用，降低对话侧延迟。
   - `-NoChatProgress` 作为兼容参数保留（当前不再关闭 stepwise 的阶段播报）。
@@ -171,9 +174,10 @@ chat 审计字段（统一）：
 ChatRelay 强约束（必须）：
 - 详情文档：`docs/testing/05-chat-relay-guardrails.md`
 - 实现现状与用户硬约束总览：`docs/testing/06-chat-first-status-and-requirements.md`
+- 故障排查手册：`docs/testing/07-shell-broadcast-troubleshooting.md`
 - 执行工具链：`start_cursor_chat_plugin + pull_cursor_chat_plugin`
 - MCP 可开启强制门禁：`chat_relay_required=true`（阻断非 relay 执行路径）
-- shell `[CHAT]` 默认关闭；仅排障时显式启用 `--emit-shell-chat` / `-EmitShellChat`
+- 当启用 `--emit-shell-chat` / `-EmitShellChat` 时，shell 播报采用两行协议：`[emit=HH:MM:SS][event=HH:MM:SS][game=]` + 文本行（无 `[CHAT]` 前缀）
 
 ## 9) 安装与更新（Settings 友好）
 - 安装脚本：`tools/game-test-runner/install/install-mcp.ps1`
@@ -191,5 +195,12 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/install/install
 
 执行前/中/后 checklist（防偏离）：
 - 执行前：确认已拿到 `run_id`，并进入 `pull_cursor_chat_plugin` 循环
-- 执行中：按 `about_to_start -> started -> result -> verify -> next` 顺序播报，不补历史批次
+- 执行中：按 `started -> result -> verify` 顺序播报，不补历史批次
 - 执行后：输出 `protocol_all_ok`、`min/max/avg_delay_ms`、失败步骤与原因（若有）
+
+## 10) 探索系统专项（未完整实现阶段）
+- 入口脚本：`tools/game-test-runner/scripts/run_gameplay_exploration_validation.ps1`
+- 分层定义：`docs/testing/09-exploration-gameplayflow-validation.md`
+- L1 flow：`flows/suites/regression/gameplay/exploration_validation_l1_scene_probe.json`
+- L2 flow：`flows/suites/regression/gameplay/exploration_validation_l2_smoke_invariants.json`
+- 白名单规则：`flows/rules/exploration_assertion_whitelist_v1.json`

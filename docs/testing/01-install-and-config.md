@@ -93,7 +93,7 @@ python "tools/game-test-runner/mcp/server.py" --tool run_and_stream_flow --proje
 
 ### 3.6 ChatRelay 强制门禁（推荐开启）
 
-当希望“聊天窗口是唯一播报面”时，在执行类调用参数中加入：
+当希望“必须走 chat relay 主链路”时，在执行类调用参数中加入：
 
 ```json
 {
@@ -106,7 +106,8 @@ python "tools/game-test-runner/mcp/server.py" --tool run_and_stream_flow --proje
 - `pull_cursor_chat_plugin`
 - 查询/取消类工具（状态、报告、产物、环境检查）
 
-其它执行入口（如 `run_game_flow`、`start_stepwise_flow` 等）会被服务端拒绝。
+其它执行入口（如 `run_game_flow`、`start_stepwise_flow` 等）会被服务端拒绝。  
+如需在终端镜像播报，可在脚本侧额外启用 `--emit-shell-chat` / `-EmitShellChat`。
 
 ## 6. 一键 CI 命令模板（PowerShell）
 

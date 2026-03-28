@@ -1,12 +1,36 @@
 {
-  "schema_version": 1,
-  "description": "探索系统静态配置（P1）。玩法闭环与 UI 另阶段接入。",
+  "schema_version": 2,
+  "description": "探索系统静态配置：区域、邻接、探索耗时（与设计 10 邻接表一致）。",
   "hub_region_id": "old_archives",
   "default_initial_investigator_count_debug": 5,
+  "default_explore_game_hours": 24,
+  "explore_investigators_per_region": 1,
   "initial_unlock_region_ids": [
     "white_cliff",
     "durkin_mine",
     "mandos_industrial"
+  ],
+  "region_edges": [
+    ["old_archives", "white_cliff"],
+    ["old_archives", "durkin_mine"],
+    ["old_archives", "mandos_industrial"],
+    ["white_cliff", "durkin_mine"],
+    ["white_cliff", "saint_river_afv"],
+    ["white_cliff", "bolero_port"],
+    ["durkin_mine", "ural_mountain"],
+    ["mandos_industrial", "new_barguzin"],
+    ["mandos_industrial", "bolero_port"],
+    ["bolero_port", "bluewood_transit"],
+    ["bolero_port", "mason_port"],
+    ["saint_river_afv", "andal_town"],
+    ["saint_river_afv", "korloh_sea"],
+    ["andal_town", "grey_town"],
+    ["korloh_sea", "grey_town"],
+    ["bluewood_transit", "grey_town"],
+    ["ural_mountain", "morku_industrial"],
+    ["new_barguzin", "west_202_port"],
+    ["morku_industrial", "west_202_port"],
+    ["morku_industrial", "korborko"]
   ],
   "regions_placeholder": [
     { "id": "old_archives", "display_name_zh": "旧日档案馆" },

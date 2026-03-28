@@ -1,0 +1,12 @@
+{
+  "flowId": "exploration_validation_l2_smoke_invariants",
+  "name": "Exploration L2: smoke invariants",
+  "system": "exploration",
+  "profile": "regression",
+  "mode": "local",
+  "scene": "res://scenes/test/exploration_smoke_test.tscn",
+  "flowStepTimeoutSec": 15,
+  "driverReadyTimeoutSec": 20,
+  "driverNoActivityTimeoutSec": 5,
+  "steps": []
+}

@@ -1,0 +1,118 @@
+{
+  "flowId": "basic_data_validation_hall_slot0_phase2_continue",
+  "name": "Basic data test phase2: continue and snapshot resources",
+  "system": "gameplay",
+  "profile": "regression",
+  "mode": "local",
+  "scene": "res://scenes/ui/start_menu.tscn",
+  "flowStepTimeoutSec": 20,
+  "driverReadyTimeoutSec": 20,
+  "driverNoActivityTimeoutSec": 5,
+  "env": {
+    "ROOM_A_ID": "room_01",
+    "ROOM_B_ID": "room_03",
+    "ROOM_C_ID": "room_07",
+    "ROOM_D_ID": "room_04",
+    "ROOM_E_ID": "room_08"
+  },
+  "steps": [
+    { "id": "sleep_boot", "action": "sleep", "ms": 500 },
+    { "id": "click_continue", "action": "click", "target": { "testId": "btn_continue" } },
+    {
+      "id": "wait_ingame",
+      "action": "wait",
+      "until": { "scene": "game_main" },
+      "minWaitMs": 200,
+      "timeoutMs": 2000
+    },
+    { "id": "pause_before_verify_window", "action": "setGlobalPause", "paused": true },
+    {
+      "id": "snapshot_after_continue_risk",
+      "action": "getState",
+      "keys": ["resources", "game_total_hours", "settlement_clock", "resource_ledger"],
+      "roomId": "${ROOM_E_ID}"
+    },
+    {
+      "id": "verify_room_a_cleaned",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_A_ID}",
+      "expect": { "room_clean_status": "cleaned" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_a_built",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_A_ID}",
+      "expect": { "build_status": "built" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_b_cleaned",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_B_ID}",
+      "expect": { "room_clean_status": "cleaned" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_b_built",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_B_ID}",
+      "expect": { "build_status": "built" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_c_cleaned",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_C_ID}",
+      "expect": { "room_clean_status": "cleaned" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_c_built",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_C_ID}",
+      "expect": { "build_status": "built" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_d_cleaned",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_D_ID}",
+      "expect": { "room_clean_status": "cleaned" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_d_built",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_D_ID}",
+      "expect": { "build_status": "built" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_e_cleaned",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_E_ID}",
+      "expect": { "room_clean_status": "cleaned" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_e_built",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_E_ID}",
+      "expect": { "build_status": "built" },
+      "timeoutMs": 5000
+    },
+    { "id": "snapshot_r3", "action": "getState", "keys": ["resources", "game_total_hours"], "roomId": "${ROOM_E_ID}" },
+    { "id": "resume_after_verify_window", "action": "setGlobalPause", "paused": false }
+  ]
+}

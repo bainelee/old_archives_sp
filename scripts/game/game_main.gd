@@ -960,6 +960,8 @@ func _process(delta: float) -> void:
 		GameMainShelterHelper.process_shelter_tick(self, game_hours_delta, _shelter_level)
 		if _exploration_service and _exploration_service.has_method("tick"):
 			_exploration_service.call("tick", game_hours_delta)
+		if _exploration_map_overlay and _exploration_map_overlay.visible and _exploration_map_overlay.has_method("refresh_regions"):
+			_exploration_map_overlay.call("refresh_regions")
 		_sync_resources_to_topbar()  ## 时间流逝时每帧刷新因子显示，确保各倍速下都能实时看到消耗
 	_sync_cleanup_researchers_to_ui()
 	_sync_construction_researchers_to_ui()

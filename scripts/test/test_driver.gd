@@ -1,6 +1,7 @@
 extends Node
 
 const DRIVER_ROOT_DIR := "user://test_driver"
+const _ExplorationCodec := preload("res://scripts/game/exploration/exploration_state_codec.gd")
 
 var _enabled: bool = false
 var _busy: bool = false
@@ -84,6 +85,16 @@ func _execute_command(cmd: Dictionary) -> Dictionary:
 			_handle_set_global_pause(params, out)
 		"setFault":
 			_handle_set_fault(params, out)
+		"exploreRegion":
+			_handle_explore_region(params, out)
+		"advanceGameHours":
+			_handle_advance_game_hours(params, out)
+		"changeScene":
+			await _handle_change_scene(params, out)
+		"verifySaveSlotExploration":
+			_handle_verify_save_slot_exploration(params, out)
+		"loadGameMainFromSlot":
+			await _handle_load_game_main_from_slot(params, out)
 		_:
 			_fail(out, "UNSUPPORTED_ACTION", "unsupported action: %s" % action)
 
@@ -411,6 +422,16 @@ func _handle_get_state(params: Dictionary, out: Dictionary) -> void:
 			"exploration_overlay_visible":
 				var overlay: CanvasLayer = gm.get("_exploration_map_overlay")
 				data[key] = bool(overlay and overlay.visible)
+			"exploration_explored_ids":
+				data[key] = _exploration_sorted_explored_ids(gm)
+			"game_main_camera_distance":
+				data[key] = float(gm.get("_camera_distance"))
+			"game_main_camera_zoom":
+				var cam2d_state: Camera2D = gm.get("_camera")
+				if cam2d_state:
+					data[key] = float(cam2d_state.zoom.x)
+				else:
+					data[key] = null
 			_:
 				data[key] = null
 	out["data"] = data
@@ -546,6 +567,54 @@ func _handle_check(params: Dictionary, out: Dictionary) -> void:
 				if not (btn_node is BaseButton and (btn_node as BaseButton).disabled):
 					_fail(out, "CHECK_FAILED", "expected button disabled: %s" % str(expect.get("btnDisabled", "")))
 					return
+		"camera_unchanged_after_wheel":
+			var gm_wheel: Node2D = _get_game_main()
+			if gm_wheel == null:
+				_fail(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+				return
+			if bool(expect.get("requireExplorationOverlay", true)):
+				var ovl: CanvasLayer = gm_wheel.get("_exploration_map_overlay")
+				if ovl == null or not ovl.visible:
+					_fail(out, "CHECK_FAILED", "exploration overlay must be open for camera_unchanged_after_wheel")
+					return
+			var steps_n: int = maxi(1, int(expect.get("steps", 6)))
+			var dir_str: String = str(expect.get("direction", "up"))
+			var camera3d_n: Camera3D = gm_wheel.get("_camera3d")
+			var dist_before: float = float(gm_wheel.get("_camera_distance"))
+			var zoom_before: float = -1.0
+			var cam2d_n: Camera2D = gm_wheel.get("_camera")
+			if cam2d_n:
+				zoom_before = float(cam2d_n.zoom.x)
+			var vp_wheel: Viewport = get_tree().root.get_viewport()
+			var pos_wheel: Vector2 = vp_wheel.get_visible_rect().get_center()
+			for _i in steps_n:
+				var w_ev := InputEventMouseButton.new()
+				w_ev.position = pos_wheel
+				if dir_str.to_lower() == "down":
+					w_ev.button_index = MOUSE_BUTTON_WHEEL_DOWN
+				else:
+					w_ev.button_index = MOUSE_BUTTON_WHEEL_UP
+				w_ev.pressed = true
+				w_ev.factor = 1.0
+				Input.parse_input_event(w_ev)
+			if camera3d_n:
+				var dist_after: float = float(gm_wheel.get("_camera_distance"))
+				if not is_equal_approx(dist_before, dist_after):
+					_fail(
+						out,
+						"CHECK_FAILED",
+						"camera distance changed after wheel (overlay open): before=%s after=%s" % [str(dist_before), str(dist_after)]
+					)
+					return
+			elif cam2d_n:
+				var zoom_after: float = float(cam2d_n.zoom.x)
+				if not is_equal_approx(zoom_before, zoom_after):
+					_fail(
+						out,
+						"CHECK_FAILED",
+						"camera zoom changed after wheel (overlay open): before=%s after=%s" % [str(zoom_before), str(zoom_after)]
+					)
+					return
 		_:
 			_fail(out, "INVALID_ARGUMENT", "unsupported check kind: %s" % kind)
 			return
@@ -585,6 +654,129 @@ func _handle_set_global_pause(params: Dictionary, out: Dictionary) -> void:
 		return
 	tree.paused = paused
 	out["data"] = {"tree_paused": tree.paused}
+
+
+func _exploration_sorted_explored_ids(gm: Node2D) -> Array:
+	var svc: Variant = gm.get("_exploration_service")
+	if svc == null or not svc.has_method("get_runtime_state_readonly"):
+		return []
+	var st: Dictionary = svc.call("get_runtime_state_readonly") as Dictionary
+	var arr: Array[String] = _ExplorationCodec.normalize_string_id_array(st.get(_ExplorationCodec.KEY_EXPLORED_REGION_IDS, []))
+	var dup: Array = []
+	for x in arr:
+		dup.append(str(x))
+	dup.sort()
+	return dup
+
+
+func _handle_explore_region(params: Dictionary, out: Dictionary) -> void:
+	var rid: String = str(params.get("regionId", "")).strip_edges()
+	if rid.is_empty():
+		_fail(out, "INVALID_ARGUMENT", "exploreRegion requires regionId")
+		return
+	var gm: Node2D = _get_game_main()
+	if gm == null:
+		_fail(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+		return
+	var svc: Variant = gm.get("_exploration_service")
+	if svc == null or not svc.has_method("explore_region"):
+		_fail(out, "NO_EXPLORATION_SERVICE", "exploration service missing")
+		return
+	svc.call("ensure_first_open_initialized")
+	var res: Variant = svc.call("explore_region", rid)
+	if not (res is Dictionary) or not bool((res as Dictionary).get("ok", false)):
+		var reason: String = str((res as Dictionary).get("reason", "unknown")) if res is Dictionary else "bad_result"
+		_fail(out, "EXPLORE_FAILED", "explore_region failed: %s" % reason)
+		return
+	out["data"] = res
+
+
+func _handle_advance_game_hours(params: Dictionary, out: Dictionary) -> void:
+	var hours: float = maxf(0.0, float(params.get("hours", 0.0)))
+	if hours <= 0.0:
+		out["data"] = {"advanced": 0.0}
+		return
+	if GameTime and GameTime.has_method("set_total_hours") and GameTime.has_method("get_total_hours"):
+		GameTime.set_total_hours(GameTime.get_total_hours() + hours)
+	var gm: Node2D = _get_game_main()
+	if gm == null:
+		_fail(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+		return
+	var svc: Variant = gm.get("_exploration_service")
+	if svc != null and svc.has_method("tick"):
+		svc.call("tick", hours)
+	out["data"] = {"advanced": hours}
+
+
+func _handle_load_game_main_from_slot(params: Dictionary, out: Dictionary) -> void:
+	var slot: int = int(params.get("slot", 0))
+	if SaveManager == null:
+		_fail(out, "SAVE_MANAGER_MISSING", "SaveManager autoload missing")
+		return
+	SaveManager.pending_load_slot = slot
+	const GAME_MAIN_SCENE := "res://scenes/game/game_main.tscn"
+	var err: Error = get_tree().change_scene_to_file(GAME_MAIN_SCENE)
+	if err != OK:
+		_fail(out, "SCENE_CHANGE_FAILED", "change_scene_to_file failed: %s" % error_string(err))
+		return
+	await get_tree().process_frame
+	await get_tree().process_frame
+	out["data"] = {"slot": slot, "scene": GAME_MAIN_SCENE}
+
+
+func _handle_change_scene(params: Dictionary, out: Dictionary) -> void:
+	var path: String = str(params.get("path", "")).strip_edges()
+	if path.is_empty():
+		_fail(out, "INVALID_ARGUMENT", "changeScene requires path")
+		return
+	var err: Error = get_tree().change_scene_to_file(path)
+	if err != OK:
+		_fail(out, "SCENE_CHANGE_FAILED", "change_scene_to_file failed: %s" % error_string(err))
+		return
+	await get_tree().process_frame
+	await get_tree().process_frame
+	out["data"] = {"path": path}
+
+
+func _handle_verify_save_slot_exploration(params: Dictionary, out: Dictionary) -> void:
+	var slot: int = int(params.get("slot", 0))
+	var must: Variant = params.get("mustContainExplored", [])
+	if not (must is Array):
+		_fail(out, "INVALID_ARGUMENT", "mustContainExplored must be array")
+		return
+	if SaveManager == null:
+		_fail(out, "SAVE_MANAGER_MISSING", "SaveManager autoload missing")
+		return
+	var path: String = SaveManager.get_slot_path(slot)
+	if not FileAccess.file_exists(path):
+		_fail(out, "SAVE_NOT_FOUND", "no save at %s" % path)
+		return
+	var f: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		_fail(out, "SAVE_READ_FAILED", path)
+		return
+	var txt: String = f.get_as_text()
+	f.close()
+	var parsed: Variant = JSON.parse_string(txt)
+	if not (parsed is Dictionary):
+		_fail(out, "SAVE_PARSE_FAILED", "invalid json")
+		return
+	var root: Dictionary = parsed as Dictionary
+	var ex: Variant = root.get("exploration", {})
+	if not (ex is Dictionary):
+		_fail(out, "SAVE_NO_EXPLORATION", "root has no exploration block")
+		return
+	var explored_raw: Variant = (ex as Dictionary).get("explored_region_ids", [])
+	var explored: Array = explored_raw if explored_raw is Array else []
+	for id in must as Array:
+		var sid: String = str(id)
+		if not explored.has(sid):
+			_fail(out, "EXPLORE_STATE_MISMATCH", "save missing explored id: %s (have %s)" % [sid, JSON.stringify(explored)])
+			return
+	out["data"] = {
+		"explored_region_ids": explored,
+		"save_version": (ex as Dictionary).get("save_version"),
+	}
 
 
 func _handle_set_fault(params: Dictionary, out: Dictionary) -> void:

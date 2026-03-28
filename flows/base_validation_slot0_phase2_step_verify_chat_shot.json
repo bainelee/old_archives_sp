@@ -15,16 +15,17 @@
     "ROOM_ID": "room_01"
   },
   "steps": [
-    { "id": "sleep_boot", "action": "sleep", "ms": 800 },
+    { "id": "sleep_boot", "action": "sleep", "ms": 500 },
     { "id": "click_continue", "action": "click", "target": { "testId": "btn_continue" } },
     {
       "id": "wait_ingame",
       "action": "wait",
       "until": { "scene": "game_main" },
-      "timeoutMs": 20000
+      "minWaitMs": 200,
+      "timeoutMs": 2000
     },
     { "id": "shot_ingame", "action": "screenshot", "name": "phase2_ingame" },
-    { "id": "set_game_speed_x6", "action": "setGameTimeSpeed", "speed": 6.0 },
+    { "id": "set_game_speed_x1_stable", "action": "setGameTimeSpeed", "speed": 1.0 },
     {
       "id": "verify_room_cleaned",
       "action": "check",

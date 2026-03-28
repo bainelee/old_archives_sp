@@ -8,10 +8,32 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from runtime_lock import release_runtime_lock
 from server_common import to_posix
 
 
 class StepwiseSupportMixin:
+    UNPAUSED_ACTION_WHITELIST: set[str] = {"wait", "sleep", "runsubflow"}
+
+    @staticmethod
+    def _to_bool(value: Any) -> bool:
+        if isinstance(value, bool):
+            return value
+        text = str(value or "").strip().lower()
+        return text in {"1", "true", "yes", "y", "on"}
+
+    def _step_requires_unpaused(self, step: dict[str, Any]) -> bool:
+        if not isinstance(step, dict):
+            return False
+        params = step.get("params", {})
+        if not isinstance(params, dict):
+            params = {}
+        explicit = params.get("requires_unpaused")
+        if explicit is not None:
+            return self._to_bool(explicit)
+        action = str(step.get("action", "")).strip().lower()
+        return action in self.UNPAUSED_ACTION_WHITELIST
+
     @staticmethod
     def _stepwise_state_path(run_root: Path) -> Path:
         return run_root / "stepwise_session.json"
@@ -150,6 +172,11 @@ class StepwiseSupportMixin:
         detail: str = "",
         event_utc: str = "",
         game_time: str = "",
+        requires_unpaused: bool | None = None,
+        paused_by_plugin: bool | None = None,
+        step_enter_runtime: dict[str, Any] | None = None,
+        step_exit_runtime: dict[str, Any] | None = None,
+        runtime_window: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         progress = f"{step_index + 1}/{step_total}" if step_total > 0 and step_index >= 0 else ""
         if phase == "about_to_start":
@@ -164,7 +191,7 @@ class StepwiseSupportMixin:
         else:
             text = f"{step_id}（{action}）"
         event_ts = str(event_utc or datetime.now(timezone.utc).isoformat())
-        return {
+        out = {
             "phase": phase,
             "text": text,
             "step_id": step_id,
@@ -176,6 +203,17 @@ class StepwiseSupportMixin:
             "game_time": str(game_time or ""),
             "ts": event_ts,
         }
+        if requires_unpaused is not None:
+            out["requires_unpaused"] = bool(requires_unpaused)
+        if paused_by_plugin is not None:
+            out["paused_by_plugin"] = bool(paused_by_plugin)
+        if isinstance(step_enter_runtime, dict):
+            out["step_enter_runtime"] = step_enter_runtime
+        if isinstance(step_exit_runtime, dict):
+            out["step_exit_runtime"] = step_exit_runtime
+        if isinstance(runtime_window, dict):
+            out["runtime_window"] = runtime_window
+        return out
 
     def _finalize_stepwise_session(self, run_root: Path, state: dict[str, Any], final_status: str, error: str = "") -> None:
         normalized_final = "passed" if str(final_status).strip().lower() == "passed" else "failed"
@@ -189,6 +227,11 @@ class StepwiseSupportMixin:
         state["pid_terminate_method"] = str(termination.get("method", "none"))
         if bool(termination.get("pid_exited", False)):
             state["pid"] = 0
+        if bool(state.get("runtime_lock_acquired", False)):
+            project_root = Path(str(state.get("project_root", "")).strip())
+            if str(project_root):
+                release_runtime_lock(project_root, int(termination.get("pid", 0) or 0))
+            state["runtime_lock_acquired"] = False
         self._write_stepwise_flow_report(run_root, state)
         report_payload: dict[str, Any] = {
             "runId": str(state.get("run_id", "")),

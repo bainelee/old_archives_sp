@@ -19,11 +19,6 @@
       "file": "common/new_game_enter_world.json"
     },
     {
-      "id": "set_game_speed_x6",
-      "action": "setGameTimeSpeed",
-      "speed": 6.0
-    },
-    {
       "id": "start_cleanup_mode",
       "action": "click",
       "target": { "testId": "btn_cleanup" }
@@ -44,7 +39,7 @@
       "until": {
         "stateEquals": { "key": "room_clean_status", "value": "cleaned", "roomId": "${CLEAN_ROOM_ID}" }
       },
-      "timeoutMs": 60000
+      "timeoutMs": 7000
     },
     {
       "id": "start_build_mode",
@@ -88,7 +83,12 @@
       "until": {
         "stateEquals": { "key": "build_status", "value": "built", "roomId": "${BUILD_ROOM_ID}" }
       },
-      "timeoutMs": 120000
+      "timeoutMs": 10000
+    },
+    {
+      "id": "set_game_speed_x1_before_save",
+      "action": "setGameTimeSpeed",
+      "speed": 1.0
     },
     {
       "id": "save_game_slot0",

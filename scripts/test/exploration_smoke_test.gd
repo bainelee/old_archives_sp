@@ -48,6 +48,43 @@ func _ready() -> void:
 		_fail("restored explored list mismatch")
 		return
 
+	var er: Dictionary = service.explore_region("white_cliff")
+	if not bool(er.get("ok", false)):
+		_fail("explore_region failed: %s" % str(er.get("reason", "")))
+		return
+	service.tick(30.0)
+	var st2: Dictionary = service.get_runtime_state_readonly()
+	var explored_after: Array[String] = CodecScript.normalize_string_id_array(st2.get(CodecScript.KEY_EXPLORED_REGION_IDS, []))
+	if not explored_after.has("white_cliff"):
+		_fail("white_cliff should be explored after tick")
+		return
+	var unlocked_after: Array[String] = CodecScript.normalize_string_id_array(st2.get(CodecScript.KEY_UNLOCKED_REGION_IDS, []))
+	if not unlocked_after.has("saint_river_afv"):
+		_fail("neighbor saint_river_afv should unlock after white_cliff explored")
+		return
+
+	var s_mid = ExplorationServiceScript.new()
+	s_mid.init_default_state()
+	s_mid.ensure_first_open_initialized()
+	var er2: Dictionary = s_mid.explore_region("durkin_mine")
+	if not bool(er2.get("ok", false)):
+		_fail("explore durkin_mine for mid-save: %s" % str(er2.get("reason", "")))
+		return
+	var blob_mid: Dictionary = s_mid.to_save_dict()
+	var s_restore = ExplorationServiceScript.new()
+	s_restore.load_from_save_dict(blob_mid)
+	var st_mid: Dictionary = s_restore.get_runtime_state_readonly()
+	var ex_mid: Variant = st_mid.get(CodecScript.KEY_EXPLORING_BY_REGION, {})
+	if not (ex_mid is Dictionary) or not (ex_mid as Dictionary).has("durkin_mine"):
+		_fail("restored state should keep durkin_mine exploring")
+		return
+	s_restore.tick(100.0)
+	var st_fin: Dictionary = s_restore.get_runtime_state_readonly()
+	var explored_fin: Array[String] = CodecScript.normalize_string_id_array(st_fin.get(CodecScript.KEY_EXPLORED_REGION_IDS, []))
+	if not explored_fin.has("durkin_mine"):
+		_fail("durkin_mine should complete after restore+tick")
+		return
+
 	print("[ExplorationSmokeTest] PASS")
 	get_tree().quit(0)
 

@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from fix_loop_service import default_fix_loop_payload, normalize_bounded_auto_fix
+from flow_path_resolver import resolve_flow_path
 from flow_runner import execute_flow_file
 from server_common import (
     first_failure_reason,
@@ -22,11 +23,11 @@ class FixLoopHandlersMixin:
         flow_file_raw = str(arguments.get("flow_file", "")).strip()
         if not flow_file_raw:
             raise AppError("INVALID_ARGUMENT", "flow_file is required")
-        flow_file = Path(flow_file_raw).resolve()
-        if not flow_file.exists():
-            raise AppError("NOT_FOUND", f"flow file not found: {flow_file}")
         project_root_raw = arguments.get("project_root", str(self.default_project_root))
         project_root = Path(str(project_root_raw)).resolve()
+        flow_file = resolve_flow_path(project_root=project_root, raw_flow_file=flow_file_raw)
+        if not flow_file.exists():
+            raise AppError("NOT_FOUND", f"flow file not found: {flow_file}")
         timeout_sec = int(arguments.get("timeout_sec", 300))
         dry_run = bool(arguments.get("dry_run", False))
         driver_ready_timeout_sec = (
@@ -52,6 +53,7 @@ class FixLoopHandlersMixin:
             driver_ready_timeout_sec=driver_ready_timeout_sec,
             driver_no_activity_timeout_sec=driver_no_activity_timeout_sec,
             run_id=str(arguments.get("run_id", "")).strip() or None,
+            allow_parallel=bool(arguments.get("allow_parallel", False)),
         )
         payload["exit_code"] = code
         payload["flow_status"] = str(payload.get("status", ""))
@@ -125,6 +127,7 @@ class FixLoopHandlersMixin:
                         "driver_ready_timeout_sec": driver_ready_timeout_sec,
                         "driver_no_activity_timeout_sec": driver_no_activity_timeout_sec,
                         "bounded_auto_fix": bounded_auto_fix,
+                        "allow_parallel": bool(arguments.get("allow_parallel", False)),
                     },
                 },
             )
@@ -161,6 +164,7 @@ class FixLoopHandlersMixin:
                 "driver_ready_timeout_sec": driver_ready_timeout_sec,
                 "driver_no_activity_timeout_sec": driver_no_activity_timeout_sec,
                 "bounded_auto_fix": bounded_auto_fix,
+                "allow_parallel": bool(arguments.get("allow_parallel", False)),
             },
             "last_payload": payload,
         }
@@ -349,6 +353,7 @@ class FixLoopHandlersMixin:
                     if config.get("driver_no_activity_timeout_sec") is not None
                     else None
                 ),
+                allow_parallel=bool(config.get("allow_parallel", False)),
             )
             retry_payload["exit_code"] = retry_code
             retry_payload["flow_status"] = str(retry_payload.get("status", ""))

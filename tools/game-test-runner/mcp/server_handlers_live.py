@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from flow_live_service import build_live_start_payload, build_stream_entry, resolve_live_state
+from flow_path_resolver import resolve_flow_path
 from server_common import load_report, resolve_godot_bin, to_posix, live_run_id
 from server_errors import AppError
 from artifact_service import load_flow_report
@@ -21,11 +22,11 @@ class LiveHandlersMixin:
         flow_file_raw = str(arguments.get("flow_file", "")).strip()
         if not flow_file_raw:
             raise AppError("INVALID_ARGUMENT", "flow_file is required")
-        flow_file = Path(flow_file_raw).resolve()
-        if not flow_file.exists():
-            raise AppError("NOT_FOUND", f"flow file not found: {flow_file}")
         project_root_raw = arguments.get("project_root", str(self.default_project_root))
         project_root = Path(str(project_root_raw)).resolve()
+        flow_file = resolve_flow_path(project_root=project_root, raw_flow_file=flow_file_raw)
+        if not flow_file.exists():
+            raise AppError("NOT_FOUND", f"flow file not found: {flow_file}")
         timeout_sec = int(arguments.get("timeout_sec", 300))
         dry_run = bool(arguments.get("dry_run", False))
         requested_godot_bin = str(arguments.get("godot_bin", "godot4"))
@@ -58,6 +59,8 @@ class LiveHandlersMixin:
         ]
         if dry_run:
             cmd.append("--dry-run")
+        if bool(arguments.get("allow_parallel", False)):
+            cmd.append("--allow-parallel")
         with open(stdout_path, "w", encoding="utf-8") as out_fh, open(stderr_path, "w", encoding="utf-8") as err_fh:
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
                 cmd,

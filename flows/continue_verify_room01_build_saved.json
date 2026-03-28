@@ -1,6 +1,6 @@
 {
   "flowId": "continue_verify_room01_build_saved",
-  "name": "Continue game and verify room_01 build persisted",
+  "name": "Continue game and verify room_01 build persisted (legacy alias)",
   "system": "gameplay",
   "profile": "regression",
   "mode": "local",
@@ -8,41 +8,11 @@
   "flowStepTimeoutSec": 20,
   "driverReadyTimeoutSec": 20,
   "driverNoActivityTimeoutSec": 5,
-  "env": {
-    "ROOM_ID": "room_01"
-  },
   "steps": [
     {
-      "id": "sleep_boot",
-      "action": "sleep",
-      "ms": 800
-    },
-    {
-      "id": "click_continue",
-      "action": "click",
-      "target": { "testId": "btn_continue" }
-    },
-    {
-      "id": "wait_ingame",
-      "action": "wait",
-      "until": { "scene": "game_main" },
-      "timeoutMs": 20000
-    },
-    {
-      "id": "verify_room_cleaned",
-      "action": "check",
-      "kind": "logic_state",
-      "roomId": "${ROOM_ID}",
-      "expect": { "room_clean_status": "cleaned" },
-      "timeoutMs": 5000
-    },
-    {
-      "id": "verify_room_built",
-      "action": "check",
-      "kind": "logic_state",
-      "roomId": "${ROOM_ID}",
-      "expect": { "build_status": "built" },
-      "timeoutMs": 5000
+      "id": "legacy_redirect_phase2",
+      "action": "runSubflow",
+      "file": "suites/regression/gameplay/base_validation_slot0_phase2.json"
     }
   ]
 }

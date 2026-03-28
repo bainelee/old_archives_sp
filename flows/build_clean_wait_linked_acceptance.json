@@ -61,7 +61,7 @@
       "until": {
         "stateEquals": { "key": "room_clean_status", "value": "cleaned", "roomId": "${CLEAN_ROOM_ID}" }
       },
-      "timeoutMs": 60000
+      "timeoutMs": 7000
     },
     {
       "id": "tdone_clean_shot",
@@ -132,7 +132,7 @@
       "until": {
         "stateEquals": { "key": "build_status", "value": "built", "roomId": "${BUILD_ROOM_ID}" }
       },
-      "timeoutMs": 120000
+      "timeoutMs": 10000
     },
     {
       "id": "tdone_build_shot",

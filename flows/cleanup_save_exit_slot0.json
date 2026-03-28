@@ -39,8 +39,8 @@
       "until": {
         "stateEquals": { "key": "room_clean_status", "value": "cleaned", "roomId": "${CLEAN_ROOM_ID}" }
       },
-      "timeoutMs": 60000,
-      "timeoutSec": 120
+      "timeoutMs": 7000,
+      "timeoutSec": 10
     },
     {
       "id": "save_current_slot",

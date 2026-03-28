@@ -6,11 +6,55 @@ param(
     [switch]$IncludeContractRegression,
     [switch]$IncludeToolSurfaceCheck,
     [switch]$Fast,
-    [switch]$OnlyPreflight
+    [switch]$OnlyPreflight,
+    [int]$SilentTimeoutSec = 12
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+function Write-StepOutput {
+    param([string]$Text)
+    $ts = [DateTime]::Now.ToString("HH:mm:ss")
+    Write-Host ("[emit=" + $ts + "][event=" + $ts + "][game=]")
+    Write-Host $Text
+    $script:LastStepOutputAt = Get-Date
+}
+
+function Invoke-PythonWithHeartbeat {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$CliArgs,
+        [Parameter(Mandatory = $true)][string]$StepLabel
+    )
+    $stdoutFile = [System.IO.Path]::GetTempFileName()
+    $stderrFile = [System.IO.Path]::GetTempFileName()
+    $proc = Start-Process -FilePath $PythonExe -ArgumentList $CliArgs -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
+    $startedAt = Get-Date
+    $lastBeatAt = Get-Date
+    while (-not $proc.HasExited) {
+        Start-Sleep -Milliseconds 500
+        $now = Get-Date
+        $elapsed = [int](($now - $startedAt).TotalSeconds)
+        if ((($now - $lastBeatAt).TotalSeconds) -ge 3.0) {
+            Write-StepOutput ($StepLabel + " 执行中（" + $elapsed + "s）")
+            $lastBeatAt = $now
+        }
+        if ((($now - $script:LastStepOutputAt).TotalSeconds) -ge [Math]::Max(4, $SilentTimeoutSec)) {
+            try { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue } catch {}
+            throw ("步骤输出静默超时（" + $SilentTimeoutSec + "s）： " + $StepLabel)
+        }
+    }
+    $stdout = ""
+    $stderr = ""
+    if (Test-Path $stdoutFile) { $stdout = Get-Content -Path $stdoutFile -Raw -Encoding UTF8 }
+    if (Test-Path $stderrFile) { $stderr = Get-Content -Path $stderrFile -Raw -Encoding UTF8 }
+    Remove-Item $stdoutFile,$stderrFile -Force -ErrorAction SilentlyContinue
+    return [ordered]@{
+        exit_code = [int]$proc.ExitCode
+        stdout = [string]$stdout
+        stderr = [string]$stderr
+    }
+}
 
 function Invoke-McpTool {
     param(
@@ -35,14 +79,30 @@ function Invoke-McpTool {
                     $cliArgs += "--dry-run"
                 }
             }
+            "chat_mode" {
+                $cliArgs += @("--chat-mode", [string]$ExtraArgs[$key])
+            }
+            "poll_interval_sec" {
+                $cliArgs += @("--poll-interval-sec", [string]$ExtraArgs[$key])
+            }
+            "max_wait_sec" {
+                $cliArgs += @("--max-wait-sec", [string]$ExtraArgs[$key])
+            }
+            "recent_steps_limit" {
+                $cliArgs += @("--recent-steps-limit", [string]$ExtraArgs[$key])
+            }
+            "stream_limit" {
+                $cliArgs += @("--stream-limit", [string]$ExtraArgs[$key])
+            }
             default {
                 throw "Unsupported extra arg for CI helper: $key"
             }
         }
     }
-    $raw = & $PythonExe @cliArgs
-    if ($LASTEXITCODE -ne 0) {
-        throw "MCP tool failed: $Tool`n$raw"
+    $exec = Invoke-PythonWithHeartbeat -CliArgs $cliArgs -StepLabel ("MCP工具 " + $Tool)
+    $raw = [string]$exec.stdout
+    if ([int]$exec.exit_code -ne 0) {
+        throw "MCP tool failed: $Tool`n$raw`n$([string]$exec.stderr)"
     }
     $parsed = $raw | ConvertFrom-Json
     if (-not $parsed.ok) {
@@ -64,11 +124,45 @@ function Invoke-ContractRegression {
     if ([string]::IsNullOrWhiteSpace($godotToUse)) {
         throw "Contract regression requires Godot path. Set GODOT_BIN or pass -GodotBin."
     }
-    $raw = & $PythonExe $contractScript --project-root $ProjectRoot --godot-bin $godotToUse
-    if ($LASTEXITCODE -ne 0) {
-        throw "Contract regression failed`n$raw"
+    $suiteRoot = Join-Path $ProjectRoot "artifacts/test-suites"
+    if (-not (Test-Path $suiteRoot)) {
+        New-Item -ItemType Directory -Path $suiteRoot | Out-Null
     }
-    return $raw | ConvertFrom-Json
+    $before = @{}
+    foreach ($dir in (Get-ChildItem -Path $suiteRoot -Directory -ErrorAction SilentlyContinue)) {
+        $before[$dir.FullName] = $true
+    }
+
+    $lineList = @()
+    & $PythonExe $contractScript --project-root $ProjectRoot --godot-bin $godotToUse | ForEach-Object {
+        $line = [string]$_
+        $lineList += $line
+        Write-Host $line
+        $script:LastStepOutputAt = Get-Date
+    }
+    if ($LASTEXITCODE -ne 0) {
+        throw "Contract regression failed"
+    }
+
+    $targetDir = $null
+    $dirs = Get-ChildItem -Path $suiteRoot -Directory -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    foreach ($dir in $dirs) {
+        if (-not $before.ContainsKey($dir.FullName)) {
+            $targetDir = $dir
+            break
+        }
+    }
+    if ($null -eq $targetDir -and $dirs.Count -gt 0) {
+        $targetDir = $dirs[0]
+    }
+    if ($null -eq $targetDir) {
+        throw "Contract regression output missing suite directory."
+    }
+    $suiteJson = Join-Path $targetDir.FullName "suite_report.json"
+    if (-not (Test-Path $suiteJson)) {
+        throw "Contract regression output missing suite_report.json."
+    }
+    return (Get-Content -Path $suiteJson -Raw -Encoding UTF8) | ConvertFrom-Json
 }
 
 function Invoke-ToolSurfaceSnapshot {
@@ -83,6 +177,7 @@ function Invoke-ToolSurfaceSnapshot {
 if (-not [string]::IsNullOrWhiteSpace($GodotBin)) {
     $env:GODOT_BIN = $GodotBin
 }
+$script:LastStepOutputAt = Get-Date
 $skipAllRuns = [bool]$OnlyPreflight
 $runContractRegression = [bool]$IncludeContractRegression
 $runToolSurfaceCheck = [bool]$IncludeToolSurfaceCheck
@@ -113,6 +208,7 @@ $summary = [ordered]@{
 # 1) Preflight for CI readiness
 $preflight = Invoke-McpTool -Tool "check_test_runner_environment"
 $summary.preflight = $preflight
+Write-StepOutput "preflight 检查完成"
 if (-not $preflight.ci_ready) {
     $summary.finished_at = (Get-Date).ToString("o")
     $summary.status = "failed_preflight"
@@ -136,14 +232,40 @@ if (-not $Fast -and -not $skipAllRuns) {
     )
 
     foreach ($flow in $flows) {
-        $runRes = Invoke-McpTool -Tool "run_game_flow" -ExtraArgs @{
+        Write-StepOutput ("开始执行 acceptance flow: " + $flow)
+        $streamRes = Invoke-McpTool -Tool "run_and_stream_flow" -ExtraArgs @{
             flow_file = $flow
+            chat_mode = "short"
+            poll_interval_sec = 0.8
+            max_wait_sec = 900
+            recent_steps_limit = 2
+            stream_limit = 120
         }
+        $streamEvents = @()
+        if ($null -ne $streamRes.stream) {
+            $streamEvents = @($streamRes.stream)
+        }
+        foreach ($evt in $streamEvents) {
+            if ($null -eq $evt) { continue }
+            $chat = $evt.chat_progress
+            if ($null -ne $chat) {
+                $current = [string]$chat.当前步骤
+                $result = [string]$chat.结果
+                if (-not [string]::IsNullOrWhiteSpace($current)) {
+                    Write-StepOutput ("步骤: " + $current)
+                }
+                if (-not [string]::IsNullOrWhiteSpace($result)) {
+                    Write-StepOutput ("结果: " + $result)
+                }
+            }
+        }
+        $runId = [string]$streamRes.run_id
+        $final = $streamRes.final
         $artifacts = Invoke-McpTool -Tool "get_test_artifacts" -ExtraArgs @{
-            run_id = $runRes.run_id
+            run_id = $runId
         }
         $report = Invoke-McpTool -Tool "get_test_report" -ExtraArgs @{
-            run_id = $runRes.run_id
+            run_id = $runId
             format = "json"
         }
         $reportPayload = $report.report
@@ -167,28 +289,35 @@ if (-not $Fast -and -not $skipAllRuns) {
                 $processExitCode = $reportPayload.process_exit_code
             }
         }
+        $finalFlowStatus = ""
+        if ($null -ne $final) {
+            $finalFlowStatus = [string]$final.flow_status
+        }
+        $runStatus = $(if ($finalFlowStatus -eq "passed") { "resolved" } else { "failed" })
         $summary.runs += [ordered]@{
             flow_file = $flow
-            run_id = $runRes.run_id
-            status = $runRes.status
+            run_id = $runId
+            status = $runStatus
             report_status = $reportStatus
-            current_step = $runRes.current_step
-            approval_required = $runRes.approval_required
+            current_step = $(if ($null -ne $final) { [string]$final.current_step } else { "" })
+            approval_required = $(if ($null -ne $final) { [bool]$final.approval_required } else { $false })
             effective_exit_code = $effectiveExitCode
             process_exit_code = $processExitCode
-            artifact_root = $runRes.artifact_root
+            artifact_root = $(if ($null -ne $final) { [string]$final.artifact_root } else { "" })
             report_json = $artifacts.report_json
             report_md = $artifacts.report_md
             junit_xml = $artifacts.junit_xml
             flow_report_json = $artifacts.flow_report_json
             driver_flow_json = $artifacts.driver_flow_json
             key_files = $artifacts.key_files
-            primary_failure = $runRes.primary_failure
+            primary_failure = $(if ($null -ne $final) { $final.primary_failure } else { $null })
         }
+        Write-StepOutput ("acceptance flow 完成: " + $flow)
     }
 }
 
 if ($runContractRegression -and -not $skipAllRuns) {
+    Write-StepOutput "开始执行 contract_regression"
     $contract = Invoke-ContractRegression -GodotBinForContract ([string]$env:GODOT_BIN)
     $contractCases = @()
     if ($null -ne $contract.cases) {
@@ -208,9 +337,11 @@ if ($runContractRegression -and -not $skipAllRuns) {
         cases = $contractCases
         has_run_and_stream_short_chat_case = $hasRunAndStreamCase
     }
+    Write-StepOutput "contract_regression 完成"
 }
 
 if ($runToolSurfaceCheck -and -not $skipAllRuns) {
+    Write-StepOutput "开始执行 mcp_tool_surface_snapshot"
     $toolSurface = Invoke-ToolSurfaceSnapshot
     $toolCases = @()
     if ($null -ne $toolSurface.cases) {
@@ -222,6 +353,7 @@ if ($runToolSurfaceCheck -and -not $skipAllRuns) {
         tool_count = $toolSurface.tool_count
         cases = $toolCases
     }
+    Write-StepOutput "mcp_tool_surface_snapshot 完成"
 }
 
 $allResolved = $true
@@ -256,6 +388,7 @@ if ([string]::IsNullOrWhiteSpace($OutputJson)) {
 $summary | ConvertTo-Json -Depth 20 | Out-File -FilePath $OutputJson -Encoding utf8
 
 Write-Output ("SUMMARY_JSON=" + $OutputJson)
+Write-StepOutput ("acceptance_ci 结束，状态=" + [string]$summary.status)
 if (-not $allResolved) {
     exit 3
 }

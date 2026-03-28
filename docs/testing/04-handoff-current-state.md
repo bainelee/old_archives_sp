@@ -34,6 +34,7 @@
 - 目标是避免 Godot 与 IDE 双入口并行导致的时序偏差与反馈分叉。
 
 ### C. Cursor 对话窗口优先（chat-first）
+- 口径说明：IDE 对话是默认观测与回传面；shell 可作为并行镜像/审计面（按脚本开关启用）。
 - MCP 新增工具：
   - `get_flow_timeline`（支持 `view=full|chat`）
   - `start_game_flow_live`（异步启动 flow）
@@ -60,7 +61,7 @@
 - 一键执行脚本：
   - `tools/game-test-runner/scripts/run_gameplay_base_template.ps1`
   - 已切换为 `chat-first + strict stepwise` 主路径
-  - 每步固定 5 段：即将开始 / 开始执行 / 执行结果 / 验证结论 / 通过后进入下一步
+  - 每步固定 3 段：开始执行 / 执行结果 / 验证结论
   - 验证失败立即停止并收尾会话（不继续下一步）
   - `-NoChatProgress` 为兼容参数（当前不会关闭 stepwise 阶段播报）
   - 播报文案映射：`tools/game-test-runner/mcp/chat_progress_templates.json`（可直接改）

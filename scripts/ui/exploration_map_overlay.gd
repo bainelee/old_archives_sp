@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 const _Codec := preload("res://scripts/game/exploration/exploration_state_codec.gd")
-const _InvestigatorPanelScene := preload("res://scenes/ui/investigator_details_panel.tscn")
+const _RegionInfoScene := preload("res://scenes/ui/exploration_region_info_panel.tscn")
 
 const _REGION_LAYOUT := {
 	"old_archives": Vector2(0.45, 0.56),
@@ -45,18 +45,19 @@ const _REGION_EDGES := [
 	["morku_industrial", "korborko"],
 ]
 
-@onready var _map_texture: TextureRect = get_node_or_null("OverlayRoot/MapFrame/MapTexture") as TextureRect
-@onready var _map_canvas: Control = get_node_or_null("OverlayRoot/MapFrame/MapCanvas") as Control
-@onready var _line_root: Node2D = get_node_or_null("OverlayRoot/MapFrame/MapCanvas/LineRoot") as Node2D
-@onready var _selected_region_label: Label = get_node_or_null("OverlayRoot/MapFrame/TopRow/SelectedRegionLabel") as Label
-@onready var _detail_anchor: Control = get_node_or_null("OverlayRoot/MapFrame/DetailAnchor") as Control
-@onready var _btn_close: Button = get_node_or_null("OverlayRoot/MapFrame/TopRow/BtnClose") as Button
+@onready var _map_texture: TextureRect = get_node_or_null("OverlayRoot/MapFrame/VBox/BodyRow/MapStack/MapTexture") as TextureRect
+@onready var _map_canvas: Control = get_node_or_null("OverlayRoot/MapFrame/VBox/BodyRow/MapStack/MapCanvas") as Control
+@onready var _line_root: Node2D = get_node_or_null("OverlayRoot/MapFrame/VBox/BodyRow/MapStack/MapCanvas/LineRoot") as Node2D
+@onready var _selected_region_label: Label = get_node_or_null("OverlayRoot/MapFrame/VBox/TopRow/SelectedRegionLabel") as Label
+@onready var _detail_anchor: Control = get_node_or_null("OverlayRoot/MapFrame/VBox/BodyRow/DetailAnchor") as Control
+@onready var _btn_close: Button = get_node_or_null("OverlayRoot/MapFrame/VBox/TopRow/BtnClose") as Button
 
 var _exploration_service: RefCounted = null
 var _region_buttons: Dictionary = {}
 var _region_names: Dictionary = {}
-var _detail_panel: Control = null
+var _region_info_panel: Control = null
 var _placeholder_texture: Texture2D = null
+var _selected_region_id: String = ""
 
 
 func _ready() -> void:
@@ -83,12 +84,14 @@ func toggle_overlay() -> void:
 func open_overlay() -> void:
 	visible = true
 	_selected_region_label.text = "当前地区: -"
+	_selected_region_id = ""
+	_hide_region_info_panel()
 	refresh_regions()
 
 
 func close_overlay() -> void:
 	visible = false
-	_hide_detail_panel()
+	_hide_region_info_panel()
 
 
 func refresh_regions() -> void:
@@ -99,6 +102,12 @@ func refresh_regions() -> void:
 	var config: Dictionary = _exploration_service.call("get_config_readonly")
 	var state: Dictionary = _exploration_service.call("get_runtime_state_readonly")
 	var unlocked: Dictionary = _to_set(state.get(_Codec.KEY_UNLOCKED_REGION_IDS, []))
+	var explored: Dictionary = _to_set(state.get(_Codec.KEY_EXPLORED_REGION_IDS, []))
+	var exploring_raw: Variant = state.get(_Codec.KEY_EXPLORING_BY_REGION, {})
+	var exploring_ids: Dictionary = {}
+	if exploring_raw is Dictionary:
+		for ek in (exploring_raw as Dictionary).keys():
+			exploring_ids[str(ek)] = true
 	_region_names.clear()
 	var catalog: Variant = config.get("regions_placeholder", [])
 	if catalog is Array:
@@ -112,8 +121,11 @@ func refresh_regions() -> void:
 				continue
 			_region_names[rid] = name_zh
 			var btn: Button = _ensure_region_button(rid)
-			_apply_button_state(btn, rid, name_zh, unlocked.has(rid))
+			_apply_button_state(btn, rid, name_zh, unlocked.has(rid), explored.has(rid), exploring_ids.has(rid))
 	_rebuild_lines()
+	if _region_info_panel and is_instance_valid(_region_info_panel) and _region_info_panel.visible:
+		if not _selected_region_id.is_empty() and _region_info_panel.has_method("present_region"):
+			_region_info_panel.call("present_region", _selected_region_id)
 
 
 func _ensure_region_button(region_id: String) -> Button:
@@ -135,17 +147,26 @@ func _ensure_region_button(region_id: String) -> Button:
 	return btn
 
 
-func _apply_button_state(btn: Button, region_id: String, region_name: String, unlocked: bool) -> void:
+func _apply_button_state(btn: Button, region_id: String, region_name: String, unlocked: bool, explored: bool, exploring: bool) -> void:
 	var pos: Vector2 = _resolve_button_pos(region_id, btn.size)
 	btn.position = pos
-	if unlocked:
-		btn.text = region_name
-		btn.disabled = false
-		btn.modulate = Color(0.95, 0.95, 0.95, 1.0)
-	else:
+	if not unlocked:
 		btn.text = "?"
 		btn.disabled = true
 		btn.modulate = Color(0.75, 0.75, 0.75, 1.0)
+		return
+	if exploring:
+		btn.text = "%s …" % region_name
+		btn.disabled = false
+		btn.modulate = Color(0.95, 0.9, 0.65, 1.0)
+	elif explored:
+		btn.text = region_name
+		btn.disabled = false
+		btn.modulate = Color(0.75, 0.95, 0.8, 1.0)
+	else:
+		btn.text = region_name
+		btn.disabled = false
+		btn.modulate = Color(0.95, 0.95, 0.95, 1.0)
 
 
 func _resolve_button_pos(region_id: String, btn_size: Vector2) -> Vector2:
@@ -154,13 +175,26 @@ func _resolve_button_pos(region_id: String, btn_size: Vector2) -> Vector2:
 	return Vector2(norm.x * canvas_size.x, norm.y * canvas_size.y) - btn_size * 0.5
 
 
+func _resolve_region_edges() -> Array:
+	if _exploration_service != null:
+		var cfg: Variant = _exploration_service.call("get_config_readonly")
+		if cfg is Dictionary:
+			var raw: Variant = (cfg as Dictionary).get("region_edges", [])
+			if raw is Array and (raw as Array).size() > 0:
+				return raw as Array
+	var fallback: Array = []
+	for e in _REGION_EDGES:
+		fallback.append(e)
+	return fallback
+
+
 func _rebuild_lines() -> void:
 	if _line_root == null:
 		return
 	for child in _line_root.get_children():
 		_line_root.remove_child(child)
 		child.queue_free()
-	for edge in _REGION_EDGES:
+	for edge in _resolve_region_edges():
 		if not (edge is Array):
 			continue
 		var pair: Array = edge as Array
@@ -181,81 +215,65 @@ func _rebuild_lines() -> void:
 	for region_id in _region_buttons.keys():
 		var btn: Button = _region_buttons[region_id] as Button
 		if btn:
-			# Button 没有 raise()；通过调子节点顺序确保按钮压在线条之上。
 			_map_canvas.move_child(btn, _map_canvas.get_child_count() - 1)
 
 
 func _on_region_pressed(region_id: String) -> void:
+	_selected_region_id = region_id
 	var region_name: String = str(_region_names.get(region_id, region_id))
 	_selected_region_label.text = "当前地区: %s" % region_name
-	_show_detail_panel_for_region(region_name)
-
-
-func _show_detail_panel_for_region(region_name: String) -> void:
-	var panel: Control = _ensure_detail_panel()
-	if panel == null or not panel.has_method("show_panel"):
+	var panel: Control = _ensure_region_info_panel()
+	if panel == null:
 		return
-	var data: Dictionary = _build_region_panel_data(region_name)
-	panel.show_panel(data)
-	panel.visible = true
+	if _exploration_service and panel.has_method("bind_exploration_service"):
+		panel.call("bind_exploration_service", _exploration_service)
+	if panel.has_method("present_region"):
+		panel.call("present_region", region_id)
 
 
-func _build_region_panel_data(region_name: String) -> Dictionary:
-	var data: Dictionary = {}
-	if Engine.has_singleton("DataProviders"):
-		var dp: Object = Engine.get_singleton("DataProviders")
-		if dp != null and dp.has_method("get_investigator_breakdown"):
-			data = dp.call("get_investigator_breakdown")
-	if data.is_empty():
-		data = {
-			"available": 0,
-			"assigned": 0,
-			"total": 0,
-			"assigned_details": [],
-			"recruited_details": [],
-		}
-	var assigned_details: Array = data.get("assigned_details", [])
-	if not (assigned_details is Array):
-		assigned_details = []
-	if assigned_details.is_empty():
-		assigned_details.append({
-			"node_name": "探索-" + region_name,
-			"count": 1,
-		})
-	data["assigned_details"] = assigned_details
-	return data
+func _on_region_explore_requested(rid: String) -> void:
+	if _exploration_service == null:
+		return
+	var res: Variant = _exploration_service.call("explore_region", rid)
+	if res is Dictionary and bool((res as Dictionary).get("ok", false)):
+		refresh_regions()
+		if _region_info_panel and is_instance_valid(_region_info_panel) and _region_info_panel.has_method("present_region"):
+			_region_info_panel.call("present_region", rid)
 
 
-func _ensure_detail_panel() -> Control:
-	if _detail_panel != null:
-		return _detail_panel
+func _ensure_region_info_panel() -> Control:
+	if _region_info_panel != null and is_instance_valid(_region_info_panel):
+		return _region_info_panel
 	if _detail_anchor == null:
 		return null
-	var panel_node: Node = _InvestigatorPanelScene.instantiate()
+	var panel_node: Node = _RegionInfoScene.instantiate()
 	var panel: Control = panel_node as Control
 	if panel == null:
 		return null
-	panel.anchor_left = 1.0
-	panel.anchor_top = 0.0
-	panel.anchor_right = 1.0
-	panel.anchor_bottom = 0.0
-	panel.offset_left = -340.0
-	panel.offset_top = 46.0
-	panel.offset_right = -20.0
-	panel.offset_bottom = 630.0
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.offset_left = 0.0
+	panel.offset_top = 0.0
+	panel.offset_right = 0.0
+	panel.offset_bottom = 0.0
 	panel.visible = false
 	_detail_anchor.add_child(panel)
-	_detail_panel = panel
-	return _detail_panel
+	_region_info_panel = panel
+	if panel.has_signal("explore_requested"):
+		panel.explore_requested.connect(_on_region_explore_requested)
+	return _region_info_panel
 
 
-func _hide_detail_panel() -> void:
-	if _detail_panel == null:
+func _hide_region_info_panel() -> void:
+	_selected_region_id = ""
+	if _region_info_panel == null:
 		return
-	if _detail_panel.has_method("hide_panel"):
-		_detail_panel.call("hide_panel")
+	if not is_instance_valid(_region_info_panel):
+		_region_info_panel = null
+		return
+	if _region_info_panel.has_method("hide_panel"):
+		_region_info_panel.call("hide_panel")
 	else:
-		_detail_panel.visible = false
+		_region_info_panel.visible = false
 
 
 func _ensure_placeholder_texture() -> void:

@@ -16,7 +16,7 @@
     {
       "id": "sleep_boot",
       "action": "sleep",
-      "ms": 800
+      "ms": 500
     },
     {
       "id": "click_continue",
@@ -27,12 +27,13 @@
       "id": "wait_ingame",
       "action": "wait",
       "until": { "scene": "game_main" },
-      "timeoutMs": 20000
+      "minWaitMs": 200,
+      "timeoutMs": 2000
     },
     {
-      "id": "set_game_speed_x6",
+      "id": "set_game_speed_x1_stable",
       "action": "setGameTimeSpeed",
-      "speed": 6.0
+      "speed": 1.0
     },
     {
       "id": "verify_room_cleaned",

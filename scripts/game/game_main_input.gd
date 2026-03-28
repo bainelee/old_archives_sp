@@ -10,7 +10,17 @@ const CONSTRUCTION_SELECTING_ZONE := 1
 const CONSTRUCTION_SELECTING_TARGET := 2
 const CONSTRUCTION_CONFIRMING := 3
 
+static func is_exploration_map_overlay_open(game_main: Node2D) -> bool:
+	var exploration_overlay: CanvasLayer = game_main.get("_exploration_map_overlay")
+	return exploration_overlay != null and exploration_overlay.visible
+
+
 static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> bool:
+	var exploration_overlay: CanvasLayer = game_main.get("_exploration_map_overlay")
+	if exploration_overlay and exploration_overlay.visible:
+		var overlay_root: Control = exploration_overlay.get_node_or_null("OverlayRoot") as Control
+		if overlay_root and overlay_root.visible and overlay_root.get_global_rect().has_point(mouse_pos):
+			return true
 	var figma_panel_root: Control = game_main.get_node_or_null("RoomDetailPanelFigma/PanelRoot") as Control
 	if figma_panel_root and figma_panel_root.visible and figma_panel_root.get_global_rect().has_point(mouse_pos):
 		return true
@@ -65,6 +75,8 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_MIDDLE:
+			if is_exploration_map_overlay_open(game_main):
+				return
 			game_main.set("_is_panning", mb.pressed)
 			if mb.pressed:
 				game_main.set("_pan_start", game_main.get_viewport().get_mouse_position())
@@ -132,16 +144,20 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 				game_main.get_viewport().set_input_as_handled()
 
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			if is_exploration_map_overlay_open(game_main):
+				return
 			GameMainCameraHelper.apply_zoom(game_main, true)
 			game_main.call("_update_debug_info")
 			game_main.get_viewport().set_input_as_handled()
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			if is_exploration_map_overlay_open(game_main):
+				return
 			GameMainCameraHelper.apply_zoom(game_main, false)
 			game_main.call("_update_debug_info")
 			game_main.get_viewport().set_input_as_handled()
 
 	if event is InputEventMouseMotion:
-		if game_main.get("_is_panning") and (game_main.get("_camera3d") or game_main.get("_camera")):
+		if game_main.get("_is_panning") and not is_exploration_map_overlay_open(game_main) and (game_main.get("_camera3d") or game_main.get("_camera")):
 			var current_pos: Vector2 = game_main.get_viewport().get_mouse_position()
 			GameMainCameraHelper.apply_pan(game_main, current_pos)
 			game_main.get_viewport().set_input_as_handled()

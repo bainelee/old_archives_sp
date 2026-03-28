@@ -15,7 +15,7 @@
     {
       "id": "sleep_boot",
       "action": "sleep",
-      "ms": 800
+      "ms": 500
     },
     {
       "id": "click_continue",
@@ -26,7 +26,8 @@
       "id": "wait_ingame",
       "action": "wait",
       "until": { "scene": "game_main" },
-      "timeoutMs": 20000
+      "minWaitMs": 200,
+      "timeoutMs": 2000
     },
     {
       "id": "verify_room_cleaned",

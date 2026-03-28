@@ -1,0 +1,13 @@
+{
+  "aliases": {
+    "flows/common/new_game_enter_world.json": "flows/fragments/common/new_game_enter_world.json",
+    "flows/common/navigate_to_room.json": "flows/fragments/common/navigate_to_room.json",
+    "flows/shotq.json": "flows/suites/regression/gameplay/variants/base_validation_slot0_phase2_step_verify_chat_shot_quick.json",
+    "flows/continue_verify_room01_build_saved.json": "flows/suites/regression/gameplay/base_validation_slot0_phase2.json",
+    "flows/base_validation_slot0_phase2.json": "flows/suites/regression/gameplay/base_validation_slot0_phase2.json",
+    "flows/base_validation_slot0_phase2_step_verify_chat_shot_quick.json": "flows/suites/regression/gameplay/variants/base_validation_slot0_phase2_step_verify_chat_shot_quick.json",
+    "flows/ui_room_detail_sync_acceptance.json": "flows/suites/regression/acceptance/ui_room_detail_sync_acceptance.json",
+    "flows/exploration_validation_l1_scene_probe.json": "flows/suites/regression/gameplay/exploration_validation_l1_scene_probe.json",
+    "flows/exploration_validation_l2_smoke_invariants.json": "flows/suites/regression/gameplay/exploration_validation_l2_smoke_invariants.json"
+  }
+}

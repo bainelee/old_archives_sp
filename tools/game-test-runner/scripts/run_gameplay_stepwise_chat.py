@@ -7,6 +7,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+import unicodedata
 
 
 def _repo_root() -> Path:
@@ -38,14 +39,53 @@ def _delay_ms(event_utc: str, emit_utc: str) -> int | None:
     return int(round((em - ev).total_seconds() * 1000))
 
 
-def _print_event(phase_name: str, text: str, event_utc: str = "", game_time: str = "", emit_shell_chat: bool = False) -> str:
+def _hhmmss(raw: str) -> str:
+    ts = _parse_ts(raw)
+    if ts is None:
+        return ""
+    return ts.strftime("%H:%M:%S")
+
+
+def _has_cjk(text: str) -> bool:
+    for ch in text:
+        if not ch.strip():
+            continue
+        name = unicodedata.name(ch, "")
+        if "CJK" in name or "HIRAGANA" in name or "KATAKANA" in name or "HANGUL" in name:
+            return True
+    return False
+
+
+def _split_text_lines(text: str, max_len: int) -> list[str]:
+    raw = str(text or "").strip()
+    if not raw:
+        return [""]
+    lines: list[str] = []
+    cursor = 0
+    while cursor < len(raw):
+        lines.append(raw[cursor : cursor + max_len])
+        cursor += max_len
+    return lines
+
+
+def _normalize_shell_text(text: str) -> list[str]:
+    raw = str(text or "").strip()
+    if not raw:
+        return [""]
+    max_len = 30 if _has_cjk(raw) else 60
+    return _split_text_lines(raw, max_len=max_len)
+
+
+def _print_event(phase_name: str, text: str, event_utc: str = "", game_time: str = "", emit_shell_chat: bool = False) -> tuple[str, list[str]]:
     emit_ts = _utc_now()
-    if emit_shell_chat:
-        print(
-            f"[CHAT][{phase_name}][emit={emit_ts}][event={event_utc}][game={game_time}] {text}",
-            flush=True,
-        )
-    return emit_ts
+    normalized_lines = _normalize_shell_text(text)
+    emit_short = _hhmmss(emit_ts)
+    event_short = _hhmmss(event_utc)
+    # Step output is always required for observability.
+    print(f"[emit={emit_short}][event={event_short}][game={game_time}]", flush=True)
+    for line in normalized_lines:
+        print(line, flush=True)
+    return emit_ts, normalized_lines
 
 
 def _run_one_flow(
@@ -62,6 +102,10 @@ def _run_one_flow(
     pause_during_think: bool = True,
     resume_speed: float = 1.0,
     emit_shell_chat: bool = False,
+    empty_poll_timeout_sec: float = 20.0,
+    max_silent_sec: float = 10.0,
+    chat_protocol_mode: str = "three_phase",
+    pause_policy: str = "strict",
 ) -> dict[str, Any]:
     audit_entries: list[dict[str, Any]] = []
     start_payload = server.start_cursor_chat_plugin(
@@ -75,6 +119,8 @@ def _run_one_flow(
             "pause_during_think": bool(pause_during_think),
             "resume_speed": float(resume_speed),
             "chat_relay_required": True,
+            "chat_protocol_mode": str(chat_protocol_mode or "three_phase"),
+            "pause_policy": str(pause_policy or "strict"),
         }
     )
     rid = str(start_payload.get("run_id", ""))
@@ -83,35 +129,67 @@ def _run_one_flow(
     flow_status = "failed"
     verify_reason = ""
     total_events = 0
+    ack_seq = 0
+    empty_poll_started = datetime.now(timezone.utc)
+    last_output_at = datetime.now(timezone.utc)
     while True:
-        payload = server.pull_cursor_chat_plugin({"run_id": rid, "max_batch": max_batch})
+        payload = server.pull_cursor_chat_plugin({"run_id": rid, "max_batch": max_batch, "ack_seq": ack_seq})
         events = payload.get("events", [])
         if not isinstance(events, list):
             one = payload.get("event", {})
             events = [one] if isinstance(one, dict) and one else []
         if not events and bool(payload.get("finished", False)):
             break
+        if not events and not bool(payload.get("finished", False)):
+            elapsed_empty = (datetime.now(timezone.utc) - empty_poll_started).total_seconds()
+            silent_elapsed = (datetime.now(timezone.utc) - last_output_at).total_seconds()
+            if silent_elapsed >= max(2.0, float(max_silent_sec)):
+                return {
+                    "run_id": rid,
+                    "status": "failed",
+                    "flow_status": "failed",
+                    "verify_reason": f"step output silent timeout after {int(silent_elapsed)}s",
+                    "pid_exit_verified": False,
+                    "events_emitted": total_events,
+                    "artifact_root": str(artifact_root),
+                    "audit_entries": audit_entries,
+                }
+            if elapsed_empty >= max(2.0, float(empty_poll_timeout_sec)):
+                return {
+                    "run_id": rid,
+                    "status": "failed",
+                    "flow_status": "failed",
+                    "verify_reason": f"broadcast idle timeout after {int(elapsed_empty)}s",
+                    "pid_exit_verified": False,
+                    "events_emitted": total_events,
+                    "artifact_root": str(artifact_root),
+                    "audit_entries": audit_entries,
+                }
+            continue
+        empty_poll_started = datetime.now(timezone.utc)
         for evt in events:
             if not isinstance(evt, dict):
                 continue
             total_events += 1
+            seq = int(evt.get("seq", 0) or 0)
             text = str(evt.get("text", "")).strip()
             event_utc = str(evt.get("event_utc", evt.get("ts", ""))).strip()
             game_time = str(evt.get("game_time", "")).strip()
-            emit_ts = _print_event(phase_name, text, event_utc, game_time, emit_shell_chat=emit_shell_chat)
+            emit_ts, normalized_lines = _print_event(
+                phase_name, text, event_utc, game_time, emit_shell_chat=emit_shell_chat
+            )
+            last_output_at = datetime.now(timezone.utc)
             phase = str(evt.get("phase", "")).strip()
             status = str(evt.get("status", "")).strip()
-            if phase == "next":
+            if phase == "verify":
                 if status == "failed":
                     final_status = "failed"
                     flow_status = "failed"
                     verify_reason = text
-                elif "流程结束" in text:
-                    final_status = "passed"
-                    flow_status = "passed"
             audit_entries.append(
                 {
                     "run_id": rid,
+                    "seq": seq,
                     "phase_name": phase_name,
                     "phase": phase,
                     "step_id": str(evt.get("step_id", "")),
@@ -119,18 +197,33 @@ def _run_one_flow(
                     "progress": str(evt.get("progress", "")),
                     "status": status,
                     "text": text,
+                    "shell_lines": normalized_lines,
                     "event_utc": event_utc,
                     "game_time": game_time,
                     "chat_emit_ts": emit_ts,
                     "delay_ms": _delay_ms(event_utc, emit_ts),
+                    "requires_unpaused": bool(evt.get("requires_unpaused", False)),
+                    "paused_by_plugin": bool(evt.get("paused_by_plugin", False)),
+                    "auto_snapshot_highrisk": bool(evt.get("auto_snapshot_highrisk", False)),
+                    "runtime_window": evt.get("runtime_window", {}) if isinstance(evt.get("runtime_window", {}), dict) else {},
+                    "step_enter_runtime": (
+                        evt.get("step_enter_runtime", {}) if isinstance(evt.get("step_enter_runtime", {}), dict) else {}
+                    ),
+                    "step_exit_runtime": (
+                        evt.get("step_exit_runtime", {}) if isinstance(evt.get("step_exit_runtime", {}), dict) else {}
+                    ),
                 }
             )
+            if seq > ack_seq:
+                ack_seq = seq
 
     pid_exit_verified = False
     try:
         flow_report = json.loads((artifact_root / "flow_report.json").read_text(encoding="utf-8"))
         if isinstance(flow_report, dict):
             pid_exit_verified = bool(flow_report.get("pid_exit_verified", False))
+            flow_status = "passed" if str(flow_report.get("status", "")).strip() == "passed" else "failed"
+            final_status = flow_status
     except Exception:
         pid_exit_verified = False
 
@@ -161,7 +254,7 @@ def _build_chat_audit(entries: list[dict[str, Any]]) -> dict[str, Any]:
         key = f"{run_id}|{progress}|{step_id}"
         grouped.setdefault(key, set()).add(phase)
     protocol_checks: list[dict[str, Any]] = []
-    required = {"about_to_start", "started", "result", "verify", "next"}
+    required = {"started", "result", "verify"}
     for key, got in grouped.items():
         run_id, progress, step_id = key.split("|", 2)
         protocol_checks.append(
@@ -172,6 +265,25 @@ def _build_chat_audit(entries: list[dict[str, Any]]) -> dict[str, Any]:
                 "protocol_ok": required.issubset(got),
             }
         )
+    pause_samples = [e for e in entries if isinstance(e, dict)]
+    paused_true = [e for e in pause_samples if bool(e.get("paused_by_plugin", False))]
+    strict_pause_candidates = [
+        e
+        for e in pause_samples
+        if str(e.get("phase", "")) == "verify" and not bool(e.get("requires_unpaused", False))
+    ]
+    strict_pause_hits = [e for e in strict_pause_candidates if bool(e.get("paused_by_plugin", False))]
+    ignored_runtime_samples: list[float] = []
+    for e in pause_samples:
+        if str(e.get("phase", "")) != "verify":
+            continue
+        window = e.get("runtime_window", {})
+        if not isinstance(window, dict):
+            continue
+        value = window.get("ignored_runtime_hours")
+        if isinstance(value, (int, float)):
+            ignored_runtime_samples.append(float(value))
+    highrisk_samples = [e for e in pause_samples if bool(e.get("auto_snapshot_highrisk", False))]
     return {
         "total_events": len(entries),
         "delay_samples": len(delay_values),
@@ -180,7 +292,49 @@ def _build_chat_audit(entries: list[dict[str, Any]]) -> dict[str, Any]:
         "avg_delay_ms": int(round(sum(delay_values) / len(delay_values))) if delay_values else None,
         "protocol_all_ok": all(bool(p.get("protocol_ok", False)) for p in protocol_checks) if protocol_checks else True,
         "protocol_checks": protocol_checks,
+        "paused_by_plugin_true_samples": len(paused_true),
+        "paused_by_plugin_total_samples": len(pause_samples),
+        "paused_by_plugin_hit_ratio": (
+            round(float(len(paused_true)) / float(len(pause_samples)), 4) if pause_samples else None
+        ),
+        "strict_pause_candidates": len(strict_pause_candidates),
+        "strict_pause_hits": len(strict_pause_hits),
+        "strict_pause_hit_ratio": (
+            round(float(len(strict_pause_hits)) / float(len(strict_pause_candidates)), 4)
+            if strict_pause_candidates
+            else None
+        ),
+        "highrisk_snapshot_samples": len(highrisk_samples),
+        "ignored_runtime_samples": len(ignored_runtime_samples),
+        "ignored_runtime_hours_total": round(sum(ignored_runtime_samples), 6) if ignored_runtime_samples else 0.0,
+        "ignored_runtime_hours_max": round(max(ignored_runtime_samples), 6) if ignored_runtime_samples else 0.0,
     }
+
+
+def _line_length_ok(entries: list[dict[str, Any]]) -> tuple[bool, list[dict[str, Any]]]:
+    violations: list[dict[str, Any]] = []
+    for item in entries:
+        if not isinstance(item, dict):
+            continue
+        lines = item.get("shell_lines", [])
+        if not isinstance(lines, list):
+            continue
+        for idx, line in enumerate(lines):
+            text = str(line or "")
+            limit = 30 if _has_cjk(text) else 60
+            if len(text) > limit:
+                violations.append(
+                    {
+                        "run_id": str(item.get("run_id", "")),
+                        "phase_name": str(item.get("phase_name", "")),
+                        "step_id": str(item.get("step_id", "")),
+                        "line_index": idx,
+                        "line_length": len(text),
+                        "line_limit": limit,
+                        "line": text,
+                    }
+                )
+    return len(violations) == 0, violations
 
 
 def _format_chat_audit_summary(chat_audit: dict[str, Any]) -> str:
@@ -206,10 +360,15 @@ def main() -> int:
     parser.add_argument("--output-json", default="")
     parser.add_argument("--template", action="store_true")
     parser.add_argument("--max-batch", type=int, default=3)
-    parser.add_argument("--wait-scale", type=float, default=0.2)
-    parser.add_argument("--resume-speed", type=float, default=6.0)
+    parser.add_argument("--wait-scale", type=float, default=1.0)
+    parser.add_argument("--resume-speed", type=float, default=1.0)
     parser.add_argument("--disable-think-pause", action="store_true")
     parser.add_argument("--emit-shell-chat", action="store_true")
+    parser.add_argument("--empty-poll-timeout-sec", type=float, default=20.0)
+    parser.add_argument("--max-silent-sec", type=float, default=10.0)
+    parser.add_argument("--allow-incomplete-broadcast", action="store_true")
+    parser.add_argument("--chat-protocol-mode", default="three_phase")
+    parser.add_argument("--pause-policy", default="strict")
     args = parser.parse_args()
     _ensure_import()
     from server import GameTestMcpServer  # pylint: disable=import-error,import-outside-toplevel
@@ -248,10 +407,14 @@ def main() -> int:
             run_id=str(args.run_id).strip(),
             phase_name=phase_name,
             max_batch=max(1, int(args.max_batch)),
-            wait_scale=max(0.05, float(args.wait_scale)),
+            wait_scale=1.0,
             pause_during_think=not bool(args.disable_think_pause),
             resume_speed=max(0.1, float(args.resume_speed)),
-            emit_shell_chat=bool(args.emit_shell_chat),
+            emit_shell_chat=True,
+            empty_poll_timeout_sec=max(2.0, float(args.empty_poll_timeout_sec)),
+            max_silent_sec=max(2.0, float(args.max_silent_sec)),
+            chat_protocol_mode=str(args.chat_protocol_mode or "three_phase"),
+            pause_policy=str(args.pause_policy or "strict"),
         )
         result["phase"] = phase_name
         result["flow_file"] = str(flow_file)
@@ -264,6 +427,19 @@ def main() -> int:
     if summary["status"] == "running":
         summary["status"] = "passed"
     summary["chat_audit"] = _build_chat_audit(summary["chat_audit_entries"])
+    length_ok, length_violations = _line_length_ok(summary["chat_audit_entries"])
+    summary["chat_audit"]["line_length_ok"] = length_ok
+    summary["chat_audit"]["line_length_violations"] = length_violations
+    if len(summary["chat_audit_entries"]) == 0:
+        summary["status"] = "failed"
+        summary["broadcast_error"] = "no chat events emitted"
+    if not bool(args.allow_incomplete_broadcast):
+        if not bool(summary["chat_audit"].get("protocol_all_ok", False)):
+            summary["status"] = "failed"
+            summary["broadcast_error"] = "chat protocol incomplete"
+        if not bool(summary["chat_audit"].get("line_length_ok", False)):
+            summary["status"] = "failed"
+            summary["broadcast_error"] = "chat line length violation"
     summary["chat_audit_summary"] = _format_chat_audit_summary(summary["chat_audit"])
     summary["finished_at"] = _utc_now()
     output_json = str(args.output_json).strip()

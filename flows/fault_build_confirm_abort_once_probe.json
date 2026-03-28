@@ -1,5 +1,5 @@
 {
-  "flowId": "fault_build_confirm_assert_once_probe",
+  "flowId": "fault_build_confirm_abort_once_probe",
   "name": "Fault assert probe after build confirm click",
   "system": "gameplay",
   "profile": "regression",
@@ -39,7 +39,7 @@
       "until": {
         "stateEquals": { "key": "room_clean_status", "value": "cleaned", "roomId": "${BUILD_ROOM_ID}" }
       },
-      "timeoutMs": 60000
+      "timeoutMs": 7000
     },
     {
       "id": "start_build_mode",

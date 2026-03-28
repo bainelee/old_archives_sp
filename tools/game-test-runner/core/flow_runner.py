@@ -288,6 +288,7 @@ def execute_flow_file(
     driver_ready_timeout_sec: int | None = None,
     driver_no_activity_timeout_sec: int | None = None,
     run_id: str | None = None,
+    allow_parallel: bool = False,
 ) -> tuple[dict, int]:
     flow = parse_flow_file(flow_file)
     flow_steps = _expand_steps(flow, flow_file)
@@ -328,6 +329,7 @@ def execute_flow_file(
         requested_run_id=str(run_id).strip() if run_id else None,
         step_prepare_pause_ms=int(flow.get("stepPreparePauseMs", 0)),
         step_verify_pause_ms=int(flow.get("stepVerifyPauseMs", flow.get("stepDebugPauseMs", 0))),
+        allow_parallel=bool(allow_parallel),
     )
 
     started_at = _utc_now_iso()
@@ -426,6 +428,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Override no-activity kill timeout seconds",
     )
     parser.add_argument("--run-id", default=None, help="Optional fixed run_id for live session polling")
+    parser.add_argument("--allow-parallel", action="store_true", help="Allow multiple test runtimes concurrently")
     return parser
 
 
@@ -440,6 +443,7 @@ def main() -> int:
         driver_ready_timeout_sec=args.driver_ready_timeout_sec,
         driver_no_activity_timeout_sec=args.driver_no_activity_timeout_sec,
         run_id=args.run_id,
+        allow_parallel=bool(args.allow_parallel),
     )
     print(json.dumps(payload, ensure_ascii=False))
     return code

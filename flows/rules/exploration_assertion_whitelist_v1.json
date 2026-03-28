@@ -1,0 +1,57 @@
+{
+  "version": "v1",
+  "scope": "exploration_current_stage",
+  "assertable_now": [
+    {
+      "id": "scene_exit_success",
+      "description": "Scenario scene exits with code 0."
+    },
+    {
+      "id": "gameplay_markers_present",
+      "description": "stdout contains all GameplayFlowV1 PASS markers."
+    },
+    {
+      "id": "evidence_files_present",
+      "description": "run_meta/log/report and step screenshots are present."
+    },
+    {
+      "id": "step_screenshots_distinct",
+      "description": "Three step screenshots are not byte-identical."
+    },
+    {
+      "id": "smoke_invariants_pass",
+      "description": "ExplorationSmokeTest reports PASS and exits with code 0."
+    },
+    {
+      "id": "overlay_input_blocked",
+      "description": "Exploration overlay: backdrop click must not close overlay or hit world; mouse wheel must not change GameMain camera zoom/distance (L3 camera_unchanged_after_wheel)."
+    },
+    {
+      "id": "topbar_cognition_bootstrap",
+      "description": "TopBar cognition amount after entering game must match bootstrap contract."
+    }
+  ],
+  "not_assertable_yet": [
+    {
+      "id": "exploration_in_progress_timer",
+      "reason": "No exploration timer/state machine in service layer yet."
+    },
+    {
+      "id": "resource_cost_and_investigator_occupation",
+      "reason": "No real explore action API and runtime accounting path yet."
+    },
+    {
+      "id": "neighbor_unlock_after_explore",
+      "reason": "Adjacency unlock logic is not implemented in exploration rules/service."
+    },
+    {
+      "id": "investigation_event_chain",
+      "reason": "Survey point/event/option chain is still design-stage."
+    }
+  ],
+  "upgrade_triggers": [
+    "ExplorationService adds real explore_region API.",
+    "Exploration runtime introduces in_progress state and completion transition.",
+    "Adjacency unlock source moves from static overlay constants to service-driven rules."
+  ]
+}

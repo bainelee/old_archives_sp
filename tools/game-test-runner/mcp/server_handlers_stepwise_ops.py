@@ -9,8 +9,10 @@ from pathlib import Path
 from typing import Any, Optional
 
 from driver_client import DriverClient
+from flow_path_resolver import resolve_flow_path
 from flow_parser import parse_flow_file
 from flow_runner import _expand_steps, _to_driver_steps
+from runtime_lock import acquire_runtime_lock, release_runtime_lock
 from runner import GameTestRunner, RunRequest
 from server_common import live_run_id, resolve_godot_bin, to_posix
 from server_errors import AppError
@@ -121,9 +123,10 @@ class StepwiseOpsHandlersMixin:
                     "another stepwise session is still running; wait for it to finish before starting a new one",
                     running,
                 )
-        flow_file = Path(str(arguments.get("flow_file", "")).strip()).resolve()
-        if not str(flow_file):
+        flow_file_raw = str(arguments.get("flow_file", "")).strip()
+        if not flow_file_raw:
             raise AppError("INVALID_ARGUMENT", "flow_file is required")
+        flow_file = resolve_flow_path(project_root=project_root, raw_flow_file=flow_file_raw)
         if not flow_file.exists():
             raise AppError("INVALID_ARGUMENT", f"flow_file not found: {flow_file}")
         requested_godot_bin = str(arguments.get("godot_bin", "godot4"))
@@ -181,6 +184,19 @@ class StepwiseOpsHandlersMixin:
                 stderr=err_fh,
                 text=True,
             )
+        runtime_lock_acquired = False
+        try:
+            acquire_runtime_lock(
+                project_root=project_root,
+                pid=int(proc.pid),
+                run_id=run_id,
+                owner="stepwise",
+                allow_parallel=allow_parallel,
+            )
+            runtime_lock_acquired = True
+        except RuntimeError as exc:
+            self._terminate_pid(int(proc.pid))
+            raise AppError("TEST_RUNTIME_ACTIVE", f"another test runtime is active: {exc}")
         try:
             session_safe = run_id
             candidate_dirs = runner._candidate_user_data_dirs(user_data_dir)
@@ -212,6 +228,8 @@ class StepwiseOpsHandlersMixin:
                 self._terminate_pid(int(proc.pid))
                 raise AppError("INVALID_STATE", "test driver did not become ready in time")
         except Exception:
+            if runtime_lock_acquired:
+                release_runtime_lock(project_root, int(proc.pid))
             self._terminate_pid(int(proc.pid))
             raise
         state = {
@@ -238,6 +256,7 @@ class StepwiseOpsHandlersMixin:
             "last_step_id": "",
             "pid_exit_verified": False,
             "last_error": "",
+            "runtime_lock_acquired": runtime_lock_acquired,
         }
         self._write_stepwise_flow_report(run_root, state)
         self._save_stepwise_state(run_root, state)

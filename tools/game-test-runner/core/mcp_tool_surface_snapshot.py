@@ -17,29 +17,6 @@ if str(MCP_DIR) not in sys.path:
 from server import AppError, GameTestMcpServer  # noqa: E402
 
 
-REQUIRED_TOOLS = {
-    "check_test_runner_environment",
-    "run_game_flow",
-    "get_test_artifacts",
-    "get_test_report",
-    "get_mcp_runtime_info",
-    "start_cursor_chat_plugin",
-    "pull_cursor_chat_plugin",
-}
-
-EXPECTED_RELAY_ALLOWED = {
-    "list_test_scenarios",
-    "check_test_runner_environment",
-    "get_test_artifacts",
-    "get_test_report",
-    "get_flow_timeline",
-    "get_test_run_status",
-    "cancel_test_run",
-    "pull_cursor_chat_plugin",
-    "start_cursor_chat_plugin",
-}
-
-
 def _record(name: str, ok: bool, details: dict[str, Any]) -> dict[str, Any]:
     return {"name": name, "ok": ok, "details": details}
 
@@ -47,6 +24,8 @@ def _record(name: str, ok: bool, details: dict[str, Any]) -> dict[str, Any]:
 def run_snapshot(project_root: Path) -> tuple[dict[str, Any], int]:
     server = GameTestMcpServer(default_project_root=project_root)
     payload = server.invoke("get_mcp_runtime_info", {})
+    required_tools = set(GameTestMcpServer.SNAPSHOT_REQUIRED_TOOLS)
+    expected_relay_allowed = set(GameTestMcpServer.RELAY_ALLOWED_TOOLS)
 
     tools = payload.get("tools", [])
     relay_allowed = payload.get("relay_allowed_tools", [])
@@ -67,7 +46,7 @@ def run_snapshot(project_root: Path) -> tuple[dict[str, Any], int]:
             {"tool_count": tool_count, "tools_len": len(tools)},
         )
     )
-    missing_required = sorted(REQUIRED_TOOLS.difference(tools_set))
+    missing_required = sorted(required_tools.difference(tools_set))
     cases.append(
         _record(
             "required_tools_present",
@@ -83,13 +62,13 @@ def run_snapshot(project_root: Path) -> tuple[dict[str, Any], int]:
             {"unexpected_relay_tools": sorted(relay_set.difference(tools_set))},
         )
     )
-    relay_exact_ok = relay_set == EXPECTED_RELAY_ALLOWED
+    relay_exact_ok = relay_set == expected_relay_allowed
     cases.append(
         _record(
             "relay_allowed_contract",
             relay_exact_ok,
             {
-                "expected": sorted(EXPECTED_RELAY_ALLOWED),
+                "expected": sorted(expected_relay_allowed),
                 "actual": sorted(relay_set),
             },
         )

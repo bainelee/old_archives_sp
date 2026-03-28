@@ -1,0 +1,33 @@
+---
+description: 触发 GF-EXP 流程（GameplayFlow 修复 + EXP 沉淀 + Git 分支编排）
+alwaysApply: true
+---
+
+# GF-EXP 触发规则
+
+当用户表达包含以下任一意图时，必须触发 GF-EXP 工作流：
+
+- `执行EXP流程`
+- `执行GF-EXP流程`
+- `进行一次带有exp的gameplayflow`
+- `来一轮GF-EXP`
+- `run gf-exp`
+
+## 术语消歧（强制）
+
+- `EXP`（通用）= 经验沉淀与方法论资产，不等于具体 bug 修复代码。
+- `GF-EXP`（专用）= GameplayFlow 修 bug 的完整流程：
+  - 修复分支中运行与收敛；
+  - 仅回合并 EXP 资产到主分支；
+  - 在主分支重开修复分支进行正式修复。
+
+## 执行入口（强制）
+
+1. 加载技能：`.cursor/skills/gf-exp-workflow/SKILL.md`
+2. 使用脚本：`tools/game-test-runner/scripts/run_gf_exp_cycle.ps1`
+3. EXP 资产边界遵循：`tools/game-test-runner/config/gf_exp_allowlist.json`
+
+## 门控要求
+
+- 必须保留 chat-first stepwise 核心要求，不得以 shell 输出替代关键播报。
+- 若脚本审计发现非 EXP 文件越界，必须停止并返回越界清单。
