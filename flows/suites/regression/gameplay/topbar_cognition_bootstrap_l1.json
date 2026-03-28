@@ -1,0 +1,35 @@
+{
+  "flowId": "topbar_cognition_bootstrap_l1",
+  "name": "TopBar cognition bootstrap sanity check",
+  "system": "gameplay",
+  "profile": "regression",
+  "mode": "local",
+  "scene": "res://scenes/ui/start_menu.tscn",
+  "flowStepTimeoutSec": 20,
+  "driverReadyTimeoutSec": 20,
+  "driverNoActivityTimeoutSec": 8,
+  "steps": [
+    { "id": "sleep_boot", "action": "sleep", "ms": 500 },
+    { "id": "click_new_game", "action": "click", "target": { "testId": "btn_new_game" } },
+    { "id": "click_slot0", "action": "click", "target": { "testId": "save_slot_0" } },
+    {
+      "id": "wait_ingame",
+      "action": "wait",
+      "until": { "scene": "game_main" },
+      "minWaitMs": 200,
+      "timeoutMs": 3000
+    },
+    { "id": "pause_before_check", "action": "setGlobalPause", "paused": true },
+    {
+      "id": "check_cognition_bootstrap",
+      "action": "check",
+      "kind": "logic_state",
+      "expect": {
+        "cognition_amount": 6000
+      },
+      "timeoutMs": 1500
+    },
+    { "id": "state_snapshot", "action": "getState", "keys": ["cognition_amount", "resources"] },
+    { "id": "resume_after_check", "action": "setGlobalPause", "paused": false }
+  ]
+}
