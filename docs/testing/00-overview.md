@@ -2,7 +2,7 @@
 
 本目录用于团队协作交付一套可复用的游戏自动测试链路，目标是：
 - AI（MCP）可调用
-- 开发者（Godot 插件）可点击运行
+- Godot 插件仅做桥接提示（不在编辑器内执行 flow）
 - 结果可追溯（日志/截图/存档索引/报告）
 
 快速入口：[`README`](README.md)
@@ -14,12 +14,17 @@
   - `tools/game-test-runner/core/contract_regression.py`
 - 场景注册表
   - `tools/game-test-runner/core/scenario_registry.py`
-- MCP 最小入口
+- MCP 统一入口
   - `tools/game-test-runner/mcp/server.py`
-  - tools: `list_test_scenarios`、`run_game_test`、`run_game_flow`、`check_test_runner_environment`、`get_test_run_status`、`cancel_test_run`、`resume_fix_loop`、`get_test_artifacts`、`get_test_report`
-- Godot 编辑器插件（MVP）
+  - tools: `get_mcp_runtime_info`、`list_test_scenarios`、`run_game_test`、`run_game_flow`、`check_test_runner_environment`、`get_test_run_status`、`cancel_test_run`、`resume_fix_loop`、`get_test_artifacts`、`get_test_report`、`get_flow_timeline`、`start_game_flow_live`、`get_live_flow_progress`、`run_and_stream_flow`、`start_stepwise_flow`、`prepare_step`、`execute_step`、`verify_step`、`step_once`、`run_stepwise_autopilot`、`start_cursor_chat_plugin`、`pull_cursor_chat_plugin`
+- Godot 编辑器插件（Bridge Mode）
   - `addons/test_orchestrator/plugin.cfg`
   - `addons/test_orchestrator/plugin.gd`
+- 安装与版本清单（Windows）
+  - `tools/game-test-runner/install/install-mcp.ps1`
+  - `tools/game-test-runner/install/start-mcp.ps1`
+  - `tools/game-test-runner/install/update-mcp.ps1`
+  - `tools/game-test-runner/mcp/version_manifest.json`
 - 首个探索 smoke 场景
   - `scenes/test/exploration_smoke_test.tscn`
   - `scripts/test/exploration_smoke_test.gd`

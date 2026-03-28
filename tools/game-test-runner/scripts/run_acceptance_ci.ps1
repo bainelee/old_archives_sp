@@ -4,6 +4,7 @@ param(
     [string]$GodotBin = "",
     [string]$OutputJson = "",
     [switch]$IncludeContractRegression,
+    [switch]$IncludeToolSurfaceCheck,
     [switch]$Fast,
     [switch]$OnlyPreflight
 )
@@ -52,10 +53,29 @@ function Invoke-McpTool {
 }
 
 function Invoke-ContractRegression {
+    param(
+        [string]$GodotBinForContract = ""
+    )
     $contractScript = Join-Path $ProjectRoot "tools/game-test-runner/core/contract_regression.py"
-    $raw = & $PythonExe $contractScript --project-root $ProjectRoot --godot-bin $env:GODOT_BIN
+    $godotToUse = $GodotBinForContract
+    if ([string]::IsNullOrWhiteSpace($godotToUse)) {
+        $godotToUse = [string]$env:GODOT_BIN
+    }
+    if ([string]::IsNullOrWhiteSpace($godotToUse)) {
+        throw "Contract regression requires Godot path. Set GODOT_BIN or pass -GodotBin."
+    }
+    $raw = & $PythonExe $contractScript --project-root $ProjectRoot --godot-bin $godotToUse
     if ($LASTEXITCODE -ne 0) {
         throw "Contract regression failed`n$raw"
+    }
+    return $raw | ConvertFrom-Json
+}
+
+function Invoke-ToolSurfaceSnapshot {
+    $scriptPath = Join-Path $ProjectRoot "tools/game-test-runner/core/mcp_tool_surface_snapshot.py"
+    $raw = & $PythonExe $scriptPath --project-root $ProjectRoot
+    if ($LASTEXITCODE -ne 0) {
+        throw "MCP tool surface snapshot failed`n$raw"
     }
     return $raw | ConvertFrom-Json
 }
@@ -65,9 +85,14 @@ if (-not [string]::IsNullOrWhiteSpace($GodotBin)) {
 }
 $skipAllRuns = [bool]$OnlyPreflight
 $runContractRegression = [bool]$IncludeContractRegression
+$runToolSurfaceCheck = [bool]$IncludeToolSurfaceCheck
 if ($Fast -and -not $runContractRegression -and -not $skipAllRuns) {
     # Fast mode defaults to running contract regression as guardrail.
     $runContractRegression = $true
+}
+if ($Fast -and -not $runToolSurfaceCheck -and -not $skipAllRuns) {
+    # Fast mode also enables MCP tool surface snapshot by default.
+    $runToolSurfaceCheck = $true
 }
 
 $timestamp = [DateTime]::UtcNow.ToString("yyyyMMddTHHmmssfffZ")
@@ -79,8 +104,10 @@ $summary = [ordered]@{
     fast_mode = [bool]$Fast
     only_preflight = $skipAllRuns
     include_contract_regression = $runContractRegression
+    include_tool_surface_check = $runToolSurfaceCheck
     runs = @()
     contract_regression = $null
+    mcp_tool_surface = $null
 }
 
 # 1) Preflight for CI readiness
@@ -162,7 +189,7 @@ if (-not $Fast -and -not $skipAllRuns) {
 }
 
 if ($runContractRegression -and -not $skipAllRuns) {
-    $contract = Invoke-ContractRegression
+    $contract = Invoke-ContractRegression -GodotBinForContract ([string]$env:GODOT_BIN)
     $contractCases = @()
     if ($null -ne $contract.cases) {
         $contractCases = @($contract.cases)
@@ -183,6 +210,20 @@ if ($runContractRegression -and -not $skipAllRuns) {
     }
 }
 
+if ($runToolSurfaceCheck -and -not $skipAllRuns) {
+    $toolSurface = Invoke-ToolSurfaceSnapshot
+    $toolCases = @()
+    if ($null -ne $toolSurface.cases) {
+        $toolCases = @($toolSurface.cases)
+    }
+    $summary.mcp_tool_surface = [ordered]@{
+        status = $toolSurface.status
+        server_version = $toolSurface.server_version
+        tool_count = $toolSurface.tool_count
+        cases = $toolCases
+    }
+}
+
 $allResolved = $true
 foreach ($item in $summary.runs) {
     if ($item.status -ne "resolved") {
@@ -197,9 +238,13 @@ if ($runContractRegression -and $null -ne $summary.contract_regression) {
         -and [bool]$summary.contract_regression.has_run_and_stream_short_chat_case
     )
 }
+$toolSurfacePassed = $true
+if ($runToolSurfaceCheck -and $null -ne $summary.mcp_tool_surface) {
+    $toolSurfacePassed = ([string]$summary.mcp_tool_surface.status -eq "passed")
+}
 
 $summary.finished_at = (Get-Date).ToString("o")
-$summary.status = $(if ($allResolved -and $contractPassed) { "passed" } else { "failed" })
+$summary.status = $(if ($allResolved -and $contractPassed -and $toolSurfacePassed) { "passed" } else { "failed" })
 
 $defaultDir = Join-Path $ProjectRoot "artifacts/test-runs"
 if (-not (Test-Path $defaultDir)) {
@@ -216,5 +261,8 @@ if (-not $allResolved) {
 }
 if (-not $contractPassed) {
     exit 4
+}
+if (-not $toolSurfacePassed) {
+    exit 5
 }
 exit 0

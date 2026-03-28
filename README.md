@@ -111,3 +111,11 @@ old-archives-sp/
 - [名词解释](docs/名词解释.md)
 - [数据文件说明](datas/README.md)
 - [术语对照](docs/settings/00-project-keywords.md)
+- [自动化测试与MCP快速入口](docs/testing/README.md)
+
+## 自动化测试入口（MCP）
+
+- 测试链路文档在 `docs/testing/`，建议先看 `docs/testing/README.md`。
+- 快速环境预检（仓库根目录执行）：
+  - `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/install/run-preflight.ps1"`
+- 说明：当前 `tools/game-test-runner/mcp/server.py` 是 CLI 适配入口（按 `--tool` 调用），用于统一 MCP 工具面与 IDE 集成脚本。

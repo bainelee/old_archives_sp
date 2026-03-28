@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import time
 from datetime import datetime, timezone
@@ -16,6 +17,41 @@ from server_errors import AppError
 
 
 class StepwiseOpsHandlersMixin:
+    @staticmethod
+    def _short_run_id_seed(flow_file: Path) -> str:
+        stem = str(flow_file.stem or "flow").strip().lower()
+        safe = re.sub(r"[^a-z0-9]+", "_", stem).strip("_")
+        if not safe:
+            safe = "flow"
+        return safe[:24]
+
+    def _detect_running_stepwise_session(self, project_root: Path) -> dict[str, Any]:
+        artifact_base = project_root / "artifacts" / "test-runs"
+        if not artifact_base.exists() or not artifact_base.is_dir():
+            return {}
+        for run_root in sorted(artifact_base.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True):
+            if not run_root.is_dir():
+                continue
+            state_path = run_root / "stepwise_session.json"
+            if not state_path.exists():
+                continue
+            try:
+                payload = json.loads(state_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(payload, dict):
+                continue
+            if str(payload.get("status", "")).strip().lower() != "running":
+                continue
+            pid = int(payload.get("pid", 0) or 0)
+            if pid > 0 and self._is_pid_running(pid):
+                return {
+                    "run_id": str(payload.get("run_id", "")),
+                    "pid": pid,
+                    "artifact_root": str(run_root),
+                }
+        return {}
+
     @staticmethod
     def _extract_game_time(response: dict[str, Any]) -> str:
         if not isinstance(response, dict):
@@ -76,6 +112,15 @@ class StepwiseOpsHandlersMixin:
         project_root = Path(str(project_root_raw)).resolve()
         if not project_root.exists():
             raise AppError("INVALID_ARGUMENT", f"project_root not found: {project_root}")
+        allow_parallel = bool(arguments.get("allow_parallel", False))
+        if not allow_parallel:
+            running = self._detect_running_stepwise_session(project_root)
+            if running:
+                raise AppError(
+                    "STEPWISE_SESSION_ACTIVE",
+                    "another stepwise session is still running; wait for it to finish before starting a new one",
+                    running,
+                )
         flow_file = Path(str(arguments.get("flow_file", "")).strip()).resolve()
         if not str(flow_file):
             raise AppError("INVALID_ARGUMENT", "flow_file is required")
@@ -96,7 +141,7 @@ class StepwiseOpsHandlersMixin:
         if not driver_steps:
             raise AppError("INVALID_ARGUMENT", "flow has no executable steps")
         runner = GameTestRunner(project_root=project_root)
-        run_id = str(arguments.get("run_id", "")).strip() or live_run_id(f"{flow_file.stem}_stepwise")
+        run_id = str(arguments.get("run_id", "")).strip() or live_run_id(f"{self._short_run_id_seed(flow_file)}_sw")
         run_root = runner._prepare_artifacts(run_id)
         user_data_dir = run_root / "user_data"
         session = run_id

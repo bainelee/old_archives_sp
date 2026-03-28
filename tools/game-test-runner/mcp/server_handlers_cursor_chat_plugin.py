@@ -93,7 +93,7 @@ class CursorChatPluginHandlersMixin:
         }
 
     @staticmethod
-    def _build_stage5_event(verify: dict[str, Any], active_step: dict[str, Any], game_time: str = "") -> dict[str, Any]:
+    def _build_plugin_stage5_event(verify: dict[str, Any], active_step: dict[str, Any], game_time: str = "") -> dict[str, Any]:
         verified = bool(verify.get("verified", False))
         status = str(verify.get("status", "running"))
         step_id = str(active_step.get("id", ""))
@@ -237,7 +237,7 @@ class CursorChatPluginHandlersMixin:
                 ]
                 queue.extend(verify_events)
                 game_time = str(verify_events[0].get("game_time", "")) if verify_events else ""
-                queue.append(self._build_stage5_event(verify=verify, active_step=active_step, game_time=game_time))
+                queue.append(self._build_plugin_stage5_event(verify=verify, active_step=active_step, game_time=game_time))
                 if str(verify.get("status", "")) == "finished":
                     state["finished"] = True
                     state["phase_state"] = "done"

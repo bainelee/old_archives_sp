@@ -7,13 +7,20 @@
 | 你要做什么 | 用哪个模式 | 命令 |
 |---|---|---|
 | 只确认环境是否可跑（最快） | `OnlyPreflight` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -OnlyPreflight` |
-| 做快速门禁（环境 + 契约） | `Fast` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
+| 做快速门禁（环境 + 契约 + 工具面） | `Fast` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
 | 做完整验收（环境 + 2 条 acceptance） | 默认模式 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"` |
 | 做完整验收 + 契约回归 | 默认 + 契约 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -IncludeContractRegression` |
 
-## 1) 启用插件
+非技术同学建议先用这一条（仓库根目录执行）：
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/install/run-preflight.ps1"
+```
+
+## 1) 启用插件（Bridge Mode）
 - 打开项目后进入 `Project > Project Settings > Plugins`
 - 启用 `Test Orchestrator`
+- 该插件仅显示桥接提示，不提供 gameplayflow 按钮与本地执行入口
+- 所有执行/播报/验证统一通过 IDE（如 Cursor）的 MCP 调用完成
 
 ## 2) 配置运行路径（推荐环境变量）
 - 推荐设置环境变量 `GODOT_BIN` 指向 Godot 可执行文件
@@ -25,23 +32,19 @@
 setx GODOT_BIN "D:\GODOT\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64.exe"
 ```
 
-## 3) 常用按钮
-- `Run Exploration Smoke`：探索系统冒烟
-- `Record Visual Baseline`：录制视觉基线图
-- `Run Visual Check`：执行视觉比对（当前故意注入了 icon 错位，可用于验证检测链路）
-- `Run Quick Regression Suite`：一次跑 exploration + visual canary 并输出汇总
-- `Run Gameplay Debug Flow`：执行真实流程模板 `exploration_gameplay_flow_v1`
+## 3) 常用 MCP 入口（IDE 内调用）
+- `get_mcp_runtime_info`：查看当前版本、工具面、更新通道信息
+- `run_and_stream_flow`：单入口启动 + 轮询 + 播报聚合
+- `start_cursor_chat_plugin` + `pull_cursor_chat_plugin`：chat-first 五阶段逐步播报
+- `get_flow_timeline`：读取步骤时间线与证据摘要
+
+工具面快照脚本（CI 可用）：
+- `tools/game-test-runner/core/mcp_tool_surface_snapshot.py`
 
 ## 4) 看结果
-- `Open Folder` 打开当前选中 run 的产物目录
-- `Open report.json` 打开结构化报告
-- `Open flow_report.json` 打开流程报告（仅 flow run 存在）
-- `Open step_timeline.json` 打开步骤时间线（step 状态、说明、证据）
-- `Flow Steps (Timeline)` 在插件内查看步骤状态、说明与截图预览（若有）
-- flow 运行中会显示 `RUN current_step` 占位行，表示进程仍在推进下一步
-- flow 运行前会先从 flow 文件读取步骤清单，并在运行中显示“预测下一步 step_id”
-- `Open diff.png` / `Open diff_annotated.png` 打开视觉差异图
-- `Copy Status` / `Copy Artifacts Path` 快速复制信息
+- 产物目录：`artifacts/test-runs/<run_id>/`
+- 关键报告：`report.json`、`flow_report.json`、`step_timeline.json`、`failure_summary.json`
+- 推荐读取方式：`get_test_artifacts` + `get_test_report` + `get_flow_timeline`
 
 ## 5) 产物目录
 - 单次 run：`artifacts/test-runs/<run_id>/`
@@ -171,6 +174,20 @@ ChatRelay 强约束（必须）：
 - 执行工具链：`start_cursor_chat_plugin + pull_cursor_chat_plugin`
 - MCP 可开启强制门禁：`chat_relay_required=true`（阻断非 relay 执行路径）
 - shell `[CHAT]` 默认关闭；仅排障时显式启用 `--emit-shell-chat` / `-EmitShellChat`
+
+## 9) 安装与更新（Settings 友好）
+- 安装脚本：`tools/game-test-runner/install/install-mcp.ps1`
+- 启动脚本：`tools/game-test-runner/install/start-mcp.ps1`
+- 更新脚本：`tools/game-test-runner/install/update-mcp.ps1`
+- 版本清单：`tools/game-test-runner/mcp/version_manifest.json`
+
+检查更新：
+```powershell
+powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/install/install-mcp.ps1" `
+  -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
+  -Channel "stable" `
+  -CheckUpdateOnly
+```
 
 执行前/中/后 checklist（防偏离）：
 - 执行前：确认已拿到 `run_id`，并进入 `pull_cursor_chat_plugin` 循环

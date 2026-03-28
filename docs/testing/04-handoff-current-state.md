@@ -28,19 +28,10 @@
   - `run_and_stream_flow_short_chat_contract`
   - `chat_progress_human_structure_contract`
 
-### B. 插件可视化（Godot 面板）
-- 失败摘要：`step/category/actual`
-- 关键文件快捷打开：
-  - `report.json`
-  - `flow_report.json`
-  - `failure_summary.json`
-  - `step_timeline.json`
-- Flow Steps 区块：
-  - 步骤列表（OK/FAIL/SKIP/RUN/TODO）
-  - 详情（id/status/action/validation/expected/actual）
-  - 证据打开
-  - 截图预览
-- 运行中轮询刷新与“预测下一步 step_id”已接入。
+### B. Godot 插件（Bridge Mode）
+- `addons/test_orchestrator/plugin.gd` 已收敛为桥接提示面板，不再提供任何 gameplayflow 执行按钮。
+- 流程编排、步骤播报、验证结论、报告读取统一由 IDE 侧 MCP 调用完成（Cursor 对话窗口为主）。
+- 目标是避免 Godot 与 IDE 双入口并行导致的时序偏差与反馈分叉。
 
 ### C. Cursor 对话窗口优先（chat-first）
 - MCP 新增工具：
@@ -74,14 +65,26 @@
   - `-NoChatProgress` 为兼容参数（当前不会关闭 stepwise 阶段播报）
   - 播报文案映射：`tools/game-test-runner/mcp/chat_progress_templates.json`（可直接改）
 
+### E. MCP 统一接线与安装更新链路
+- `tools/game-test-runner/mcp/server.py` 已统一工具面（core/fixloop/live/stepwise/cursor plugin）。
+- 新工具：`get_mcp_runtime_info`（返回 server_version、tools、relay_allowed_tools、manifest/update_policy）。
+- 已实现 `chat_relay_required=true` 服务端强门禁：非 relay 执行入口会返回 `CHAT_RELAY_REQUIRED`。
+- 新增安装运维脚本：
+  - `tools/game-test-runner/install/install-mcp.ps1`
+  - `tools/game-test-runner/install/start-mcp.ps1`
+  - `tools/game-test-runner/install/update-mcp.ps1`
+- 版本清单：`tools/game-test-runner/mcp/version_manifest.json`
+  - 支持 stable/beta 通道与 artifact 元数据（url/sha256/size/zip_layout）。
+- `update-mcp.ps1` 已支持：本地包更新、远端 artifact 下载（若配置 URL）、sha256 校验、失败回滚、smoke check。
+
 ## 关键路径（更新后）
 - 插件主入口：`addons/test_orchestrator/plugin.gd`
-- 插件时间线工具：`addons/test_orchestrator/flow_timeline_utils.gd`
 - MCP 服务：`tools/game-test-runner/mcp/server.py`
 - MCP 时间线读取：`tools/game-test-runner/mcp/flow_timeline_reader.py`
 - 流程执行器：`tools/game-test-runner/core/flow_runner.py`
 - 运行器：`tools/game-test-runner/core/runner.py`
 - 契约回归：`tools/game-test-runner/core/contract_regression.py`
+- 工具面快照：`tools/game-test-runner/core/mcp_tool_surface_snapshot.py`
 - CI 脚本：`tools/game-test-runner/scripts/run_acceptance_ci.ps1`
 
 ## 已验证的 live 会话样例
@@ -96,7 +99,13 @@
 - 关键截图示例：`.../screenshots/room_detail_opened.png`
 
 ## 仍需继续推进（下阶段建议）
-1. 继续拆分超大文件（第二轮）：
-   - `addons/test_orchestrator/plugin.gd`
+1. 将 `version_manifest.json` 的 `artifact.url/sha256` 接入真实发布源（当前字段已预留）。
 2. 增加 `chat_progress_short` 的多语言模板（zh/en）切换。
 3. 在对话侧支持“截图路径 -> 直接内联展示”桥接（目前已稳定返回绝对路径）。
+
+## TODO（待补充，后续实现）
+- [ ] 接入真实发布源：为 `version_manifest.json` 填充可用 `artifact.url/sha256/size_bytes`，并形成发布更新清单。
+- [ ] 明确接入模型：在 `docs/testing/01-install-and-config.md` 增加“CLI 适配入口与 IDE 调用方式”统一说明，避免误解为常驻协议服务。
+- [ ] 文档结构整理：统一 `docs/testing/01-install-and-config.md` 章节顺序与编号，减少阅读跳转成本。
+- [ ] 跨平台安装补齐：增加 `install` 的 shell 版本（如 `.sh`）或明确 Windows-only 支持边界。
+- [ ] 常量去重：将工具面快照中的 relay 白名单改为复用服务端单一来源，避免双处维护漂移。

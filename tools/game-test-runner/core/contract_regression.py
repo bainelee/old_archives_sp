@@ -41,6 +41,37 @@ def run_contract_suite(project_root: Path, godot_bin: str, timeout_sec: int) -> 
     flow_file = project_root / "flows" / "internal" / "contract_force_fail_invalid_scene.json"
     cases: list[dict[str, Any]] = []
 
+    # Case 0: runtime info + relay gate contract.
+    runtime_info = server.invoke("get_mcp_runtime_info", {})
+    runtime_info_ok = bool(runtime_info.get("tool_count", 0)) and "run_game_flow" in runtime_info.get("tools", [])
+    cases.append(
+        _record_case(
+            "runtime_info_contract",
+            runtime_info_ok,
+            {
+                "server_version": runtime_info.get("server_version"),
+                "tool_count": runtime_info.get("tool_count"),
+                "manifest_loaded": runtime_info.get("version_manifest_loaded"),
+            },
+        )
+    )
+    relay_gate_ok = False
+    relay_error: dict[str, Any] = {}
+    try:
+        server.invoke("run_game_flow", {"chat_relay_required": True})
+    except AppError as exc:
+        relay_error = exc.as_dict()
+        relay_gate_ok = str(relay_error.get("code", "")) == "CHAT_RELAY_REQUIRED"
+    cases.append(
+        _record_case(
+            "chat_relay_gate_contract",
+            relay_gate_ok,
+            {
+                "error": relay_error,
+            },
+        )
+    )
+
     # Case 1: waiting_approval contract.
     waiting_payload = server.run_game_flow(
         {

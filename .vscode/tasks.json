@@ -10,6 +10,36 @@
         "reveal": "always",
         "panel": "dedicated"
       }
+    },
+    {
+      "label": "Test Runner: OnlyPreflight",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File \"${workspaceFolder}/tools/game-test-runner/install/run-preflight.ps1\"",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test Runner: Fast Gate",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File \"${workspaceFolder}/tools/game-test-runner/scripts/run_acceptance_ci.ps1\" -ProjectRoot \"${workspaceFolder}\" -Fast",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test Runner: MCP Update Check",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File \"${workspaceFolder}/tools/game-test-runner/install/install-mcp.ps1\" -ProjectRoot \"${workspaceFolder}\" -CheckUpdateOnly",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
     }
   ]
 }
