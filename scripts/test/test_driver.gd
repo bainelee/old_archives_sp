@@ -8,7 +8,10 @@ var _session: String = "default"
 var _cmd_dir: String = ""
 var _cmd_file: String = ""
 var _resp_file: String = ""
-var _step_pre_delay_ms: int = 1000
+var _step_pre_delay_ms: int = 100
+var _resource_probe_initialized: bool = false
+var _resource_probe_baseline: Dictionary = {}
+var _resource_probe_last: Dictionary = {}
 
 
 func _ready() -> void:
@@ -252,7 +255,10 @@ func _find_room_index_by_node_name(gm: Node2D, node_name: String) -> int:
 
 func _handle_wait(params: Dictionary, out: Dictionary) -> void:
 	var timeout_ms: int = maxi(1, int(params.get("timeoutMs", 10000)))
+	var min_wait_ms: int = maxi(0, int(params.get("minWaitMs", 0)))
 	var until: Dictionary = params.get("until", {})
+	if min_wait_ms > 0:
+		await get_tree().create_timer(float(min_wait_ms) / 1000.0).timeout
 	var ok: bool = await _wait_until(until, timeout_ms)
 	if not ok:
 		_fail(out, "TIMEOUT", "wait condition timeout")
@@ -260,6 +266,9 @@ func _handle_wait(params: Dictionary, out: Dictionary) -> void:
 
 func _before_step(action: String, params: Dictionary) -> void:
 	if _step_pre_delay_ms <= 0:
+		return
+	# 预延迟仅用于可视交互步骤，避免在验证/存档/状态读取期间引入额外运行时长
+	if action != "click" and action != "dragCamera":
 		return
 	var marker_layer := CanvasLayer.new()
 	marker_layer.layer = 200
@@ -364,10 +373,120 @@ func _handle_get_state(params: Dictionary, out: Dictionary) -> void:
 				data[key] = _get_build_status(gm, rid_build)
 			"resources":
 				if gm.has_method("_get_player_resources"):
-					data[key] = gm.call("_get_player_resources")
+					data[key] = _canonical_resources(gm.call("_get_player_resources"))
+			"cognition_amount":
+				var ui_main: Node = gm.get_node_or_null("UIMain")
+				if ui_main and ui_main.has_method("get_cognition"):
+					data[key] = int(ui_main.call("get_cognition"))
+				else:
+					data[key] = 0
+			"game_total_hours":
+				if GameTime and GameTime.has_method("get_total_hours"):
+					data[key] = float(GameTime.get_total_hours())
+			"game_hour":
+				if GameTime and GameTime.has_method("get_hour"):
+					data[key] = int(GameTime.get_hour())
+			"settlement_clock":
+				data[key] = _build_settlement_clock()
+			"resource_ledger":
+				data[key] = _build_resource_ledger(gm)
+			"tree_paused":
+				var tree := get_tree()
+				data[key] = bool(tree and tree.paused)
+			"game_speed_multiplier":
+				if GameTime and ("speed_multiplier" in GameTime):
+					data[key] = float(GameTime.speed_multiplier)
+				else:
+					data[key] = null
+			"selected_room_index":
+				data[key] = int(gm.get("_selected_room_index"))
+			"selected_room_id":
+				var selected_index: int = int(gm.get("_selected_room_index"))
+				var rooms: Array = gm.get("_rooms")
+				if selected_index >= 0 and selected_index < rooms.size():
+					var room: ArchivesRoomInfo = rooms[selected_index]
+					data[key] = room.id if room.id != "" else room.json_room_id
+				else:
+					data[key] = ""
+			"exploration_overlay_visible":
+				var overlay: CanvasLayer = gm.get("_exploration_map_overlay")
+				data[key] = bool(overlay and overlay.visible)
 			_:
 				data[key] = null
 	out["data"] = data
+
+
+func _build_settlement_clock() -> Dictionary:
+	var total_hours: float = 0.0
+	if GameTime and GameTime.has_method("get_total_hours"):
+		total_hours = float(GameTime.get_total_hours())
+	var settled_ticks: int = int(floor(total_hours))
+	var settled_hours: float = float(settled_ticks)
+	var unsettled_fraction_hours: float = total_hours - settled_hours
+	return {
+		"tick_hours": 1.0,
+		"total_hours": total_hours,
+		"settled_ticks": settled_ticks,
+		"settled_hours": settled_hours,
+		"unsettled_fraction_hours": unsettled_fraction_hours,
+	}
+
+
+func _build_resource_ledger(gm: Node2D) -> Dictionary:
+	if not gm.has_method("_get_player_resources"):
+		return {}
+	var current: Dictionary = _canonical_resources(gm.call("_get_player_resources"))
+	if not _resource_probe_initialized:
+		_resource_probe_initialized = true
+		_resource_probe_baseline = current.duplicate(true)
+		_resource_probe_last = current.duplicate(true)
+	var delta_from_baseline: Dictionary = _resource_delta(_resource_probe_baseline, current)
+	var delta_from_last: Dictionary = _resource_delta(_resource_probe_last, current)
+	_resource_probe_last = current.duplicate(true)
+	return {
+		"baseline": _resource_probe_baseline.duplicate(true),
+		"current": current.duplicate(true),
+		"delta_from_baseline": delta_from_baseline,
+		"delta_from_last": delta_from_last,
+	}
+
+
+func _canonical_resources(raw: Variant) -> Dictionary:
+	var src: Dictionary = raw if raw is Dictionary else {}
+	return {
+		"cognition": src.get("cognition"),
+		"computation": src.get("computation"),
+		"willpower": src.get("willpower"),
+		"permission": src.get("permission"),
+		"info": src.get("info"),
+		"truth": src.get("truth"),
+		"researcher": src.get("researcher"),
+		"labor": src.get("labor", 0),
+		"eroded": src.get("eroded", 0),
+		"investigator": src.get("investigator", 0),
+	}
+
+
+func _resource_delta(old_value: Dictionary, new_value: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	var keys: Array = []
+	for key in old_value.keys():
+		if not keys.has(key):
+			keys.append(key)
+	for key in new_value.keys():
+		if not keys.has(key):
+			keys.append(key)
+	for key in keys:
+		var a: Variant = old_value.get(key, null)
+		var b: Variant = new_value.get(key, null)
+		if a is int or a is float:
+			if b is int or b is float:
+				out[key] = float(b) - float(a)
+			else:
+				out[key] = null
+		else:
+			out[key] = null
+	return out
 
 
 func _handle_export_ui_spec(params: Dictionary, out: Dictionary) -> void:
