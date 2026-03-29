@@ -10,6 +10,7 @@ param(
     [double]$ResumeSpeed = 1.0,
     [switch]$DisableThinkPause,
     [switch]$EmitShellChat,
+    [switch]$NoEmitShellChat,
     [string]$OutputJson = "",
     [switch]$Template,
     [ValidateSet("three_phase","legacy_five_phase")]
@@ -41,14 +42,20 @@ $argsList = @(
     "--wait-scale", "1.0",
     "--resume-speed", [string]$ResumeSpeed,
     "--chat-protocol-mode", [string]$ChatProtocolMode,
-    "--pause-policy", [string]$PausePolicy,
-    "--emit-shell-chat"
+    "--pause-policy", [string]$PausePolicy
 )
+if ($NoEmitShellChat -and $EmitShellChat) {
+    throw "Cannot use -EmitShellChat with -NoEmitShellChat"
+}
+if ($NoEmitShellChat) {
+    $argsList += "--no-emit-shell-chat"
+}
+elseif ($EmitShellChat) {
+    $argsList += "--emit-shell-chat"
+}
 if ($DisableThinkPause) {
     $argsList += "--disable-think-pause"
 }
-# Step output is mandatory; keep -EmitShellChat for backward-compatible CLI.
-$null = $EmitShellChat
 # Wait scale is fixed at 1.0; keep -WaitScale for backward-compatible CLI.
 $null = $WaitScale
 if ($Template) {

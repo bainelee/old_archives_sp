@@ -5,9 +5,9 @@
 | 场景 | 推荐命令 |
 |---|---|
 | 只检查环境（最快） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -OnlyPreflight` |
-| 快速门禁（环境 + 契约） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
-| 完整验收（环境 + 两条 acceptance） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"` |
-| 完整验收 + 契约回归 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -IncludeContractRegression` |
+| 快速门禁（环境 + 契约 + 工具面，默认） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
+| 完整验收（preflight + 汇总；**不**在此脚本串流 GameplayFlow） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"`；Gameplay 回归另见 `run_gameplay_regression.ps1`（[README.md](./README.md)） |
+| 完整验收 + 显式契约回归 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -IncludeContractRegression`（非 Fast 时默认不跑契约，需显式开关或 `-Fast`） |
 
 ## 1. 前置条件
 - Godot 4.6 已安装并可命令行调用
@@ -107,7 +107,7 @@ python "tools/game-test-runner/mcp/server.py" --tool run_and_stream_flow --proje
 - 查询/取消类工具（状态、报告、产物、环境检查）
 
 其它执行入口（如 `run_game_flow`、`start_stepwise_flow` 等）会被服务端拒绝。  
-如需在终端镜像播报，可在脚本侧额外启用 `--emit-shell-chat` / `-EmitShellChat`。
+`run_gameplay_stepwise_chat.py` 默认已在终端镜像播报；包装脚本可显式传 `--emit-shell-chat` / `-EmitShellChat`（等价于默认）。仅当明确需要静默时可传 `--no-emit-shell-chat`（须符合产品对「允许静默」的前提）。
 
 ## 6. 一键 CI 命令模板（PowerShell）
 
@@ -126,16 +126,16 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acc
 - `-OutputJson`：指定汇总报告输出路径
 - `-IncludeContractRegression`：附加执行闭环契约回归（`contract_regression.py`）
 - `-IncludeToolSurfaceCheck`：附加执行 MCP 工具面快照检查（`mcp_tool_surface_snapshot.py`）
-- `-Fast`：快速门禁模式（跳过 acceptance flows，仅 preflight + contract）
-- `-OnlyPreflight`：只做环境检查（不跑 acceptance、不跑 contract）
+- `-Fast`：快速门禁；在 preflight 通过后**默认**还会跑契约回归（`contract_regression.py`）与 MCP 工具面快照（与 [README.md](./README.md) 一致）。**不**在此脚本内串流历史 acceptance flow，也**不**替代 `run_gameplay_regression.ps1`。
+- `-OnlyPreflight`：只做环境检查（不跑契约、不跑工具面）
 
 脚本行为：
-1. 调用 `check_test_runner_environment` 做前置检查（失败则退出码 2）
-2. 串行执行两个 acceptance flow：
-   - GameplayFlow 清单已收敛；默认用 `tools/game-test-runner/scripts/run_gameplay_regression.ps1` 或 MCP 指定 `flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json` 等
-3. 生成汇总 JSON（默认输出到 `artifacts/test-runs/acceptance_ci_<timestamp>.json`）
-4. 任一 flow 非 `resolved` 则退出码 3
-5. 若启用 `-IncludeContractRegression` 且契约回归失败，则退出码 4
+1. 调用 `check_test_runner_environment`（失败则退出码 **2**）
+2. **不在本脚本内**执行 GameplayFlow 串流；基线 gameplay 请用 `tools/game-test-runner/scripts/run_gameplay_regression.ps1`（或 MCP + `run_gameplay_stepwise_chat.py` 等，见 [14-mcp-core-invariants.md](../design/99-tools/14-mcp-core-invariants.md)）
+3. 若启用契约回归（`-IncludeContractRegression`，或 `-Fast` 默认启用）：执行 `contract_regression.py`（失败则退出码 **4**）
+4. 若启用工具面检查（`-IncludeToolSurfaceCheck`，或 `-Fast` 默认启用）：执行 `mcp_tool_surface_snapshot.py`（失败则退出码 **5**）
+5. 生成汇总 JSON（默认 `artifacts/test-runs/acceptance_ci_<timestamp>.json`）
+6. 汇总里保留 `runs` 字段；当前实现不向其中写入 acceptance flow 结果。若未来重新接入 `runs`，「未 resolved」仍可能映射到退出码 **3**（现为兼容保留）
 
 快速门禁示例：
 ```powershell

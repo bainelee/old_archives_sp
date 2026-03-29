@@ -8,7 +8,7 @@
 |---|---|
 | 只确认环境（最快） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -OnlyPreflight` |
 | 快速门禁（环境 + 契约） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe" -Fast` |
-| 完整验收（环境 + 两条 acceptance） | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe"` |
+| 完整验收（环境；GameplayFlow 另跑 regression） | `run_acceptance_ci.ps1` 默认不串流 GameplayFlow；gameplay 用 `run_gameplay_regression.ps1`（见 `docs/testing/README.md`） |
 
 最近一次快速门禁（通过）：
 - `artifacts/test-runs/acceptance_ci_20260327T160943859Z.json`
@@ -81,7 +81,7 @@
 - 插件主入口：`addons/test_orchestrator/plugin.gd`
 - MCP 服务：`tools/game-test-runner/mcp/server.py`
 - MCP 时间线读取：`tools/game-test-runner/mcp/flow_timeline_reader.py`
-- 流程执行器：`tools/game-test-runner/core/flow_runner.py`
+- 流程执行器：`tools/game-test-runner/core/flow_runner.py`（MCP/fixloop 等内部路径；**Agent/人工主路径**须用 `run_gameplay_stepwise_chat.py` / `run_gameplay_regression.ps1`，勿单独用 `flow_runner.py` 跑需逐步 shell 播报的 `flow_steps`，见 `.cursor/rules/chat-first-stepwise-core.mdc`）
 - 运行器：`tools/game-test-runner/core/runner.py`
 - 契约回归：`tools/game-test-runner/core/contract_regression.py`
 - 工具面快照：`tools/game-test-runner/core/mcp_tool_surface_snapshot.py`

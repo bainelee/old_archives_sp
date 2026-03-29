@@ -50,9 +50,9 @@ python "tools/game-test-runner/core/mcp_tool_surface_snapshot.py" --project-root
 ```
 
 ```powershell
+# 默认已镜像 shell（无需 -EmitShellChat）；仅静默排障时用 -NoEmitShellChat
 powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_stepwise_chat.ps1" `
   -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
   -GodotBin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe" `
-  -FlowFile "D:/GODOT_Test/old-archives-sp/flows/suites/regression/gameplay/basic_gameplay_slot0_phase2.json" `
-  -EmitShellChat
+  -FlowFile "D:/GODOT_Test/old-archives-sp/flows/suites/regression/gameplay/basic_gameplay_slot0_phase2.json"
 ```

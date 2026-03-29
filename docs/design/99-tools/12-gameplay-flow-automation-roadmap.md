@@ -48,9 +48,7 @@
   - `smoke` 同步门禁 + `strict_ui/regression` 异步回归
 - 退出标准：
   - PR 可直接看到失败用例、截图链接、错误摘要。
-  - （已达成）提供一键 CI 脚本：
-    - `tools/game-test-runner/scripts/run_acceptance_ci.ps1`
-    - 内置 preflight + 两条 acceptance flow + 汇总 JSON 产出。
+  - （已达成）提供一键 CI 脚本 `tools/game-test-runner/scripts/run_acceptance_ci.ps1`：**preflight** + 汇总 JSON；可选 **Fast** 模式附带契约回归（`contract_regression.py`）与 MCP 工具面快照。**GameplayFlow 串流执行已从此脚本拆出**，完整 gameplay 回归请用 `tools/game-test-runner/scripts/run_gameplay_regression.ps1`（见 [docs/testing/README.md](../../testing/README.md)）。
 
 ## Phase 4：产品化与规模化（持续）
 - 目标：形成团队可持续使用的测试产品能力。

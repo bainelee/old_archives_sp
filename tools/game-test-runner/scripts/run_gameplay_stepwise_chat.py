@@ -81,10 +81,10 @@ def _print_event(phase_name: str, text: str, event_utc: str = "", game_time: str
     normalized_lines = _normalize_shell_text(text)
     emit_short = _hhmmss(emit_ts)
     event_short = _hhmmss(event_utc)
-    # Step output is always required for observability.
-    print(f"[emit={emit_short}][event={event_short}][game={game_time}]", flush=True)
-    for line in normalized_lines:
-        print(line, flush=True)
+    if emit_shell_chat:
+        print(f"[emit={emit_short}][event={event_short}][game={game_time}]", flush=True)
+        for line in normalized_lines:
+            print(line, flush=True)
     return emit_ts, normalized_lines
 
 
@@ -366,7 +366,16 @@ def main() -> int:
     parser.add_argument("--wait-scale", type=float, default=1.0)
     parser.add_argument("--resume-speed", type=float, default=1.0)
     parser.add_argument("--disable-think-pause", action="store_true")
-    parser.add_argument("--emit-shell-chat", action="store_true")
+    parser.add_argument(
+        "--emit-shell-chat",
+        action="store_true",
+        help="Print chat events to shell (default on). Kept for wrapper scripts; redundant if --no-emit-shell-chat is not set.",
+    )
+    parser.add_argument(
+        "--no-emit-shell-chat",
+        action="store_true",
+        help="Disable shell mirror. Non-default; only when silent runs are explicitly allowed (see docs/design/99-tools/14-mcp-core-invariants.md).",
+    )
     parser.add_argument("--empty-poll-timeout-sec", type=float, default=20.0)
     parser.add_argument("--max-silent-sec", type=float, default=10.0)
     parser.add_argument("--allow-incomplete-broadcast", action="store_true")
@@ -374,6 +383,9 @@ def main() -> int:
     parser.add_argument("--pause-policy", default="strict")
     parser.add_argument("--user-data-dir", default="", help="Shared Godot user data dir (e.g. basic data reconcile)")
     args = parser.parse_args()
+    if bool(args.emit_shell_chat) and bool(args.no_emit_shell_chat):
+        raise SystemExit("Cannot use both --emit-shell-chat and --no-emit-shell-chat")
+    emit_shell_chat = not bool(args.no_emit_shell_chat)
     _ensure_import()
     from server import GameTestMcpServer  # pylint: disable=import-error,import-outside-toplevel
 
@@ -415,7 +427,7 @@ def main() -> int:
             wait_scale=1.0,
             pause_during_think=not bool(args.disable_think_pause),
             resume_speed=max(0.1, float(args.resume_speed)),
-            emit_shell_chat=True,
+            emit_shell_chat=emit_shell_chat,
             empty_poll_timeout_sec=max(2.0, float(args.empty_poll_timeout_sec)),
             max_silent_sec=max(2.0, float(args.max_silent_sec)),
             chat_protocol_mode=str(args.chat_protocol_mode or "three_phase"),

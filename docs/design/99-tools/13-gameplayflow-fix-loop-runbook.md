@@ -12,7 +12,31 @@
 
 ## 2. 标准运行命令
 
-场景 A：
+主路径须满足 [14-mcp-core-invariants.md](./14-mcp-core-invariants.md) 与 [06-chat-first-status-and-requirements.md](../../testing/06-chat-first-status-and-requirements.md)：**ChatRelay + 每步三段协议（`started`→`result`→`verify`）+ shell（终端）可逐步审计**。不要单独用 `flow_runner.py` 作为本闭环的默认执行入口（见下文「例外」）。
+
+**场景 A（单 flow，与旧 runbook 场景 A 等价）：**
+
+```bash
+python tools/game-test-runner/scripts/run_gameplay_stepwise_chat.py \
+  --project-root . \
+  --godot-bin godot4 \
+  --flow-file flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json
+```
+
+**场景 B（单 flow，与旧 runbook 场景 B 等价）：**
+
+```bash
+python tools/game-test-runner/scripts/run_gameplay_stepwise_chat.py \
+  --project-root . \
+  --godot-bin godot4 \
+  --flow-file flows/suites/regression/gameplay/basic_data_slot0_phase1.json
+```
+
+**一键基础回归（两房模板 + 可选基础数据对账）：** 见 `tools/game-test-runner/scripts/run_gameplay_regression.ps1`（内部已用 stepwise + Chat 链路）。
+
+### 2.1 例外：`flow_runner.py`（仅静默 / 排障）
+
+仅在**用户明确允许无逐步 shell 播报**时使用，例如只要产物、不要 Chat 事件：
 
 ```bash
 python tools/game-test-runner/core/flow_runner.py \
@@ -21,14 +45,7 @@ python tools/game-test-runner/core/flow_runner.py \
   --godot-bin godot4
 ```
 
-场景 B：
-
-```bash
-python tools/game-test-runner/core/flow_runner.py \
-  --flow-file flows/suites/regression/gameplay/basic_data_slot0_phase1.json \
-  --project-root . \
-  --godot-bin godot4
-```
+带 `flow_steps` 时，执行器会向 stderr 提示：`flow_runner.py has no per-step shell broadcast`，并指向 `run_gameplay_stepwise_chat.py`（与 [docs/testing/README.md](../../testing/README.md) 一致）。
 
 ## 3. 产物与定位
 

@@ -6,9 +6,10 @@
 
 | 入口 | 偏离触发条件 | 风险 |
 |---|---|---|
-| `run_gameplay_stepwise_chat.py` | 直接走旧格式单行输出 | 文本过长、可读性差 |
 | `run_gameplay_base_template.ps1` | 只看终端且未回传 pull 事件结果 | 容易误判为“无连续播报” |
 | `start_stepwise_flow/step_once/autopilot` | 被直接调用且未通过 plugin relay | 执行与展示耦合到 shell |
+
+`run_gameplay_stepwise_chat.py` 走 `start_cursor_chat_plugin` + `pull_cursor_chat_plugin`，主观测下默认将事件 **镜像到 shell**，格式为两行制（元信息行 + 文本行，长文案按 CJK/英文宽度折行），与 [06-chat-first-status-and-requirements.md](./06-chat-first-status-and-requirements.md) 一致。仅当显式传入 `--no-emit-shell-chat` 时才关闭终端镜像（非默认；须符合 [14-mcp-core-invariants.md](../design/99-tools/14-mcp-core-invariants.md) 中“用户明确允许静默”的前提）。
 
 ## 强制门禁
 
@@ -23,13 +24,12 @@
 
 1. 启动：`start_cursor_chat_plugin`
 2. 拉取：循环 `pull_cursor_chat_plugin`（`max_batch=1~3`）
-3. 播报：主流程按 `phase` 顺序通过 `pull_cursor_chat_plugin` 回传；需要终端镜像时再输出到 shell（两行制）
+3. 播报：主流程按 `phase` 顺序通过 `pull_cursor_chat_plugin` 回传；主观测时由 `run_gameplay_stepwise_chat.py` 等将事件 **print 到 shell**（两行制，见下）
 4. 收尾：输出 `chat_audit` 摘要（协议完整率 + 延迟）
 
 ## shell 输出策略
 
-- shell 播报是可选镜像（`--emit-shell-chat` / `-EmitShellChat`），默认可关闭。
-- 格式固定为两行：
+- **`run_gameplay_stepwise_chat.py`**：默认 **开启** shell 镜像（`--emit-shell-chat` 可显式写上，与默认等价；供包装脚本兼容）。关闭镜像用 `--no-emit-shell-chat`（例外场景）。
+- 格式固定为两行（每条 Chat 事件可折成多组「元信息 + 文本」）：
   - 元信息行：`[emit=HH:MM:SS][event=HH:MM:SS][game=]`
-  - 文本行：步骤播报文本（中文单行<=30，英文单行<=60）
-
+  - 文本行：步骤播报文本（中文单行<=30，英文单行<=60；超长由脚本折行）

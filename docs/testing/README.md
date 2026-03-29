@@ -176,7 +176,7 @@ ChatRelay 强约束（必须）：
 - 故障排查手册：`docs/testing/07-shell-broadcast-troubleshooting.md`
 - 执行工具链：`start_cursor_chat_plugin + pull_cursor_chat_plugin`
 - MCP 可开启强制门禁：`chat_relay_required=true`（阻断非 relay 执行路径）
-- 当启用 `--emit-shell-chat` / `-EmitShellChat` 时，shell 播报采用两行协议：`[emit=HH:MM:SS][event=HH:MM:SS][game=]` + 文本行（无 `[CHAT]` 前缀）
+- `run_gameplay_stepwise_chat.py` **默认**将事件镜像到 shell（两行协议：`[emit=HH:MM:SS][event=HH:MM:SS][game=]` + 文本行，无 `[CHAT]` 前缀）；显式关闭用 `--no-emit-shell-chat`。包装脚本仍可传 `--emit-shell-chat` / `-EmitShellChat`（与默认等价）。
 
 ## 9) 安装与更新（Settings 友好）
 - 安装脚本：`tools/game-test-runner/install/install-mcp.ps1`
