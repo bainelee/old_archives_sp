@@ -281,7 +281,7 @@ graph TD
 
 **脚本与场景（速查）**：`scripts/game/exploration/exploration_service.gd`、`exploration_tick.gd`、`exploration_rules.gd`、`exploration_state_codec.gd`；`scripts/ui/exploration_map_overlay.gd`、`exploration_region_info_panel.gd`、`exploration_investigation_event_panel.*`；静态数据 `datas/exploration_investigations.json`；输入与叠层命中见 `scripts/game/game_main_input.gd`。
 
-**自动化**：`docs/testing/09-exploration-gameplayflow-validation.md`；回归 flow `flows/suites/regression/gameplay/exploration_two_regions_save_verify.json`；`scripts/test/test_driver.gd` 提供 `exploreRegion`、`advanceGameHours`、`verifySaveSlotExploration`、`loadGameMainFromSlot` 等。
+**自动化**：GameplayFlow 侧已与其他系统一并收敛为全局「基础测试 + 基础数据」回归（见 `docs/testing/README.md`、`tools/game-test-runner/scripts/run_gameplay_regression.ps1`）。探索相关断言可继续通过 `scripts/test/test_driver.gd` 的 `exploreRegion`、`advanceGameHours`、`verifySaveSlotExploration`、`loadGameMainFromSlot` 等在自定义 flow 中编排。
 
 ---
 

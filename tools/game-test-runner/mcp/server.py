@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -198,6 +199,16 @@ class GameTestMcpServer(
         if tool_name not in self.BROADCAST_REQUIRED_TOOLS:
             return
         if bool(arguments.get("allow_non_broadcast", False)):
+            if str(os.environ.get("MCP_ALLOW_NON_BROADCAST", "")).strip() != "1":
+                raise AppError(
+                    "BROADCAST_BYPASS_DENIED",
+                    "allow_non_broadcast requires MCP_ALLOW_NON_BROADCAST=1 (first-party scripts must use chat/stepwise instead)",
+                    {
+                        "tool": tool_name,
+                        "preferred_tool": "start_cursor_chat_plugin",
+                        "env_hint": "MCP_ALLOW_NON_BROADCAST=1",
+                    },
+                )
             return
         raise AppError(
             "BROADCAST_ENTRY_REQUIRED",
@@ -227,6 +238,7 @@ class GameTestMcpServer(
             "relay_allowed_tools": sorted(self.RELAY_ALLOWED_TOOLS),
             "broadcast_required_tools": sorted(self.BROADCAST_REQUIRED_TOOLS),
             "broadcast_policy_default": "chat_plugin_only",
+            "broadcast_bypass_requires_env": "MCP_ALLOW_NON_BROADCAST=1",
             "version_manifest_path": str(VERSION_MANIFEST_PATH),
             "version_manifest_loaded": bool(manifest_payload),
             "update_policy": manifest_payload.get("update_policy", {}),

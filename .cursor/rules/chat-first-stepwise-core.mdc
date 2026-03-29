@@ -1,12 +1,12 @@
 # Chat-First Stepwise 核心要求（强制）
 
-以下要求为本项目测试流程的最高优先级约束，必须始终执行：
+以下要求为本项目 **GameplayFlow / 逐步测试** 的最高优先级约束，必须始终执行。
 
-## 1) 播报渠道
+## 1) 播报渠道（主观测 = shell）
 
-- 测试流程步骤必须在 **Chat 对话界面** 播报。
-- 不允许把 shell/terminal 输出当作主播报渠道。
-- 若出现 shell 播报与 chat 播报冲突，以 chat 播报为准，并修正流程。
+- **人类与 Agent 的主观测、主播报渠道**为 **shell（终端）**：须能逐步看到带时间戳行的输出，以及每步协议对应的中文文案（见 §3）。
+- 事件由 MCP **`start_cursor_chat_plugin` + `pull_cursor_chat_plugin`**（或等价包装如 `run_gameplay_stepwise_chat.py`）产生；**IDE 对话窗**若消费同一事件流，视为 **可选并行展示**，不得替代「终端可见、可审计」的要求。
+- **禁止**把「仅最终一行 JSON、无逐步事件」的路径当作「已满足播报约定」的默认跑法（例如单独使用 `tools/game-test-runner/core/flow_runner.py` 跑带 `flow_steps` 的 gameplay flow）。
 
 ## 2) 低延迟
 
@@ -14,15 +14,20 @@
 - 优先使用服务端原子执行/自驱执行（如 `step_once` / `run_stepwise_autopilot`）以减少往返延迟。
 - 禁止使用会导致历史补发、批量推送、明显延迟的路径作为主路径。
 
-## 3) 每步固定五段协议（必须完整）
+## 3) 每步固定三段协议（默认 `three_phase`，必须完整）
 
-每个步骤都必须显示以下阶段，且顺序固定：
+每个步骤在**对外可见队列**中须按顺序出现以下 **3** 个阶段（对应 MCP 事件 `phase`：`started` → `result` → `verify`），且中文前缀固定为：
 
-1. 即将开始
-2. 开始执行
-3. 执行结果
-4. 验证结论
-5. 通过后进入下一步 / 失败立即停止
+1. **开始执行**（`started`）
+2. **执行结果**（`result`）
+3. **验证结论**（`verify`，通过/失败）
+
+- **失败即停**：任一步在 `verify` 为失败时立即停止，不得继续后续步骤。
+- **审计契约**：`run_gameplay_stepwise_chat.py` 中 `protocol_all_ok` 以每步是否同时具备 `started` / `result` / `verify` 为判据。
+
+### 遗留模式（非默认）
+
+- `chat_protocol_mode=legacy_five_phase` 时，在默认三段之外可能额外出现「即将开始」及「进入下一步」类事件；**仅供显式兼容旧行为**，**不得**写入新流程或新文档的默认要求。
 
 ## 4) 严格门控
 
@@ -31,5 +36,9 @@
 
 ## 5) 执行原则
 
-- 所有改动、脚本与工具设计都必须优先满足上述四条。
+- 所有改动、脚本与工具设计都必须优先满足上述各条。
 - 若实现方式与核心要求冲突，必须重构实现方式，而不是降低核心要求。
+
+## 6) 播报中文文案与 Flow 同步
+
+- 用户可见的步骤描述须来自 `chat_progress_templates.json`（`step_map` / `action_map`），与 `flows/**/*.json` **同一变更内**维护；细则见 `.cursor/rules/gameplay-flow-chat-templates.mdc`。

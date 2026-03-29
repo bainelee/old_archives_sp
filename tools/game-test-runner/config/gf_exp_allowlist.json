@@ -5,7 +5,7 @@
     ".cursor/skills/exp-overlay-input-debug/**",
     ".cursor/skills/gf-exp-workflow/**",
     ".cursor/rules/gf-exp-trigger.mdc",
-    "docs/testing/09-exploration-gameplayflow-validation.md",
+    "docs/testing/08-resource-reconcile-flow.md",
     "docs/testing/gf-exp-*.md",
     "tools/game-test-runner/config/gf_exp_allowlist.json"
   ],

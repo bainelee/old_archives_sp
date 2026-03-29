@@ -8,9 +8,9 @@
 |---|---|---|
 | 只确认环境是否可跑（最快） | `OnlyPreflight` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -OnlyPreflight` |
 | 做快速门禁（环境 + 契约 + 工具面） | `Fast` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast` |
-| 做完整验收（环境 + 2 条 acceptance） | 默认模式 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"` |
+| 做完整验收（环境；不再默认串流 GameplayFlow） | 默认模式 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp"` |
 | 做完整验收 + 契约回归 | 默认 + 契约 | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -IncludeContractRegression` |
-| 探索系统当前阶段专项验证（L1+L2+门禁） | `ExplorationValidation` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_exploration_validation.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "<GodotExePath>"` |
+| GameplayFlow 回归（基础测试两房 + 基础数据对账） | `GameplayRegression` | `powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_regression.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "<GodotExePath>"` |
 
 非技术同学建议先用这一条（仓库根目录执行）：
 ```powershell
@@ -36,7 +36,7 @@ setx GODOT_BIN "D:\GODOT\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64
 ## 3) 常用 MCP 入口（IDE 内调用）
 - `get_mcp_runtime_info`：查看当前版本、工具面、更新通道信息
 - `run_and_stream_flow`：单入口启动 + 轮询 + 播报聚合
-- `start_cursor_chat_plugin` + `pull_cursor_chat_plugin`：chat-first 五阶段逐步播报
+- `start_cursor_chat_plugin` + `pull_cursor_chat_plugin`：chat-first **三阶段**（`started`→`result`→`verify`）逐步播报；shell 镜像见 `run_gameplay_stepwise_chat.py` / `run_gameplay_stepwise_chat.ps1`
 - `get_flow_timeline`：读取步骤时间线与证据摘要
 
 工具面快照脚本（CI 可用）：
@@ -69,9 +69,7 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acc
 
 说明：
 - 脚本会先执行 `check_test_runner_environment`
-- 然后串行执行：
-  - `flows/ui_room_detail_sync_acceptance.json`
-  - `flows/build_clean_wait_linked_acceptance.json`
+- 不再默认串流执行历史 acceptance flow；Gameplay 回归请单独运行 `run_gameplay_regression.ps1`
 - 输出汇总 JSON，核心字段命名统一为：
   - 顶层：`status`、`contract_regression`
   - 每个 run：`status`、`report_status`、`effective_exit_code`、`process_exit_code`
@@ -120,11 +118,11 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acc
 python "tools/game-test-runner/mcp/server.py" --tool get_flow_timeline --project-root "D:/GODOT_Test/old-archives-sp" --run-id "<run_id>"
 ```
 ```powershell
-python "tools/game-test-runner/mcp/server.py" --tool start_game_flow_live --project-root "D:/GODOT_Test/old-archives-sp" --flow-file "D:/GODOT_Test/old-archives-sp/flows/ui_room_detail_sync_acceptance.json" --view chat
+python "tools/game-test-runner/mcp/server.py" --tool start_game_flow_live --project-root "D:/GODOT_Test/old-archives-sp" --flow-file "D:/GODOT_Test/old-archives-sp/flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json" --view chat
 python "tools/game-test-runner/mcp/server.py" --tool get_live_flow_progress --project-root "D:/GODOT_Test/old-archives-sp" --run-id "<run_id>" --view chat --recent-steps-limit 3
 ```
 ```powershell
-python "tools/game-test-runner/mcp/server.py" --tool run_and_stream_flow --project-root "D:/GODOT_Test/old-archives-sp" --flow-file "D:/GODOT_Test/old-archives-sp/flows/ui_room_detail_sync_acceptance.json" --godot-bin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe" --chat-mode short --poll-interval-sec 0.8 --max-wait-sec 600 --stream-limit 60
+python "tools/game-test-runner/mcp/server.py" --tool run_and_stream_flow --project-root "D:/GODOT_Test/old-archives-sp" --flow-file "D:/GODOT_Test/old-archives-sp/flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json" --godot-bin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe" --chat-mode short --poll-interval-sec 0.8 --max-wait-sec 600 --stream-limit 60
 ```
 
 GameplayFlow 通用默认实时播报（推荐）：
@@ -133,16 +131,17 @@ GameplayFlow 通用默认实时播报（推荐）：
 - 若在 Cursor 对话里由 AI 执行，优先使用 `start_game_flow_live + get_live_flow_progress` 逐轮回消息（对话内实时播报）；本脚本主要用于终端手工执行/排障。
 ```powershell
 powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_flow_live_chat.ps1" `
-  -FlowFile "D:/GODOT_Test/old-archives-sp/flows/build_clean_wait_linked_acceptance.json" `
+  -FlowFile "D:/GODOT_Test/old-archives-sp/flows/suites/regression/gameplay/basic_gameplay_slot0_phase2.json" `
   -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
   -GodotBin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe"
 ```
 
 基础流程模板（推荐作为后续 flow 的基线）：
-- 流程语义：新游戏覆盖存档0 -> 清理房间等待 -> 建设房间等待 -> 保存游戏 -> 退出 -> 继续游戏验证
+- 流程语义：新游戏覆盖存档0 -> **两间**房清理+建设 -> 保存 -> 继续游戏验证两房状态
 - 实现方式：双阶段执行（phase1 + phase2）
-  - phase1: `flows/base_validation_slot0_phase1.json`（按设计时长等待清理/建设，保存前强制 `setGameTimeSpeed speed=1.0`）
-  - phase2: `flows/base_validation_slot0_phase2.json`（继续游戏后保持 `setGameTimeSpeed speed=1.0` 并验证状态）
+  - phase1: `flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json`（保存前强制 `setGameTimeSpeed speed=1.0`）
+  - phase2: `flows/suites/regression/gameplay/basic_gameplay_slot0_phase2.json`（继续游戏后 `setGameTimeSpeed speed=1.0` 并校验）
+- 基础数据对账（独立 userdata、带快照）：`basic_data_slot0_phase1.json` / `basic_data_slot0_phase2.json`，由 `resource_reconcile.py` 或 `run_gameplay_regression.ps1` 串联
 - 一键脚本：
 ```powershell
 powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_base_template.ps1" `
@@ -162,7 +161,7 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gam
 单条 flow 的 chat-first stepwise 执行：
 ```powershell
 powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_stepwise_chat.ps1" `
-  -FlowFile "D:/GODOT_Test/old-archives-sp/flows/base_validation_slot0_phase2.json" `
+  -FlowFile "D:/GODOT_Test/old-archives-sp/flows/suites/regression/gameplay/basic_gameplay_slot0_phase2.json" `
   -ProjectRoot "D:/GODOT_Test/old-archives-sp" `
   -GodotBin "D:/GODOT/Godot_v4.6.1-stable_win64.exe/Godot_v4.6.1-stable_win64.exe"
 ```
@@ -198,9 +197,9 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/install/install
 - 执行中：按 `started -> result -> verify` 顺序播报，不补历史批次
 - 执行后：输出 `protocol_all_ok`、`min/max/avg_delay_ms`、失败步骤与原因（若有）
 
-## 10) 探索系统专项（未完整实现阶段）
-- 入口脚本：`tools/game-test-runner/scripts/run_gameplay_exploration_validation.ps1`
-- 分层定义：`docs/testing/09-exploration-gameplayflow-validation.md`
-- L1 flow：`flows/suites/regression/gameplay/exploration_validation_l1_scene_probe.json`
-- L2 flow：`flows/suites/regression/gameplay/exploration_validation_l2_smoke_invariants.json`
-- 白名单规则：`flows/rules/exploration_assertion_whitelist_v1.json`
+## 10) GameplayFlow 回归（基础测试 + 基础数据 + 可选探索）
+- 入口脚本：`tools/game-test-runner/scripts/run_gameplay_regression.ps1`（可选 `-SkipBasicDataReconcile` 仅跑基础测试）
+- Flow：`flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json`、`basic_gameplay_slot0_phase2.json`、`basic_data_slot0_phase1.json`、`basic_data_slot0_phase2.json`
+- 探索两地区存读档（须逐步 shell 播报时请用 stepwise，勿用 `flow_runner.py`）：`exploration_two_regions_slot0_phase1.json` + `exploration_two_regions_slot0_phase2.json`；一键：`tools/game-test-runner/scripts/run_exploration_two_regions_stepwise.ps1`
+- 资源对账说明：`docs/testing/08-resource-reconcile-flow.md`
+- 探索 flow 收敛说明：`docs/testing/09-exploration-gameplayflow-validation.md`

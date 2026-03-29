@@ -84,8 +84,8 @@ python "tools/game-test-runner/core/resource_reconcile.py" `
 
 ## 关键文件
 
-- `flows/suites/regression/gameplay/basic_data_validation_hall_slot0_phase1.json`
-- `flows/suites/regression/gameplay/basic_data_validation_hall_slot0_phase2_continue.json`
+- `flows/suites/regression/gameplay/basic_data_slot0_phase1.json`
+- `flows/suites/regression/gameplay/basic_data_slot0_phase2.json`
 - `tools/game-test-runner/core/resource_reconcile.py`
 
 ## 当前状态（2026-03-28 收口）

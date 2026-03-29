@@ -66,7 +66,7 @@ setx GODOT_BIN "D:\GODOT\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64
 
 ### 3.4 单入口实时播报（推荐）
 ```powershell
-python "tools/game-test-runner/mcp/server.py" --tool run_and_stream_flow --project-root "D:/GODOT_Test/old-archives-sp" --flow-file "D:/GODOT_Test/old-archives-sp/flows/ui_room_detail_sync_acceptance.json" --godot-bin "$env:GODOT_BIN" --chat-mode short --poll-interval-sec 0.8 --max-wait-sec 600 --stream-limit 60
+python "tools/game-test-runner/mcp/server.py" --tool run_and_stream_flow --project-root "D:/GODOT_Test/old-archives-sp" --flow-file "D:/GODOT_Test/old-archives-sp/flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json" --godot-bin "$env:GODOT_BIN" --chat-mode short --poll-interval-sec 0.8 --max-wait-sec 600 --stream-limit 60
 ```
 
 参数说明：
@@ -132,8 +132,7 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acc
 脚本行为：
 1. 调用 `check_test_runner_environment` 做前置检查（失败则退出码 2）
 2. 串行执行两个 acceptance flow：
-   - `flows/ui_room_detail_sync_acceptance.json`
-   - `flows/build_clean_wait_linked_acceptance.json`
+   - GameplayFlow 清单已收敛；默认用 `tools/game-test-runner/scripts/run_gameplay_regression.ps1` 或 MCP 指定 `flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json` 等
 3. 生成汇总 JSON（默认输出到 `artifacts/test-runs/acceptance_ci_<timestamp>.json`）
 4. 任一 flow 非 `resolved` 则退出码 3
 5. 若启用 `-IncludeContractRegression` 且契约回归失败，则退出码 4

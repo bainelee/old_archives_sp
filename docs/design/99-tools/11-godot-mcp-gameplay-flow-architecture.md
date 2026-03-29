@@ -1,5 +1,7 @@
 # 11 - Godot + MCP GameplayFlow 架构与契约（v2 设计稿）
 
+**产品硬约束（Chat / 三句式 / 播报文案）** 以 [14-mcp-core-invariants.md](./14-mcp-core-invariants.md) 为准。
+
 ## 1. 目标与边界
 
 目标：建立一套可用于 Agent 与人工统一调用的自动化验收框架，支持“执行 -> 验收 -> 归因 -> 修复 -> 复验”的闭环。
@@ -239,6 +241,8 @@ stateDiagram-v2
 ---
 
 ## 7. 两个闭环场景的标准化 Flow 规格
+
+> **更新**：仓库内下列专项 acceptance 的 JSON 已移除；当前 GameplayFlow 基线为 `basic_gameplay_slot0_phase1` / `basic_gameplay_slot0_phase2`（两房）与 `basic_data_slot0_phase*`（对账）。本节 YAML 与 flowId 仍可作为 DSL 示例参考。
 
 ## 7.1 场景A：Figma 同步 UI 严格验收
 

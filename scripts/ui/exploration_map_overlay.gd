@@ -87,6 +87,7 @@ func _ready() -> void:
 	visible = false
 	set_process_input(true)
 	if _btn_close:
+		_btn_close.set_meta("test_id", "btn_exploration_close")
 		_btn_close.pressed.connect(close_overlay)
 	if _map_canvas:
 		_map_canvas.resized.connect(_on_map_canvas_resized)

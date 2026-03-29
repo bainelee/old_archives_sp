@@ -1,0 +1,37 @@
+---
+description: 新建或修改 GameplayFlow 时必须同步 chat 播报模板（step_map / action_map）
+globs:
+  - "flows/**/*.json"
+  - "tools/game-test-runner/mcp/chat_progress_templates.json"
+alwaysApply: false
+---
+
+# GameplayFlow 与 Chat 播报文案（强制）
+
+凡 **新建、拆分、合并或改动** `flows/` 下任意流程（含 `steps[].id`、`action`、步骤语义），须保证 **Chat 三句式** 中用户可见的中文来自模板，而非裸 `step_id` + `action`。
+
+## 数据源（唯一维护面）
+
+- 文件：`tools/game-test-runner/mcp/chat_progress_templates.json`
+- **`step_map`**：`steps[].id`（flow 里写的 `id`）→ `{ "doing", "goal" }`
+- **`action_map`**：仅当 **未命中** `step_map` 时，按 `action`（小写）兜底
+
+运行时由 `flow_timeline_chat_map.human_step_and_goal()` 加载；MCP 侧 `server_handlers_stepwise_support._build_stepwise_chat_event()` 用其生成「开始执行 / 执行结果 / 验证结论」等 `text`。
+
+## 新建流程时的必做清单（同一变更内完成）
+
+1. **每个步骤 `id`**：在 `step_map` 增加 **小写 key** 与 flow JSON 中 `id` 对应（解析时会 `strip().lower()`，模板 key 请用小写，如 `click_continue`）。
+2. **有独立语义的步骤**（同 `action` 不同意图，如多个 `click`）：**必须** 各写一条 `step_map`，**禁止** 只依赖 `action_map` 导致播报雷同或泛化。
+3. **`doing`**：用自然中文描述当前在做什么（常带「正在…」）；**`goal`**：以 **「目标：」** 开头，写清可理解的验证意图。
+4. **禁止** 依赖兜底句 `正在执行步骤 {step_id}` 作为常态；出现即表示缺模板，须补 `step_map` 或 `action_map`。
+5. 变更后至少 **本地跑一次** 相关 flow（如 `run_gameplay_stepwise_chat.py --flow-file … --emit-shell-chat` 或项目内 smoke 脚本），确认 **`protocol_all_ok`** 且播报中文与步骤语义一致。
+
+## 改名 / 删步
+
+- 重命名 `steps[].id`：同步 **改名** `step_map` 条目（或新增新 id 并删除废弃 key，避免孤儿）。
+- 删除步骤：删除对应 `step_map` 条目（若仅此处使用）。
+
+## 设计文档
+
+- 产品级说明：`docs/design/99-tools/14-mcp-core-invariants.md`（§ Flow 步骤与播报文案一体）
+- 与 Chat-First 协议：`/.cursor/rules/chat-first-stepwise-core.mdc`（播报渠道与阶段）；本规则负责 **文案内容与模板同步**。

@@ -29,5 +29,5 @@ alwaysApply: true
 
 ## 门控要求
 
-- 必须保留 chat-first stepwise 核心要求，不得以 shell 输出替代关键播报。
+- 必须保留 chat-first stepwise 核心要求（见 `.cursor/rules/chat-first-stepwise-core.mdc`）：**每步三段协议**（`started`→`result`→`verify`）且 **终端（shell）须能逐步看到播报**；不得以 **无 per-step 事件** 的路径（如单独 `flow_runner.py`）替代关键播报。
 - 若脚本审计发现非 EXP 文件越界，必须停止并返回越界清单。

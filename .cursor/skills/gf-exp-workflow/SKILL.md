@@ -32,7 +32,7 @@ description: 执行 GF-EXP 全流程：在修复分支运行 GameplayFlow 并收
 
 - 脚本入口：`tools/game-test-runner/scripts/run_gf_exp_cycle.ps1`
 - allowlist：`tools/game-test-runner/config/gf_exp_allowlist.json`
-- GameplayFlow 验证入口：`tools/game-test-runner/scripts/run_gameplay_exploration_validation.ps1`
+- GameplayFlow 验证入口：`tools/game-test-runner/scripts/run_gameplay_regression.ps1`（基础测试 phase1/2 + 基础数据 resource_reconcile）
 
 ## 执行要求
 

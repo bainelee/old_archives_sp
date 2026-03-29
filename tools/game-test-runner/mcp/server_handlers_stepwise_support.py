@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from flow_timeline_chat_map import human_step_and_goal
 from runtime_lock import release_runtime_lock
 from server_common import to_posix
 
@@ -161,6 +162,17 @@ class StepwiseSupportMixin:
         return result
 
     @staticmethod
+    def _chat_status_zh(status: str) -> str:
+        s = str(status or "").strip().lower()
+        return {
+            "passed": "通过",
+            "failed": "失败",
+            "running": "进行中",
+            "ready": "就绪",
+            "ok": "成功",
+        }.get(s, str(status or "未知").strip() or "未知")
+
+    @staticmethod
     def _build_stepwise_chat_event(
         *,
         phase: str,
@@ -179,17 +191,27 @@ class StepwiseSupportMixin:
         runtime_window: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         progress = f"{step_index + 1}/{step_total}" if step_total > 0 and step_index >= 0 else ""
+        doing, goal = human_step_and_goal(step_id, action)
+        goal_s = str(goal or "").strip()
+        detail_s = str(detail or "").strip()
         if phase == "about_to_start":
-            text = f"即将开始：{step_id}（{action}）"
+            text = f"即将开始：{doing}"
         elif phase == "started":
-            text = f"开始执行：{step_id}（{action}）"
+            text = f"开始执行：{doing}"
         elif phase == "result":
-            text = f"执行结果：{step_id}（{status or 'unknown'}）"
+            st_zh = StepwiseSupportMixin._chat_status_zh(status)
+            text = f"执行结果：{doing}（{st_zh}）"
+            if detail_s and str(status or "").strip().lower() == "failed":
+                text = f"{text} · {detail_s}"
         elif phase == "verify":
-            verdict = "通过" if status == "passed" else "失败"
+            verdict = "通过" if str(status or "").strip().lower() == "passed" else "失败"
             text = f"验证结论：{verdict}"
+            if verdict == "通过" and goal_s:
+                text = f"{text} · {goal_s}"
+            elif verdict == "失败" and detail_s:
+                text = f"{text}（{detail_s}）"
         else:
-            text = f"{step_id}（{action}）"
+            text = f"{doing}（{step_id} · {action}）" if (step_id or action) else doing
         event_ts = str(event_utc or datetime.now(timezone.utc).isoformat())
         out = {
             "phase": phase,

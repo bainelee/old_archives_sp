@@ -16,7 +16,7 @@
 
 ```bash
 python tools/game-test-runner/core/flow_runner.py \
-  --flow-file flows/ui_room_detail_sync_acceptance.json \
+  --flow-file flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json \
   --project-root . \
   --godot-bin godot4
 ```
@@ -25,7 +25,7 @@ python tools/game-test-runner/core/flow_runner.py \
 
 ```bash
 python tools/game-test-runner/core/flow_runner.py \
-  --flow-file flows/build_clean_wait_linked_acceptance.json \
+  --flow-file flows/suites/regression/gameplay/basic_data_slot0_phase1.json \
   --project-root . \
   --godot-bin godot4
 ```

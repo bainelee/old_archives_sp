@@ -146,7 +146,12 @@ class StepwiseOpsHandlersMixin:
         runner = GameTestRunner(project_root=project_root)
         run_id = str(arguments.get("run_id", "")).strip() or live_run_id(f"{self._short_run_id_seed(flow_file)}_sw")
         run_root = runner._prepare_artifacts(run_id)
-        user_data_dir = run_root / "user_data"
+        user_data_dir_raw = str(arguments.get("user_data_dir", "")).strip()
+        if user_data_dir_raw:
+            user_data_dir = Path(user_data_dir_raw).resolve()
+            user_data_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            user_data_dir = run_root / "user_data"
         session = run_id
         req = RunRequest(
             system=str(flow.get("system", "gameplay")),

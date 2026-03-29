@@ -1,6 +1,6 @@
 {
-  "flowId": "base_validation_slot0_phase2_step_verify_chat_shot",
-  "name": "Base validation phase2 with step verify and screenshots",
+  "flowId": "basic_gameplay_slot0_phase2",
+  "name": "基础测试流程 phase2：继续游戏并校验两房清理与建设状态",
   "system": "gameplay",
   "profile": "regression",
   "mode": "local",
@@ -8,11 +8,9 @@
   "flowStepTimeoutSec": 20,
   "driverReadyTimeoutSec": 20,
   "driverNoActivityTimeoutSec": 5,
-  "stepPreparePauseMs": 0,
-  "stepVerifyPauseMs": 0,
-  "screenshotPrefix": "phase2_verify_",
   "env": {
-    "ROOM_ID": "room_01"
+    "ROOM_A_ID": "room_01",
+    "ROOM_B_ID": "room_03"
   },
   "steps": [
     { "id": "sleep_boot", "action": "sleep", "ms": 500 },
@@ -24,25 +22,38 @@
       "minWaitMs": 200,
       "timeoutMs": 2000
     },
-    { "id": "shot_ingame", "action": "screenshot", "name": "phase2_ingame" },
     { "id": "set_game_speed_x1_stable", "action": "setGameTimeSpeed", "speed": 1.0 },
     {
-      "id": "verify_room_cleaned",
+      "id": "verify_room_a_cleaned",
       "action": "check",
       "kind": "logic_state",
-      "roomId": "${ROOM_ID}",
+      "roomId": "${ROOM_A_ID}",
       "expect": { "room_clean_status": "cleaned" },
       "timeoutMs": 5000
     },
-    { "id": "shot_cleaned", "action": "screenshot", "name": "phase2_cleaned" },
     {
-      "id": "verify_room_built",
+      "id": "verify_room_a_built",
       "action": "check",
       "kind": "logic_state",
-      "roomId": "${ROOM_ID}",
+      "roomId": "${ROOM_A_ID}",
       "expect": { "build_status": "built" },
       "timeoutMs": 5000
     },
-    { "id": "shot_built", "action": "screenshot", "name": "phase2_built" }
+    {
+      "id": "verify_room_b_cleaned",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_B_ID}",
+      "expect": { "room_clean_status": "cleaned" },
+      "timeoutMs": 5000
+    },
+    {
+      "id": "verify_room_b_built",
+      "action": "check",
+      "kind": "logic_state",
+      "roomId": "${ROOM_B_ID}",
+      "expect": { "build_status": "built" },
+      "timeoutMs": 5000
+    }
   ]
 }

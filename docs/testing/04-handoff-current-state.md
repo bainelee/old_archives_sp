@@ -30,11 +30,11 @@
 
 ### B. Godot 插件（Bridge Mode）
 - `addons/test_orchestrator/plugin.gd` 已收敛为桥接提示面板，不再提供任何 gameplayflow 执行按钮。
-- 流程编排、步骤播报、验证结论、报告读取统一由 IDE 侧 MCP 调用完成（Cursor 对话窗口为主）。
+- 流程编排、步骤播报、验证结论、报告读取统一由 IDE 侧 MCP 调用完成；**人类与 Agent 的主观测渠道为 shell（终端）逐步输出**（见 `06-chat-first-status-and-requirements.md`、`.cursor/rules/chat-first-stepwise-core.mdc`）。Cursor 对话窗可为可选并行消费同一事件流。
 - 目标是避免 Godot 与 IDE 双入口并行导致的时序偏差与反馈分叉。
 
-### C. Cursor 对话窗口优先（chat-first）
-- 口径说明：IDE 对话是默认观测与回传面；shell 可作为并行镜像/审计面（按脚本开关启用）。
+### C. Chat-First / 逐步播报（chat-first）
+- 口径说明：**shell（终端）为默认主观测与审计面**（`run_gameplay_stepwise_chat.py` 等对 MCP 事件的 print）；IDE 对话可作为并行回传面。
 - MCP 新增工具：
   - `get_flow_timeline`（支持 `view=full|chat`）
   - `start_game_flow_live`（异步启动 flow）
@@ -56,8 +56,7 @@
 ### D. 基础流程模板（已定版）
 - 基线语义：`新游戏覆盖存档0 -> 清理等待 -> 建设等待 -> 保存 -> 退出 -> 继续游戏验证`
 - 采用双阶段模板固化：
-  - `flows/base_validation_slot0_phase1.json`（游戏内六倍速）
-  - `flows/base_validation_slot0_phase2.json`（继续游戏后六倍速）
+  - `flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json` / `basic_gameplay_slot0_phase2.json`（两房清理建设回归）
 - 一键执行脚本：
   - `tools/game-test-runner/scripts/run_gameplay_base_template.ps1`
   - 已切换为 `chat-first + strict stepwise` 主路径

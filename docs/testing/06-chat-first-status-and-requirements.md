@@ -4,8 +4,8 @@
 
 ## 用户硬性要求（必须长期满足）
 
-1. 所有测试步骤必须有稳定播报，允许以 shell 作为主播报渠道。
-   - 默认在 IDE 对话回传；启用 shell 镜像时须遵循统一两行协议。
+1. 所有测试步骤必须有稳定播报；**人类与 Agent 的主观测渠道为 shell（终端）**。
+   - MCP 仍通过 ChatRelay 链路产生事件；`run_gameplay_stepwise_chat.py` 等将事件 **print 到终端** 时须遵循统一两行协议（见下 § 已实现 1）。
 2. 步骤播报必须严格按 3 段顺序执行，且不能倒序、不能补发历史批次：
    - 开始执行
    - 执行结果
@@ -25,9 +25,9 @@
 
 - 主执行链路：`start_cursor_chat_plugin` + `pull_cursor_chat_plugin`
 - 强制门禁：`chat_relay_required=true` 时，MCP 会阻断非 ChatRelay 路径。
-- 支持 shell 播报规范输出（推荐）：
+- 支持 shell 播报规范输出（**主观测推荐**）：
   - 第一行元信息：`[emit=HH:MM:SS][event=HH:MM:SS][game=]`
-  - 第二行步骤文本：如 `即将开始：sleep_boot（sleep）`
+  - 第二行步骤文本：须与 **三段协议**一致；典型首条为 **`开始执行：…`**（对应 `phase=started`）。默认 `three_phase` 下**不会**把「即将开始」排入对外可见队列（该文案仅存在于遗留 `legacy_five_phase`）。
   - 不再输出 `[CHAT]` 与 `[single_flow]` 前缀。
 
 ### 2) 严格逐步协议与失败即停
@@ -39,7 +39,7 @@
 ### 3) 播报时序修复（关键）
 
 - Cursor 插件拉取逻辑已改为相位状态机（prepare/started/execute/verify 分离）。
-- 已保证：先发聊天 `即将开始/开始执行`，再触发实际执行动作。
+- 已保证：在对外可见顺序上先出现 **`开始执行`**（`started`），再触发该步实际游戏侧动作；默认路径**不包含**单独的「即将开始」播报段。
 - 已覆盖用户关注点：`click_continue` 前必须先出现聊天播报。
 
 ### 4) 游戏时间与聊天时间审计
@@ -79,8 +79,8 @@
 
 ## 执行准则（后续每次测试都必须遵守）
 
-1. 只用 ChatRelay 主路径执行。
-2. 每个 step 必须按 3 阶段顺序逐条播报。
+1. 执行上只用 **ChatRelay** 主路径（`start_cursor_chat_plugin` + `pull_cursor_chat_plugin` 或等价包装），以产生可拉取的事件。
+2. 每个 step 必须按 **3** 阶段顺序逐条播报（`started` → `result` → `verify`）；主观测以 **shell 输出**为准时，须使用带终端镜像的脚本（如 `run_gameplay_stepwise_chat.py`）。
 3. 禁止补发历史阶段、禁止在步骤流中夹杂无关叙述。
 4. 失败即停并立即汇报失败步骤与原因。
 5. 测试结束后输出进程退出验证结果（`pid_exit_verified`）。

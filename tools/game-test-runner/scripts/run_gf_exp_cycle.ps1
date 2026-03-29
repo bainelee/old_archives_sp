@@ -5,7 +5,7 @@ param(
     [string]$FixBranch = "",
     [string]$RedoBranch = "",
     [string]$AllowlistFile = "tools/game-test-runner/config/gf_exp_allowlist.json",
-    [string]$ValidationScript = "tools/game-test-runner/scripts/run_gameplay_exploration_validation.ps1",
+    [string]$ValidationScript = "tools/game-test-runner/scripts/run_gameplay_regression.ps1",
     [string]$GodotBin = "",
     [string]$ExpNoteFile = "",
     [switch]$SkipValidation,
@@ -138,7 +138,7 @@ try {
             Write-Stage ("DRY-RUN: powershell " + ($validationArgs -join " "))
         }
         else {
-            Write-Stage "运行 exploration validation 入口脚本"
+            Write-Stage "运行 gameplay regression 入口脚本"
             & powershell @validationArgs
             if ($LASTEXITCODE -ne 0) {
                 throw "validation failed in Phase A"

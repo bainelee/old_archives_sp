@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -294,6 +295,13 @@ def execute_flow_file(
     flow_steps = _expand_steps(flow, flow_file)
     default_step_timeout_sec = int(flow.get("flowStepTimeoutSec", 15))
     driver_steps = _to_driver_steps(flow_steps, default_timeout_sec=default_step_timeout_sec)
+    if not dry_run and driver_steps:
+        print(
+            "gameplayflow: flow_runner.py has no per-step shell broadcast; "
+            "use tools/game-test-runner/scripts/run_gameplay_stepwise_chat.py "
+            "or run_gameplay_stepwise_chat.ps1 (see docs/testing/README.md).",
+            file=sys.stderr,
+        )
     system = str(flow.get("system", "exploration"))
     scene = flow.get("scene")
     scenario = flow.get("scenario")

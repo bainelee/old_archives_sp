@@ -106,23 +106,26 @@ def _run_one_flow(
     max_silent_sec: float = 10.0,
     chat_protocol_mode: str = "three_phase",
     pause_policy: str = "strict",
+    user_data_dir: str = "",
 ) -> dict[str, Any]:
     audit_entries: list[dict[str, Any]] = []
-    start_payload = server.start_cursor_chat_plugin(
-        {
-            "project_root": str(project_root),
-            "flow_file": str(flow_file),
-            "godot_bin": godot_bin,
-            "timeout_sec": timeout_sec,
-            "run_id": run_id,
-            "wait_scale": float(wait_scale),
-            "pause_during_think": bool(pause_during_think),
-            "resume_speed": float(resume_speed),
-            "chat_relay_required": True,
-            "chat_protocol_mode": str(chat_protocol_mode or "three_phase"),
-            "pause_policy": str(pause_policy or "strict"),
-        }
-    )
+    start_args: dict[str, Any] = {
+        "project_root": str(project_root),
+        "flow_file": str(flow_file),
+        "godot_bin": godot_bin,
+        "timeout_sec": timeout_sec,
+        "run_id": run_id,
+        "wait_scale": float(wait_scale),
+        "pause_during_think": bool(pause_during_think),
+        "resume_speed": float(resume_speed),
+        "chat_relay_required": True,
+        "chat_protocol_mode": str(chat_protocol_mode or "three_phase"),
+        "pause_policy": str(pause_policy or "strict"),
+    }
+    udd = str(user_data_dir or "").strip()
+    if udd:
+        start_args["user_data_dir"] = udd
+    start_payload = server.start_cursor_chat_plugin(start_args)
     rid = str(start_payload.get("run_id", ""))
     artifact_root = Path(str(start_payload.get("artifact_root", ""))).resolve()
     final_status = "failed"
@@ -369,6 +372,7 @@ def main() -> int:
     parser.add_argument("--allow-incomplete-broadcast", action="store_true")
     parser.add_argument("--chat-protocol-mode", default="three_phase")
     parser.add_argument("--pause-policy", default="strict")
+    parser.add_argument("--user-data-dir", default="", help="Shared Godot user data dir (e.g. basic data reconcile)")
     args = parser.parse_args()
     _ensure_import()
     from server import GameTestMcpServer  # pylint: disable=import-error,import-outside-toplevel
@@ -386,9 +390,10 @@ def main() -> int:
     }
     flows: list[tuple[str, Path]]
     if args.template:
+        gp = project_root / "flows" / "suites" / "regression" / "gameplay"
         flows = [
-            ("phase1_new_game_clean_build_save", project_root / "flows" / "base_validation_slot0_phase1.json"),
-            ("phase2_continue_verify_persisted", project_root / "flows" / "base_validation_slot0_phase2.json"),
+            ("phase1_basic_gameplay_two_rooms_save", gp / "basic_gameplay_slot0_phase1.json"),
+            ("phase2_basic_gameplay_continue_verify", gp / "basic_gameplay_slot0_phase2.json"),
         ]
     else:
         if not args.flow_file:
@@ -415,6 +420,7 @@ def main() -> int:
             max_silent_sec=max(2.0, float(args.max_silent_sec)),
             chat_protocol_mode=str(args.chat_protocol_mode or "three_phase"),
             pause_policy=str(args.pause_policy or "strict"),
+            user_data_dir=str(args.user_data_dir or "").strip(),
         )
         result["phase"] = phase_name
         result["flow_file"] = str(flow_file)

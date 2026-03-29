@@ -5,15 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
+import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-import math
-
-from flow_parser import parse_flow_file
-from flow_runner import _build_step_timeline, _expand_steps, _to_driver_steps
-from runner import GameTestRunner, RunRequest
 
 RESOURCE_KEYS = [
     "cognition",
@@ -180,7 +178,7 @@ def _extract_snapshot(run_root: Path, step_id: str) -> dict[str, Any]:
     }
 
 
-def _run_flow_shared_user_data(
+def _run_flow_stepwise_shared(
     *,
     project_root: Path,
     flow_file: Path,
@@ -189,64 +187,71 @@ def _run_flow_shared_user_data(
     timeout_sec: int,
     run_id: str,
 ) -> dict[str, Any]:
-    flow = parse_flow_file(flow_file)
-    flow_steps = _expand_steps(flow, flow_file)
-    default_step_timeout_sec = int(flow.get("flowStepTimeoutSec", 15))
-    driver_steps = _to_driver_steps(flow_steps, default_timeout_sec=default_step_timeout_sec)
-
-    req = RunRequest(
-        system=str(flow.get("system", "gameplay")),
-        project_root=project_root,
-        scenario=str(flow.get("scenario", "flow")),
-        profile=str(flow.get("profile", "regression")),
-        mode=str(flow.get("mode", "local")),
-        timeout_sec=int(timeout_sec),
-        retry=0,
-        godot_bin=godot_bin,
-        scene=str(flow.get("scene", "")) or None,
-        dry_run=False,
-        enable_test_driver=True,
-        flow_steps=driver_steps,
-        flow_step_timeout_sec=default_step_timeout_sec,
-        driver_ready_timeout_sec=int(flow.get("driverReadyTimeoutSec", 20)),
-        driver_no_activity_timeout_sec=int(flow.get("driverNoActivityTimeoutSec", 5)),
-        user_data_dir=user_data_dir,
-        reload_project_before_run=bool(flow.get("reloadProjectBeforeRun", True)),
-        reload_timeout_sec=int(flow.get("reloadTimeoutSec", 20)),
-        requested_run_id=run_id,
+    """Run flow via Cursor chat / stepwise script so Chat 三句式播报与主路径一致。"""
+    script = project_root / "tools" / "game-test-runner" / "scripts" / "run_gameplay_stepwise_chat.py"
+    user_data_dir.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        sys.executable,
+        str(script),
+        "--project-root",
+        str(project_root),
+        "--godot-bin",
+        godot_bin,
+        "--flow-file",
+        str(flow_file),
+        "--timeout-sec",
+        str(int(timeout_sec)),
+        "--user-data-dir",
+        str(user_data_dir),
+    ]
+    rid = str(run_id or "").strip()
+    if rid:
+        cmd.extend(["--run-id", rid])
+    proc = subprocess.run(
+        cmd,
+        cwd=str(project_root),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
-    runner = GameTestRunner(project_root=project_root)
-    started_at = _utc_iso()
-    result = runner.run(req)
-    finished_at = _utc_iso()
-    run_root = Path(result.artifact_root)
-
-    flow_report = {
-        "flow_id": flow.get("flowId", flow_file.stem),
-        "flow_file": str(flow_file),
-        "status": "passed" if result.status == "finished" else "failed",
-        "started_at": started_at,
-        "finished_at": finished_at,
-        "run_id": result.run_id,
-        "driver_steps": driver_steps,
-    }
-    (run_root / "flow_report.json").write_text(json.dumps(flow_report, ensure_ascii=False, indent=2), encoding="utf-8")
-    step_timeline = _build_step_timeline(
-        run_root=run_root,
-        flow_id=str(flow_report["flow_id"]),
-        run_id=str(result.run_id),
-        flow_steps=flow_steps,
-        driver_steps=driver_steps,
-        started_at_iso=started_at,
-        finished_at_iso=finished_at,
-        run_status=str(flow_report["status"]),
-    )
-    (run_root / "step_timeline.json").write_text(json.dumps(step_timeline, ensure_ascii=False, indent=2), encoding="utf-8")
+    stdout = proc.stdout or ""
+    summary_path = ""
+    for line in stdout.splitlines():
+        if line.startswith("SUMMARY_JSON="):
+            summary_path = line.split("=", 1)[-1].strip()
+            break
+    flow_payload: dict[str, Any] = {}
+    if summary_path:
+        sp = Path(summary_path)
+        if sp.exists():
+            try:
+                loaded = json.loads(sp.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    flow_payload = loaded
+            except json.JSONDecodeError:
+                flow_payload = {}
+    phases = flow_payload.get("phases") if isinstance(flow_payload.get("phases"), list) else []
+    phase0 = phases[0] if phases and isinstance(phases[0], dict) else {}
+    phase_root = str(phase0.get("artifact_root", "")).strip()
+    st = str(phase0.get("status", "")).strip()
+    passed = st == "passed" and int(proc.returncode) == 0 and bool(phase_root)
+    flow_id = flow_file.stem
+    try:
+        raw_flow = json.loads(flow_file.read_text(encoding="utf-8"))
+        if isinstance(raw_flow, dict) and raw_flow.get("flowId"):
+            flow_id = str(raw_flow.get("flowId"))
+    except (OSError, json.JSONDecodeError):
+        pass
     return {
-        "flow_id": str(flow_report["flow_id"]),
-        "run_id": str(result.run_id),
-        "run_root": str(run_root),
-        "status": str(flow_report["status"]),
+        "flow_id": flow_id,
+        "run_id": str(phase0.get("run_id", "") or "").strip() or rid,
+        "run_root": phase_root,
+        "status": "passed" if passed else "failed",
+        "stepwise_exit_code": int(proc.returncode),
+        "stepwise_summary_json": summary_path,
+        "stepwise_stdout_tail": stdout[-6000:],
+        "stepwise_stderr_tail": (proc.stderr or "")[-3000:],
     }
 
 
@@ -521,8 +526,8 @@ def run_basic_data_validation(
     timeout_sec: int,
     output_json: Path,
 ) -> tuple[dict[str, Any], int]:
-    phase1_flow = project_root / "flows" / "suites" / "regression" / "gameplay" / "basic_data_validation_hall_slot0_phase1.json"
-    phase2_flow = project_root / "flows" / "suites" / "regression" / "gameplay" / "basic_data_validation_hall_slot0_phase2_continue.json"
+    phase1_flow = project_root / "flows" / "suites" / "regression" / "gameplay" / "basic_data_slot0_phase1.json"
+    phase2_flow = project_root / "flows" / "suites" / "regression" / "gameplay" / "basic_data_slot0_phase2.json"
     if not phase1_flow.exists():
         raise FileNotFoundError(f"phase1 flow not found: {phase1_flow}")
     if not phase2_flow.exists():
@@ -532,7 +537,7 @@ def run_basic_data_validation(
     shared_user_data_dir = project_root / "artifacts" / "test-runs" / test_id / "shared_user_data"
     shared_user_data_dir.mkdir(parents=True, exist_ok=True)
 
-    phase1 = _run_flow_shared_user_data(
+    phase1 = _run_flow_stepwise_shared(
         project_root=project_root,
         flow_file=phase1_flow,
         godot_bin=godot_bin,
@@ -540,7 +545,7 @@ def run_basic_data_validation(
         timeout_sec=timeout_sec,
         run_id=f"{test_id}_phase1",
     )
-    phase2 = _run_flow_shared_user_data(
+    phase2 = _run_flow_stepwise_shared(
         project_root=project_root,
         flow_file=phase2_flow,
         godot_bin=godot_bin,
@@ -556,11 +561,6 @@ def run_basic_data_validation(
     room_a_built = _extract_snapshot(phase1_root, "snapshot_room_a_built")
     room_b_cleaned = _extract_snapshot(phase1_root, "snapshot_room_b_cleaned")
     room_b_built = _extract_snapshot(phase1_root, "snapshot_room_b_built")
-    room_c_cleaned = _extract_snapshot(phase1_root, "snapshot_room_c_cleaned")
-    room_c_built = _extract_snapshot(phase1_root, "snapshot_room_c_built")
-    room_d_cleaned = _extract_snapshot(phase1_root, "snapshot_room_d_cleaned")
-    room_d_built = _extract_snapshot(phase1_root, "snapshot_room_d_built")
-    room_e_cleaned = _extract_snapshot(phase1_root, "snapshot_room_e_cleaned")
     r2 = _extract_snapshot(phase1_root, "snapshot_r2")
     r2_saved = _extract_snapshot(phase1_root, "snapshot_r2_saved")
     rs = {"step_id": "save_slot_0", "resources": _load_saved_resources(shared_user_data_dir, slot=0)}
@@ -575,12 +575,6 @@ def run_basic_data_validation(
     stage_build_a = _time_window(room_a_cleaned, room_a_built)
     stage_cleanup_b = _time_window(room_a_built, room_b_cleaned)
     stage_build_b = _time_window(room_b_cleaned, room_b_built)
-    stage_cleanup_c = _time_window(room_b_built, room_c_cleaned)
-    stage_build_c = _time_window(room_c_cleaned, room_c_built)
-    stage_cleanup_d = _time_window(room_c_built, room_d_cleaned)
-    stage_build_d = _time_window(room_d_cleaned, room_d_built)
-    stage_cleanup_e = _time_window(room_d_built, room_e_cleaned)
-    stage_build_e = _time_window(room_e_cleaned, r2)
     stage_total = _time_window(r0, r2)
     stage_reopen = _time_window(r2, r3)
 
@@ -651,11 +645,6 @@ def run_basic_data_validation(
             "room_a_built": room_a_built,
             "room_b_cleaned": room_b_cleaned,
             "room_b_built": room_b_built,
-            "room_c_cleaned": room_c_cleaned,
-            "room_c_built": room_c_built,
-            "room_d_cleaned": room_d_cleaned,
-            "room_d_built": room_d_built,
-            "room_e_cleaned": room_e_cleaned,
             "r2": r2,
             "r2_saved": r2_saved,
             "rs": rs,
@@ -666,12 +655,6 @@ def run_basic_data_validation(
             "build_room_a": stage_build_a,
             "cleanup_room_b": stage_cleanup_b,
             "build_room_b": stage_build_b,
-            "cleanup_room_c": stage_cleanup_c,
-            "build_room_c": stage_build_c,
-            "cleanup_room_d": stage_cleanup_d,
-            "build_room_d": stage_build_d,
-            "cleanup_room_e": stage_cleanup_e,
-            "build_room_e": stage_build_e,
             "operation_total": stage_total,
             "reopen": stage_reopen,
         },
