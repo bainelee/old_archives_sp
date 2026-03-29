@@ -1,14 +1,10 @@
 class_name GameMainConstructionHelper
 extends RefCounted
 
+const _GameModeEnums := preload("res://scripts/game/game_mode_enums.gd")
+
 ## 建设模式逻辑 - 选择区域、选择房间、确认、进度、消耗
 ## 详见 docs/design/2-gameplay/05-zone-construction.md
-
-const CONSTRUCTION_NONE := 0
-const CONSTRUCTION_SELECTING_ZONE := 1
-const CONSTRUCTION_SELECTING_TARGET := 2
-const CONSTRUCTION_CONFIRMING := 3
-
 
 static func _consume_test_fault(game_main: Node2D, fault_name: String) -> bool:
 	if not game_main.has_meta("_test_faults"):
@@ -25,11 +21,11 @@ static func _consume_test_fault(game_main: Node2D, fault_name: String) -> bool:
 
 
 static func on_build_button_pressed(game_main: Node2D) -> void:
-	var cleanup_mode: int = game_main.get("_cleanup_mode")
-	if cleanup_mode != 0:  # CleanupMode.NONE
+	var cleanup_mode: int = game_main.get_cleanup_mode_int()
+	if cleanup_mode != _GameModeEnums.CleanupMode.NONE:
 		return
-	var construction_mode: int = game_main.get("_construction_mode")
-	if construction_mode == CONSTRUCTION_NONE:
+	var construction_mode: int = game_main.get_construction_mode_int()
+	if construction_mode == _GameModeEnums.ConstructionMode.NONE:
 		enter_selecting_zone_mode(game_main)
 	else:
 		exit_mode(game_main)
@@ -38,16 +34,16 @@ static func on_build_button_pressed(game_main: Node2D) -> void:
 static func on_zone_selected(game_main: Node2D, zone_type: int) -> void:
 	if zone_type == 0:
 		game_main.set("_construction_selected_zone", 0)
-		game_main.set("_construction_mode", CONSTRUCTION_SELECTING_ZONE)
+		game_main.set("_construction_mode", _GameModeEnums.ConstructionMode.SELECTING_ZONE)
 	else:
 		game_main.set("_construction_selected_zone", zone_type)
-		game_main.set("_construction_mode", CONSTRUCTION_SELECTING_TARGET)
+		game_main.set("_construction_mode", _GameModeEnums.ConstructionMode.SELECTING_TARGET)
 	game_main.queue_redraw()
 
 
 static func get_construction_researchers_occupied(game_main: Node2D) -> int:
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var total: int = 0
 	for room_idx in construction_rooms:
 		var data: Dictionary = construction_rooms[room_idx]
@@ -75,7 +71,7 @@ static func can_afford_construction(room: ArchivesRoomInfo, zone_type: int, reso
 
 static func consume_construction_cost(game_main: Node2D, room: ArchivesRoomInfo, zone_type: int) -> void:
 	var cost: Dictionary = room.get_construction_cost(zone_type)
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if not ui:
 		return
 	ResourceLedger.consume_cost(ui, cost)
@@ -83,7 +79,7 @@ static func consume_construction_cost(game_main: Node2D, room: ArchivesRoomInfo,
 
 
 static func is_click_over_construction_allowed_ui(game_main: Node2D, mouse_pos: Vector2) -> bool:
-	var build_btn: Control = game_main.get_node_or_null("UIMain/BottomRightBar/Margin/Content/BtnBuild") as Control
+	var build_btn: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/BottomRightBar/Margin/Content/BtnBuild") as Control
 	if build_btn and build_btn.get_global_rect().has_point(mouse_pos):
 		return true
 	var construction_overlay: Node = game_main.call("_get_construction_overlay")
@@ -101,9 +97,9 @@ static func is_click_over_construction_allowed_ui(game_main: Node2D, mouse_pos: 
 
 
 static func process_overlay(game_main: Node2D, construction_overlay: Node, delta: float) -> void:
-	var construction_mode: int = game_main.get("_construction_mode")
+	var construction_mode: int = game_main.get_construction_mode_int()
 	var construction_selected_zone: int = game_main.get("_construction_selected_zone")
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var hovered_room_index: int = game_main.get("_hovered_room_index")
 	var construction_confirm_room_index: int = game_main.get("_construction_confirm_room_index")
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
@@ -112,7 +108,7 @@ static func process_overlay(game_main: Node2D, construction_overlay: Node, delta
 	var get_construction_overlay: Callable = Callable(game_main, "_get_construction_overlay")
 
 	# 悬停与确认位置
-	if construction_mode == CONSTRUCTION_SELECTING_TARGET or construction_mode == CONSTRUCTION_CONFIRMING:
+	if construction_mode == _GameModeEnums.ConstructionMode.SELECTING_TARGET or construction_mode == _GameModeEnums.ConstructionMode.CONFIRMING:
 		if construction_selected_zone != 0 and hovered_room_index >= 0 and hovered_room_index < rooms.size():
 			var room: ArchivesRoomInfo = rooms[hovered_room_index]
 			if room.can_build_zone(construction_selected_zone) and not is_room_constructing(game_main, hovered_room_index):
@@ -131,7 +127,7 @@ static func process_overlay(game_main: Node2D, construction_overlay: Node, delta
 			var mouse_pos: Vector2 = game_main.get_viewport().get_mouse_position()
 			var vp_size: Vector2 = game_main.get_viewport().get_visible_rect().size
 			construction_overlay.update_hover_position(mouse_pos, vp_size)
-		if construction_mode == CONSTRUCTION_CONFIRMING and construction_confirm_room_index >= 0 and construction_overlay and construction_overlay.has_method("update_confirm_position"):
+		if construction_mode == _GameModeEnums.ConstructionMode.CONFIRMING and construction_confirm_room_index >= 0 and construction_overlay and construction_overlay.has_method("update_confirm_position"):
 			construction_overlay.update_confirm_position(room_center_to_screen.call(construction_confirm_room_index))
 
 	# 多房间建设进度 tick
@@ -149,7 +145,7 @@ static func process_overlay(game_main: Node2D, construction_overlay: Node, delta
 			rooms[room_idx].zone_type = zt
 			var n: int = rooms[room_idx].get_construction_researcher_count(zt)
 			construction_to_remove.append(room_idx)
-			var ui_node: Node = game_main.get_node_or_null("UIMain")
+			var ui_node: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 			if ui_node and ui_node.get("researchers_in_construction") != null and ui_node.get("researchers_working_in_rooms") != null:
 				ui_node.researchers_in_construction = maxi(0, ui_node.researchers_in_construction - n)
 				ui_node.researchers_working_in_rooms = ui_node.researchers_working_in_rooms + n
@@ -172,7 +168,7 @@ static func process_overlay(game_main: Node2D, construction_overlay: Node, delta
 
 
 static func enter_selecting_zone_mode(game_main: Node2D) -> void:
-	game_main.set("_construction_mode", CONSTRUCTION_SELECTING_ZONE)
+	game_main.set("_construction_mode", _GameModeEnums.ConstructionMode.SELECTING_ZONE)
 	game_main.set("_construction_selected_zone", 0)
 	game_main.set("_construction_confirm_room_index", -1)
 	if GameTime:
@@ -188,14 +184,14 @@ static func enter_selecting_zone_mode(game_main: Node2D) -> void:
 	var overlay: Node = game_main.call("_get_construction_overlay")
 	if overlay and overlay.has_method("show_construction_selecting_ui"):
 		overlay.show_construction_selecting_ui()
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_method("set_construction_blocking"):
 		ui.set_construction_blocking(true)
 	game_main.queue_redraw()
 
 
 static func exit_mode(game_main: Node2D) -> void:
-	game_main.set("_construction_mode", CONSTRUCTION_NONE)
+	game_main.set("_construction_mode", _GameModeEnums.ConstructionMode.NONE)
 	game_main.set("_construction_selected_zone", 0)
 	game_main.set("_construction_confirm_room_index", -1)
 	var overlay: Node = game_main.call("_get_construction_overlay")
@@ -203,7 +199,7 @@ static func exit_mode(game_main: Node2D) -> void:
 		overlay.hide_construction_selecting_ui()
 	overlay.hide_hover()
 	overlay.hide_confirm()
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_method("set_construction_blocking"):
 		ui.set_construction_blocking(false)
 	if GameTime and game_main.get("_time_was_flowing_before_construction"):
@@ -219,11 +215,11 @@ static func exit_mode(game_main: Node2D) -> void:
 
 
 static func on_confirm_pressed(game_main: Node2D) -> void:
-	var construction_mode: int = game_main.get("_construction_mode")
+	var construction_mode: int = game_main.get_construction_mode_int()
 	var construction_confirm_room_index: int = game_main.get("_construction_confirm_room_index")
 	var construction_selected_zone: int = game_main.get("_construction_selected_zone")
-	var rooms: Array = game_main.get("_rooms")
-	if construction_mode != CONSTRUCTION_CONFIRMING or construction_confirm_room_index < 0:
+	var rooms: Array = game_main.get_game_rooms()
+	if construction_mode != _GameModeEnums.ConstructionMode.CONFIRMING or construction_confirm_room_index < 0:
 		return
 	var room: ArchivesRoomInfo = rooms[construction_confirm_room_index]
 	var zone_type: int = construction_selected_zone
@@ -252,7 +248,7 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 		"zone_type": zone_type,
 		"researcher_ids": researcher_ids
 	}
-	var ui_node: Node = game_main.get_node_or_null("UIMain")
+	var ui_node: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui_node and ui_node.get("researchers_in_construction") != null:
 		ui_node.researchers_in_construction = ui_node.researchers_in_construction + n_researchers
 	game_main.set("_construction_confirm_room_index", -1)
@@ -260,7 +256,7 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 
 
 static func handle_left_click(game_main: Node2D, rid: int) -> void:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var construction_selected_zone: int = game_main.get("_construction_selected_zone")
 	var room_center_to_screen: Callable = Callable(game_main, "_room_center_to_screen")
 	var get_player_resources: Callable = Callable(game_main, "_get_player_resources")
@@ -273,7 +269,7 @@ static func handle_left_click(game_main: Node2D, rid: int) -> void:
 			var resources: Dictionary = get_player_resources.call()
 			var can_afford: bool = can_afford_construction(room, construction_selected_zone, resources, game_main)
 			if can_afford:
-				game_main.set("_construction_mode", CONSTRUCTION_CONFIRMING)
+				game_main.set("_construction_mode", _GameModeEnums.ConstructionMode.CONFIRMING)
 				game_main.set("_construction_confirm_room_index", rid)
 				focus_camera.call(rid)
 				get_construction_overlay.call().show_confirm_at(room_center_to_screen.call(rid))

@@ -1,6 +1,6 @@
 ---
 name: exp-overlay-input-debug
-description: 快速定位和修复 Godot UI 覆盖层输入穿透问题。用于出现“界面在上层但点击命中后景”、"TopBar/BottomBar 误伤"、或“可见但不可交互”时，按最小闭环执行盘查、断言与收敛。
+description: 快速定位和修复 Godot UI 覆盖层输入穿透与「暂停后看得见点不动」问题（含 tree.paused + process_mode）。用于“界面在上层但点击命中后景”、TopBar/BottomBar 误伤、或可见但不可交互时，按最小闭环盘查与收敛。
 ---
 
 # EXP Overlay Input Debug
@@ -25,6 +25,16 @@ description: 快速定位和修复 Godot UI 覆盖层输入穿透问题。用于
    - 每轮只改一类变量：布局边界 / 输入门禁 / 测试断言 三选一。
 5. 稳定性门槛
    - 连续至少 3 次通过后，再扩展次级断言。
+
+## `tree.paused` 与「看得见点不动」（Godot 4）
+
+**触发**：`TimePanel` / `PauseMenu` 等设置 `get_tree().paused = true` 后，某 `CanvasLayer` 或 `Control` 仍显示但按钮、`gui_input` 无响应。
+
+**根因**：节点为默认可暂停（`PROCESS_MODE_INHERIT` 沿 `GameMain` 继承），暂停时不进处理管线。
+
+**修复**：在该 UI 根节点（常为 `CanvasLayer`）`_ready()` 设 `process_mode = Node.PROCESS_MODE_ALWAYS`，与 `cleanup_overlay.gd`、`ui_main.gd` 一致；**新建挂到 `GameMain` 的交互层必须自检此项**。
+
+**与穿透区别**：穿透是事件被后景吃掉；本项是前景**根本不处理**事件。先确认 `get_tree().paused`，再查 `process_mode`。
 
 ## 盘查顺序（从快到慢）
 

@@ -46,7 +46,7 @@
     {
       "id": "click_overlay_backdrop_area",
       "action": "click",
-      "target": { "nodePath": "/root/GameMain/ExplorationMapOverlay/OverlayRoot/Backdrop" }
+      "target": { "nodePath": "/root/GameMain/InteractiveUiRoot/ExplorationMapOverlay/OverlayRoot/MapArea/MapStack" }
     },
     {
       "id": "check_overlay_blocks_world_clickthrough",

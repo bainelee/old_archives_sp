@@ -35,6 +35,14 @@ var _pending_delete_slot: int = -1
 var _was_flowing_before_menu: bool = true  ## show_menu 前的时间流逝状态，hide_menu 时恢复
 
 
+func _game_main_node() -> Node:
+	## PauseMenu 挂在 InteractiveUiRoot 下，存档/退出需指向 GameMain
+	var p: Node = get_parent()
+	if p and String(p.name) == "InteractiveUiRoot":
+		return p.get_parent()
+	return p
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
@@ -129,7 +137,7 @@ func _on_slot_selected(slot: int) -> void:
 
 
 func _do_save(slot: int) -> void:
-	var game_main: Node = get_parent()
+	var game_main: Node = _game_main_node()
 	if not game_main.has_method("collect_game_state"):
 		push_error(tr("ERROR_PAUSE_NO_COLLECT"))
 		return
@@ -155,7 +163,7 @@ func _on_settings() -> void:
 func _on_quit() -> void:
 	get_tree().paused = false
 	## 退出前自动保存到当前槽位，确保进度不丢失
-	var game_main: Node = get_parent()
+	var game_main: Node = _game_main_node()
 	if game_main and game_main.has_method("collect_game_state") and game_main.get("_current_slot") != null:
 		var slot: int = int(game_main.get("_current_slot"))
 		var game_state: Dictionary = game_main.collect_game_state()

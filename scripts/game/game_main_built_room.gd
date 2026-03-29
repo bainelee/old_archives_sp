@@ -46,7 +46,7 @@ static func is_creation_zone_paused(room: ArchivesRoomInfo, ui: Node) -> bool:
 
 
 static func process_production(game_main: Node2D, game_hours_delta: float) -> void:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var accumulator: float = game_main.get("_built_room_production_accumulator")
 	accumulator += game_hours_delta
 	var gv: Node = _GameValuesRef.get_singleton()
@@ -57,7 +57,7 @@ static func process_production(game_main: Node2D, game_hours_delta: float) -> vo
 		return
 	accumulator -= float(hours_to_process)
 	game_main.set("_built_room_production_accumulator", accumulator)
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if not ui:
 		return
 	for _h in hours_to_process:
@@ -72,15 +72,6 @@ static func process_production(game_main: Node2D, game_hours_delta: float) -> vo
 					_produce_creation_zone_hour(room, ui, game_main)
 
 
-static func _resource_name_to_type(name: String) -> int:
-	match name:
-		"cognition": return ArchivesRoomInfo.ResourceType.COGNITION
-		"computation": return ArchivesRoomInfo.ResourceType.COMPUTATION
-		"willpower": return ArchivesRoomInfo.ResourceType.WILL
-		"permission": return ArchivesRoomInfo.ResourceType.PERMISSION
-		_: return ArchivesRoomInfo.ResourceType.NONE
-
-
 static func _produce_research_zone_hour(room: ArchivesRoomInfo, ui: Node, game_main: Node2D) -> void:
 	var gv: Node = _GameValuesRef.get_singleton()
 	if gv == null:
@@ -89,7 +80,7 @@ static func _produce_research_zone_hour(room: ArchivesRoomInfo, ui: Node, game_m
 	var amt_per_unit: int = gv.get_research_output_per_unit_per_hour(room.room_type)
 	if amt_per_unit <= 0:
 		return
-	var rt: int = _resource_name_to_type(gv.get_research_output_resource(room.room_type))
+	var rt: int = ResourceLedger.resource_key_string_to_type(gv.get_research_output_resource(room.room_type))
 	if rt == ArchivesRoomInfo.ResourceType.NONE:
 		return
 	var output_this_hour: int = units * amt_per_unit
@@ -116,7 +107,7 @@ static func _deplete_research_room(room: ArchivesRoomInfo, game_main: Node2D) ->
 	room.zone_type = 0
 	room.room_type = ArchivesRoomInfo.RoomType.EMPTY_ROOM
 	room.resources.clear()
-	var ui_node: Node = game_main.get_node_or_null("UIMain")
+	var ui_node: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui_node and ui_node.get("researchers_working_in_rooms") != null:
 		ui_node.researchers_working_in_rooms = maxi(0, ui_node.researchers_working_in_rooms - n)
 

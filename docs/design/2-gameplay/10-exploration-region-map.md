@@ -266,6 +266,25 @@ graph TD
 
 ---
 
+## 当前实现状态（工程对齐）
+
+以下描述**仓库内已有代码与数据**，与上文策划稿并列；未单独标注「已实现」的段落仍以设计目标为准。
+
+| 维度 | 设计稿 | 当前工程 |
+|------|--------|----------|
+| 承载 | 独立 2D 探索场景 | `CanvasLayer` 叠加在 `game_main` 上（`ExplorationMapOverlay`） |
+| 入口条件 | 建事务所 + 有调查员后出现探索按钮 | **未**接线：由 GameMain 底栏占位 `BOTTOM_PLACEHOLDER_EXPLORATION_MAP` 与 `UIMain` 的 `btn_center` 打开 overlay（便于开发与烟测） |
+| 邻接与耗时 | 文案与图 | `datas/exploration_config.json` 的 `region_edges`、`default_explore_game_hours`、`explore_investigators_per_region`；地区元数据当前为 `regions_placeholder` |
+| 时间推进 | 文档多处写「离线时长自动补算」 | **探索进度**仅在游戏运行、`GameTime` 流逝且探索地图打开时由 `ExplorationTick` 扣减；**无**现实时间离线补算；读档为 `exploration` 快照 |
+| UI | 地区信息 + 调查点链 | 已实现：地区按钮、`ExplorationRegionInfoPanel`（简介 +「开始探索」）、**已探索地区**的调查点列表 + `ExplorationInvestigationEventPanel`（四行正文、选项悬停、`UIMain` 资源扣发）。**未**实现：有后续链、节点转化、正式调查员建筑条件接线 |
+| 存档 | 随主存档 | 根键 `exploration`，`ExplorationStateCodec.SAVE_VERSION == 3`，含 `completed_investigation_site_ids`；**v2** 读档迁移为 v3（调查点完成列表补空）；v1 档读入后探索中状态清空；详见 [03 - 存档系统](03-save-system.md) |
+
+**脚本与场景（速查）**：`scripts/game/exploration/exploration_service.gd`、`exploration_tick.gd`、`exploration_rules.gd`、`exploration_state_codec.gd`；`scripts/ui/exploration_map_overlay.gd`、`exploration_region_info_panel.gd`、`exploration_investigation_event_panel.*`；静态数据 `datas/exploration_investigations.json`；输入与叠层命中见 `scripts/game/game_main_input.gd`。
+
+**自动化**：`docs/testing/09-exploration-gameplayflow-validation.md`；回归 flow `flows/suites/regression/gameplay/exploration_two_regions_save_verify.json`；`scripts/test/test_driver.gd` 提供 `exploreRegion`、`advanceGameHours`、`verifySaveSlotExploration`、`loadGameMainFromSlot` 等。
+
+---
+
 ## 可达性分析（从旧日档案馆出发）
 
 从旧日档案馆出发，按广度优先展开（每轮探索当轮所有已解锁但未探索的区域）：
@@ -298,3 +317,4 @@ graph TD
 | 2026-03-27 | 新增：并行探索/并行后续进展、资源不足停机、节点手动关闭规则 |
 | 2026-03-27 | 新增：每小时结算+按天展示、调查点一次性、稍后处理仅返回、存档读档说明 |
 | 2026-03-27 | 确认：所有进度相关系统均按离线时长自动补算 |
+| 2026-03-29 | 增补「当前实现状态」：overlay 承载、配置驱动的邻接/tick、存档 v2、与设计稿差异（无离线补算、无调查点链）；测试与 flow 索引 |

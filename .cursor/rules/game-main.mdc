@@ -11,12 +11,24 @@ alwaysApply: false
 
 **模块拆分**：主逻辑在 `game_main.gd`；绘制在 `game_main_draw.gd`；存档在 `game_main_save.gd`；
 清理在 `game_main_cleanup.gd`；建设在 `game_main_construction.gd`；已建设产出在 `game_main_built_room.gd`；
-镜头在 `game_main_camera.gd`；输入在 `game_main_input.gd`。
+镜头在 `game_main_camera.gd`；输入在 `game_main_input.gd`；探索地图叠层在 `game_main_exploration_ui.gd`。
+**模式枚举单源**：`game_mode_enums.gd`（`CleanupMode` / `ConstructionMode`），各 Helper 通过 `preload` 引用。
 
 ## 网格与常量
 
 - **网格**：80×60，每格 `CELL_SIZE` (20px)，与地图编辑器一致
 - **状态归属**：`_tiles`、`_rooms`、`_camera`、模式变量等保留在主文件
+
+## `InteractiveUiRoot`（交互 UI 根）
+
+- `GameMain` 下子节点 **`InteractiveUiRoot`**（`scripts/game/interactive_ui_root.gd`）为 `Node`，`process_mode = PROCESS_MODE_ALWAYS`，其子节点含：`UIMain`、`PauseMenu`、房间详情、`CleanupOverlay`、`ConstructionOverlay`；探索叠层由 `game_main_exploration_ui.gd` **add_child 到此根**。
+- 从 `GameMain` 取上述节点须用路径前缀 **`InteractiveUiRoot/`**（如 `get_node("InteractiveUiRoot/UIMain")`）。`PauseMenu` 的 `get_parent()` 为 `InteractiveUiRoot`，存档/退出需 `get_parent().get_parent()` 得 `GameMain`（见 `pause_menu.gd` `_game_main_node`）。
+
+## `tree.paused` 与交互 UI
+
+- `TimePanel` 与存档恢复会在 `GameTime.is_flowing == false` 时 `get_tree().paused = true`（另有 `PauseMenu`）。
+- 默认可暂停节点在暂停下**不处理** GUI；**整棵 `InteractiveUiRoot` 子树**在暂停下仍可交互，无需再逐层依赖「碰巧挂在 UIMain 下」。
+- 若新增**全屏/侧栏交互层**：优先 **add_child 到 `InteractiveUiRoot`**；若必须挂在 `GameMain` 直系，仍须在脚本设 `PROCESS_MODE_ALWAYS`（见 `cleanup_overlay.gd` 注释风格）。
 
 ## 辅助类调用约定
 

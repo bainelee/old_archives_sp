@@ -90,7 +90,7 @@ func _update_all_researchers(game_main: Node2D) -> void:
 			var data: Dictionary = cleanup_rooms[room_idx]
 			var ids: Array = data.get("researcher_ids", [])
 			if id in ids:
-				var rooms: Array = game_main.get("_rooms")
+				var rooms: Array = game_main.get_game_rooms()
 				if room_idx >= 0 and room_idx < rooms.size():
 					var room: ArchivesRoomInfo = rooms[room_idx] as ArchivesRoomInfo
 					if room:
@@ -105,7 +105,7 @@ func _update_all_researchers(game_main: Node2D) -> void:
 				var data: Dictionary = construction_rooms[room_idx]
 				var ids: Array = data.get("researcher_ids", [])
 				if id in ids:
-					var rooms: Array = game_main.get("_rooms")
+					var rooms: Array = game_main.get_game_rooms()
 					if room_idx >= 0 and room_idx < rooms.size():
 						var room: ArchivesRoomInfo = rooms[room_idx] as ArchivesRoomInfo
 						if room:
@@ -265,7 +265,7 @@ static func get_current_life_phase(game_main: Node2D, researcher_id: int) -> int
 ## 可闲逛房间：room_00（核心）+ 所有已解锁且已清理的房间
 func _build_wanderable_room_list(game_main: Node2D) -> Array[String]:
 	var out: Array[String] = ["room_00"]
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	for room in rooms:
 		var r: ArchivesRoomInfo = room as ArchivesRoomInfo
 		if not r:

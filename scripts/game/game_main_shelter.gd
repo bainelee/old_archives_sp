@@ -166,7 +166,7 @@ static func get_free_researcher_ids(game_main: Node2D) -> Array:
 
 
 static func _count_work_slots(game_main: Node2D) -> int:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
 	var n: int = 0
@@ -195,7 +195,7 @@ static func enrich_researcher_with_rooms(game_main: Node2D, researcher: Dictiona
 	var researcher_id: int = int(r.get("id", 0))
 
 	var work_slots: Array[String] = []
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
 
@@ -242,10 +242,10 @@ static func enrich_researcher_with_rooms(game_main: Node2D, researcher: Dictiona
 const MAX_HOURS_PER_FRAME := 24  ## 单帧最多处理小时数，避免 delta 尖峰导致计算因子瞬间耗尽
 
 func _tick(game_main: Node2D, game_hours_delta: float, shelter_level: int) -> void:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	if rooms.is_empty():
 		return
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if not ui:
 		return
 	var gv: Node = _GameValuesRef.get_singleton()
@@ -391,12 +391,7 @@ static func _research_has_reserve(room: ArchivesRoomInfo) -> bool:
 	if not gv:
 		return false
 	var rt: String = gv.get_research_output_resource(room.room_type)
-	var res_type: int = ArchivesRoomInfo.ResourceType.NONE
-	match rt:
-		"cognition": res_type = ArchivesRoomInfo.ResourceType.COGNITION
-		"computation": res_type = ArchivesRoomInfo.ResourceType.COMPUTATION
-		"willpower": res_type = ArchivesRoomInfo.ResourceType.WILL
-		"permission": res_type = ArchivesRoomInfo.ResourceType.PERMISSION
+	var res_type: int = ResourceLedger.resource_key_string_to_type(rt)
 	if res_type == ArchivesRoomInfo.ResourceType.NONE:
 		return false
 	for r in room.resources:
@@ -450,8 +445,8 @@ static func _get_or_create_helper(game_main: Node2D) -> GameMainShelterHelper:
 
 
 func _build_manual_context(game_main: Node2D) -> Dictionary:
-	var rooms: Array = game_main.get("_rooms")
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var rooms: Array = game_main.get_game_rooms()
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	var gv: Node = _GameValuesRef.get_singleton()
 	if rooms.is_empty() or ui == null or gv == null:
 		return {"valid": false}
@@ -547,8 +542,8 @@ func _build_effective_manual_targets(need_shelter: Array[Dictionary], total_avai
 ## 返回 [{zone_name, room_name, per_day}]；按需显示各需要庇护的房间及实际分配消耗
 ## 优先使用上次 tick 的实际分配（_room_shelter_energy），否则按相同逻辑模拟
 static func get_shelter_consumption_breakdown(game_main: Node2D, shelter_level: int) -> Array:
-	var rooms: Array = game_main.get("_rooms")
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var rooms: Array = game_main.get_game_rooms()
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	var gv: Node = _GameValuesRef.get_singleton()
 	if not gv or not ui:
 		return []

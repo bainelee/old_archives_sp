@@ -1,8 +1,28 @@
 # 全项目架构审查报告
 
-> 审查日期：2026-03-19
-> 覆盖范围：85 个 GDScript 文件、94 个场景、12+ JSON 数据文件、11 个 Schema、40+ 设计文档
+> 审查日期：2026-03-19  
+> **复核日期：2026-03-29**（见下文「已关闭的 Critical / 高优先级项」；统计数未全量重扫，以复核段为准）  
+> 覆盖范围：85 个 GDScript 文件、94 个场景、12+ JSON 数据文件、11 个 Schema、40+ 设计文档  
 > 审查模块：Core (10) / Editor (9) / Game (14) / UI-TopBar (12) / UI-Panels+Overlays (28) / 3D-Rooms+Actors (9) / Data+Docs
+
+---
+
+## 〇、已关闭或已缓解的 Critical / 高优先级项（2026-03-29 复核）
+
+以下条目在初版审计中为紧急/高优先级，**当前仓库已修复或已按设计实现**，不再作为 Phase 0/1 阻塞项；后文「第二节」保留原文档便于对照历史。
+
+| 编号 | 结论 | 说明 |
+|------|------|------|
+| C1 | **已关闭** | `project.godot` Autoload 已为 `LocaleManager → GameValues → GameTime → …` |
+| C2 | **已关闭** | `game_main.gd` 已声明 `var _shelter_helper` |
+| C3 | **已关闭** | `game_main_cleanup.gd` 入口已检查 `_construction_mode` |
+| C4 | **待断言关单** | `data_providers.gd` 已区分 `lacking` / `dried_up`；建议用 GameplayFlow 或单测固定口径 |
+| C5 | **已关闭** | 已无 `debug-ada89e.log` / agent log 写盘 |
+| C6 | **已关闭** | `ui_main.gd` 使用 `_detail_panel_dirty` 等条件刷新 |
+| C7 | **已关闭** | `room_detail_panel.gd` 使用 `dynamic_hash`，仅变化时刷新动态区 |
+| 架构问题 1（核心） | **已缓解** | 权威定义为 `scripts/core/room_info.gd`（`class_name ArchivesRoomInfo`）；`scripts/editor/room_info.gd` 为 **extends core** 的兼容层，设计文档应逐步改为引用 core 路径 |
+
+**文档债**：若干 `docs/design/*.md` 仍写「RoomInfo 在 `scripts/editor/room_info.gd`」，应改为以 **`scripts/core/room_info.gd` 为准**，并注明 editor 文件仅为兼容 re-export。
 
 ---
 
@@ -10,13 +30,13 @@
 
 | 严重度 | 数量 | 分布 |
 |--------|------|------|
-| **Critical** | 7 | Core ×2, Game ×2, UI-TopBar ×1, UI-Panels ×3 |
-| **Warning** | 25 | Core ×7, Editor ×5, Game ×6, UI-TopBar ×7, UI-Panels ×8, 3D ×8, Data ×2 |
+| **Critical（初版）** | 7 | 见第二节；**复核后待办 Critical 视为 0**（C4 建议测试关单） |
+| **Warning** | 25 | Core ×7, Editor ×5, Game ×6, UI-TopBar ×7, UI-Panels ×8, 3D ×8, Data ×2（仍作改进 backlog） |
 | **Info** | 30+ | 各模块均有 |
 
 ---
 
-## 二、Critical 问题汇总（必须立即修复）
+## 二、Critical 问题汇总（历史记录 — 初版 2026-03-19）
 
 ### C1. Autoload 初始化顺序错误 — GameTime 在 GameValues 之前
 - **模块**：Core
@@ -64,19 +84,13 @@
 
 ## 三、跨模块架构问题
 
-### 架构问题 1：RoomInfo 跨模块逆向依赖
+### 架构问题 1：RoomInfo 跨模块逆向依赖（已缓解，文档待统一）
 
-`RoomInfo` 类定义在 `scripts/editor/room_info.gd`，但被 **20+ 个文件**跨模块引用：
+**现状（2026-03-29）**：核心类型已落在 `scripts/core/room_info.gd`（`ArchivesRoomInfo` 等）。`scripts/editor/room_info.gd` 为 **兼容层**（`extends "res://scripts/core/room_info.gd"`），旧路径仍可用。
 
-```
-scripts/editor/ → RoomInfo（本地）
-scripts/game/ → RoomInfo（12+ 文件反向依赖 editor 模块）
-scripts/core/ → RoomInfo（SaveManager, DataProviders, ZoneType）
-```
+**剩余工作**：设计文档与引用统一写到 `scripts/core/room_info.gd`；在确认无外部依赖后，可删除 editor 薄文件或保留仅作 redirect。
 
-`RoomInfoLoader` 甚至需要 `preload("res://scripts/editor/room_info.gd")` 来访问枚举。
-
-**建议**：将 `room_info.gd` 迁移到 `scripts/core/`。它是核心数据结构，不应归属 editor 模块。
+**历史描述（初版）**：曾将类定义仅放在 editor，导致 game/core 反向依赖 editor。该问题已通过迁移至 core + editor 兼容层解决。
 
 ### 架构问题 2：Helper 通过字符串反射访问主类私有状态
 
@@ -202,15 +216,15 @@ cognition / computation / willpower / permission / shelter 五个面板中，`_f
 
 ---
 
-## 六、Autoload 依赖关系（修正后建议）
+## 六、Autoload 依赖关系
+
+**当前顺序（2026-03-29，已与「建议顺序」一致）**：
 
 ```
-当前顺序（有 bug）：
-  LocaleManager → GameTime → ErosionCore → GameValues → PersonnelErosionCore → SaveManager → DataProviders
-
-建议顺序：
-  LocaleManager → GameValues → GameTime → ErosionCore → PersonnelErosionCore → SaveManager → DataProviders
+LocaleManager → GameValues → GameTime → ErosionCore → PersonnelErosionCore → SaveManager → DataProviders → DebugFramePrint → TestDriver
 ```
+
+（初版文档中的「有 bug」顺序已过时，仅作历史对照。）
 
 修正后的依赖图：
 
@@ -236,7 +250,7 @@ DataProviders ──→ GameValues + ZoneType + 运行时场景查找
 
 | 文件 | 违反 | 当前位置 | 应在 |
 |------|------|----------|------|
-| resource_progress_bar.gd | 节点缓存在 _ready | _ready:103-116 | _enter_tree |
+| resource_progress_bar.gd | 节点缓存在 _ready | 已部分修复：`_enter_tree` 调用 `_cache_nodes`，`_ready` 仅兜底 | 可移除 `_ready` 中重复缓存（若全覆盖） |
 | corrosion_number.gd | 节点+贴图缓存在 _ready | _ready:24-37 | _enter_tree |
 | forecast_warning.gd | 节点缓存在 _ready | _ready:42-54 | _enter_tree |
 | detail_storage_progress_bar.gd | 节点缓存在 _ready | _ready:32-38 | _enter_tree |
@@ -255,24 +269,24 @@ DataProviders ──→ GameValues + ZoneType + 运行时场景查找
 
 ## 九、优先修复路线图
 
-### Phase 0：紧急修复（影响游戏正确性）
+### Phase 0：紧急修复（影响游戏正确性）— **已完成（2026-03-29 复核）**
 
-1. 修正 Autoload 顺序（C1）— 游戏速度错误
-2. 声明 `_shelter_helper` 变量（C2）— 庇护系统无效
-3. 清理模式互斥检查（C3）— 状态冲突风险
-4. 删除调试日志写文件（C5）— 性能/安全隐患
-5. 修正 _calculate_factor_status 死分支（C4）
+1. ~~修正 Autoload 顺序（C1）~~ ✅  
+2. ~~声明 `_shelter_helper` 变量（C2）~~ ✅  
+3. ~~清理模式互斥检查（C3）~~ ✅  
+4. ~~删除调试日志写文件（C5）~~ ✅  
+5. 修正 _calculate_factor_status（C4）— 逻辑已调整；**建议测试关单**  
 
-### Phase 1：性能修复
+### Phase 1：性能修复 — **核心项已完成**
 
-6. ui_main 详情面板改为脏标记刷新（C6）
-7. room_detail_panel 条件重建（C7）
-8. ui_main 属性 setter 去重刷新（call_deferred）
-9. resource_progress_bar / corrosion_number / forecast_warning 节点缓存移至 _enter_tree
+6. ~~ui_main 详情面板脏标记（C6）~~ ✅  
+7. ~~room_detail_panel 条件重建（C7）~~ ✅  
+8. ui_main 属性 setter 去重刷新（call_deferred）— **待查是否仍适用**  
+9. resource_progress_bar 已部分迁移 `_enter_tree`；**corrosion_number / forecast_warning / detail_* 仍建议对齐 ui-no-ready**  
 
 ### Phase 2：代码质量重构
 
-10. RoomInfo 迁移到 scripts/core/（架构问题 1）
+10. ~~RoomInfo 迁移到 scripts/core/（架构问题 1）~~ ✅（**文档统一路径**仍待做）
 11. 提取 FactorDetailPanelBase 中间类（架构问题 5，~400 行去重）
 12. 提取资源操作工具方法（架构问题 4，~200 行去重）
 13. 提取行构建工具方法到 DetailPanelBase（~300 行去重）

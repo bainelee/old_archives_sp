@@ -1,0 +1,870 @@
+{
+  "schema_version": 1,
+  "description": "探索调查点静态配置（测试占位命名）；每区 2 点、每点 2 选项。",
+  "sites_by_region": {
+    "old_archives": [
+      {
+        "id": "inv_old_archives_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：旧日档案馆 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_old_archives_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_old_archives_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_old_archives_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：旧日档案馆 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_old_archives_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_old_archives_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "white_cliff": [
+      {
+        "id": "inv_white_cliff_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：白崖镇 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_white_cliff_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_white_cliff_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_white_cliff_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：白崖镇 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_white_cliff_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_white_cliff_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "durkin_mine": [
+      {
+        "id": "inv_durkin_mine_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：杜尔金矿区 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_durkin_mine_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_durkin_mine_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_durkin_mine_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：杜尔金矿区 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_durkin_mine_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_durkin_mine_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "mandos_industrial": [
+      {
+        "id": "inv_mandos_industrial_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：曼多斯工业区 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_mandos_industrial_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_mandos_industrial_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_mandos_industrial_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：曼多斯工业区 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_mandos_industrial_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_mandos_industrial_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "bolero_port": [
+      {
+        "id": "inv_bolero_port_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：波莱罗港 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_bolero_port_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_bolero_port_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_bolero_port_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：波莱罗港 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_bolero_port_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_bolero_port_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "saint_river_afv": [
+      {
+        "id": "inv_saint_river_afv_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：圣河亚弗 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_saint_river_afv_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_saint_river_afv_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_saint_river_afv_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：圣河亚弗 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_saint_river_afv_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_saint_river_afv_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "andal_town": [
+      {
+        "id": "inv_andal_town_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：安达尔镇 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_andal_town_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_andal_town_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_andal_town_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：安达尔镇 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_andal_town_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_andal_town_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "korloh_sea": [
+      {
+        "id": "inv_korloh_sea_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：科尔洛海 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_korloh_sea_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_korloh_sea_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_korloh_sea_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：科尔洛海 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_korloh_sea_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_korloh_sea_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "bluewood_transit": [
+      {
+        "id": "inv_bluewood_transit_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：蓝木跃迁线 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_bluewood_transit_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_bluewood_transit_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_bluewood_transit_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：蓝木跃迁线 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_bluewood_transit_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_bluewood_transit_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "grey_town": [
+      {
+        "id": "inv_grey_town_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：格雷镇 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_grey_town_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_grey_town_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_grey_town_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：格雷镇 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_grey_town_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_grey_town_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "ural_mountain": [
+      {
+        "id": "inv_ural_mountain_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：乌拉尔山 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_ural_mountain_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_ural_mountain_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_ural_mountain_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：乌拉尔山 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_ural_mountain_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_ural_mountain_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "new_barguzin": [
+      {
+        "id": "inv_new_barguzin_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：新巴尔古津 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_new_barguzin_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_new_barguzin_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_new_barguzin_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：新巴尔古津 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_new_barguzin_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_new_barguzin_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "morku_industrial": [
+      {
+        "id": "inv_morku_industrial_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：莫尔库工业区 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_morku_industrial_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_morku_industrial_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_morku_industrial_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：莫尔库工业区 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_morku_industrial_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_morku_industrial_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "mason_port": [
+      {
+        "id": "inv_mason_port_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：石匠港 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_mason_port_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_mason_port_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_mason_port_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：石匠港 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_mason_port_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_mason_port_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "west_202_port": [
+      {
+        "id": "inv_west_202_port_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：西202港 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_west_202_port_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_west_202_port_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_west_202_port_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：西202港 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_west_202_port_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_west_202_port_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ],
+    "korborko": [
+      {
+        "id": "inv_korborko_1",
+        "title_zh": "测试调查点1",
+        "body_zh": "【占位-调查点】地区：科尔博柯 · 调查点序号 1\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_korborko_1_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_korborko_1_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "inv_korborko_2",
+        "title_zh": "测试调查点2",
+        "body_zh": "【占位-调查点】地区：科尔博柯 · 调查点序号 2\n【占位】此处为事件背景/现场情况描述（行 2）。\n【占位】此处为可交互线索或风险说明（行 3）。\n【占位】请选择下方一项行动；「稍后处理」仅关闭界面不结算。",
+        "image": "",
+        "options": [
+          {
+            "id": "opt_inv_korborko_2_1",
+            "label_zh": "测试选项1",
+            "hint_zh": "【占位】测试选项1：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {
+              "info": 5
+            },
+            "reward": {}
+          },
+          {
+            "id": "opt_inv_korborko_2_2",
+            "label_zh": "测试选项2",
+            "hint_zh": "【占位】测试选项2：消耗/收益见结构化字段（当前可为空）。",
+            "cost": {},
+            "reward": {
+              "cognition": 10
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -75,15 +75,17 @@ func _on_erosion_changed(_new_value: int) -> void:
 func _on_settings_pressed() -> void:
 	if _ui_root == null:
 		_ui_root = get_parent().get_parent() if get_parent() else null
-	var gm: Node = _ui_root.get_parent() if _ui_root else null
-	var pause_menu: CanvasLayer = gm.get_node_or_null("PauseMenu") as CanvasLayer if gm else null
+	var shell: Node = _ui_root.get_parent() if _ui_root else null
+	## shell 为 InteractiveUiRoot，PauseMenu 为其子节点（非 GameMain 直系）
+	var pause_menu: CanvasLayer = shell.get_node_or_null("PauseMenu") as CanvasLayer if shell else null
 	if pause_menu and pause_menu.has_method("show_menu"):
 		pause_menu.show_menu()
 
 
 func set_resources(factors: Dictionary, currency: Dictionary, personnel: Dictionary) -> void:
 	var gv: Node = GameValuesRef.get_singleton()
-	var gm: Node = _ui_root.get_parent() if _ui_root else null
+	var shell: Node = _ui_root.get_parent() if _ui_root else null
+	var gm: Node = shell.get_parent() if shell else null
 	_Helper.apply_resources(self, factors, currency, personnel, {
 		"gv": gv, "gm": gm, "ui": _ui_root,
 	})

@@ -38,7 +38,7 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 	var grid_width: int = game_main.get("GRID_WIDTH")
 	var grid_height: int = game_main.get("GRID_HEIGHT")
 	var cell_size: int = game_main.get("CELL_SIZE")
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
 
@@ -90,7 +90,7 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 			map_data[SAVE_KEY_FORCED_SHUTDOWN_ROOMS] = room_ids
 	var total_hours: int = int(GameTime.get_total_hours()) if GameTime else 0
 	var resources: Dictionary = {"factors": {}, "currency": {}, "personnel": {}}
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_method("get_resources"):
 		resources = ui.get_resources()
 	if PersonnelErosionCore:
@@ -131,7 +131,7 @@ static func collect_game_state(game_main: Node2D) -> Dictionary:
 ## 新游戏时调用：若房间有 grid 且无 adjacent_ids（未从存档恢复），则计算邻接并应用开篇
 ## 读档时跳过，避免覆盖已恢复的 unlocked
 static func ensure_layout_and_prologue(game_main: Node2D) -> void:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	if rooms.is_empty():
 		return
 	var has_any_adjacent: bool = false
@@ -186,7 +186,7 @@ static func apply_map(game_main: Node2D, d: Dictionary) -> void:
 				for y in min(col.size(), grid_height):
 					tiles[x][y] = int(col[y])
 
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var construction_rooms: Dictionary = game_main.get("_construction_rooms_in_progress")
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
 	var forced_shutdown: Dictionary = game_main.get("_forced_shutdown_room_ids")
@@ -268,7 +268,7 @@ static func apply_resources(game_main: Node2D, d: Dictionary) -> void:
 			PersonnelErosionCore.initialize_from_personnel(personnel, total_hours)
 		PersonnelErosionCore.sync_last_tick()
 		personnel = PersonnelErosionCore.get_personnel()
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_method("set_resources"):
 		ui.set_resources(factors, currency, personnel)
 	if PersonnelErosionCore and ui:

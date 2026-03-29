@@ -10,12 +10,16 @@ extends RefCounted
 ## ---------------------------------------------------------------------------
 
 const CONFIG_PATH := "res://datas/exploration_config.json"
+const INVESTIGATIONS_PATH := "res://datas/exploration_investigations.json"
 
 const _Codec := preload("res://scripts/game/exploration/exploration_state_codec.gd")
 const _Rules := preload("res://scripts/game/exploration/exploration_rules.gd")
 const _TickScript := preload("res://scripts/game/exploration/exploration_tick.gd")
 
 var _config: Dictionary = {}
+var _investigations_blob: Dictionary = {}
+## site_id -> { "region_id": String, "site": Dictionary }
+var _site_index: Dictionary = {}
 var _state: Dictionary = {}
 
 
@@ -25,6 +29,8 @@ func _init() -> void:
 
 func reload_static_config() -> void:
 	_config = _load_config_file()
+	_investigations_blob = _load_investigations_file()
+	_rebuild_site_index()
 
 
 func init_default_state() -> void:
@@ -36,6 +42,8 @@ func ensure_first_open_initialized() -> void:
 		init_default_state()
 	if not _state.has(_Codec.KEY_EXPLORING_BY_REGION):
 		_state[_Codec.KEY_EXPLORING_BY_REGION] = {}
+	if not _state.has(_Codec.KEY_COMPLETED_INVESTIGATION_SITE_IDS):
+		_state[_Codec.KEY_COMPLETED_INVESTIGATION_SITE_IDS] = []
 	if bool(_state.get(_Codec.KEY_FIRST_OPEN_DONE, false)):
 		return
 	var hub: String = _Rules.get_hub_region_id(_config)
@@ -91,6 +99,121 @@ func get_config_readonly() -> Dictionary:
 	return _config.duplicate(true)
 
 
+func get_investigations_readonly() -> Dictionary:
+	return _investigations_blob.duplicate(true)
+
+
+func get_investigation_sites_for_region(region_id: String) -> Array:
+	var rid: String = region_id.strip_edges()
+	var raw: Variant = _investigations_blob.get("sites_by_region", {})
+	if not (raw is Dictionary):
+		return []
+	var arr: Variant = (raw as Dictionary).get(rid, [])
+	if not (arr is Array):
+		return []
+	var out: Array = []
+	for item in arr as Array:
+		if item is Dictionary:
+			out.append((item as Dictionary).duplicate(true))
+	return out
+
+
+func get_site_definition(site_id: String) -> Dictionary:
+	var sid: String = site_id.strip_edges()
+	var entry: Variant = _site_index.get(sid, null)
+	if entry is Dictionary:
+		var site: Variant = (entry as Dictionary).get("site", {})
+		if site is Dictionary:
+			return (site as Dictionary).duplicate(true)
+	return {}
+
+
+func get_site_region_id(site_id: String) -> String:
+	var sid: String = site_id.strip_edges()
+	var entry: Variant = _site_index.get(sid, null)
+	if entry is Dictionary:
+		return str((entry as Dictionary).get("region_id", ""))
+	return ""
+
+
+func is_investigation_site_completed(site_id: String) -> bool:
+	var sid: String = site_id.strip_edges()
+	var raw: Variant = _state.get(_Codec.KEY_COMPLETED_INVESTIGATION_SITE_IDS, [])
+	if not (raw is Array):
+		return false
+	return (raw as Array).has(sid)
+
+
+func mark_investigation_site_completed(site_id: String) -> void:
+	var sid: String = site_id.strip_edges()
+	if sid.is_empty():
+		return
+	var raw: Variant = _state.get(_Codec.KEY_COMPLETED_INVESTIGATION_SITE_IDS, [])
+	var arr: Array = raw.duplicate() if raw is Array else []
+	if arr.has(sid):
+		return
+	arr.append(sid)
+	_state[_Codec.KEY_COMPLETED_INVESTIGATION_SITE_IDS] = arr
+
+
+## 校验地区已探索、调查点未完成、选项存在；返回 cost/reward 供 GameMain 扣发。
+func validate_investigation_option(site_id: String, option_id: String) -> Dictionary:
+	var sid: String = site_id.strip_edges()
+	var oid: String = option_id.strip_edges()
+	if sid.is_empty() or oid.is_empty():
+		return {"ok": false, "reason": "empty_id"}
+	var site: Dictionary = get_site_definition(sid)
+	if site.is_empty():
+		return {"ok": false, "reason": "unknown_site"}
+	var rid: String = get_site_region_id(sid)
+	if rid.is_empty():
+		return {"ok": false, "reason": "unknown_site_region"}
+	var explored: Variant = _state.get(_Codec.KEY_EXPLORED_REGION_IDS, [])
+	if not (explored is Array) or not (explored as Array).has(rid):
+		return {"ok": false, "reason": "region_not_explored"}
+	if is_investigation_site_completed(sid):
+		return {"ok": false, "reason": "site_already_completed"}
+	var opts: Variant = site.get("options", [])
+	if not (opts is Array):
+		return {"ok": false, "reason": "no_options"}
+	for item in opts as Array:
+		if not (item is Dictionary):
+			continue
+		var o: Dictionary = item as Dictionary
+		if str(o.get("id", "")) != oid:
+			continue
+		var cost: Dictionary = {}
+		var cr: Variant = o.get("cost", {})
+		if cr is Dictionary:
+			cost = (cr as Dictionary).duplicate(true)
+		var reward: Dictionary = {}
+		var rr: Variant = o.get("reward", {})
+		if rr is Dictionary:
+			reward = (rr as Dictionary).duplicate(true)
+		return {"ok": true, "reason": "", "cost": cost, "reward": reward}
+	return {"ok": false, "reason": "unknown_option"}
+
+
+func _rebuild_site_index() -> void:
+	_site_index.clear()
+	var raw: Variant = _investigations_blob.get("sites_by_region", {})
+	if not (raw is Dictionary):
+		return
+	for region_key in (raw as Dictionary).keys():
+		var rid: String = str(region_key)
+		var arr: Variant = (raw as Dictionary)[region_key]
+		if not (arr is Array):
+			continue
+		for item in arr as Array:
+			if not (item is Dictionary):
+				continue
+			var site: Dictionary = item as Dictionary
+			var sid: String = str(site.get("id", ""))
+			if sid.is_empty():
+				continue
+			_site_index[sid] = {"region_id": rid, "site": site.duplicate(true)}
+
+
 func tick(delta_game_hours: float) -> void:
 	_TickScript.apply_tick(_state, _config, delta_game_hours)
 
@@ -139,3 +262,16 @@ static func _load_config_file() -> Dictionary:
 	var parsed: Variant = JSON.parse_string(f.get_as_text())
 	f.close()
 	return parsed if parsed is Dictionary else {}
+
+
+static func _load_investigations_file() -> Dictionary:
+	if not FileAccess.file_exists(INVESTIGATIONS_PATH):
+		push_warning("ExplorationService: missing investigations " + INVESTIGATIONS_PATH)
+		return {}
+	var f2: FileAccess = FileAccess.open(INVESTIGATIONS_PATH, FileAccess.READ)
+	if not f2:
+		push_error("ExplorationService: cannot read " + INVESTIGATIONS_PATH)
+		return {}
+	var parsed2: Variant = JSON.parse_string(f2.get_as_text())
+	f2.close()
+	return parsed2 if parsed2 is Dictionary else {}

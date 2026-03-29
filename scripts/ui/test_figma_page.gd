@@ -10,6 +10,15 @@ const _Helper = preload("res://scripts/ui/topbar_data_helper.gd")
 var _design_canvas: Control
 
 
+func _game_main_from_context() -> Node2D:
+	var n: Node = self
+	while n:
+		if n is Node2D and String(n.name) == "GameMain":
+			return n as Node2D
+		n = n.get_parent()
+	return null
+
+
 func _ready() -> void:
 	_design_canvas = get_node_or_null("Content/Center/DesignCanvas") as Control
 	if _design_canvas:
@@ -55,7 +64,10 @@ func set_corrosion_value(value: int) -> void:
 
 
 func _on_settings_pressed() -> void:
-	var pause_menu: CanvasLayer = get_parent().get_node_or_null("PauseMenu") as CanvasLayer if get_parent() else null
+	var gm: Node2D = _game_main_from_context()
+	var pause_menu: CanvasLayer = null
+	if gm:
+		pause_menu = gm.get_node_or_null("InteractiveUiRoot/PauseMenu") as CanvasLayer
 	if pause_menu and pause_menu.has_method("show_menu"):
 		pause_menu.show_menu()
 
@@ -88,15 +100,16 @@ func set_resources(factors: Dictionary, currency: Dictionary, personnel: Diction
 	if not topbar:
 		return
 	var gv: Node = GameValuesRef.get_singleton()
-	var gm: Node = get_parent()
-	var ui: Node = get_parent().get_node_or_null("UIMain") if get_parent() else null
+	var gm: Node2D = _game_main_from_context()
+	var ui: Node = gm.get_node_or_null("InteractiveUiRoot/UIMain") if gm else null
 	_Helper.apply_resources(topbar, factors, currency, personnel, {
 		"gv": gv, "gm": gm, "ui": ui,
 	})
 
 
 func refresh_display() -> void:
-	var ui: Node = get_parent().get_node_or_null("UIMain") if get_parent() else null
+	var gm: Node2D = _game_main_from_context()
+	var ui: Node = gm.get_node_or_null("InteractiveUiRoot/UIMain") if gm else null
 	if not ui or not ui.has_method("get_resources"):
 		return
 	var res: Dictionary = ui.get_resources()

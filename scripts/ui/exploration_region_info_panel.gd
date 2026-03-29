@@ -1,25 +1,38 @@
 extends PanelContainer
-## 探索地图 — 右侧「地区信息」面板：名称、状态、耗时、调查员占位、开始探索。
+## 探索地图 — 右侧「地区信息」面板：名称、状态、耗时、调查员、开始探索、已探索地区的调查点列表与事件。
 
 signal explore_requested(region_id: String)
+signal region_info_close_requested()
 
 const _Codec := preload("res://scripts/game/exploration/exploration_state_codec.gd")
 const _Rules := preload("res://scripts/game/exploration/exploration_rules.gd")
+const _EventPanelScene := preload("res://scenes/ui/exploration_investigation_event_panel.tscn")
 
-@onready var _title: Label = get_node_or_null("Margin/VBox/TitleLabel") as Label
+@onready var _title: Label = get_node_or_null("Margin/VBox/TitleRow/TitleLabel") as Label
+@onready var _btn_close: Button = get_node_or_null("Margin/VBox/TitleRow/BtnClose") as Button
 @onready var _status: Label = get_node_or_null("Margin/VBox/StatusLabel") as Label
 @onready var _duration: Label = get_node_or_null("Margin/VBox/DurationLabel") as Label
 @onready var _invest: Label = get_node_or_null("Margin/VBox/InvestLabel") as Label
 @onready var _reward: Label = get_node_or_null("Margin/VBox/RewardLabel") as Label
 @onready var _btn_explore: Button = get_node_or_null("Margin/VBox/BtnExplore") as Button
+@onready var _sites_label: Label = get_node_or_null("Margin/VBox/InvestigationSitesLabel") as Label
+@onready var _sites_box: VBoxContainer = get_node_or_null("Margin/VBox/InvestigationSitesBox") as VBoxContainer
 
 var _region_id: String = ""
 var _exploration_service: Variant = null
+var _game_main: Node2D = null
+var _event_panel: Control = null
+var _event_signals_connected: bool = false
 
 
 func _ready() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	if _btn_close:
+		_btn_close.pressed.connect(func() -> void:
+			_hide_event_panel()
+			region_info_close_requested.emit()
+		)
 	if _btn_explore:
 		_btn_explore.pressed.connect(func() -> void:
 			if not _region_id.is_empty():
@@ -31,14 +44,25 @@ func bind_exploration_service(service: Variant) -> void:
 	_exploration_service = service
 
 
+func bind_game_main(game_main: Node2D) -> void:
+	_game_main = game_main
+
+
 func hide_panel() -> void:
+	_hide_event_panel()
 	visible = false
 	_region_id = ""
+
+
+func _hide_event_panel() -> void:
+	if _event_panel and is_instance_valid(_event_panel) and _event_panel.has_method("hide_panel"):
+		_event_panel.call("hide_panel")
 
 
 ## 根据当前服务状态刷新右侧信息；若地区未解锁则不调用或在外部先判断。
 func present_region(region_id: String) -> void:
 	_region_id = region_id
+	_hide_event_panel()
 	if _exploration_service == null:
 		return
 	_exploration_service.call("ensure_first_open_initialized")
@@ -86,7 +110,111 @@ func present_region(region_id: String) -> void:
 			_btn_explore.text = "已完成"
 		else:
 			_btn_explore.text = "开始探索"
+	_refresh_investigation_sites(is_explored)
 	visible = true
+
+
+func _refresh_investigation_sites(is_explored: bool) -> void:
+	if _sites_label == null or _sites_box == null:
+		return
+	if not is_explored or _exploration_service == null:
+		_sites_label.visible = false
+		_sites_box.visible = false
+		_clear_sites_box()
+		return
+	_sites_label.visible = true
+	_sites_box.visible = true
+	_clear_sites_box()
+	var sites: Variant = _exploration_service.call("get_investigation_sites_for_region", _region_id)
+	if not (sites is Array):
+		return
+	for item in sites as Array:
+		if not (item is Dictionary):
+			continue
+		var site: Dictionary = item as Dictionary
+		var sid: String = str(site.get("id", ""))
+		if sid.is_empty():
+			continue
+		var completed: bool = bool(_exploration_service.call("is_investigation_site_completed", sid))
+		if completed:
+			var lab := Label.new()
+			lab.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			lab.text = "%s（已完成）" % str(site.get("title_zh", sid))
+			_sites_box.add_child(lab)
+		else:
+			var btn := Button.new()
+			btn.text = str(site.get("title_zh", sid))
+			btn.focus_mode = Control.FOCUS_NONE
+			btn.custom_minimum_size = Vector2(0, 28)
+			var site_copy: Dictionary = site.duplicate(true)
+			btn.pressed.connect(func() -> void:
+				_open_investigation_site(site_copy)
+			)
+			_sites_box.add_child(btn)
+
+
+func _clear_sites_box() -> void:
+	if _sites_box == null:
+		return
+	for c in _sites_box.get_children():
+		_sites_box.remove_child(c)
+		c.queue_free()
+
+
+func _ensure_event_panel() -> void:
+	if _event_panel != null and is_instance_valid(_event_panel):
+		if not _event_signals_connected:
+			_connect_event_panel_signals()
+		return
+	var node: Node = _EventPanelScene.instantiate()
+	_event_panel = node as Control
+	if _event_panel == null:
+		return
+	add_child(_event_panel)
+	_event_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_event_panel.offset_left = 0.0
+	_event_panel.offset_top = 0.0
+	_event_panel.offset_right = 0.0
+	_event_panel.offset_bottom = 0.0
+	_event_panel.z_index = 10
+	_connect_event_panel_signals()
+
+
+func _connect_event_panel_signals() -> void:
+	if _event_panel == null or _event_signals_connected:
+		return
+	if _event_panel.has_signal("option_selected"):
+		_event_panel.option_selected.connect(_on_investigation_option_selected)
+	if _event_panel.has_signal("defer_requested"):
+		_event_panel.defer_requested.connect(_on_investigation_defer)
+	_event_signals_connected = true
+
+
+func _open_investigation_site(site: Dictionary) -> void:
+	_ensure_event_panel()
+	if _event_panel and _event_panel.has_method("present_site"):
+		_event_panel.call("present_site", site)
+
+
+func _on_investigation_option_selected(option_id: String) -> void:
+	if _game_main == null or not is_instance_valid(_game_main):
+		_hide_event_panel()
+		return
+	if not _game_main.has_method("apply_exploration_investigation_option"):
+		_hide_event_panel()
+		return
+	var res: Variant = _game_main.call("apply_exploration_investigation_option", _event_panel.get_presented_site_id(), option_id)
+	if res is Dictionary and bool((res as Dictionary).get("ok", false)):
+		_hide_event_panel()
+		present_region(_region_id)
+	else:
+		var reason: String = str((res as Dictionary).get("reason", "")) if res is Dictionary else ""
+		if not reason.is_empty():
+			push_warning("Exploration investigation option failed: %s" % reason)
+
+
+func _on_investigation_defer() -> void:
+	_hide_event_panel()
 
 
 static func _display_name_for(config: Dictionary, region_id: String) -> String:

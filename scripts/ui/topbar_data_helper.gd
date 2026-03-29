@@ -128,9 +128,9 @@ static func get_housing_data(gm: Node, gv: Node, ui: Node) -> Dictionary:
 
 
 static func get_housing_provided(gm: Node, gv: Node) -> int:
-	if not gm or gm.get("_rooms") == null:
+	if not gm or not gm.has_method("get_game_rooms"):
 		return 0
-	var rooms: Array = gm.get("_rooms")
+	var rooms: Array = gm.get_game_rooms()
 	var total: int = 0
 	for room in rooms:
 		if not room:

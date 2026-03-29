@@ -29,13 +29,23 @@ var _fill_clip: Control
 var _fill: ColorRect
 
 
+func _enter_tree() -> void:
+	_cache_nodes()
+	_update_fill()
+
+
 func _ready() -> void:
-	_back = get_node_or_null("Back") as TextureRect
-	_fill_clip = get_node_or_null("FillClip") as Control
-	_fill = get_node_or_null("FillClip/Fill") as ColorRect
+	if _fill_clip == null:
+		_cache_nodes()
 	_update_fill()
 	if Engine.is_editor_hint():
 		call_deferred("_update_fill")
+
+
+func _cache_nodes() -> void:
+	_back = get_node_or_null("Back") as TextureRect
+	_fill_clip = get_node_or_null("FillClip") as Control
+	_fill = get_node_or_null("FillClip/Fill") as ColorRect
 
 
 func _notification(what: int) -> void:

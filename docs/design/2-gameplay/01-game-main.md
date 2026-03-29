@@ -22,6 +22,14 @@
 - 清理模式：选择未清理房间、确认、多房间并行清理
 - 建设模式：选择区域、选择房间、确认、多房间并行建设
 - 已建设房间：研究区/造物区持续产出
+- 探索：`ExplorationService` 管理区域解锁/探索中/已完成；`ExplorationMapOverlay` 叠层 UI；`GameTime` 流动且 overlay 可见时推进探索计时（见 [10 - 探索系统：区域地图](10-exploration-region-map.md)）
+
+### 房间详情 UI（双轨）
+
+- **主路径**：`RoomDetailPanelFigma`（`room_detail_panel_figma.tscn`），与当前视觉规范一致。
+- **回退**：`RoomDetailPanel`（`room_detail_panel.tscn`），在场景中缺少 Figma 节点或部分自动化仍依赖旧节点名时使用。
+- **代码**：`game_main.gd` 中 `_show_room_detail` / `_hide_room_detail` 先取 Figma，再取 legacy。
+- **演进**：待 GameplayFlow / 测试不再依赖 legacy 节点后，可从 `game_main.tscn` 移除 `RoomDetailPanel` 并删除回退分支。
 
 ---
 
@@ -38,6 +46,11 @@
 | `scripts/game/game_main_built_room.gd` | 已建设房间：研究区/造物区每小时产出 |
 | `scripts/game/game_main_camera.gd` | 镜头初始化、聚焦、平移、缩放 |
 | `scripts/game/game_main_input.gd` | 输入分发、UI 点击检测、模式路由 |
+| `scripts/game/exploration/exploration_service.gd` | 探索状态、首开初始化、`explore_region`、与存档编解码协作 |
+| `scripts/game/exploration/exploration_tick.gd` | 探索中按游戏小时扣减进度 |
+| `scripts/game/exploration/exploration_rules.gd` | 邻接、默认耗时与调查员占用（读配置） |
+| `scripts/ui/exploration_map_overlay.gd` | 世界地图叠层：地区绘制、边线、选区与信息面板 |
+| `scripts/ui/exploration_region_info_panel.gd` | 单地区信息与「开始探索」 |
 
 ---
 
@@ -45,7 +58,8 @@
 
 ```
 game_main.gd (_ready/_process/_input/_draw)
-    ├── GameMainSaveHelper (collect_game_state, apply_map/time/resources)
+    ├── ExplorationService（探索状态、overlay 打开时 tick）
+    ├── GameMainSaveHelper (collect_game_state, apply_map/time/resources/exploration)
     ├── GameMainDrawHelper (draw_all)
     ├── GameMainCleanupHelper (process_overlay, on_button_pressed, on_confirm_pressed)
     ├── GameMainConstructionHelper (process_overlay, on_confirm_pressed, ...)
@@ -64,3 +78,4 @@ game_main.gd (_ready/_process/_input/_draw)
 - [04 - 房间清理系统](04-room-cleanup-system.md)
 - [05 - 区域建设功能](05-zone-construction.md)
 - [06 - 已建设房间系统](06-built-room-system.md)
+- [10 - 探索系统：区域地图](10-exploration-region-map.md)

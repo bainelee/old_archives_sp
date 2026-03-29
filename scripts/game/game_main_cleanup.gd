@@ -1,6 +1,8 @@
 class_name GameMainCleanupHelper
 extends RefCounted
 
+const _GameModeEnums := preload("res://scripts/game/game_mode_enums.gd")
+
 ## 清理房间模式逻辑 - 选择、确认、进度、消耗
 
 ## 调试：暂停时研究员 emoji/移动 问题，输出 [ResearcherPause] 日志
@@ -8,29 +10,25 @@ const RESEARCHER_PAUSE_DEBUG := false
 ## 详见 docs/design/2-gameplay/04-room-cleanup-system.md
 ## 解锁：仅 unlocked 房间可选中；清理完成时解锁邻接房间（04-room-unlock-adjacency）
 
-const CLEANUP_NONE := 0
-const CLEANUP_SELECTING := 1
-const CLEANUP_CONFIRMING := 2
-
 static func on_button_pressed(game_main: Node2D) -> void:
 	## 清理/建设模式互斥，避免两套模式状态同时进入
-	if int(game_main.get("_construction_mode")) != 0:
+	if game_main.get_construction_mode_int() != _GameModeEnums.ConstructionMode.NONE:
 		return
-	var cleanup_mode: int = game_main.get("_cleanup_mode")
-	if cleanup_mode == CLEANUP_NONE:
+	var cleanup_mode: int = game_main.get_cleanup_mode_int()
+	if cleanup_mode == _GameModeEnums.CleanupMode.NONE:
 		enter_selecting_mode(game_main)
-	elif cleanup_mode == CLEANUP_SELECTING:
+	elif cleanup_mode == _GameModeEnums.CleanupMode.SELECTING:
 		exit_mode(game_main)
-	elif cleanup_mode == CLEANUP_CONFIRMING:
+	elif cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING:
 		game_main.set("_cleanup_confirm_room_index", -1)
-		game_main.set("_cleanup_mode", CLEANUP_SELECTING)
+		game_main.set("_cleanup_mode", _GameModeEnums.CleanupMode.SELECTING)
 		game_main.call("_get_cleanup_overlay").hide_confirm()
 		game_main.queue_redraw()
 
 
 static func get_cleanup_researchers_occupied(game_main: Node2D) -> int:
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var total: int = 0
 	for room_idx in cleanup_rooms:
 		if room_idx >= 0 and room_idx < rooms.size():
@@ -56,7 +54,7 @@ static func can_afford_cleanup(room: ArchivesRoomInfo, resources: Dictionary, ga
 
 static func consume_cleanup_cost(game_main: Node2D, room: ArchivesRoomInfo) -> void:
 	var cost: Dictionary = room.get_cleanup_cost()
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if not ui:
 		return
 	ResourceLedger.consume_cost(ui, cost)
@@ -64,10 +62,10 @@ static func consume_cleanup_cost(game_main: Node2D, room: ArchivesRoomInfo) -> v
 
 
 static func is_click_over_cleanup_allowed_ui(game_main: Node2D, mouse_pos: Vector2) -> bool:
-	var btn: Control = game_main.get_node_or_null("UIMain/BottomRightBar/Margin/Content/BtnCleanup") as Control
+	var btn: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/BottomRightBar/Margin/Content/BtnCleanup") as Control
 	if btn and btn.get_global_rect().has_point(mouse_pos):
 		return true
-	var debug_panel: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control
+	var debug_panel: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/DebugInfoPanel") as Control
 	if debug_panel and debug_panel.visible and debug_panel.get_global_rect().has_point(mouse_pos):
 		return true
 	var overlay: Node = game_main.call("_get_cleanup_overlay")
@@ -79,8 +77,8 @@ static func is_click_over_cleanup_allowed_ui(game_main: Node2D, mouse_pos: Vecto
 
 
 static func process_overlay(game_main: Node2D, overlay: Node, delta: float) -> void:
-	var cleanup_mode: int = game_main.get("_cleanup_mode")
-	var rooms: Array = game_main.get("_rooms")
+	var cleanup_mode: int = game_main.get_cleanup_mode_int()
+	var rooms: Array = game_main.get_game_rooms()
 	var hovered_room_index: int = game_main.get("_hovered_room_index")
 	var cleanup_confirm_room_index: int = game_main.get("_cleanup_confirm_room_index")
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
@@ -90,7 +88,7 @@ static func process_overlay(game_main: Node2D, overlay: Node, delta: float) -> v
 	var get_cleanup_overlay: Callable = Callable(game_main, "_get_cleanup_overlay")
 
 	# 悬停与确认位置更新
-	if cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING:
+	if cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING:
 		if hovered_room_index >= 0 and hovered_room_index < rooms.size():
 			var room: ArchivesRoomInfo = rooms[hovered_room_index]
 			if room.unlocked and room.clean_status == ArchivesRoomInfo.CleanStatus.UNCLEANED and not is_room_cleaning(game_main, hovered_room_index):
@@ -107,7 +105,7 @@ static func process_overlay(game_main: Node2D, overlay: Node, delta: float) -> v
 			var mouse_pos: Vector2 = game_main.get_viewport().get_mouse_position()
 			var vp_size: Vector2 = game_main.get_viewport().get_visible_rect().size
 			overlay.update_hover_position(mouse_pos, vp_size)
-		if cleanup_mode == CLEANUP_CONFIRMING and cleanup_confirm_room_index >= 0 and overlay.has_method("update_confirm_position"):
+		if cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING and cleanup_confirm_room_index >= 0 and overlay.has_method("update_confirm_position"):
 			overlay.update_confirm_position(room_center_to_screen.call(cleanup_confirm_room_index))
 
 	# 多房间清理进度 tick
@@ -158,7 +156,7 @@ static func enter_selecting_mode(game_main: Node2D) -> void:
 	var sim_root: Node = game_main.get_node_or_null("SimulationRoot")
 	if sim_root:
 		sim_root.process_mode = Node.PROCESS_MODE_DISABLED
-	game_main.set("_cleanup_mode", CLEANUP_SELECTING)
+	game_main.set("_cleanup_mode", _GameModeEnums.CleanupMode.SELECTING)
 	game_main.set("_cleanup_confirm_room_index", -1)
 	game_main.call("_clear_room_selection")
 	var overlay: Node = game_main.call("_get_cleanup_overlay")
@@ -167,14 +165,14 @@ static func enter_selecting_mode(game_main: Node2D) -> void:
 	if overlay.has_method("show_cleanup_selecting_ui"):
 		overlay.show_cleanup_selecting_ui()
 	game_main.call("_update_room_overlays")
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_method("set_cleanup_blocking"):
 		ui.set_cleanup_blocking(true)
 	game_main.queue_redraw()
 
 
 static func exit_mode(game_main: Node2D) -> void:
-	game_main.set("_cleanup_mode", CLEANUP_NONE)
+	game_main.set("_cleanup_mode", _GameModeEnums.CleanupMode.NONE)
 	game_main.set("_cleanup_confirm_room_index", -1)
 	var cleanup_rooms: Dictionary = game_main.get("_cleanup_rooms_in_progress")
 	if cleanup_rooms.is_empty():
@@ -182,7 +180,7 @@ static func exit_mode(game_main: Node2D) -> void:
 	var overlay: Node = game_main.call("_get_cleanup_overlay")
 	if overlay.has_method("hide_cleanup_selecting_ui"):
 		overlay.hide_cleanup_selecting_ui()
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_method("set_cleanup_blocking"):
 		ui.set_cleanup_blocking(false)
 	if GameTime and game_main.get("_time_was_flowing_before_cleanup"):
@@ -201,10 +199,10 @@ static func exit_mode(game_main: Node2D) -> void:
 
 
 static func on_confirm_pressed(game_main: Node2D) -> void:
-	var cleanup_mode: int = game_main.get("_cleanup_mode")
+	var cleanup_mode: int = game_main.get_cleanup_mode_int()
 	var cleanup_confirm_room_index: int = game_main.get("_cleanup_confirm_room_index")
-	var rooms: Array = game_main.get("_rooms")
-	if cleanup_mode != CLEANUP_CONFIRMING or cleanup_confirm_room_index < 0:
+	var rooms: Array = game_main.get_game_rooms()
+	if cleanup_mode != _GameModeEnums.CleanupMode.CONFIRMING or cleanup_confirm_room_index < 0:
 		return
 	var room: ArchivesRoomInfo = rooms[cleanup_confirm_room_index]
 	var resources: Dictionary = game_main.call("_get_player_resources")
@@ -227,7 +225,7 @@ static func on_confirm_pressed(game_main: Node2D) -> void:
 
 
 static func unlock_adjacent_rooms(game_main: Node2D, room: ArchivesRoomInfo) -> void:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var id_to_index: Dictionary = RoomLayoutHelper.build_id_to_index(rooms)
 	for adj_id in room.adjacent_ids:
 		var idx: Variant = id_to_index.get(adj_id)
@@ -238,7 +236,7 @@ static func unlock_adjacent_rooms(game_main: Node2D, room: ArchivesRoomInfo) -> 
 
 
 static func handle_left_click(game_main: Node2D, rid: int) -> void:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var room_center_to_screen: Callable = Callable(game_main, "_room_center_to_screen")
 	var get_player_resources: Callable = Callable(game_main, "_get_player_resources")
 	var get_cleanup_overlay: Callable = Callable(game_main, "_get_cleanup_overlay")
@@ -252,7 +250,7 @@ static func handle_left_click(game_main: Node2D, rid: int) -> void:
 			var resources: Dictionary = get_player_resources.call()
 			var can_afford: bool = can_afford_cleanup(room, resources, game_main)
 			if can_afford:
-				game_main.set("_cleanup_mode", CLEANUP_CONFIRMING)
+				game_main.set("_cleanup_mode", _GameModeEnums.CleanupMode.CONFIRMING)
 				game_main.set("_cleanup_confirm_room_index", rid)
 				focus_camera.call(rid)
 				var screen_pos: Vector2 = room_center_to_screen.call(rid)

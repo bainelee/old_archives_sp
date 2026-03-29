@@ -39,7 +39,7 @@ static func setup_camera(game_main: Node2D) -> void:
 
 
 static func focus_camera_on_room(game_main: Node2D, room_index: int) -> void:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var focus_tween: Tween = game_main.get("_focus_tween")
 
 	if room_index < 0 or room_index >= rooms.size():
@@ -162,7 +162,7 @@ static func apply_zoom(game_main: Node2D, zoom_in: bool) -> void:
 
 
 static func is_room_in_center_zone(game_main: Node2D, room_index: int) -> bool:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var camera: Camera2D = game_main.get("_camera")
 	var cell_size: int = game_main.get("CELL_SIZE")
 	if room_index < 0 or room_index >= rooms.size() or not camera:

@@ -12,6 +12,7 @@ signal investigator_data_changed
 signal truth_data_changed
 
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
+const _DataProvidersFutureStubs = preload("res://scripts/core/data_providers_future_stubs.gd")
 const _UIUtils = preload("res://scripts/core/ui_utils.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const RoomInfoScript = preload("res://scripts/core/room_info.gd")
@@ -122,10 +123,7 @@ func _get_factor_cap(factor_key: String) -> int:
 ## 获取固有消耗条目
 ## 来自探索中的节点
 func _get_fixed_consumption(_factor_key: String) -> Array:
-	var result: Array = []
-	## TODO: 从探索系统获取正在运行的探索节点消耗
-	## 目前返回空数组，待探索系统实现后填充
-	return result
+	return _DataProvidersFutureStubs.exploration_fixed_consumption_entries()
 
 
 ## 获取档案馆消耗条目
@@ -133,10 +131,10 @@ func _get_fixed_consumption(_factor_key: String) -> Array:
 func _get_archives_consumption(factor_key: String) -> Array:
 	var result: Array = []
 	var game_main := _get_game_main()
-	if not game_main or not game_main.get("_rooms"):
+	if not game_main or not game_main.has_method("get_game_rooms") or game_main.get_game_rooms().is_empty():
 		return result
 
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	for room in rooms:
 		if not room or not room.has_method("get_consumption"):
 			continue
@@ -164,10 +162,10 @@ func _get_archives_consumption(factor_key: String) -> Array:
 func _get_factor_output(factor_key: String) -> Array:
 	var result: Array = []
 	var game_main := _get_game_main()
-	if not game_main or not game_main.get("_rooms"):
+	if not game_main or not game_main.has_method("get_game_rooms") or game_main.get_game_rooms().is_empty():
 		return result
 
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	for room in rooms:
 		if not room or not room.has_method("get_output"):
 			continue
@@ -318,7 +316,7 @@ func get_shelter_breakdown() -> Dictionary:
 	result.construction = 0.0
 
 	var rs: Dictionary = result["region_status"]
-	var rooms: Variant = game_main.get("_rooms")
+	var rooms: Variant = game_main.get_game_rooms() if game_main.has_method("get_game_rooms") else []
 	if rooms is Array:
 		for room in rooms as Array:
 			if not (room is ArchivesRoomInfo):
@@ -415,11 +413,11 @@ func get_housing_breakdown() -> Dictionary:
 	}
 
 	var game_main := _get_game_main()
-	if not game_main or not game_main.get("_rooms"):
+	if not game_main or not game_main.has_method("get_game_rooms") or game_main.get_game_rooms().is_empty():
 		return result
 
 	## 计算住房供应
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var gv = _GameValuesRef.get_singleton()
 
 	for room in rooms:
@@ -477,7 +475,10 @@ func get_information_breakdown() -> Dictionary:
 	if ui_main:
 		result.current = ui_main.info_amount if ui_main.get("info_amount") != null else 0
 
-	## TODO: 从探索系统获取信息产出和额外影响
+	for x in _DataProvidersFutureStubs.information_exploration_output():
+		result.output.append(x)
+	for x in _DataProvidersFutureStubs.information_extra_effects():
+		result.extra_effects.append(x)
 
 	return result
 
@@ -499,7 +500,8 @@ func get_investigator_breakdown() -> Dictionary:
 	if ui_main:
 		result.total = ui_main.investigator_count if ui_main.get("investigator_count") != null else 0
 
-	## TODO: 从探索系统获取调查员分配详情
+	for x in _DataProvidersFutureStubs.investigator_exploration_assignments():
+		result.assigned_details.append(x)
 
 	return result
 
@@ -510,11 +512,9 @@ func get_investigator_breakdown() -> Dictionary:
 
 func get_truth_breakdown() -> Dictionary:
 	var result := {
-		"acquired": [],      # [{truth_id, name, desc}]
-		"interpreted": [],   # [{truth_id, name, desc}]
+		"acquired": _DataProvidersFutureStubs.truth_acquired_list(),
+		"interpreted": _DataProvidersFutureStubs.truth_interpreted_list(),
 	}
-
-	## TODO: 从真相系统获取已获得和已解读的真相列表
 
 	return result
 
@@ -527,7 +527,7 @@ func _get_ui_main() -> Node:
 	var game_main := _get_game_main()
 	if not game_main:
 		return null
-	return game_main.get_node_or_null("UIMain")
+	return game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 
 
 func _get_game_main() -> Node:

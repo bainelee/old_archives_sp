@@ -1,6 +1,8 @@
 class_name GameMainDrawHelper
 extends RefCounted
 
+const _GameModeEnums := preload("res://scripts/game/game_mode_enums.gd")
+
 ## 游戏主场景绘制逻辑 - 底板、房间底图、房间遮罩、边框、暂停研究标记
 ## 接收 CanvasItem 与 game_main，将绘制逻辑与主类解耦
 
@@ -10,16 +12,6 @@ const TILE_COLORS := {
 	FloorTileType.Type.WALL: Color(0.4, 0.4, 0.45),
 	FloorTileType.Type.ROOM_FLOOR: Color(0.55, 0.45, 0.35),
 }
-
-## CleanupMode 值（与 game_main.gd 一致）
-const CLEANUP_NONE := 0
-const CLEANUP_SELECTING := 1
-const CLEANUP_CONFIRMING := 2
-
-## ConstructionMode 值（与 game_main.gd 一致）
-const CONSTRUCTION_SELECTING_TARGET := 2
-const CONSTRUCTION_CONFIRMING := 3
-
 
 static func get_base_image_texture(game_main: Node2D, path: String) -> Texture2D:
 	if path.is_empty():
@@ -58,9 +50,9 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 	var grid_height: int = game_main.get("GRID_HEIGHT")
 	var cell_size: int = game_main.get("CELL_SIZE")
 	var tiles: Array = game_main.get("_tiles")
-	var rooms: Array = game_main.get("_rooms")
-	var cleanup_mode: int = game_main.get("_cleanup_mode")
-	var construction_mode: int = game_main.get("_construction_mode")
+	var rooms: Array = game_main.get_game_rooms()
+	var cleanup_mode: int = game_main.get_cleanup_mode_int()
+	var construction_mode: int = game_main.get_construction_mode_int()
 	var construction_selected_zone: int = game_main.get("_construction_selected_zone")
 	var selected_room_index: int = game_main.get("_selected_room_index")
 	var hovered_room_index: int = game_main.get("_hovered_room_index")
@@ -87,8 +79,8 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 		draw_single_base_image(canvas, tex, room.rect, cell_size)
 
 	# 房间遮罩
-	var in_cleanup_selecting: bool = (cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING)
-	var in_construction_selecting: bool = (construction_mode == CONSTRUCTION_SELECTING_TARGET or construction_mode == CONSTRUCTION_CONFIRMING)
+	var in_cleanup_selecting: bool = (cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING)
+	var in_construction_selecting: bool = (construction_mode == _GameModeEnums.ConstructionMode.SELECTING_TARGET or construction_mode == _GameModeEnums.ConstructionMode.CONFIRMING)
 	for i in rooms.size():
 		var room: ArchivesRoomInfo = rooms[i]
 		var px: float = room.rect.position.x * cell_size
@@ -115,7 +107,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 			canvas.draw_rect(rect, Color(0.2, 0.8, 0.3, 0.3), true)
 
 	# 暂停研究标记（造物区、玩家意志不足 24h 消耗，12-built-room-system 3）
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui:
 		var font: Font = ThemeDB.fallback_font
 		var font_size: int = 12
@@ -135,7 +127,7 @@ static func draw_all(canvas: CanvasItem, game_main: Node2D) -> void:
 				canvas.draw_string(font, Vector2(px + 8, py + 4 + badge_size + 2 + font.get_ascent(font_size) + 2), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 
 	# 房间边框（清理/建设模式下不显示）
-	if cleanup_mode != CLEANUP_SELECTING and cleanup_mode != CLEANUP_CONFIRMING and construction_mode != CONSTRUCTION_SELECTING_TARGET and construction_mode != CONSTRUCTION_CONFIRMING:
+	if cleanup_mode != _GameModeEnums.CleanupMode.SELECTING and cleanup_mode != _GameModeEnums.CleanupMode.CONFIRMING and construction_mode != _GameModeEnums.ConstructionMode.SELECTING_TARGET and construction_mode != _GameModeEnums.ConstructionMode.CONFIRMING:
 		for i in rooms.size():
 			var room: ArchivesRoomInfo = rooms[i]
 			var r: Rect2i = room.rect

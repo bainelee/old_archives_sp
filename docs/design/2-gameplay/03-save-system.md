@@ -58,6 +58,7 @@
 │  - time: { total_hours, is_flowing, speed }                          │
 │  - resources: { 四种因子, 货币, 人员 }                                 │
 │  - erosion: { raw_mystery, shelter_bonus, forecast }                  │
+│  - exploration: { save_version, unlocked, explored, exploring_by..., completed_investigation_site_ids } │
 │  - version: int                                                       │
 └────────────────────────────┬────────────────────────────────────────┘
                              │
@@ -108,6 +109,20 @@
     "raw_mystery_erosion": 0,
     "shelter_bonus": 0,
     "forecast": [ {"value": 0}, {"value": -2}, {"value": -2}, ... ]
+  },
+  "exploration": {
+    "save_version": 3,
+    "first_open_done": true,
+    "unlocked_region_ids": ["old_archives", "white_cliff"],
+    "explored_region_ids": ["old_archives"],
+    "debug_investigator_pool": 0,
+    "exploring_by_region": {
+      "white_cliff": {
+        "hours_remaining": 12.0,
+        "investigators_reserved": 1
+      }
+    },
+    "completed_investigation_site_ids": ["inv_old_archives_1"]
   }
 }
 ```
@@ -135,6 +150,7 @@
 | `resources` | object | 否 | 缺省时从 `datas/game_base.json` 读取开局值；需含 factors / currency / personnel |
 | `erosion` | object | 否 | 缺省则由 ErosionCore 按时间推导 |
 | `erosion.forecast` | array | 否 | 未来 3 个月侵蚀预测，每元素 `{"value": int}`；缺省则按 `total_game_hours` 重新生成 |
+| `exploration` | object | 否 | 缺省则 `SaveManager` / `ExplorationStateCodec` 合成默认块；见 §3.8 |
 
 ### 3.4 侵蚀预测格式
 
@@ -172,7 +188,25 @@
 
 ---
 
-### 3.8 版本与迁移
+### 3.8 探索状态块（`exploration`）
+
+根键 **`exploration`** 由 `ExplorationStateCodec` 与 `GameMainSaveHelper` 读写；与 [10 - 探索系统：区域地图](10-exploration-region-map.md) 一致。
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `save_version` | int | 当前写入 **3**；**2** 可读且迁移为 v3（补空 `completed_investigation_site_ids`）；**1** 为旧档（无进行中探索，`exploring_by_region` 读档后清空） |
+| `first_open_done` | bool | 是否已完成首次打开地图时的邻接解锁初始化 |
+| `unlocked_region_ids` | string[] | 已解锁地区 id |
+| `explored_region_ids` | string[] | 已完成探索的地区 id |
+| `debug_investigator_pool` | int | 调试/占位用调查员池（与正式建筑条件解耦时的占位） |
+| `exploring_by_region` | object | 进行中探索：`region_id` → `{ "hours_remaining": float, "investigators_reserved": int }` |
+| `completed_investigation_site_ids` | string[] | 已完成结算的调查点 id（与 `datas/exploration_investigations.json` 中站点 `id` 一致） |
+
+区域 id 与边表以 `datas/exploration_config.json` 为准；调查点静态表以 `datas/exploration_investigations.json` 为准。
+
+---
+
+### 3.9 版本与迁移
 
 | version | 说明 | 迁移策略 |
 |---------|------|----------|
@@ -195,6 +229,7 @@
    - **货币**：info、truth
    - **人员**：researcher、labor、eroded、investigator
    - **侵蚀预测**：`ErosionCore.get_forecast_segments(90, GameTime.get_total_hours())`
+   - **探索**：`ExplorationService` 运行时状态经 `ExplorationStateCodec.encode_for_save` 写入 `exploration`
 2. 构建 `GameState` 字典
 3. 写入 `user://saves/slot_N.json`（或兼容路径）
 4. 更新槽位元数据缓存（供存档列表 UI 使用）

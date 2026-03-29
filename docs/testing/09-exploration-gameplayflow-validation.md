@@ -38,7 +38,7 @@
 - 场景：`res://scenes/ui/start_menu.tscn`（进入 `game_main` 后打开探索 overlay）
 - 断言：
   - 探索 overlay 已打开；
-  - 点击 overlay Backdrop 后，overlay 仍保持可见（不得触发底层按钮/世界输入）。
+  - 点击地图区（`OverlayRoot/MapArea/MapStack`）后，overlay 仍保持可见（不得触发底层按钮/世界输入）。
 
 ### L4 守护门禁层
 - manifest：`flows/suites/regression/gameplay/exploration_validation_current_stage_manifest.json`

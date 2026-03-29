@@ -9,7 +9,7 @@ const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 
 
 static func get_breakdown(game_main: Node2D, factor_key: String) -> Dictionary:
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	var gv: Node = _GameValuesRef.get_singleton()
 	if not ui or not gv:
 		return _empty_breakdown(ui, gv, factor_key)
@@ -106,7 +106,7 @@ static func _get_research_production(game_main: Node2D, resource_key: String) ->
 	var gv: Node = _GameValuesRef.get_singleton()
 	if not gv:
 		return []
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var rt_map: Dictionary = {"cognition": 0, "computation": 1, "willpower": 2, "permission": 3}
 	var room_type: int = rt_map.get(resource_key, -1)
 	if room_type < 0:
@@ -142,10 +142,10 @@ static func _research_room_has_reserve(room: ArchivesRoomInfo, res_type: int) ->
 
 static func _get_creation_consumption(game_main: Node2D) -> Array:
 	var gv: Node = _GameValuesRef.get_singleton()
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if not gv or not ui:
 		return []
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var result: Array = []
 	for room in rooms:
 		if not (room is ArchivesRoomInfo):
@@ -167,10 +167,10 @@ static func _get_creation_consumption(game_main: Node2D) -> Array:
 
 static func _get_creation_production_permission(game_main: Node2D) -> Array:
 	var gv: Node = _GameValuesRef.get_singleton()
-	var ui: Node = game_main.get_node_or_null("UIMain")
+	var ui: Node = game_main.get_node_or_null("InteractiveUiRoot/UIMain")
 	if not gv or not ui:
 		return []
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var result: Array = []
 	for room in rooms:
 		if not (room is ArchivesRoomInfo):
@@ -193,7 +193,7 @@ static func _get_creation_production_permission(game_main: Node2D) -> Array:
 
 
 static func _get_zone_fixed_will_consumption(game_main: Node2D) -> Array:
-	var rooms: Array = game_main.get("_rooms")
+	var rooms: Array = game_main.get_game_rooms()
 	var result: Array = []
 	for room in rooms:
 		if not (room is ArchivesRoomInfo):
@@ -210,9 +210,4 @@ static func _get_zone_fixed_will_consumption(game_main: Node2D) -> Array:
 
 
 static func _resource_key_to_type(key: String) -> int:
-	match key:
-		"cognition": return ArchivesRoomInfo.ResourceType.COGNITION
-		"computation": return ArchivesRoomInfo.ResourceType.COMPUTATION
-		"willpower": return ArchivesRoomInfo.ResourceType.WILL
-		"permission": return ArchivesRoomInfo.ResourceType.PERMISSION
-	return ArchivesRoomInfo.ResourceType.NONE
+	return ResourceLedger.resource_key_string_to_type(key)

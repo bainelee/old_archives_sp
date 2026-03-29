@@ -83,12 +83,13 @@ func get_slot_metadata(slot: int) -> Variant:
 func default_exploration_dict() -> Dictionary:
 	## 与 ExplorationService.to_save_dict / ExplorationStateCodec 同形
 	return {
-		"save_version": 2,
+		"save_version": 3,
 		"first_open_done": false,
 		"unlocked_region_ids": [],
 		"explored_region_ids": [],
 		"debug_investigator_pool": 5,
 		"exploring_by_region": {},
+		"completed_investigation_site_ids": [],
 	}
 
 

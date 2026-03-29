@@ -1,5 +1,7 @@
 extends Node2D
 
+const _GameModeEnums := preload("res://scripts/game/game_mode_enums.gd")
+
 ## 游戏主场景 - 展示存档槽位，通过 SaveManager 加载完整游戏状态
 ## 主场景入口：加载 slot_0（或后续由主菜单指定槽位）并渲染
 ## 模块拆分：绘制/存档/清理/建设/已建设产出/镜头/输入 见 game_main_*.gd
@@ -7,7 +9,7 @@ extends Node2D
 const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 const _ResearcherLifecycle = preload("res://scripts/game/researcher_lifecycle.gd")
 const _ExplorationServiceScript = preload("res://scripts/game/exploration/exploration_service.gd")
-const _ExplorationMapOverlayScene = preload("res://scenes/ui/exploration_map_overlay.tscn")
+const _GameMainExplorationUiHelper = preload("res://scripts/game/game_main_exploration_ui.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const GRID_WIDTH := 80
 const GRID_HEIGHT := 60
@@ -54,8 +56,7 @@ var _focus_room_index := -1
 var _focus_tween: Tween = null
 
 ## 清理房间模式（支持多房间同时清理）
-enum CleanupMode { NONE, SELECTING, CONFIRMING, CLEANING }
-var _cleanup_mode: CleanupMode = CleanupMode.NONE
+var _cleanup_mode: int = _GameModeEnums.CleanupMode.NONE
 @warning_ignore("unused_private_class_variable")
 var _cleanup_confirm_room_index := -1
 var _cleanup_rooms_in_progress: Dictionary = {}
@@ -63,8 +64,7 @@ var _cleanup_rooms_in_progress: Dictionary = {}
 var _time_was_flowing_before_cleanup := false
 
 ## 建设模式（11-zone-construction）
-enum ConstructionMode { NONE, SELECTING_ZONE, SELECTING_TARGET, CONFIRMING }
-var _construction_mode: ConstructionMode = ConstructionMode.NONE
+var _construction_mode: int = _GameModeEnums.ConstructionMode.NONE
 var _construction_selected_zone: int = 0
 @warning_ignore("unused_private_class_variable")
 var _construction_confirm_room_index := -1
@@ -153,22 +153,11 @@ func _mark_room_test_ids() -> void:
 
 
 func _setup_exploration_map_overlay() -> void:
-	if _exploration_map_overlay != null:
-		return
-	var overlay_node: Node = _ExplorationMapOverlayScene.instantiate()
-	var overlay: CanvasLayer = overlay_node as CanvasLayer
-	if overlay == null:
-		return
-	add_child(overlay)
-	_exploration_map_overlay = overlay
-	if _exploration_map_overlay.has_method("set_context"):
-		_exploration_map_overlay.call("set_context", _exploration_service)
+	_GameMainExplorationUiHelper.setup_exploration_map_overlay(self)
 
 
 func _toggle_exploration_map_overlay() -> void:
-	if _exploration_map_overlay == null or not _exploration_map_overlay.has_method("toggle_overlay"):
-		return
-	_exploration_map_overlay.call("toggle_overlay")
+	_GameMainExplorationUiHelper.toggle_exploration_map_overlay(self)
 
 
 func _setup_camera3d() -> void:
@@ -302,7 +291,7 @@ func _setup_researchers() -> void:
 		var personnel: Dictionary = PersonnelErosionCore.get_personnel()
 		researcher_count = int(personnel.get("researcher", 10))
 	else:
-		var ui: Node = get_node_or_null("UIMain")
+		var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 		if ui and ui.get("researcher_count") != null:
 			researcher_count = int(ui.researcher_count)
 		if researcher_count <= 0:
@@ -464,8 +453,8 @@ func _update_room_info_labels() -> void:
 func _update_room_overlays() -> void:
 	var cleanup_mode: int = _cleanup_mode
 	var construction_mode: int = _construction_mode
-	var in_cleanup_selecting: bool = (cleanup_mode == CleanupMode.SELECTING or cleanup_mode == CleanupMode.CONFIRMING)
-	var in_construction_selecting: bool = (construction_mode == ConstructionMode.SELECTING_TARGET or construction_mode == ConstructionMode.CONFIRMING)
+	var in_cleanup_selecting: bool = (cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING)
+	var in_construction_selecting: bool = (construction_mode == _GameModeEnums.ConstructionMode.SELECTING_TARGET or construction_mode == _GameModeEnums.ConstructionMode.CONFIRMING)
 	for rid in _room_overlays:
 		var mi: MeshInstance3D = _room_overlays[rid] as MeshInstance3D
 		if not mi:
@@ -591,7 +580,7 @@ func request_demolish_room(room: ArchivesRoomInfo) -> bool:
 	var rid: String = room.id if room.id else room.json_room_id
 	if not rid.is_empty():
 		_forced_shutdown_room_ids.erase(rid)
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.get("researchers_working_in_rooms") != null:
 		ui.researchers_working_in_rooms = maxi(0, int(ui.researchers_working_in_rooms) - occupied)
 	_sync_researchers_working_in_rooms_to_ui()
@@ -816,8 +805,8 @@ func _update_room_highlights() -> void:
 		var hl: Node = _room_highlights[rid]
 		if hl:
 			hl.visible = false
-	var in_cleanup_selecting: bool = (_cleanup_mode == CleanupMode.SELECTING or _cleanup_mode == CleanupMode.CONFIRMING)
-	var in_construction_selecting: bool = (_construction_mode == ConstructionMode.SELECTING_TARGET or _construction_mode == ConstructionMode.CONFIRMING)
+	var in_cleanup_selecting: bool = (_cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or _cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING)
+	var in_construction_selecting: bool = (_construction_mode == _GameModeEnums.ConstructionMode.SELECTING_TARGET or _construction_mode == _GameModeEnums.ConstructionMode.CONFIRMING)
 	var room_index: int = _hovered_room_index
 	if room_index >= 0 and room_index < _rooms.size() and not in_cleanup_selecting and not in_construction_selecting:
 		var room: ArchivesRoomInfo = _rooms[room_index]
@@ -831,7 +820,7 @@ func _update_room_highlights() -> void:
 
 
 func _update_debug_info() -> void:
-	var lbl: Label = get_node_or_null("UIMain/DebugInfoPanel/Margin/VBox/Content") as Label
+	var lbl: Label = get_node_or_null("InteractiveUiRoot/UIMain/DebugInfoPanel/Margin/VBox/Content") as Label
 	if not lbl:
 		return
 	var room_index: int = _hovered_room_index
@@ -843,7 +832,7 @@ func _update_debug_info() -> void:
 	else:
 		lbl.text = "悬停: -"
 	## 镜头缩放距离（3D 模式）
-	var dist_lbl: Label = get_node_or_null("UIMain/DebugInfoPanel/Margin/VBox/CameraDistance") as Label
+	var dist_lbl: Label = get_node_or_null("InteractiveUiRoot/UIMain/DebugInfoPanel/Margin/VBox/CameraDistance") as Label
 	if dist_lbl:
 		if _camera3d:
 			var d: float = _camera3d.global_position.z
@@ -1041,8 +1030,20 @@ func _get_room_at_grid(gx: int, gy: int) -> int:
 	return -1
 
 
+func get_game_rooms() -> Array:
+	return _rooms
+
+
+func get_cleanup_mode_int() -> int:
+	return _cleanup_mode
+
+
+func get_construction_mode_int() -> int:
+	return _construction_mode
+
+
 func _get_player_resources() -> Dictionary:
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if not ui or not ui.has_method("get_resources"):
 		return {}
 	var res: Dictionary = ui.get_resources()
@@ -1056,32 +1057,52 @@ func _get_player_resources() -> Dictionary:
 
 
 func _get_cleanup_overlay() -> Node:
-	return get_node_or_null("CleanupOverlay")
+	return get_node_or_null("InteractiveUiRoot/CleanupOverlay")
 
 
 func _get_construction_overlay() -> Node:
-	return get_node_or_null("ConstructionOverlay")
+	return get_node_or_null("InteractiveUiRoot/ConstructionOverlay")
 
 
 func _grant_room_resources_to_player(room: ArchivesRoomInfo) -> void:
-	var ui: Node = get_node_or_null("UIMain")
-	if not ui:
-		return
-	for r in room.resources:
-		if not (r is Dictionary):
-			continue
-		var rt: int = int(r.get("resource_type", ArchivesRoomInfo.ResourceType.NONE))
-		var amt: int = int(r.get("resource_amount", 0))
-		if rt == ArchivesRoomInfo.ResourceType.NONE or amt <= 0:
-			continue
-		ResourceLedger.add_by_type(ui, rt, amt)
-	_sync_resources_to_topbar()
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
+	ResourceLedger.grant_room_resource_entries(ui, room, self)
 
 
 func _sync_resources_to_topbar() -> void:
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_method("refresh_display"):
 		ui.refresh_display()
+
+
+## 探索调查点：校验 → 扣 cost → 发 reward → 标记完成（存档随主存档 exploration 块）。
+func apply_exploration_investigation_option(site_id: String, option_id: String) -> Dictionary:
+	if _exploration_service == null:
+		return {"ok": false, "reason": "no_exploration_service"}
+	var v: Variant = _exploration_service.call("validate_investigation_option", site_id, option_id)
+	if not (v is Dictionary):
+		return {"ok": false, "reason": "validate_failed"}
+	var d: Dictionary = v as Dictionary
+	if not bool(d.get("ok", false)):
+		return d
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
+	if ui == null:
+		return {"ok": false, "reason": "no_ui"}
+	var cost: Dictionary = {}
+	var c_raw: Variant = d.get("cost", {})
+	if c_raw is Dictionary:
+		cost = (c_raw as Dictionary).duplicate(true)
+	if not ResourceLedger.can_afford_cost(ui, cost):
+		return {"ok": false, "reason": "cannot_afford"}
+	ResourceLedger.consume_cost(ui, cost)
+	var reward: Dictionary = {}
+	var r_raw: Variant = d.get("reward", {})
+	if r_raw is Dictionary:
+		reward = (r_raw as Dictionary).duplicate(true)
+	ResourceLedger.grant_string_dict(ui, reward, self)
+	_exploration_service.call("mark_investigation_site_completed", site_id)
+	_sync_resources_to_topbar()
+	return {"ok": true, "reason": ""}
 
 
 func set_room_manual_shelter_target(room_id: String, target: int) -> Dictionary:
@@ -1102,14 +1123,14 @@ func get_factor_breakdown(factor_key: String) -> Dictionary:
 
 
 func _sync_cleanup_researchers_to_ui() -> void:
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if not ui or ui.get("researchers_in_cleanup") == null:
 		return
 	ui.researchers_in_cleanup = GameMainCleanupHelper.get_cleanup_researchers_occupied(self)
 
 
 func _sync_construction_researchers_to_ui() -> void:
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if not ui or ui.get("researchers_in_construction") == null:
 		return
 	ui.researchers_in_construction = GameMainConstructionHelper.get_construction_researchers_occupied(self)
@@ -1120,13 +1141,13 @@ func _sync_researchers_working_in_rooms_to_ui() -> void:
 	for room in _rooms:
 		if room.zone_type != 0:
 			total += room.get_construction_researcher_count(room.zone_type)
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.get("researchers_working_in_rooms") != null:
 		ui.researchers_working_in_rooms = total
 
 
 func _ensure_cognition_provider_registered() -> void:
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and PersonnelErosionCore:
 		_register_cognition_provider(ui)
 
@@ -1165,7 +1186,7 @@ func _ensure_shelter_resolver_registered() -> void:
 
 
 func _on_personnel_updated() -> void:
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_method("set_resources") and PersonnelErosionCore:
 		var res: Dictionary = ui.get_resources() if ui.has_method("get_resources") else {}
 		var factors: Dictionary = res.get("factors", {})
@@ -1192,31 +1213,32 @@ func _clear_room_selection() -> void:
 	queue_redraw()
 
 
+## 房间详情 UI 双轨：主路径 RoomDetailPanelFigma；RoomDetailPanel 为回退。删除 legacy 前须确认测试无硬依赖。见 docs/design/2-gameplay/01-game-main.md。
 func _show_room_detail(room: ArchivesRoomInfo) -> void:
-	var panel: Node = get_node_or_null("RoomDetailPanelFigma")
+	var panel: Node = get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma")
 	if panel == null:
-		panel = get_node_or_null("RoomDetailPanel")
+		panel = get_node_or_null("InteractiveUiRoot/RoomDetailPanel")
 	if panel and panel.has_method("show_room"):
 		panel.show_room(room)
 
 
 func _hide_room_detail() -> void:
-	var panel: Node = get_node_or_null("RoomDetailPanelFigma")
+	var panel: Node = get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma")
 	if panel == null:
-		panel = get_node_or_null("RoomDetailPanel")
+		panel = get_node_or_null("InteractiveUiRoot/RoomDetailPanel")
 	if panel and panel.has_method("hide_panel"):
 		panel.hide_panel()
 
 
 func _setup_cleanup_mode() -> void:
-	var overlay: Node = get_node_or_null("CleanupOverlay")
+	var overlay: Node = get_node_or_null("InteractiveUiRoot/CleanupOverlay")
 	if overlay and overlay.has_signal("confirm_cleanup_pressed"):
 		overlay.confirm_cleanup_pressed.connect(_on_cleanup_confirm_pressed)
-	var btn: Button = get_node_or_null("UIMain/BottomRightBar/Margin/Content/BtnCleanup") as Button
+	var btn: Button = get_node_or_null("InteractiveUiRoot/UIMain/BottomRightBar/Margin/Content/BtnCleanup") as Button
 	if btn:
 		btn.pressed.connect(_on_cleanup_button_pressed)
 	else:
-		var ui: Node = get_node_or_null("UIMain")
+		var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 		if ui and ui.has_signal("cleanup_button_pressed"):
 			ui.cleanup_button_pressed.connect(_on_cleanup_button_pressed)
 
@@ -1230,12 +1252,12 @@ func _on_cleanup_confirm_pressed() -> void:
 
 
 func _setup_construction_mode() -> void:
-	var overlay: Node = get_node_or_null("ConstructionOverlay")
+	var overlay: Node = get_node_or_null("InteractiveUiRoot/ConstructionOverlay")
 	if overlay and overlay.has_signal("confirm_construction_pressed"):
 		overlay.confirm_construction_pressed.connect(_on_construction_confirm_pressed)
 	if overlay and overlay.has_signal("zone_selected"):
 		overlay.zone_selected.connect(_on_construction_zone_selected)
-	var ui: Node = get_node_or_null("UIMain")
+	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and ui.has_signal("build_button_pressed"):
 		ui.build_button_pressed.connect(_on_build_button_pressed)
 	if ui and ui.has_signal("bottom_task_placeholder_pressed"):
@@ -1256,7 +1278,6 @@ func _on_bottom_task_placeholder_pressed(button_id: String) -> void:
 		if _exploration_map_overlay and _exploration_map_overlay.has_method("refresh_regions"):
 			_exploration_map_overlay.call("refresh_regions")
 		_toggle_exploration_map_overlay()
-		print("[ExplorationMap] toggle overlay (center), starter_unlocks=%s" % str(did_init))
 		return
 	print("[BottomTaskPlaceholder] pressed: %s" % button_id)
 

@@ -1,6 +1,6 @@
 @tool
 class_name FactorDetailsPanelShelter
-extends DetailPanelBase
+extends FactorDetailPanelBase
 ## 庇护能量详细信息面板
 ## 结构区别于因子：无状态文、储存标题为「庇护能量出力上限」、特殊三段进度条（已分配/缺口）
 ## 含已分配、固有分配组（细则）、建设分配、产出、区域庇护状态；见 [ui-detail-panel-design.md]
@@ -111,21 +111,6 @@ func show_panel(data: Dictionary) -> void:
 	
 	## 确保面板高度自适应内容
 	call_deferred("_force_layout_refresh")
-
-
-## 强制刷新面板布局（延迟一帧确保内容更新完成）
-func _force_layout_refresh() -> void:
-	## 重置面板最小高度，让其根据内容自适应
-	custom_minimum_size.y = 0
-	custom_minimum_size.x = 320
-	## 强制重新计算大小
-	reset_size()
-	## 重新排序
-	queue_sort()
-	var content := _get_content_vbox()
-	if content:
-		content.reset_size()
-		content.queue_sort()
 
 
 ## 修复预置行的布局（确保Label不占满空间，数值右对齐）

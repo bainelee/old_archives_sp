@@ -1,14 +1,10 @@
 class_name GameMainInputHelper
 extends RefCounted
 
+const _GameModeEnums := preload("res://scripts/game/game_mode_enums.gd")
+
 ## 输入分发与 UI 点击检测
 ## 处理鼠标左/中/右键、滚轮、移动
-
-const CLEANUP_SELECTING := 1
-const CLEANUP_CONFIRMING := 2
-const CONSTRUCTION_SELECTING_ZONE := 1
-const CONSTRUCTION_SELECTING_TARGET := 2
-const CONSTRUCTION_CONFIRMING := 3
 
 static func is_exploration_map_overlay_open(game_main: Node2D) -> bool:
 	var exploration_overlay: CanvasLayer = game_main.get("_exploration_map_overlay")
@@ -21,25 +17,25 @@ static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> b
 		var overlay_root: Control = exploration_overlay.get_node_or_null("OverlayRoot") as Control
 		if overlay_root and overlay_root.visible and overlay_root.get_global_rect().has_point(mouse_pos):
 			return true
-	var figma_panel_root: Control = game_main.get_node_or_null("RoomDetailPanelFigma/PanelRoot") as Control
+	var figma_panel_root: Control = game_main.get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma/PanelRoot") as Control
 	if figma_panel_root and figma_panel_root.visible and figma_panel_root.get_global_rect().has_point(mouse_pos):
 		return true
-	var legacy_panel: Control = game_main.get_node_or_null("RoomDetailPanel/Panel") as Control
+	var legacy_panel: Control = game_main.get_node_or_null("InteractiveUiRoot/RoomDetailPanel/Panel") as Control
 	if legacy_panel and legacy_panel.visible and legacy_panel.get_global_rect().has_point(mouse_pos):
 		return true
-	var top_bar: Control = game_main.get_node_or_null("UIMain/TopBar") as Control
+	var top_bar: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/TopBar") as Control
 	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
 		return true
-	var researcher_panel: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel/Margin/VBox/ResearcherListPanel") as Control
+	var researcher_panel: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/DebugInfoPanel/Margin/VBox/ResearcherListPanel") as Control
 	if researcher_panel and researcher_panel.visible and researcher_panel.get_global_rect().has_point(mouse_pos):
 		return true
-	var bar: Control = game_main.get_node_or_null("UIMain/BottomRightBar") as Control
+	var bar: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/BottomRightBar") as Control
 	if bar and bar.get_global_rect().has_point(mouse_pos):
 		return true
-	var calamity: Control = game_main.get_node_or_null("UIMain/BottomRightBar/Margin/Content/CalamityInline") as Control
+	var calamity: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/BottomRightBar/Margin/Content/CalamityInline") as Control
 	if calamity and calamity.visible and calamity.get_global_rect().has_point(mouse_pos):
 		return true
-	var debug_info: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control
+	var debug_info: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/DebugInfoPanel") as Control
 	if debug_info and debug_info.visible and debug_info.get_global_rect().has_point(mouse_pos):
 		return true
 	var overlay: Node = game_main.call("_get_cleanup_overlay")
@@ -61,14 +57,14 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 			if focus_owner and (focus_owner is LineEdit or focus_owner is TextEdit):
 				pass
 			else:
-				var debug_panel: Control = game_main.get_node_or_null("UIMain/DebugInfoPanel") as Control
+				var debug_panel: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/DebugInfoPanel") as Control
 				if debug_panel:
 					debug_panel.visible = not debug_panel.visible
 					vp.set_input_as_handled()
 					return
 
 	## 暂停菜单打开时完全跳过游戏输入，避免点击穿透到底层 UI/游戏世界
-	var pause_menu: CanvasLayer = game_main.get_node_or_null("PauseMenu") as CanvasLayer
+	var pause_menu: CanvasLayer = game_main.get_node_or_null("InteractiveUiRoot/PauseMenu") as CanvasLayer
 	if pause_menu and pause_menu.visible:
 		return
 
@@ -85,10 +81,14 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 
 		elif mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed and not game_main.get("_is_panning"):
 			var mouse_pos: Vector2 = game_main.get_viewport().get_mouse_position()
-			var cleanup_mode: int = game_main.get("_cleanup_mode")
-			var construction_mode: int = game_main.get("_construction_mode")
-			var in_cleanup: bool = (cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING)
-			var in_construction: bool = (construction_mode == CONSTRUCTION_SELECTING_ZONE or construction_mode == CONSTRUCTION_SELECTING_TARGET or construction_mode == CONSTRUCTION_CONFIRMING)
+			var cleanup_mode: int = game_main.get_cleanup_mode_int()
+			var construction_mode: int = game_main.get_construction_mode_int()
+			var in_cleanup: bool = (cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING)
+			var in_construction: bool = (
+				construction_mode == _GameModeEnums.ConstructionMode.SELECTING_ZONE
+				or construction_mode == _GameModeEnums.ConstructionMode.SELECTING_TARGET
+				or construction_mode == _GameModeEnums.ConstructionMode.CONFIRMING
+			)
 
 			if in_cleanup:
 				if GameMainCleanupHelper.is_click_over_cleanup_allowed_ui(game_main, mouse_pos):
@@ -112,13 +112,13 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 				var grid: Vector2i = game_main.call("_get_mouse_grid")
 				rid = game_main.call("_get_room_at_grid", grid.x, grid.y)
 
-			if cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING:
+			if cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING:
 				GameMainCleanupHelper.handle_left_click(game_main, rid)
-			elif construction_mode == CONSTRUCTION_SELECTING_TARGET or construction_mode == CONSTRUCTION_CONFIRMING:
+			elif construction_mode == _GameModeEnums.ConstructionMode.SELECTING_TARGET or construction_mode == _GameModeEnums.ConstructionMode.CONFIRMING:
 				GameMainConstructionHelper.handle_left_click(game_main, rid)
 				game_main.call("_update_room_highlights")
 			else:
-				var rooms: Array = game_main.get("_rooms")
+				var rooms: Array = game_main.get_game_rooms()
 				game_main.set("_selected_room_index", rid)
 				if rid >= 0:
 					GameMainCameraHelper.focus_camera_on_room(game_main, rid)
@@ -129,14 +129,14 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 			game_main.get_viewport().set_input_as_handled()
 
 		elif mb.button_index == MOUSE_BUTTON_RIGHT and mb.pressed:
-			var cleanup_mode: int = game_main.get("_cleanup_mode")
-			var construction_mode: int = game_main.get("_construction_mode")
-			if cleanup_mode == CLEANUP_SELECTING or cleanup_mode == CLEANUP_CONFIRMING:
+			var cleanup_mode: int = game_main.get_cleanup_mode_int()
+			var construction_mode: int = game_main.get_construction_mode_int()
+			if cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING:
 				game_main.set("_cleanup_confirm_room_index", -1)
 				game_main.call("_get_cleanup_overlay").hide_confirm()
 				GameMainCleanupHelper.exit_mode(game_main)
 				game_main.get_viewport().set_input_as_handled()
-			elif construction_mode != 0:  # CONSTRUCTION_NONE
+			elif construction_mode != _GameModeEnums.ConstructionMode.NONE:
 				game_main.set("_construction_confirm_room_index", -1)
 				game_main.call("_get_construction_overlay").hide_confirm()
 				GameMainConstructionHelper.exit_mode(game_main)

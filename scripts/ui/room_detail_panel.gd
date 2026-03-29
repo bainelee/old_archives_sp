@@ -24,6 +24,8 @@ var _last_dynamic_hash: int = -1
 
 
 func _ready() -> void:
+	## TimePanel 暂停会 tree.paused；与 room_detail_panel_figma 同约定
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 
 

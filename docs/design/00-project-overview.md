@@ -48,6 +48,7 @@ old-archives-sp/
 │   ├── game_base.json    # 新游戏初始资源、人员
 │   ├── room_info.json    # 3D 档案馆房间信息表（v2）
 │   ├── room_info_legacy.json # 2D 地图编辑器模板库（ROOM_001 等）
+│   ├── exploration_config.json # 世界地图：地区占位、邻接边表、探索耗时与调查员占用
 │   └── actor_table.json  # 3D 元件表
 ├── assets/               # 图标、材质、GLB、精灵图、UI 素材
 ├── addons/               # room_items_grid_snap、snappy
@@ -75,7 +76,7 @@ old-archives-sp/
 
 - **房间创建**：在房间底板上框选，或使用快捷尺寸（5×3、10×3、5×7）
 - **房间信息**：名称、类型（图书室/机房/实验室/教学室等）、清理状态、描述、资源列表、底图
-- **RoomInfo 结构**：`scripts/editor/room_info.gd` 定义 `RoomType`、`ResourceType`、`CleanStatus`
+- **RoomInfo 结构**：权威定义在 `scripts/core/room_info.gd`（`ArchivesRoomInfo`、`RoomType`、`ResourceType`、`CleanStatus` 等）；`scripts/editor/room_info.gd` 为兼容层（extends core），旧文档路径仍可能解析到同一类型
 
 ### 3.3 数据流
 
@@ -97,7 +98,8 @@ datas/room_info_legacy.json ──导入──►  _rooms（从模板导入）
 | 文件 | 职责 |
 |------|------|
 | `scripts/editor/map_editor.gd` | 地图编辑主逻辑、UI、保存/加载、JSON 同步 |
-| `scripts/editor/room_info.gd` | RoomInfo 定义、枚举、序列化 |
+| `scripts/core/room_info.gd` | RoomInfo（ArchivesRoomInfo）定义、枚举、序列化（权威） |
+| `scripts/editor/room_info.gd` | 兼容 re-export，新代码请引用 core |
 | `scripts/editor/floor_tile_type.gd` | 底板类型、编辑层级、选择模式 |
 | `scripts/editor/map_editor_ruler.gd` | 标尺/网格坐标显示 |
 | `datas/room_info_legacy.json` | 2D 编辑器房间模板（约 30+ 房间） |
@@ -124,7 +126,7 @@ datas/room_info_legacy.json ──导入──►  _rooms（从模板导入）
 - 底板与 room type 的关联规则
 - 区域多选、复制、粘贴
 
-**已实现**：游戏主逻辑（game_main、保存/加载、清理、建设、已建设房间、庇护、侵蚀、研究员系统等）、主菜单、Autoload 单例（LocaleManager、GameTime、ErosionCore、GameValues、PersonnelErosionCore、SaveManager）
+**已实现**：游戏主逻辑（game_main、保存/加载、清理、建设、已建设房间、庇护、侵蚀、研究员系统等）、主菜单、Autoload 单例（LocaleManager、GameTime、ErosionCore、GameValues、PersonnelErosionCore、SaveManager）、**区域探索 P1**（地图叠层 UI、`ExplorationService`、邻接与计时、`exploration_investigations.json` 调查点、存档 `exploration` 块 v3；详见 [2-gameplay/10-exploration-region-map.md](2-gameplay/10-exploration-region-map.md)）
 
 ---
 
@@ -143,4 +145,5 @@ datas/room_info_legacy.json ──导入──►  _rooms（从模板导入）
 - [02 - 房间信息与 room_info.json 同步](1-editor/02-room-info-and-json-sync.md)
 - [01 - 庇护/侵蚀 UI](3-ui/01-shelter-erosion-ui.md)
 - [02 - 主 UI 设计概览](3-ui/02-ui-main-overview.md)
+- [10 - 探索系统：区域地图](2-gameplay/10-exploration-region-map.md)
 - [名词解释](../名词解释.md)

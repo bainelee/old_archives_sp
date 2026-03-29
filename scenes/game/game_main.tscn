@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/construction_overlay.tscn" id="8_construction"]
 [ext_resource type="Script" uid="uid://byid0yvkr2jei" path="res://scripts/game/game_main_input_handler.gd" id="10_input_handler"]
 [ext_resource type="PackedScene" path="res://scenes/ui/room_detail_panel_figma.tscn" id="11_room_detail_figma"]
+[ext_resource type="Script" path="res://scripts/game/interactive_ui_root.gd" id="12_interactive_ui_root"]
 
 [node name="GameMain" type="Node2D" unique_id=857920342]
 script = ExtResource("1_game_main")
@@ -16,18 +17,21 @@ script = ExtResource("1_game_main")
 [node name="GameMainInputHandler" type="Node" parent="." unique_id=900000002]
 script = ExtResource("10_input_handler")
 
-[node name="UIMain" parent="." unique_id=2043499112 instance=ExtResource("3_ui_main")]
+[node name="InteractiveUiRoot" type="Node" parent="." unique_id=900000003]
+script = ExtResource("12_interactive_ui_root")
 
-[node name="PauseMenu" parent="." unique_id=830806540 instance=ExtResource("5_pause_menu")]
+[node name="UIMain" parent="InteractiveUiRoot" unique_id=2043499112 instance=ExtResource("3_ui_main")]
 
-[node name="RoomDetailPanel" parent="." unique_id=10596567 instance=ExtResource("6_room_detail")]
+[node name="PauseMenu" parent="InteractiveUiRoot" unique_id=830806540 instance=ExtResource("5_pause_menu")]
 
-[node name="RoomDetailPanelFigma" parent="." unique_id=100596567 instance=ExtResource("11_room_detail_figma")]
+[node name="RoomDetailPanel" parent="InteractiveUiRoot" unique_id=10596567 instance=ExtResource("6_room_detail")]
+
+[node name="RoomDetailPanelFigma" parent="InteractiveUiRoot" unique_id=100596567 instance=ExtResource("11_room_detail_figma")]
 visible = false
 
-[node name="CleanupOverlay" parent="." unique_id=516201649 instance=ExtResource("7_cleanup")]
+[node name="CleanupOverlay" parent="InteractiveUiRoot" unique_id=516201649 instance=ExtResource("7_cleanup")]
 
-[node name="ConstructionOverlay" parent="." unique_id=116726987 instance=ExtResource("8_construction")]
+[node name="ConstructionOverlay" parent="InteractiveUiRoot" unique_id=116726987 instance=ExtResource("8_construction")]
 
 [node name="ArchivesBase0" parent="." unique_id=1866609128 instance=ExtResource("2_archives")]
 

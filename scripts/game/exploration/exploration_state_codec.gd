@@ -5,7 +5,9 @@ extends RefCounted
 ## 根存档键名 "exploration"（GameMainSaveHelper）。
 
 const SAVE_ROOT_KEY := "exploration"
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
+## 读档兼容：仍接受 v2 块并迁移为运行时 v3（不写盘则下次保存升为 v3）。
+const SAVE_VERSION_LEGACY_2 := 2
 
 const KEY_SAVE_VERSION := "save_version"
 const KEY_FIRST_OPEN_DONE := "first_open_done"
@@ -13,17 +15,20 @@ const KEY_UNLOCKED_REGION_IDS := "unlocked_region_ids"
 const KEY_EXPLORED_REGION_IDS := "explored_region_ids"
 const KEY_DEBUG_INVESTIGATOR_POOL := "debug_investigator_pool"
 const KEY_EXPLORING_BY_REGION := "exploring_by_region"
+const KEY_COMPLETED_INVESTIGATION_SITE_IDS := "completed_investigation_site_ids"
 
 
 static func create_default_runtime_state() -> Dictionary:
 	var unlocked: Array[String] = []
 	var explored: Array[String] = []
+	var completed_sites: Array[String] = []
 	return {
 		KEY_FIRST_OPEN_DONE: false,
 		KEY_UNLOCKED_REGION_IDS: unlocked,
 		KEY_EXPLORED_REGION_IDS: explored,
 		KEY_DEBUG_INVESTIGATOR_POOL: 0,
 		KEY_EXPLORING_BY_REGION: {},
+		KEY_COMPLETED_INVESTIGATION_SITE_IDS: completed_sites,
 	}
 
 
@@ -58,6 +63,14 @@ static func normalize_exploring_map(raw: Variant) -> Dictionary:
 	return out
 
 
+static func _merge_core_fields_from_blob(merged: Dictionary, d: Dictionary) -> void:
+	merged[KEY_FIRST_OPEN_DONE] = bool(d.get(KEY_FIRST_OPEN_DONE, false))
+	merged[KEY_UNLOCKED_REGION_IDS] = normalize_string_id_array(d.get(KEY_UNLOCKED_REGION_IDS, []))
+	merged[KEY_EXPLORED_REGION_IDS] = normalize_string_id_array(d.get(KEY_EXPLORED_REGION_IDS, []))
+	merged[KEY_DEBUG_INVESTIGATOR_POOL] = int(d.get(KEY_DEBUG_INVESTIGATOR_POOL, 0))
+	merged[KEY_EXPLORING_BY_REGION] = normalize_exploring_map(d.get(KEY_EXPLORING_BY_REGION, {}))
+
+
 static func encode_for_save(runtime: Dictionary) -> Dictionary:
 	var exploring: Dictionary = normalize_exploring_map(runtime.get(KEY_EXPLORING_BY_REGION, {}))
 	return {
@@ -67,6 +80,9 @@ static func encode_for_save(runtime: Dictionary) -> Dictionary:
 		KEY_EXPLORED_REGION_IDS: normalize_string_id_array(runtime.get(KEY_EXPLORED_REGION_IDS, [])),
 		KEY_DEBUG_INVESTIGATOR_POOL: int(runtime.get(KEY_DEBUG_INVESTIGATOR_POOL, 0)),
 		KEY_EXPLORING_BY_REGION: exploring,
+		KEY_COMPLETED_INVESTIGATION_SITE_IDS: normalize_string_id_array(
+			runtime.get(KEY_COMPLETED_INVESTIGATION_SITE_IDS, [])
+		),
 	}
 
 
@@ -86,12 +102,16 @@ static func decode_to_runtime(blob: Variant) -> Dictionary:
 		merged[KEY_EXPLORED_REGION_IDS] = normalize_string_id_array(d.get(KEY_EXPLORED_REGION_IDS, []))
 		merged[KEY_DEBUG_INVESTIGATOR_POOL] = int(d.get(KEY_DEBUG_INVESTIGATOR_POOL, 0))
 		merged[KEY_EXPLORING_BY_REGION] = {}
+		merged[KEY_COMPLETED_INVESTIGATION_SITE_IDS] = []
 		return merged
-	if ver != SAVE_VERSION:
-		return create_default_runtime_state()
-	merged[KEY_FIRST_OPEN_DONE] = bool(d.get(KEY_FIRST_OPEN_DONE, false))
-	merged[KEY_UNLOCKED_REGION_IDS] = normalize_string_id_array(d.get(KEY_UNLOCKED_REGION_IDS, []))
-	merged[KEY_EXPLORED_REGION_IDS] = normalize_string_id_array(d.get(KEY_EXPLORED_REGION_IDS, []))
-	merged[KEY_DEBUG_INVESTIGATOR_POOL] = int(d.get(KEY_DEBUG_INVESTIGATOR_POOL, 0))
-	merged[KEY_EXPLORING_BY_REGION] = normalize_exploring_map(d.get(KEY_EXPLORING_BY_REGION, {}))
+	if ver == SAVE_VERSION_LEGACY_2:
+		_merge_core_fields_from_blob(merged, d)
+		merged[KEY_COMPLETED_INVESTIGATION_SITE_IDS] = []
+		return merged
+	## v3 或更高：读取已知字段，缺失调查点完成列表则视为空（向前兼容）
+	_merge_core_fields_from_blob(merged, d)
+	merged[KEY_COMPLETED_INVESTIGATION_SITE_IDS] = normalize_string_id_array(
+		d.get(KEY_COMPLETED_INVESTIGATION_SITE_IDS, [])
+	)
 	return merged
+

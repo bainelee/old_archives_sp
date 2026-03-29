@@ -78,6 +78,8 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	## TimePanel 暂停会 tree.paused；详情为决策 UI，须 ALWAYS 与 UIMain 一致可交互
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	_mark_test_ids()
 	_apply_skill_button_layout(2)
@@ -595,7 +597,7 @@ func _on_skill_button_pressed(index: int) -> void:
 	match skill_id:
 		"focus":
 			if gm:
-				var rooms: Array = gm.get("_rooms")
+				var rooms: Array = gm.get_game_rooms()
 				for i in rooms.size():
 					if rooms[i] == _current_room:
 						gm.call("_focus_camera_on_room", i)
