@@ -61,8 +61,9 @@ var zone_type: int = 0
 ## 房间解锁与邻接（04-room-unlock-adjacency）
 var unlocked: bool = true  ## 是否可被清理选中，默认 true 兼容旧存档
 var adjacent_ids: Array = []  ## 邻接房间 id 列表
-var grid_x: int = 0  ## 布局网格 X
+var grid_x: int = 0  ## 布局网格 X（与 3D/编辑器一致；清理解锁以 layout_cells 为准）
 var grid_y: int = 0  ## 布局网格 Y
+var layout_cells: Array = []  ## 馆内布局格 [[gx,gy]→Vector2i]，各占 1×1；空则运行时由 grid+size_3d 展开
 var size_3d: String = ""  ## 3d_size：base|small|tall|small_tall|long
 var remodel_slot_count: int = 1  ## 改造槽位数量（最小 1，最大 3）
 
@@ -298,6 +299,7 @@ func to_dict() -> Dictionary:
 		"adjacent_ids": adj_list,
 		"grid_x": grid_x,
 		"grid_y": grid_y,
+		"layout_cells": _layout_cells_to_serial(),
 		"size_3d": size_3d,
 		"remodel_slot_count": clampi(remodel_slot_count, 1, 3),
 	}
@@ -347,4 +349,32 @@ static func from_dict(d: Dictionary) -> ArchivesRoomInfo:
 	info.grid_y = int(d.get("grid_y", 0))
 	info.size_3d = str(d.get("size_3d", d.get("3d_size", "")))
 	info.remodel_slot_count = clampi(int(d.get("remodel_slot_count", d.get("remodel_slots", 1))), 1, 3)
+	_deserialize_layout_cells_into(info, d.get("layout_cells", null))
 	return info
+
+
+func _layout_cells_to_serial() -> Array:
+	var out: Array = []
+	for c in layout_cells:
+		if c is Vector2i:
+			var v: Vector2i = c as Vector2i
+			out.append([v.x, v.y])
+		elif c is Array and (c as Array).size() >= 2:
+			var a: Array = c as Array
+			out.append([int(a[0]), int(a[1])])
+	return out
+
+
+static func _deserialize_layout_cells_into(info: ArchivesRoomInfo, v: Variant) -> void:
+	info.layout_cells.clear()
+	if v == null:
+		return
+	if not (v is Array):
+		return
+	for item in v as Array:
+		if item is Array:
+			var pair: Array = item as Array
+			if pair.size() >= 2:
+				info.layout_cells.append(Vector2i(int(pair[0]), int(pair[1])))
+		elif item is Vector2i:
+			info.layout_cells.append(item as Vector2i)

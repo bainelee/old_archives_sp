@@ -27,7 +27,8 @@
 | `pre_clean_text` | A | 已实现 | 支持字符串/数组拼接。 |
 | `desc` | A | 已实现 | 支持字符串/数组拼接。 |
 | `3d_size` | A | 已实现 | 兼容 `size_3d/3d_size`。 |
-| `grid_x/grid_y` | A | 已实现 | 用于布局与邻接。 |
+| `grid_x/grid_y` | A | 已实现 | 与 3D/工具链对齐的锚点格。 |
+| `layout_cells` | A | 已实现 | 馆内布局格真源；邻接由 `RoomLayoutHelper` 按曼哈顿距离派生。 |
 | `adjacent_ids` | B/D | 已实现 | 新游戏计算，存档持久化。 |
 | `remodel_slot_count` | B | 已实现 | 已接入 `room_info` 模型、Loader、存档、详情面板显示。 |
 | `items_in_room` | A | 待实现 | JSON/schema 已有，运行时模型未接入。 |

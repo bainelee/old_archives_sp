@@ -139,7 +139,7 @@ static func ensure_layout_and_prologue(game_main: Node2D) -> void:
 	for room in rooms:
 		if room.adjacent_ids.size() > 0:
 			has_any_adjacent = true
-		if room.grid_x != 0 or room.grid_y != 0 or room.size_3d != "":
+		if room.layout_cells.size() > 0 or room.grid_x != 0 or room.grid_y != 0 or room.size_3d != "":
 			has_any_grid = true
 	if has_any_adjacent:
 		return

@@ -56,6 +56,7 @@ static func _dict_to_room_info(r: Dictionary) -> ArchivesRoomInfo:
 	info.desc = ArchivesRoomInfo.parse_text_field(r.get("desc"), "")
 	info.remodel_slot_count = clampi(int(r.get("remodel_slot_count", 1)), 1, 3)
 	info.json_room_id = info.id
+	ArchivesRoomInfo._deserialize_layout_cells_into(info, r.get("layout_cells", null))
 	var room_type_str: String = str(r.get("room_type", ""))
 	info.room_type = _room_type_from_string(room_type_str)
 	if r.has("rect_x"):

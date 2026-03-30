@@ -41,7 +41,7 @@
 | **4-archives_rooms/** | [01 - 档案馆房间信息](4-archives_rooms/01-archive_rooms_info.md) | 房间名称、尺寸、类型、描述、存量（设计参考） |
 | | [02 - 房间尺寸与设计规范](4-archives_rooms/02-room-dimensions-and-specs.md) | 3d_size、volum、设计约定 |
 | | [03 - 房间类型定义](4-archives_rooms/03-room-types.md) | 中英对照、RoomType 枚举 |
-| | [04 - 房间解锁与邻接](4-archives_rooms/04-room-unlock-adjacency.md) | 解锁状态、grid、邻接判定 |
+| | [04 - 房间解锁与邻接](4-archives_rooms/04-room-unlock-adjacency.md) | 解锁状态、`layout_cells` 真源、邻接派生与校验脚本 |
 | | [05 - 3D room_info 格式](4-archives_rooms/05-room-info-3d-format.md) | room_info.json 结构与约定 |
 
 ## 文档编号约定

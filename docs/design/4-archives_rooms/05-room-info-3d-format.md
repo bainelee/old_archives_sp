@@ -89,7 +89,7 @@
 ```json
 {
   "source": "新版本档案馆房间 (3D)",
-  "version": 2,
+  "version": 3,
   "rooms": [
     {
       "id": "room_00",
@@ -97,6 +97,7 @@
       "3d_size": "tall",
       "grid_x": -1,
       "grid_y": 1,
+      "layout_cells": [[0,0],[1,0],[0,1],[1,1]],
       "room_type": "核心",
       "clean_status": 0,
       "room_resources": [{"type": 2, "amount": 0}],
@@ -119,7 +120,8 @@
 | `id` | `String` | 唯一标识，如 `room_00`、`room_hall_00`。 |
 | `room_name` | `String` | 见 §3「房间名称」。 |
 | `3d_size` | `String` | 见 §3「房间尺寸」。 |
-| `grid_x` / `grid_y` | `int` | 布局网格坐标。 |
+| `grid_x` / `grid_y` | `int` | 与 3D/工具链对齐的锚点格。 |
+| `layout_cells` | `Array`（`[gx,gy]`） | **清理解锁邻接的真源**：馆内坐标下各占 1×1 格；见 [04 - 房间解锁与邻接](04-room-unlock-adjacency.md)。 |
 | `room_type` | `String` | 见 §3「房间类型」。 |
 | `clean_status` | `int` | 0=未清理，1=已清理。 |
 | `room_resources` | `Array` | 资源储备，见 §3。 |
@@ -146,5 +148,5 @@
 - [01 - 档案馆房间信息](01-archive_rooms_info.md)：按房间的设计文案表  
 - [02 - 房间尺寸与设计规范](02-room-dimensions-and-specs.md)：`3d_size` 与 volum  
 - [03 - 房间类型](03-room-types.md)：`room_type` 与枚举  
-- [04 - 房间解锁与邻接](04-room-unlock-adjacency.md)：`unlocked`、`adjacent_ids`、grid  
+- [04 - 房间解锁与邻接](04-room-unlock-adjacency.md)：`layout_cells`、`unlocked`、`adjacent_ids`  
 - [02 - 房间信息与 room_info 同步（2D）](../1-editor/02-room-info-and-json-sync.md)
