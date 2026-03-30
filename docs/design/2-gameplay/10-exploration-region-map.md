@@ -38,9 +38,10 @@
 ```
 点击已解锁地区
   └─ 打开【地区信息面板】
-       ├─ 探索所需时间
-       ├─ 占用调查员数量
-       └─ 可能获得的资源
+       ├─ 地区名称、状态
+       ├─ 探索所需时间、占用调查员数量
+       ├─ 可能获得的资源（当前工程为占位文案）
+       ├─ 地区说明文案区（配置驱动：探索前 / 探索后两套，见下文）
        └─ 【探索】按钮
             └─ 点击 → 扣除资源、占用调查员 → 开始计时
                        └─ 到达时间后：
@@ -63,6 +64,81 @@
   └─ 若选普通选项（有后续）→ 立即结算消耗/收益 → 进入进展计时
                               └─ 到时后调查点更新为后续事件
 ```
+
+### 地区信息面板：布局与地区说明文案（工程实现）
+
+右侧详情区 `DetailAnchor` 宽度 **480px**，与 `ExplorationRegionInfoPanel` 的最小宽度一致；在 `ExplorationMapOverlay` 中随顶栏/底栏留白对齐（见 `exploration_map_overlay` 脚本 `_sync_overlay_layout_to_uimain`）。
+
+面板自上而下顺序：
+
+- **标题行**：地区显示名（`display_name_zh`）+「关闭」
+- **状态**、**预计探索时间**、**调查员需求**
+- **可能获得**：当前仍为占位「待配置」，与具体地区奖励表未接线
+- **地区说明区**（场景节点 `RegionBriefRichText`）：位于「可能获得」与「开始探索」之间；`RichTextLabel`、自动换行、**16px**（与耗时/调查员/可能获得行一致）。**最小高度约为五行正文**；正文超过五行时按实际换行高度增高。视口尺寸变化时会重新测量内容高度。
+- **开始探索** / **探索中…** / **已完成**（随状态切换）
+- **已探索**地区：调查点列表；点击调查点叠放 **调查点事件面板**（`ExplorationInvestigationEventPanel`）
+
+#### 字号、颜色与间距（与场景一致）
+
+以下数值来自 `scenes/ui/exploration_region_info_panel.tscn`；主题字体继承 `assets/ui/detail_panel_theme.tres`，表中为 `theme_override_font_sizes` 与内边距。**sRGB 颜色**便于与 Inspector 对照。
+
+**根与布局**
+
+| 项 | 值 |
+|----|-----|
+| 面板最小尺寸 | **480×220** px（宽与右侧 `DetailAnchor` 一致） |
+| 内边距（`MarginContainer`） | 左/上/右/下均为 **16** px |
+| 主纵向 `VBox` 子控件间距 | **10** px |
+| 标题行 `HBox` 间距 | **10** px |
+
+**地区信息面板 · 文本与按钮**
+
+| 节点 / 用途 | 字号 | 字色（约） | 其它 |
+|-------------|------|------------|------|
+| 标题 `TitleLabel`（地区名） | **24** | 深灰 `(0.06, 0.06, 0.08)` | 横向填满标题行 |
+| 状态 `StatusLabel` | **18** | `(0.12, 0.12, 0.14)` | 自动换行 |
+| 预计时间 / 调查员 / 可能获得 | **16** | 同上 | 自动换行 |
+| 地区说明 `RegionBriefRichText` | **16** | 默认色同上 | `fit_content`、无滚动条、智能换行 |
+| 「关闭」`BtnClose` | （主题） | — | 最小 **88×40** px |
+| 「开始探索」等主按钮 `BtnExplore` | （主题） | — | 最小高度 **44** px |
+| 「调查点」小标题 `InvestigationSitesLabel` | **18** | `(0.1, 0.1, 0.12)` | 仅已探索时显示 |
+| 调查点列表容器 `InvestigationSitesBox` | — | — | 子项间距 **8** px |
+
+**脚本动态生成的调查点项**（`exploration_region_info_panel.gd`）：已完成项为 `Label`、可点击项为 `Button`，均 **`add_theme_font_size_override(..., 16)`**，按钮最小高度 **40** px。
+
+**探索地图顶栏**（`scenes/ui/exploration_map_overlay.tscn` · `TopChrome`）
+
+| 项 | 值 |
+|----|-----|
+| 顶栏边距 | 左/右 **10** px，上/下 **8** px |
+| 「当前地区」`SelectedRegionLabel` | **18** px |
+| 「关闭探索」按钮 | 最小 **120×34** px |
+| 顶栏内 `HBox` 间距 | **8** px |
+
+#### 调查点事件面板（叠层全幅）
+
+与 `scenes/ui/exploration_investigation_event_panel.tscn` 一致；叠在地区信息面板之上。
+
+| 项 | 值 |
+|----|-----|
+| 内边距 | **16** px |
+| 主 `VBox` 间距 | **12** px |
+| 标题 `TitleLabel` | **22** px，浅色 `(0.95, 0.93, 0.88)` |
+| 正文 `BodyLabel` | **17** px，`(0.85, 0.86, 0.9)`，自动换行 |
+| 选项区 `OptionsBox` 间距 | **8** px |
+| 「稍后处理」`BtnDefer` | 最小高度 **44** px |
+| 动态选项按钮（脚本） | **16** px，最小高度 **40** px |
+
+**配置**（`datas/exploration_config.json` → `regions_placeholder` 中每条地区对象，可选）：
+
+| 字段 | 展示时机 |
+|------|----------|
+| `brief_before_explore_zh` | 该地区已解锁且**尚未完成探索**（含「可开始探索」「探索中」） |
+| `brief_after_explore_zh` | 该地区**已完成探索** |
+
+支持在字符串中使用 `\n` 换行。两字段均未配置或去掉前后空白后为空时，**不显示**说明区（不占垂直空间）。`exploration_config.json` 顶部的 `description` 字段中对上述键名有简短说明。
+
+**实现文件**：`scenes/ui/exploration_region_info_panel.tscn`、`scripts/ui/exploration_region_info_panel.gd`；地图叠层 `scenes/ui/exploration_map_overlay.tscn`、`scripts/ui/exploration_map_overlay.gd`。调查点事件场景为 `scenes/ui/exploration_investigation_event_panel.tscn`（脚本在 `scripts/ui/exploration_investigation_event_panel.gd`）。
 
 ### 并行规则
 
@@ -274,12 +350,12 @@ graph TD
 |------|--------|----------|
 | 承载 | 独立 2D 探索场景 | `CanvasLayer` 叠加在 `game_main` 上（`ExplorationMapOverlay`） |
 | 入口条件 | 建事务所 + 有调查员后出现探索按钮 | **未**接线：由 GameMain 底栏占位 `BOTTOM_PLACEHOLDER_EXPLORATION_MAP` 与 `UIMain` 的 `btn_center` 打开 overlay（便于开发与烟测） |
-| 邻接与耗时 | 文案与图 | `datas/exploration_config.json` 的 `region_edges`、`default_explore_game_hours`、`explore_investigators_per_region`；地区元数据当前为 `regions_placeholder` |
+| 邻接与耗时 | 文案与图 | `datas/exploration_config.json` 的 `region_edges`、`default_explore_game_hours`、`explore_investigators_per_region`；地区元数据为 `regions_placeholder`（`id`、`display_name_zh`、可选 `explore_game_hours`、可选地区说明 `brief_before_explore_zh` / `brief_after_explore_zh`） |
 | 时间推进 | 文档多处写「离线时长自动补算」 | **探索进度**仅在游戏运行、`GameTime` 流逝且探索地图打开时由 `ExplorationTick` 扣减；**无**现实时间离线补算；读档为 `exploration` 快照 |
-| UI | 地区信息 + 调查点链 | 已实现：地区按钮、`ExplorationRegionInfoPanel`（简介 +「开始探索」）、**已探索地区**的调查点列表 + `ExplorationInvestigationEventPanel`（四行正文、选项悬停、`UIMain` 资源扣发）。**未**实现：有后续链、节点转化、正式调查员建筑条件接线 |
+| UI | 地区信息 + 调查点链 | 已实现：地区按钮；右侧 **480px** `ExplorationRegionInfoPanel`（状态/耗时/调查员、可能获得占位、**配置驱动地区说明区**、`RegionBriefRichText` 最少约五行高且随内容增高）；**已探索地区**的调查点列表 + `ExplorationInvestigationEventPanel`（正文、选项悬停、`UIMain` 资源扣发）。**未**实现：有后续链、节点转化、正式调查员建筑条件接线 |
 | 存档 | 随主存档 | 根键 `exploration`，`ExplorationStateCodec.SAVE_VERSION == 3`，含 `completed_investigation_site_ids`；**v2** 读档迁移为 v3（调查点完成列表补空）；v1 档读入后探索中状态清空；详见 [03 - 存档系统](03-save-system.md) |
 
-**脚本与场景（速查）**：`scripts/game/exploration/exploration_service.gd`、`exploration_tick.gd`、`exploration_rules.gd`、`exploration_state_codec.gd`；`scripts/ui/exploration_map_overlay.gd`、`exploration_region_info_panel.gd`、`exploration_investigation_event_panel.*`；静态数据 `datas/exploration_investigations.json`；输入与叠层命中见 `scripts/game/game_main_input.gd`。
+**脚本与场景（速查）**：`scripts/game/exploration/exploration_service.gd`、`exploration_tick.gd`、`exploration_rules.gd`、`exploration_state_codec.gd`；`scripts/ui/exploration_map_overlay.gd`、`exploration_region_info_panel.gd`、`exploration_investigation_event_panel.gd`；对应场景 `scenes/ui/exploration_map_overlay.tscn`、`exploration_region_info_panel.tscn`、`exploration_investigation_event_panel.tscn`；静态数据 `datas/exploration_investigations.json`；输入与叠层命中见 `scripts/game/game_main_input.gd`。
 
 **自动化**：GameplayFlow 侧已与其他系统一并收敛为全局「基础测试 + 基础数据」回归（见 `docs/testing/README.md`、`tools/game-test-runner/scripts/run_gameplay_regression.ps1`）。探索相关断言可继续通过 `scripts/test/test_driver.gd` 的 `exploreRegion`、`advanceGameHours`、`verifySaveSlotExploration`、`loadGameMainFromSlot` 等在自定义 flow 中编排。
 
@@ -318,3 +394,4 @@ graph TD
 | 2026-03-27 | 新增：每小时结算+按天展示、调查点一次性、稍后处理仅返回、存档读档说明 |
 | 2026-03-27 | 确认：所有进度相关系统均按离线时长自动补算 |
 | 2026-03-29 | 增补「当前实现状态」：overlay 承载、配置驱动的邻接/tick、存档 v2、与设计稿差异（无离线补算、无调查点链）；测试与 flow 索引 |
+| 2026-03-30 | 地区信息面板 **480px**、`brief_*` 说明区与流程/路径对齐；增补 **字号·颜色·间距** 规格表（地区信息面板、探索顶栏、调查点事件面板，与 `.tscn` 及脚本动态控件一致） |

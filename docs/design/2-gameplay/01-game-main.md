@@ -49,8 +49,8 @@
 | `scripts/game/exploration/exploration_service.gd` | 探索状态、首开初始化、`explore_region`、与存档编解码协作 |
 | `scripts/game/exploration/exploration_tick.gd` | 探索中按游戏小时扣减进度 |
 | `scripts/game/exploration/exploration_rules.gd` | 邻接、默认耗时与调查员占用（读配置） |
-| `scripts/ui/exploration_map_overlay.gd` | 世界地图叠层：地区绘制、边线、选区与信息面板 |
-| `scripts/ui/exploration_region_info_panel.gd` | 单地区信息与「开始探索」 |
+| `scripts/ui/exploration_map_overlay.gd` | 世界地图叠层：地区绘制、边线、选区；右侧 **480px** 详情锚点挂信息面板 |
+| `scripts/ui/exploration_region_info_panel.gd` | 单地区信息：状态/耗时/调查员、可能获得占位、`brief_*` 地区说明区（`exploration_config`）、「开始探索」与调查点入口 |
 
 ---
 

@@ -51,7 +51,8 @@ func present_site(site: Dictionary) -> void:
 			btn.text = label
 			btn.focus_mode = Control.FOCUS_NONE
 			btn.tooltip_text = hint
-			btn.custom_minimum_size = Vector2(0, 32)
+			btn.add_theme_font_size_override("font_size", 16)
+			btn.custom_minimum_size = Vector2(0, 40)
 			var captured: String = oid
 			btn.pressed.connect(func() -> void:
 				option_selected.emit(captured)

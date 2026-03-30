@@ -299,6 +299,26 @@
     "verify_runtime_exploration_after_continue": {
       "doing": "正在校验读档后的运行时探索状态",
       "goal": "目标：继续游戏后内存与存档探索列表一致。"
+    },
+    "set_game_speed_x1_before_explore": {
+      "doing": "正在将游戏时间设为正常倍速（探索前）",
+      "goal": "目标：稳定推进探索计时与后续交互。"
+    },
+    "advance_game_hours_complete_one_region_explore": {
+      "doing": "正在推进游戏内时间以完成单地区探索",
+      "goal": "目标：计时结束后目标地区写入已探索列表。"
+    },
+    "verify_one_region_explored_before_save": {
+      "doing": "正在校验内存中已探索地区（单地区+枢纽）",
+      "goal": "目标：存盘前已包含旧日档案馆与杜尔金矿区。"
+    },
+    "verify_save_slot_exploration_one_region": {
+      "doing": "正在读取存档文件校验探索块（单地区）",
+      "goal": "目标：磁盘存档 exploration 含枢纽与已完成的单地区探索。"
+    },
+    "verify_runtime_exploration_one_region_after_continue": {
+      "doing": "正在校验读档后的运行时探索状态（单地区）",
+      "goal": "目标：继续游戏后内存探索列表与存档一致。"
     }
   },
   "action_map": {

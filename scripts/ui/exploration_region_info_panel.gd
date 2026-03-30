@@ -1,5 +1,5 @@
 extends PanelContainer
-## 探索地图 — 右侧「地区信息」面板：名称、状态、耗时、调查员、开始探索、已探索地区的调查点列表与事件。
+## 探索地图 — 右侧「地区信息」面板：名称、状态、耗时、调查员、配置文案区（brief_*）、开始探索、已探索地区的调查点列表与事件。
 
 signal explore_requested(region_id: String)
 signal region_info_close_requested()
@@ -7,6 +7,10 @@ signal region_info_close_requested()
 const _Codec := preload("res://scripts/game/exploration/exploration_state_codec.gd")
 const _Rules := preload("res://scripts/game/exploration/exploration_rules.gd")
 const _EventPanelScene := preload("res://scenes/ui/exploration_investigation_event_panel.tscn")
+## 地区说明：`exploration_config.json` → regions_placeholder 条目中可选；展示在「可能获得」与「开始探索」之间。
+const _KEY_BRIEF_BEFORE_EXPLORE_ZH := "brief_before_explore_zh"
+const _KEY_BRIEF_AFTER_EXPLORE_ZH := "brief_after_explore_zh"
+const _BRIEF_MIN_LINES := 5
 
 @onready var _title: Label = get_node_or_null("Margin/VBox/TitleRow/TitleLabel") as Label
 @onready var _btn_close: Button = get_node_or_null("Margin/VBox/TitleRow/BtnClose") as Button
@@ -14,6 +18,7 @@ const _EventPanelScene := preload("res://scenes/ui/exploration_investigation_eve
 @onready var _duration: Label = get_node_or_null("Margin/VBox/DurationLabel") as Label
 @onready var _invest: Label = get_node_or_null("Margin/VBox/InvestLabel") as Label
 @onready var _reward: Label = get_node_or_null("Margin/VBox/RewardLabel") as Label
+@onready var _brief_rt: RichTextLabel = get_node_or_null("Margin/VBox/RegionBriefRichText") as RichTextLabel
 @onready var _btn_explore: Button = get_node_or_null("Margin/VBox/BtnExplore") as Button
 @onready var _sites_label: Label = get_node_or_null("Margin/VBox/InvestigationSitesLabel") as Label
 @onready var _sites_box: VBoxContainer = get_node_or_null("Margin/VBox/InvestigationSitesBox") as VBoxContainer
@@ -28,6 +33,9 @@ var _event_signals_connected: bool = false
 func _ready() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	var vp: Viewport = get_viewport()
+	if vp:
+		vp.size_changed.connect(_on_viewport_size_changed)
 	if _btn_close:
 		_btn_close.pressed.connect(func() -> void:
 			_hide_event_panel()
@@ -50,6 +58,7 @@ func bind_game_main(game_main: Node2D) -> void:
 
 func hide_panel() -> void:
 	_hide_event_panel()
+	_clear_region_brief()
 	visible = false
 	_region_id = ""
 
@@ -88,6 +97,7 @@ func present_region(region_id: String) -> void:
 		_invest.text = "需要调查员：%d（当前可用：%d）" % [need_inv, pool]
 	if _reward:
 		_reward.text = "可能获得：待配置"
+	_apply_region_brief(is_unlocked, is_explored, config, region_id)
 	if _status:
 		if not is_unlocked:
 			_status.text = "状态：未解锁"
@@ -112,6 +122,71 @@ func present_region(region_id: String) -> void:
 			_btn_explore.text = "开始探索"
 	_refresh_investigation_sites(is_explored)
 	visible = true
+	if _brief_rt != null and _brief_rt.visible:
+		call_deferred("_run_brief_height_fit_chain")
+
+
+func _run_brief_height_fit_chain() -> void:
+	if not is_instance_valid(self) or _brief_rt == null or not _brief_rt.visible:
+		return
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not is_instance_valid(self) or _brief_rt == null:
+		return
+	_fit_region_brief_height()
+
+
+func _brief_line_height_px() -> float:
+	if _brief_rt == null:
+		return 20.0
+	var fs: int = _brief_rt.get_theme_font_size("font_size")
+	var f: Font = _brief_rt.get_theme_font("font")
+	if f != null:
+		return float(f.get_height(fs))
+	return maxf(float(fs), 14.0) * 1.25
+
+
+func _clear_region_brief() -> void:
+	if _brief_rt == null:
+		return
+	_brief_rt.visible = false
+	_brief_rt.text = ""
+	_brief_rt.custom_minimum_size = Vector2.ZERO
+
+
+func _apply_region_brief(
+	is_unlocked: bool,
+	is_explored: bool,
+	config: Dictionary,
+	region_id: String
+) -> void:
+	if _brief_rt == null:
+		return
+	if not is_unlocked:
+		_clear_region_brief()
+		return
+	var entry: Dictionary = _catalog_entry_for(config, region_id)
+	var body: String = _brief_text_for_entry(entry, is_explored)
+	if body.is_empty():
+		_clear_region_brief()
+		return
+	_brief_rt.visible = true
+	_brief_rt.text = body
+	_brief_rt.custom_minimum_size = Vector2.ZERO
+
+
+func _on_viewport_size_changed() -> void:
+	if _brief_rt != null and _brief_rt.visible and visible:
+		call_deferred("_run_brief_height_fit_chain")
+
+
+func _fit_region_brief_height() -> void:
+	if _brief_rt == null or not _brief_rt.visible:
+		return
+	var line_h: float = _brief_line_height_px()
+	var min_h: float = line_h * float(_BRIEF_MIN_LINES)
+	var content_h: float = float(_brief_rt.get_content_height())
+	_brief_rt.custom_minimum_size.y = maxf(min_h, content_h)
 
 
 func _refresh_investigation_sites(is_explored: bool) -> void:
@@ -139,13 +214,15 @@ func _refresh_investigation_sites(is_explored: bool) -> void:
 		if completed:
 			var lab := Label.new()
 			lab.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			lab.add_theme_font_size_override("font_size", 16)
 			lab.text = "%s（已完成）" % str(site.get("title_zh", sid))
 			_sites_box.add_child(lab)
 		else:
 			var btn := Button.new()
 			btn.text = str(site.get("title_zh", sid))
 			btn.focus_mode = Control.FOCUS_NONE
-			btn.custom_minimum_size = Vector2(0, 28)
+			btn.add_theme_font_size_override("font_size", 16)
+			btn.custom_minimum_size = Vector2(0, 40)
 			var site_copy: Dictionary = site.duplicate(true)
 			btn.pressed.connect(func() -> void:
 				_open_investigation_site(site_copy)
@@ -217,10 +294,24 @@ func _on_investigation_defer() -> void:
 	_hide_event_panel()
 
 
-static func _display_name_for(config: Dictionary, region_id: String) -> String:
+static func _catalog_entry_for(config: Dictionary, region_id: String) -> Dictionary:
 	var catalog: Variant = config.get("regions_placeholder", [])
 	if catalog is Array:
 		for entry in catalog as Array:
 			if entry is Dictionary and str((entry as Dictionary).get("id", "")) == region_id:
-				return str((entry as Dictionary).get("display_name_zh", region_id))
+				return entry as Dictionary
+	return {}
+
+
+static func _brief_text_for_entry(entry: Dictionary, is_explored: bool) -> String:
+	var key: String = (
+		_KEY_BRIEF_AFTER_EXPLORE_ZH if is_explored else _KEY_BRIEF_BEFORE_EXPLORE_ZH
+	)
+	return str(entry.get(key, "")).strip_edges()
+
+
+static func _display_name_for(config: Dictionary, region_id: String) -> String:
+	var entry: Dictionary = _catalog_entry_for(config, region_id)
+	if not entry.is_empty():
+		return str(entry.get("display_name_zh", region_id))
 	return region_id

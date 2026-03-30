@@ -143,7 +143,7 @@ func _sync_overlay_layout_to_uimain() -> void:
 		_top_chrome.offset_right = -m
 		_top_chrome.offset_bottom = m + top_r + _TOP_CHROME_BAR_HEIGHT
 	if _detail_anchor:
-		_detail_anchor.offset_left = -320.0
+		_detail_anchor.offset_left = -480.0
 		_detail_anchor.offset_right = 0.0
 		_detail_anchor.offset_top = m + top_r
 		_detail_anchor.offset_bottom = -m - bot_r

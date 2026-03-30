@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "description": "探索系统静态配置：区域、邻接、探索耗时（与设计 10 邻接表一致）。",
+  "description": "探索系统静态配置：区域、邻接、探索耗时（与设计 10 邻接表一致）。地区可选文案：brief_before_explore_zh（已解锁、尚未完成探索或探索中）、brief_after_explore_zh（已完成该地区探索），供地区信息面板「可能获得」与「开始探索」之间的说明区使用。",
   "hub_region_id": "old_archives",
   "default_initial_investigator_count_debug": 5,
   "default_explore_game_hours": 24,
@@ -34,9 +34,24 @@
   ],
   "regions_placeholder": [
     { "id": "old_archives", "display_name_zh": "旧日档案馆" },
-    { "id": "white_cliff", "display_name_zh": "白崖镇" },
-    { "id": "durkin_mine", "display_name_zh": "杜尔金矿区" },
-    { "id": "mandos_industrial", "display_name_zh": "曼多斯工业区" },
+    {
+      "id": "white_cliff",
+      "display_name_zh": "白崖镇",
+      "brief_before_explore_zh": "白崖镇在档案馆向海一侧，码头与仓储区散落着未结案的补给与调度记录。\n调查员可从登记册与目击者口述中，筛出物流链上的缺口。\n出发前请确认调查员编制与预计耗时。",
+      "brief_after_explore_zh": "踏勘已完成：港区吞吐与仓库台账已核对，断续出现的批次缺口指向上游节点。\n后续细节需通过本地区的调查点事件逐步收束。"
+    },
+    {
+      "id": "durkin_mine",
+      "display_name_zh": "杜尔金矿区",
+      "brief_before_explore_zh": "杜尔金矿区以深井与轨道运输为主，事故报告与停产记录往往对不上号。\n派遣调查员可核对产能、伤亡与物资去向之间的断层。",
+      "brief_after_explore_zh": "矿区主干巷道与调度站已走查：公开产量曲线与井下传感器日志存在系统性偏差。\n进一步结论依赖调查点中的证人、物证与结算记录。"
+    },
+    {
+      "id": "mandos_industrial",
+      "display_name_zh": "曼多斯工业区",
+      "brief_before_explore_zh": "曼多斯工业区聚合了冶炼、化工与外包仓储，监管档案分散在多家承包商名下。\n探索重点是交叉比对排放、转运与合同履约痕迹。",
+      "brief_after_explore_zh": "工业区外围巡检已完成：关键管网的监测点位与承运单据已建立对照表。\n深层矛盾集中在少数高权限仓单与夜间转运批次，需由调查点推进。"
+    },
     { "id": "bolero_port", "display_name_zh": "波莱罗港" },
     { "id": "saint_river_afv", "display_name_zh": "圣河亚弗" },
     { "id": "andal_town", "display_name_zh": "安达尔镇" },
