@@ -25,13 +25,24 @@
 | 认知因子 | 每人每小时 1 认知，每人每天 24 认知 | [01-game-values §1](../0-values/01-game-values.md#1-研究员认知消耗)、[07 §5](07-researcher-erosion.md#5-认知消耗与认知危机) |
 | 认知不足 | 获得「认知危机」标记（上限 3），达上限则认知失能，每天 +10 灾厄值 | [07 §5.3](07-researcher-erosion.md#53-认知危机) |
 
-### 1.3 产出
+### 1.3 产出（信息 · 货币）
 
-| 类型 | 数值 | 时机 |
-|------|------|------|
-| 信息因子 | 每人 1 信息 | 每天结束时 |
+信息指 TopBar **货币** `currency.info`（非四条因子）。**研究员日结信息**在**每个游戏日结束时**按**个体**结算一次；**已被神秘侵蚀**的研究员**不参与**本产出（产出 **0**），与 [07](07-researcher-erosion.md)「被侵蚀者不工作」一致。
 
-科研、房间类型等加成见后续设计。
+**口径区分**：
+- **侵蚀/治愈口径**：沿用 [07 §1.1 庇护等级与工作/住房分配](07-researcher-erosion.md#11-庇护等级与工作住房分配) 的 `has_no_housing`（**有工作但无分配住房**）。
+- **信息日结口径**：只要**未分配住房**即视为无住房扣减（**不区分是否有工作**）。
+
+**单名研究员、未侵蚀**时的日结公式：
+
+1. 基础：**+3** 信息。
+2. 若处于 **无住房** 状态：**−1** 信息。
+3. 若处于 **认知危机** 状态（见 [07 §5.3 认知危机](07-researcher-erosion.md#53-认知危机)，当日用于结算时 **认知危机标记数 ≥ 1**）：**−1** 信息。
+4. 在 **未被侵蚀** 的前提下，当日实际获得 **`max(1, 基础 + 修正)`**，即**至少 +1 信息/游戏日**。
+
+说明：若未来增加其他日结修正项，仍保留上述 **未侵蚀保底 1** 的规则（除非文档另有修订）。
+
+科研、房间类型等对信息产出的**加成**见后续设计（在基础日结之上叠加）。
 
 ### 1.4 住房
 
@@ -111,13 +122,16 @@
 | 事务所 | 2 | 同上 |
 | 生活区 | 1 | 同上 |
 
-### 3.4 研究员产出与住房惩罚
+### 3.4 研究员信息日结与住房惩罚
 
 | 项目 | 数值 | 说明 |
 |------|------|------|
-| 信息产出 | 每人每天 1 信息 | 每天结束时结算 |
+| 信息日结基础 | 每名**未侵蚀**研究员 **+3/游戏日** | 游戏日结束时按个体结算 |
+| 无住房修正 | **−1** | 状态定义见 **无住房**（[07 §1.1](07-researcher-erosion.md#11-庇护等级与工作住房分配)） |
+| 认知危机修正 | **−1** | 认知危机标记 ≥ 1 时（[07 §5.3](07-researcher-erosion.md#53-认知危机)） |
+| 未侵蚀保底 | 实际入账 **`max(1, 3 + 修正)`** | 被侵蚀者不参与日结，产出 **0** |
 | 宿舍生活区住房 | 每宿舍 4 住房 | 生活区建设于宿舍后提供 |
-| 无住房侵蚀惩罚 | ×2 | 有工作但无住房时，侵蚀判定概率加倍 |
+| 无住房侵蚀惩罚 | ×2 | 有工作但无住房时，侵蚀判定概率加倍（与信息修正独立） |
 | 无住房不可治愈 | 是 | 被侵蚀且无住房的研究员跳过治愈判定 |
 
 ---
@@ -243,10 +257,23 @@
 - [ ] 研究员 → 劳动力的转化比例
 - [ ] 劳动力不足 / 严重不足对房间产出的影响
 
-### 5.5 信息产出
+### 5.5 信息产出（日结）与信息详情 UI
 
-- [ ] 每人每天结束时 +1 信息（基础公式已定）
-- [ ] 与科研、房间类型的联动（加成待设计）
+**数值与时机（相对 §1.3 / §3.4）**
+
+- [x] 游戏日边界触发日结：对每名 **`is_eroded == false`** 的研究员按配置计算后累加并写入 `currency.info`；被侵蚀者跳过（`PersonnelErosionCore._run_daily_logic` 开头 + `GameMain._register_info_grant_provider`）。
+- [x] 配置项位于 `datas/researcher_system.json` 的 `info_daily`（`per_researcher_base`、`penalty_no_housing`、`penalty_cognition_crisis`、`minimum_if_not_eroded`），由 `GameValues` 读取；索引见 [00-data-driven-index](../0-values/00-data-driven-index.md)。
+- [ ] 与科研、房间类型的联动加成（在日结基础之上叠加，待设计）。
+
+**信息详情 UI · 细则条目（必做，已实现汇总 + 推理室满负荷理论行）**
+
+研究员日结产出的信息须在 **TopBar → 信息 → 信息详情面板** 中展示，版式遵循预设计文档（与实现 `scripts/ui/information_details_panel.gd`、`scenes/ui/information_details_panel.tscn` 一致）：
+
+- 面板结构：**信息产出**（章节标题 + **总产出/游戏日** 同行）→ **细则条目**（灰色背景行：`产出来源` + `数量`）→ … → **信息储量**。版式与条目层级见 [ui-detail-panel-design.md § 信息相关详细信息](../../predesign/ui-detail-panel-design.md)（文内「信息相关详细信息」小节）。
+- **DataProvider**（`DataProviders.get_information_breakdown()` 的 `output` 数组）须包含研究员相关条目，例如：
+  - **汇总行（已实现 · 方案 A）**：`source` 为翻译键 `INFO_BREAKDOWN_RESEARCHER_DAILY`，`amount` 为 **`get_researcher_daily_info_theoretical_total()`**（按**当前**研究员状态计算的「下一游戏日」理论总和）；与**上一日实际入账**可能因跨日瞬间状态变化略有差异。
+  - **可选扩展**：在汇总之下再按研究员 `id` 各增一行细则（`研究员 #3` + `+2` 等），便于玩家理解无住房/认知危机扣减；若性能或版面受限，可仅保留汇总行，扣减原因在研究员详情中解释。
+- 推理室造物区、探索奖励等其他信息来源继续作为 **信息产出** 下的独立细则条目，与研究员条目并列，共同计入章节标题旁的总产出数值。
 
 ---
 
@@ -257,7 +284,8 @@
 | 侵蚀核心 | `scripts/core/personnel_erosion_core.gd` |
 | 3D 可视化 | `scripts/actors/researcher_3d.gd`、`scenes/actors/researcher_3d.tscn`、`scripts/actors/researcher_emoji.gd` |
 | 生活周期 | `scripts/game/researcher_lifecycle.gd` |
-| 数值 | `scripts/core/game_values.gd`、`datas/game_values.json` |
+| 数值 | `scripts/core/game_values.gd`、`datas/game_values.json`、`datas/researcher_system.json`（含 `info_daily`） |
+| 信息详情数据 | `scripts/core/data_providers.gd`（`get_information_breakdown`） |
 | 游戏主逻辑 | `scripts/game/game_main.gd`、`game_main_cleanup.gd`、`game_main_construction.gd`、`game_main_built_room.gd`、`game_main_save.gd`、`game_main_camera.gd` |
 | UI | `scripts/ui/ui_main.gd`、`scripts/ui/researcher_hover_panel.gd`、`scripts/ui/researcher_list_panel.gd` |
 | 房间 | `scripts/editor/room_info.gd`（`get_cleanup_researcher_count()`、`get_construction_researcher_count()`） |
@@ -269,8 +297,10 @@
 ## 7. 相关文档
 
 - [01 - 游戏数值系统](../0-values/01-game-values.md)（认知消耗、清理、建设、住房）
-- [07 - 研究员侵蚀机制](07-researcher-erosion.md)
+- [07 - 研究员侵蚀机制](07-researcher-erosion.md)（**无住房**、认知危机、被侵蚀行为）
 - [04 - 房间清理系统](04-room-cleanup-system.md)
 - [05 - 区域建设功能](05-zone-construction.md)
 - [06 - 已建设房间系统](06-built-room-system.md)
 - [名词解释：研究员](../../名词解释.md#研究员)
+- [详细信息界面详解（预设计）](../../predesign/ui-detail-panel-design.md)（「信息相关详细信息」：产出章节 + 灰色背景细则行）
+- [因子详情面板总结](../../predesign/ui-detail-panel-summary.md)（信息详情面板路径与 Figma 70:1154）

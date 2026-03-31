@@ -8,6 +8,7 @@
 | | 清理 | ✅ | `room_info.gd` 从 `cleanup_system.json` 读取 |
 | | 建设 | ✅ | `zone_type.gd`、`game_main_built_room.gd` 从 `construction_system.json` 读取 |
 | | 研究员 | ✅ | `personnel_erosion_core.gd`、`game_main_shelter.gd` 从 `researcher_system.json` 读取 |
+| | 研究员信息日结 `info_daily` | ✅ | `game_values.gd` getter；`personnel_erosion_core.gd` 日结入账；`game_main.gd` `register_info_grant`；`DataProviders` 信息详情展示 |
 | | 侵蚀 | ✅ | `personnel_erosion_core.gd` 从 `erosion_system.json` 读取 |
 | | 庇护 | ✅ | `game_main_shelter.gd` 从 `shelter_system.json` 读取 |
 | **Phase 2.5** | recruitment | ✅ getter | `game_values.gd` 提供只读接口 |
@@ -28,8 +29,7 @@
 
 ### 2.2 校验覆盖
 
-- `game_values.gd` 对 `researcher_system` 校验：`version`、`cognition`、`housing`。
-- `housing_linkage`、`recruitment` 未纳入必填校验。
+- `game_values.gd` 对 `researcher_system` 校验：`version`、`cognition`、`housing`、`info_daily`、`housing_linkage`、`recruitment`。
 - `construction_system` 校验：`version`、`construction`、`production`。
 - `zone_extensions` 未纳入必填校验。
 

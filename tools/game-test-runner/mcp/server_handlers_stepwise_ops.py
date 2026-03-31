@@ -134,6 +134,7 @@ class StepwiseOpsHandlersMixin:
             requested=requested_godot_bin,
             strict=bool(arguments.get("strict_godot_bin", False)),
             allow_unresolved=False,
+            project_root=project_root,
         )
         flow = parse_flow_file(flow_file)
         flow_steps = _expand_steps(flow, flow_file)

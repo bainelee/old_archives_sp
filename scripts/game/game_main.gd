@@ -655,7 +655,11 @@ func get_researcher_detail(researcher_id: int) -> Dictionary:
 	var researchers: Array = []
 	if PersonnelErosionCore:
 		researchers = PersonnelErosionCore.get_researchers()
-	var r_dict: Dictionary = researchers[researcher_id] if researcher_id >= 0 and researcher_id < researchers.size() else {}
+	var r_dict: Dictionary = {}
+	for item in researchers:
+		if item is Dictionary and int(item.get("id", -999999)) == researcher_id:
+			r_dict = item
+			break
 	var enriched: Dictionary = GameMainShelterHelper.enrich_researcher_with_rooms(self, r_dict)
 	var work_rid: String = str(enriched.get("work_room_id", ""))
 	var housing_rid: String = str(enriched.get("housing_room_id", ""))
@@ -674,14 +678,18 @@ func get_researcher_detail(researcher_id: int) -> Dictionary:
 	if work_room:
 		var zname: String = ZoneTypeScript.get_zone_name(work_room.zone_type) if work_room.zone_type != 0 else tr("ZONE_NONE")
 		out["work_area"] = "%s %s" % [zname, work_room.get_display_name()]
-		if work_room.zone_type == ZoneTypeScript.Type.RESEARCH:
-			out["info_output"] = tr("ZONE_RESEARCH")
-		elif work_room.zone_type == ZoneTypeScript.Type.CREATION:
-			out["info_output"] = tr("ZONE_CREATION")
-		else:
-			out["info_output"] = "—"
 	else:
 		out["work_area"] = "—"
+	## 信息产出：货币日结（08-researcher-system §1.3），与区域类型无关
+	if r_dict.is_empty():
+		out["info_output"] = "—"
+	elif bool(r_dict.get("is_eroded", false)):
+		out["info_output"] = tr("RESEARCHER_INFO_DAILY_ERODED")
+	elif PersonnelErosionCore:
+		var daily_info: int = PersonnelErosionCore.compute_daily_info_for_researcher(r_dict)
+		out["info_output"] = tr("RESEARCHER_INFO_DAILY_FMT") % daily_info
+	else:
+		out["info_output"] = "—"
 	if living_room:
 		var zname_l: String = ZoneTypeScript.get_zone_name(living_room.zone_type) if living_room.zone_type != 0 else tr("ZONE_NONE")
 		out["living_area"] = "%s %s" % [zname_l, living_room.get_display_name()]
@@ -920,8 +928,9 @@ func _load_from_slot(slot: int) -> void:
 		d = game_state as Dictionary
 	_pending_researchers_3d = d.get("researchers_3d", [])
 	GameMainSaveHelper.apply_map(self, d)
-	GameMainSaveHelper.apply_time(d)
+	## 先于 apply_time：避免 set_total_hours 触发 time_updated 时认知/人员未就绪，且庇护解析器须已注册（见 apply_resources）
 	GameMainSaveHelper.apply_resources(self, d)
+	GameMainSaveHelper.apply_time(d)
 	GameMainSaveHelper.apply_exploration(self, d)
 
 
@@ -1150,6 +1159,7 @@ func _ensure_cognition_provider_registered() -> void:
 	var ui: Node = get_node_or_null("InteractiveUiRoot/UIMain")
 	if ui and PersonnelErosionCore:
 		_register_cognition_provider(ui)
+		_register_info_grant_provider(ui)
 
 
 func _register_cognition_provider(ui: Node) -> void:
@@ -1170,6 +1180,26 @@ func _register_cognition_provider(ui: Node) -> void:
 		)
 
 
+func _register_info_grant_provider(ui: Node) -> void:
+	if not PersonnelErosionCore or ui == null:
+		return
+	var weak_ui: WeakRef = weakref(ui)
+	var weak_gm: WeakRef = weakref(self)
+	PersonnelErosionCore.register_info_grant(func(amount: int) -> void:
+		var u: Node = weak_ui.get_ref()
+		var gm: Node2D = weak_gm.get_ref()
+		if u == null or gm == null:
+			return
+		if amount <= 0:
+			return
+		ResourceLedger.add_by_type(u, ArchivesRoomInfo.ResourceType.INFO, amount)
+		if gm.has_method("_sync_resources_to_topbar"):
+			gm.call("_sync_resources_to_topbar")
+		if DataProviders and DataProviders.has_signal("information_data_changed"):
+			DataProviders.information_data_changed.emit()
+	)
+
+
 func _ensure_shelter_resolver_registered() -> void:
 	if not PersonnelErosionCore:
 		return
@@ -1177,11 +1207,16 @@ func _ensure_shelter_resolver_registered() -> void:
 	PersonnelErosionCore.register_shelter_resolver(func(r: Dictionary) -> Dictionary:
 		var gm: Node2D = weak_gm.get_ref()
 		if gm == null:
-			return {"shelter_level": 1, "has_no_housing": false}
+			return {"shelter_level": 1, "has_no_housing": false, "has_no_housing_for_info": false}
 		var enriched: Dictionary = GameMainShelterHelper.enrich_researcher_with_rooms(gm, r)
 		var level: int = GameMainShelterHelper.get_shelter_level_for_researcher(gm, enriched)
 		var no_housing: bool = GameMainShelterHelper.has_no_housing(enriched)
-		return {"shelter_level": level, "has_no_housing": no_housing}
+		var housing_missing_for_info: bool = str(enriched.get("housing_room_id", "")).is_empty()
+		return {
+			"shelter_level": level,
+			"has_no_housing": no_housing,
+			"has_no_housing_for_info": housing_missing_for_info,
+		}
 	)
 
 

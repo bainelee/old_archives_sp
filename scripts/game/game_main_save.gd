@@ -273,8 +273,12 @@ static func apply_resources(game_main: Node2D, d: Dictionary) -> void:
 		ui.set_resources(factors, currency, personnel)
 	if PersonnelErosionCore and ui:
 		game_main.call("_register_cognition_provider", ui)
+		game_main.call("_register_info_grant_provider", ui)
 		if not PersonnelErosionCore.personnel_updated.is_connected(Callable(game_main, "_on_personnel_updated")):
 			PersonnelErosionCore.personnel_updated.connect(Callable(game_main, "_on_personnel_updated"))
+	if PersonnelErosionCore:
+		## 须在 apply_time 触发 time_updated 之前注册，否则日结信息仍走 fallback（has_no_housing=false）
+		game_main.call("_ensure_shelter_resolver_registered")
 
 	## 庇护核心等级 + ForecastWarning handle 池
 	var erosion_data: Variant = d.get(KEY_EROSION, null)

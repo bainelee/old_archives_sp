@@ -34,6 +34,7 @@ class LiveHandlersMixin:
             requested=requested_godot_bin,
             strict=bool(arguments.get("strict_godot_bin", False)),
             allow_unresolved=dry_run,
+            project_root=project_root,
         )
         run_id = str(arguments.get("run_id", "")).strip() or live_run_id(flow_file.stem)
         artifact_base = project_root / "artifacts" / "test-runs"

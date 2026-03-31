@@ -43,6 +43,7 @@ class FixLoopHandlersMixin:
             requested=requested_godot_bin,
             strict=bool(arguments.get("strict_godot_bin", False)),
             allow_unresolved=dry_run,
+            project_root=project_root,
         )
         payload, code = execute_flow_file(
             flow_file=flow_file,

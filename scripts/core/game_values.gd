@@ -155,7 +155,7 @@ func _validate_loaded_configs() -> void:
 	_validate_required_keys(_time_data, "time_system", ["version", "time", "calendar", "speed_presets", "speed_range"])
 	_validate_required_keys(_cleanup_data, "cleanup_system", ["version", "cleanup"])
 	_validate_required_keys(_construction_data, "construction_system", ["version", "construction", "production", "zone_extensions"])
-	_validate_required_keys(_researcher_data, "researcher_system", ["version", "cognition", "housing", "housing_linkage", "recruitment"])
+	_validate_required_keys(_researcher_data, "researcher_system", ["version", "cognition", "housing", "housing_linkage", "info_daily", "recruitment"])
 	_validate_required_keys(_erosion_data, "erosion_system", ["version", "erosion_probability", "risk", "cure", "death_curve", "calamity"])
 	_validate_required_keys(_shelter_data, "shelter_system", ["version", "shelter"])
 
@@ -171,6 +171,7 @@ func _validate_loaded_configs() -> void:
 	_validate_type(_researcher_data.get("cognition", null), "Dictionary", "researcher_system.cognition")
 	_validate_type(_researcher_data.get("housing", null), "Dictionary", "researcher_system.housing")
 	_validate_type(_researcher_data.get("housing_linkage", null), "Dictionary", "researcher_system.housing_linkage")
+	_validate_type(_researcher_data.get("info_daily", null), "Dictionary", "researcher_system.info_daily")
 	_validate_type(_researcher_data.get("recruitment", null), "Dictionary", "researcher_system.recruitment")
 	_validate_type(_erosion_data.get("erosion_probability", null), "Dictionary", "erosion_system.erosion_probability")
 	_validate_type(_shelter_data.get("shelter", null), "Dictionary", "shelter_system.shelter")
@@ -620,3 +621,20 @@ func get_cognition_crisis_max_stacks() -> int:
 
 func get_calamity_per_impaired_per_day() -> int:
 	return int(_researcher_data.get("cognition", {}).get("crisis", {}).get("calamity_per_impaired_per_day", 10))
+
+
+## --- 研究员信息日结（货币 info，见 08-researcher-system §1.3）---
+func get_researcher_info_daily_base() -> int:
+	return int(_researcher_data.get("info_daily", {}).get("per_researcher_base", 3))
+
+
+func get_researcher_info_daily_penalty_no_housing() -> int:
+	return int(_researcher_data.get("info_daily", {}).get("penalty_no_housing", 1))
+
+
+func get_researcher_info_daily_penalty_cognition_crisis() -> int:
+	return int(_researcher_data.get("info_daily", {}).get("penalty_cognition_crisis", 1))
+
+
+func get_researcher_info_daily_minimum_if_not_eroded() -> int:
+	return int(_researcher_data.get("info_daily", {}).get("minimum_if_not_eroded", 1))

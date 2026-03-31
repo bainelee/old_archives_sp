@@ -356,7 +356,13 @@ def _format_chat_audit_summary(chat_audit: dict[str, Any]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run gameplay stepwise flow with chat-first strict stages.")
     parser.add_argument("--project-root", default=str(_repo_root()))
-    parser.add_argument("--godot-bin", required=True)
+    parser.add_argument(
+        "--godot-bin",
+        nargs="?",
+        const="",
+        default="",
+        help="Godot 可执行文件路径；可省略本参数或传空字符串，从 GODOT_BIN 或 tools/game-test-runner/config/godot_executable.json 解析。",
+    )
     parser.add_argument("--flow-file", default="")
     parser.add_argument("--timeout-sec", type=int, default=300)
     parser.add_argument("--run-id", default="")
@@ -388,14 +394,25 @@ def main() -> int:
     emit_shell_chat = not bool(args.no_emit_shell_chat)
     _ensure_import()
     from server import GameTestMcpServer  # pylint: disable=import-error,import-outside-toplevel
+    from server_common import resolve_godot_bin  # pylint: disable=import-error,import-outside-toplevel
 
     project_root = Path(args.project_root).resolve()
+
+    requested_godot = str(args.godot_bin or "").strip()
+    resolved_godot, godot_resolution = resolve_godot_bin(
+        requested=requested_godot,
+        strict=False,
+        allow_unresolved=False,
+        project_root=project_root,
+    )
     server = GameTestMcpServer(default_project_root=project_root)
     summary: dict[str, Any] = {
         "template_id": "gameplay_base_template_cursor_plugin" if args.template else "single_flow_stepwise_chat_plugin",
         "started_at": _utc_now(),
         "project_root": str(project_root),
-        "godot_bin": str(args.godot_bin),
+        "godot_bin": resolved_godot,
+        "godot_bin_requested": requested_godot,
+        "godot_bin_resolution": godot_resolution,
         "phases": [],
         "chat_audit_entries": [],
         "status": "running",
@@ -419,7 +436,7 @@ def main() -> int:
             server=server,
             project_root=project_root,
             flow_file=flow_file,
-            godot_bin=str(args.godot_bin),
+            godot_bin=str(resolved_godot),
             timeout_sec=int(args.timeout_sec),
             run_id=str(args.run_id).strip(),
             phase_name=phase_name,

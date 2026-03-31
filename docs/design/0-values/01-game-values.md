@@ -37,6 +37,14 @@
 
 **公式**：`每小时消耗 = 研究员人数 × 1`
 
+### 1.1 研究员信息日结（货币）
+
+每名**未被侵蚀**的研究员在每个**游戏日**结束时获得 **信息**（`currency.info`），公式、无住房与认知危机修正、保底及 UI 展示约定见 **[08 - 研究员系统](../2-gameplay/08-researcher-system.md) §1.3、§3.4、§5.5**。
+
+**数据**：`datas/researcher_system.json` 的 `info_daily`（`per_researcher_base`、`penalty_no_housing`、`penalty_cognition_crisis`、`minimum_if_not_eroded`），由 `GameValues` 读取；入账在 `PersonnelErosionCore` 日逻辑内触发，`GameMain` 注册信息发放回调。
+
+**信息详情面板**：`DataProviders.get_information_breakdown()` 对研究员条目采用 **方案 A**（按当前状态展示「下一游戏日」理论产出，与跨日瞬间前后状态可能略有差异）。
+
 ---
 
 ## 2. 档案馆核心：庇护能量与计算因子消耗

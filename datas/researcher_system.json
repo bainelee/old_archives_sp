@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "cognition": {
     "consumption_per_researcher_per_hour": 1,
     "consumption_per_researcher_per_day": 24,
@@ -16,6 +16,12 @@
   "housing_linkage": {
     "no_housing_erosion_probability_multiplier": 2.0,
     "no_housing_skip_cure_for_eroded": true
+  },
+  "info_daily": {
+    "per_researcher_base": 3,
+    "penalty_no_housing": 1,
+    "penalty_cognition_crisis": 1,
+    "minimum_if_not_eroded": 1
   },
   "recruitment": {
     "enabled": false,

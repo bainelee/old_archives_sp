@@ -518,6 +518,10 @@ SOURCE_TYPE_EXPLORATION,Exploration,探索
 SOURCE_TYPE_TECHNOLOGY,Technology,技术
 SOURCE_TYPE_RESOLUTION,Resolution,决议
 INFORMATION_OUTPUT,Information Output,信息产出
+INFO_BREAKDOWN_RESEARCHER_DAILY,Researcher daily settlement,研究员日结
+INFO_BREAKDOWN_REASONING_MAX,full load,满负荷
+RESEARCHER_INFO_DAILY_FMT,+%d / day,+%d / 天
+RESEARCHER_INFO_DAILY_ERODED,Eroded (no daily info),被侵蚀（无日结信息）
 EXTRA_EFFECTS,Extra Effects,额外影响
 INFORMATION_STORAGE,Information Storage,信息储量
 TRUTH_ACQUIRED,Acquired Truths,已获得真相

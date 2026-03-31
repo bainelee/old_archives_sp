@@ -16,7 +16,7 @@
 | `datas/time_system.json` | 时间推进、日历、倍速 | GameValues -> GameTime |
 | `datas/cleanup_system.json` | 清理需求 | GameValues |
 | `datas/construction_system.json` | 建设需求、生产推进阈值 | GameValues |
-| `datas/researcher_system.json` | 研究员认知/危机/住房 | GameValues |
+| `datas/researcher_system.json` | 研究员认知/危机/住房、信息日结 `info_daily` | GameValues |
 | `datas/erosion_system.json` | 侵蚀、治愈、死亡、灾厄 | GameValues |
 | `datas/shelter_system.json` | 庇护等级、分配参数 | GameValues |
 | `datas/game_base.json` | 新游戏开局资源默认值 | SaveManager |

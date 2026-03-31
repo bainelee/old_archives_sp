@@ -16,7 +16,7 @@
 | `datas/time_system.json` | 时间推进、日历、倍速参数 | `scripts/core/game_values.gd` -> `scripts/core/game_time.gd` |
 | `datas/cleanup_system.json` | 清理成本/耗时/研究员占用（按单位区间） | `scripts/core/game_values.gd` -> `scripts/editor/room_info.gd` |
 | `datas/construction_system.json` | 建设成本/耗时（按 zone_type）+ 生产推进运行时阈值 | `scripts/core/game_values.gd` -> `scripts/core/zone_type.gd` / `scripts/game/game_main_built_room.gd` |
-| `datas/researcher_system.json` | 研究员认知消耗、认知危机、住房参数 | `scripts/core/game_values.gd` -> `scripts/core/personnel_erosion_core.gd` / `scripts/game/game_main_shelter.gd` |
+| `datas/researcher_system.json` | 研究员认知消耗、认知危机、住房参数、**信息日结**（`info_daily`） | `scripts/core/game_values.gd` -> `scripts/core/personnel_erosion_core.gd` / `scripts/game/game_main_shelter.gd` |
 | `datas/erosion_system.json` | 侵蚀概率、治愈、死亡曲线、灾厄参数 | `scripts/core/game_values.gd` -> `scripts/core/personnel_erosion_core.gd` |
 | `datas/shelter_system.json` | 庇护等级、能量上限、每级能量配置、不参与房型 | `scripts/core/game_values.gd` -> `scripts/game/game_main_shelter.gd` |
 | `datas/room_size_config.json` | 房间尺寸类型（size_3d）→ volum、单位映射 | `scripts/core/game_values.gd` -> `scripts/editor/room_info.gd` |

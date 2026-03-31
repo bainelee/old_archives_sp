@@ -3,6 +3,7 @@ extends RefCounted
 ## TestDriver 命令实现：input / query / game / scene（含 await）
 
 const _ExplorationCodec := preload("res://scripts/game/exploration/exploration_state_codec.gd")
+const _GameValuesRef := preload("res://scripts/core/game_values_ref.gd")
 
 var _host: Node
 var _ctx: RefCounted
@@ -340,6 +341,17 @@ func handle_get_state(params: Dictionary, out: Dictionary) -> void:
 					data[key] = float(GameTime.speed_multiplier)
 				else:
 					data[key] = null
+			"info_amount":
+				var ui_info: Node = gm.get_node_or_null("InteractiveUiRoot/UIMain")
+				if ui_info and ui_info.get("info_amount") != null:
+					data[key] = int(ui_info.info_amount)
+				else:
+					data[key] = 0
+			"researcher_daily_info_theoretical_total":
+				if PersonnelErosionCore and PersonnelErosionCore.has_method("get_researcher_daily_info_theoretical_total"):
+					data[key] = int(PersonnelErosionCore.get_researcher_daily_info_theoretical_total())
+				else:
+					data[key] = 0
 			"selected_room_index":
 				data[key] = int(gm.get("_selected_room_index"))
 			"selected_room_id":
@@ -426,6 +438,146 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 					_ctx.fail_out(out, "CHECK_FAILED", "logic_state mismatch for %s" % (keys[0] if keys.size() > 0 else "unknown"))
 					return
 				await _host.get_tree().create_timer(0.05).timeout
+		"info_currency_week_design":
+			## 断言：推进若干游戏日后，信息货币增量落在「每人每日 [minimum, base] × 人数 × 天数」区间内（见 researcher_system.info_daily）
+			if _ctx.get_game_main() == null:
+				_ctx.fail_out(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+				return
+			var baseline_info_ic: int = int(expect.get("baseline_info", -1))
+			if baseline_info_ic < 0:
+				_ctx.fail_out(out, "INVALID_ARGUMENT", "info_currency_week_design requires expect.baseline_info")
+				return
+			var days_ic: int = maxi(1, int(expect.get("days", 7)))
+			var min_hours_ic: float = float(expect.get("min_game_total_hours", 168.0))
+			if bool(expect.get("require_speed_multiplier_2", false)):
+				if GameTime == null:
+					_ctx.fail_out(out, "GAME_TIME_NOT_FOUND", "GameTime missing for speed check")
+					return
+				if not is_equal_approx(float(GameTime.speed_multiplier), 2.0):
+					_ctx.fail_out(out, "CHECK_FAILED", "expected game speed 2.0, got %s" % str(GameTime.speed_multiplier))
+					return
+			var st_ic: Dictionary = {"status": "ok", "data": {}}
+			handle_get_state({"keys": ["game_total_hours", "info_amount", "researcher_daily_info_theoretical_total"]}, st_ic)
+			if st_ic.get("status", "ok") != "ok":
+				_ctx.fail_out(out, "CHECK_FAILED", "info_currency_week_design state query failed")
+				return
+			var hours_ic: float = float(st_ic["data"].get("game_total_hours", 0.0))
+			var info_ic: int = int(st_ic["data"].get("info_amount", 0))
+			var theo_ic: int = int(st_ic["data"].get("researcher_daily_info_theoretical_total", 0))
+			if hours_ic + 0.0001 < min_hours_ic:
+				_ctx.fail_out(out, "CHECK_FAILED", "game_total_hours %s < min %s" % [str(hours_ic), str(min_hours_ic)])
+				return
+			var gv_ic: Node = _GameValuesRef.get_singleton()
+			var base_amt_ic: int = 3
+			var min_amt_ic: int = 1
+			if gv_ic:
+				if gv_ic.has_method("get_researcher_info_daily_base"):
+					base_amt_ic = int(gv_ic.get_researcher_info_daily_base())
+				if gv_ic.has_method("get_researcher_info_daily_minimum_if_not_eroded"):
+					min_amt_ic = int(gv_ic.get_researcher_info_daily_minimum_if_not_eroded())
+			var rc_ic: int = 10
+			if PersonnelErosionCore and PersonnelErosionCore.has_method("get_researchers"):
+				rc_ic = (PersonnelErosionCore.get_researchers() as Array).size()
+			rc_ic = maxi(rc_ic, 1)
+			## 上限按配置人数 cap：周内有减员时，实际增量可能仍接近「满编 × 天数」的前段日结之和
+			var roster_cap_ic: int = maxi(1, int(expect.get("researcher_count_cap", 10)))
+			if PersonnelErosionCore and PersonnelErosionCore.has_method("get_personnel"):
+				roster_cap_ic = maxi(roster_cap_ic, int(PersonnelErosionCore.get_personnel().get("researcher", roster_cap_ic)))
+			var max_delta_ic: int = days_ic * roster_cap_ic * base_amt_ic
+			var min_delta_ic: int = days_ic * rc_ic * min_amt_ic
+			var delta_ic: int = info_ic - baseline_info_ic
+			if delta_ic < min_delta_ic:
+				_ctx.fail_out(
+					out,
+					"CHECK_FAILED",
+					"info delta %d < min %d (baseline %d -> %d, theo_daily %d, hours %s)" % [delta_ic, min_delta_ic, baseline_info_ic, info_ic, theo_ic, str(hours_ic)]
+				)
+				return
+			if delta_ic > max_delta_ic:
+				_ctx.fail_out(out, "CHECK_FAILED", "info delta %d > max %d (theo_daily %d)" % [delta_ic, max_delta_ic, theo_ic])
+				return
+			out["data"] = {
+				"kind": kind,
+				"expect": expect,
+				"game_total_hours": hours_ic,
+				"info_amount": info_ic,
+				"info_delta": delta_ic,
+				"researcher_daily_info_theoretical_total": theo_ic,
+				"bounds": {"min_delta": min_delta_ic, "max_delta": max_delta_ic},
+			}
+		"researcher_no_housing_info_penalty":
+			var gm_nh: Node2D = _ctx.get_game_main()
+			if gm_nh == null:
+				_ctx.fail_out(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+				return
+			if PersonnelErosionCore == null:
+				_ctx.fail_out(out, "CORE_NOT_FOUND", "PersonnelErosionCore missing")
+				return
+			var gv_nh: Node = _GameValuesRef.get_singleton()
+			if gv_nh == null:
+				_ctx.fail_out(out, "GAME_VALUES_NOT_FOUND", "GameValues singleton missing")
+				return
+			var helper_nh := load("res://scripts/game/game_main_shelter.gd")
+			if helper_nh == null:
+				_ctx.fail_out(out, "HELPER_NOT_FOUND", "GameMainShelterHelper script missing")
+				return
+			var base_nh: int = int(gv_nh.get_researcher_info_daily_base())
+			var pen_h_nh: int = int(gv_nh.get_researcher_info_daily_penalty_no_housing())
+			var pen_c_nh: int = int(gv_nh.get_researcher_info_daily_penalty_cognition_crisis())
+			var min_nh: int = int(gv_nh.get_researcher_info_daily_minimum_if_not_eroded())
+			var researchers_nh: Array = PersonnelErosionCore.get_researchers()
+			var total_no_housing: int = 0
+			var no_housing_working: int = 0
+			var no_housing_no_work: int = 0
+			for r_nh in researchers_nh:
+				if not (r_nh is Dictionary):
+					continue
+				var raw_nh: Dictionary = r_nh as Dictionary
+				if bool(raw_nh.get("is_eroded", false)):
+					continue
+				var enriched_nh: Dictionary = helper_nh.enrich_researcher_with_rooms(gm_nh, raw_nh)
+				var housing_missing: bool = str(enriched_nh.get("housing_room_id", "")).is_empty()
+				if not housing_missing:
+					continue
+				total_no_housing += 1
+				var work_missing: bool = str(enriched_nh.get("work_room_id", "")).is_empty()
+				if work_missing:
+					no_housing_no_work += 1
+				else:
+					no_housing_working += 1
+				var expected_nh: int = base_nh - pen_h_nh
+				if int(raw_nh.get("cognition_crisis", 0)) >= 1:
+					expected_nh -= pen_c_nh
+				expected_nh = maxi(min_nh, expected_nh)
+				var actual_nh: int = int(PersonnelErosionCore.compute_daily_info_for_researcher(raw_nh))
+				if actual_nh != expected_nh:
+					_ctx.fail_out(
+						out,
+						"CHECK_FAILED",
+						"researcher id=%s no housing daily info mismatch: expected=%d actual=%d work_room_id=%s" % [
+							str(raw_nh.get("id", -1)),
+							expected_nh,
+							actual_nh,
+							str(enriched_nh.get("work_room_id", "")),
+						]
+					)
+					return
+			if total_no_housing <= 0:
+				_ctx.fail_out(out, "CHECK_FAILED", "no non-eroded no-housing researcher found for validation")
+				return
+			out["data"] = {
+				"kind": kind,
+				"expect": expect,
+				"total_no_housing_checked": total_no_housing,
+				"no_housing_working_checked": no_housing_working,
+				"no_housing_no_work_checked": no_housing_no_work,
+				"formula": {
+					"base": base_nh,
+					"penalty_no_housing": pen_h_nh,
+					"penalty_cognition_crisis": pen_c_nh,
+					"minimum_if_not_eroded": min_nh,
+				},
+			}
 		"visual_hard":
 			if expect.has("nodeVisible"):
 				var target: Dictionary = {"testId": str(expect.get("nodeVisible", ""))}
@@ -490,7 +642,8 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 		_:
 			_ctx.fail_out(out, "INVALID_ARGUMENT", "unsupported check kind: %s" % kind)
 			return
-	out["data"] = {"kind": kind, "expect": expect}
+	if kind != "info_currency_week_design":
+		out["data"] = {"kind": kind, "expect": expect}
 
 
 func handle_save_game(_params: Dictionary, out: Dictionary) -> void:

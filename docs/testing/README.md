@@ -61,7 +61,13 @@ setx GODOT_BIN "D:\GODOT\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64
 - 当前状态文档：`docs/testing/04-handoff-current-state.md`
 - 下一对话提示词：`docs/testing/NEXT_CHAT_PROMPT.md`
 
-## 8) 一键 CI（preflight + acceptance）
+## 8) TestDriver `getState`：信息产出调试键
+
+- `info_amount`：`UIMain.info_amount`（货币信息）。
+- `researcher_daily_info_theoretical_total`：`PersonnelErosionCore.get_researcher_daily_info_theoretical_total()`（与信息详情面板「研究员日结」行一致的**理论**下一日总和）。
+- 可与 `advanceGameHours`（推进 ≥24 游戏小时跨日）配合，断言 `info_amount` 增量是否接近 `10 × 每研究员日结底数`（默认每名未侵蚀至少 1，基础 3，共 10 人时约 30/日量级，视无住房/认知危机而变）。
+
+## 9) 一键 CI（preflight + acceptance）
 ```powershell
 powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" `
   -ProjectRoot "D:/GODOT_Test/old-archives-sp"
@@ -178,7 +184,7 @@ ChatRelay 强约束（必须）：
 - MCP 可开启强制门禁：`chat_relay_required=true`（阻断非 relay 执行路径）
 - `run_gameplay_stepwise_chat.py` **默认**将事件镜像到 shell（两行协议：`[emit=HH:MM:SS][event=HH:MM:SS][game=]` + 文本行，无 `[CHAT]` 前缀）；显式关闭用 `--no-emit-shell-chat`。包装脚本仍可传 `--emit-shell-chat` / `-EmitShellChat`（与默认等价）。
 
-## 9) 安装与更新（Settings 友好）
+## 10) 安装与更新（Settings 友好）
 - 安装脚本：`tools/game-test-runner/install/install-mcp.ps1`
 - 启动脚本：`tools/game-test-runner/install/start-mcp.ps1`
 - 更新脚本：`tools/game-test-runner/install/update-mcp.ps1`
@@ -197,7 +203,7 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/install/install
 - 执行中：按 `started -> result -> verify` 顺序播报，不补历史批次
 - 执行后：输出 `protocol_all_ok`、`min/max/avg_delay_ms`、失败步骤与原因（若有）
 
-## 10) GameplayFlow 回归（基础测试 + 基础数据 + 可选探索）
+## 11) GameplayFlow 回归（基础测试 + 基础数据 + 可选探索）
 - 入口脚本：`tools/game-test-runner/scripts/run_gameplay_regression.ps1`（可选 `-SkipBasicDataReconcile` 仅跑基础测试）
 - Flow：`flows/suites/regression/gameplay/basic_gameplay_slot0_phase1.json`、`basic_gameplay_slot0_phase2.json`、`basic_data_slot0_phase1.json`、`basic_data_slot0_phase2.json`
 - 探索两地区存读档（须逐步 shell 播报时请用 stepwise，勿用 `flow_runner.py`）：`exploration_two_regions_slot0_phase1.json` + `exploration_two_regions_slot0_phase2.json`；一键：`tools/game-test-runner/scripts/run_exploration_two_regions_stepwise.ps1`

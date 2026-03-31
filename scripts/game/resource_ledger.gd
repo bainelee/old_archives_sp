@@ -93,6 +93,10 @@ static func resource_key_string_to_type(key: String) -> int:
 			return ArchivesRoomInfo.ResourceType.WILL
 		"permission":
 			return ArchivesRoomInfo.ResourceType.PERMISSION
+		"info":
+			return ArchivesRoomInfo.ResourceType.INFO
+		"truth":
+			return ArchivesRoomInfo.ResourceType.TRUTH
 		_:
 			return ArchivesRoomInfo.ResourceType.NONE
 

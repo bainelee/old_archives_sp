@@ -15,7 +15,6 @@ const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 const _DataProvidersFutureStubs = preload("res://scripts/core/data_providers_future_stubs.gd")
 const _UIUtils = preload("res://scripts/core/ui_utils.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
-const RoomInfoScript = preload("res://scripts/core/room_info.gd")
 
 ## 缓存的上次数据（用于检测变化）
 var _last_factor_data: Dictionary = {}
@@ -474,6 +473,41 @@ func get_information_breakdown() -> Dictionary:
 	var ui_main := _get_ui_main()
 	if ui_main:
 		result.current = ui_main.info_amount if ui_main.get("info_amount") != null else 0
+
+	var gv: Node = _GameValuesRef.get_singleton()
+	## 方案 A：按当前状态展示「下一游戏日」理论产出，与刚发生的日结可能因跨日瞬间状态略有差异（见 08-researcher-system §5.5）
+	if PersonnelErosionCore and gv:
+		var rtotal: int = PersonnelErosionCore.get_researcher_daily_info_theoretical_total()
+		if rtotal > 0:
+			result.output.append({
+				"source": tr("INFO_BREAKDOWN_RESEARCHER_DAILY"),
+				"amount": rtotal,
+			})
+
+	var gm: Node = _get_game_main()
+	if gm != null and gm.has_method("get_game_rooms") and gv:
+		var hours_day: int = int(gv.get_time_hours_per_day()) if gv.has_method("get_time_hours_per_day") else 24
+		var rooms: Array = gm.call("get_game_rooms")
+		for room in rooms:
+			if not room is ArchivesRoomInfo:
+				continue
+			var ar: ArchivesRoomInfo = room as ArchivesRoomInfo
+			if ar.zone_type != ZoneTypeScript.Type.CREATION:
+				continue
+			if ar.room_type != ArchivesRoomInfo.RoomType.REASONING:
+				continue
+			if str(gv.get_creation_produce_resource(ar.room_type)) != "info":
+				continue
+			var units: int = GameMainBuiltRoomHelper.get_room_units(ar)
+			var perh: int = gv.get_creation_produce_per_unit_per_hour(ar.room_type)
+			var day_amt: int = units * perh * hours_day
+			if day_amt <= 0:
+				continue
+			var label: String = ar.get_display_name() if ar.has_method("get_display_name") else str(ar.id)
+			result.output.append({
+				"source": "%s (%s)" % [label, tr("INFO_BREAKDOWN_REASONING_MAX")],
+				"amount": day_amt,
+			})
 
 	for x in _DataProvidersFutureStubs.information_exploration_output():
 		result.output.append(x)

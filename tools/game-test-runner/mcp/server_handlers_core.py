@@ -60,6 +60,7 @@ class CoreHandlersMixin:
             requested=requested_godot_bin,
             strict=bool(arguments.get("strict_godot_bin", False)),
             allow_unresolved=bool(arguments.get("dry_run", False)),
+            project_root=project_root,
         )
         req = RunRequest(
             system=system,
@@ -267,6 +268,8 @@ class CoreHandlersMixin:
     def check_test_runner_environment(self, arguments: dict[str, Any]) -> dict[str, Any]:
         requested_godot_bin = str(arguments.get("godot_bin", "godot4"))
         strict = bool(arguments.get("strict_godot_bin", True))
+        project_root_raw = arguments.get("project_root", str(self.default_project_root))
+        project_root = Path(str(project_root_raw)).resolve()
         checks: list[dict[str, Any]] = []
         recommendations: list[str] = []
         ok = True
@@ -275,6 +278,7 @@ class CoreHandlersMixin:
                 requested=requested_godot_bin,
                 strict=strict,
                 allow_unresolved=False,
+                project_root=project_root if project_root.is_dir() else None,
             )
             checks.append(
                 {
@@ -299,10 +303,11 @@ class CoreHandlersMixin:
             recommendations.append(
                 "PowerShell: setx GODOT_BIN \"D:\\GODOT\\Godot_v4.6.1-stable_win64.exe\\Godot_v4.6.1-stable_win64.exe\""
             )
+            recommendations.append(
+                "Or copy tools/game-test-runner/config/godot_executable.example.json to godot_executable.json and set godot_executable."
+            )
             resolved_godot_bin = ""
             resolution = {}
-        project_root_raw = arguments.get("project_root", str(self.default_project_root))
-        project_root = Path(str(project_root_raw)).resolve()
         if project_root.exists() and project_root.is_dir():
             checks.append({"id": "project_root", "status": "passed", "message": "project_root exists", "path": to_posix(project_root)})
         else:

@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import os
 import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from artifact_service import load_json_dict
 from server_errors import AppError
+
+_CORE_DIR = Path(__file__).resolve().parents[1] / "core"
+if str(_CORE_DIR) not in sys.path:
+    sys.path.insert(0, str(_CORE_DIR))
+from godot_executable_config import load_godot_executable_from_project_config  # noqa: E402
 
 
 def load_report(run_root: Path) -> dict[str, Any]:
@@ -106,18 +112,36 @@ def common_windows_godot_candidates() -> list[str]:
     return dedup
 
 
+def _is_godot_request_placeholder(requested: str) -> bool:
+    s = requested.strip().lower()
+    if not s:
+        return True
+    return s in {"godot4", "godot", "godot4.exe", "godot.exe"}
+
+
 def resolve_godot_bin(
     requested: str,
     strict: bool = False,
     allow_unresolved: bool = False,
+    project_root: Path | str | None = None,
 ) -> tuple[str, dict[str, Any]]:
     requested = requested.strip()
+    pr: Path | None = None
+    if project_root is not None:
+        p = Path(str(project_root)).resolve()
+        pr = p if p.is_dir() else None
+
     candidates: list[str] = []
-    if requested:
+    if requested and not _is_godot_request_placeholder(requested):
         candidates.append(requested)
     env_bin = str(os.environ.get("GODOT_BIN", "")).strip()
     if env_bin:
         candidates.append(env_bin)
+    cfg_bin = load_godot_executable_from_project_config(pr)
+    if cfg_bin:
+        candidates.append(cfg_bin)
+    if requested:
+        candidates.append(requested)
     candidates.extend(["godot4", "godot", "godot4.exe", "godot.exe"])
     candidates.extend(common_windows_godot_candidates())
 

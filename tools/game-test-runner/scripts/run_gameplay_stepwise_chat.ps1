@@ -28,8 +28,17 @@ if ([string]::IsNullOrWhiteSpace($GodotBin)) {
     }
 }
 if ([string]::IsNullOrWhiteSpace($GodotBin)) {
-    throw "GodotBin is required (or set GODOT_BIN env)."
+    $cfgGodot = Join-Path $ProjectRoot "tools/game-test-runner/config/godot_executable.json"
+    if (Test-Path -LiteralPath $cfgGodot) {
+        try {
+            $j = Get-Content -LiteralPath $cfgGodot -Raw -Encoding UTF8 | ConvertFrom-Json
+            $c = [string]$j.godot_executable
+            if ([string]::IsNullOrWhiteSpace($c)) { $c = [string]$j.godot_bin }
+            if (-not [string]::IsNullOrWhiteSpace($c)) { $GodotBin = $c }
+        } catch {}
+    }
 }
+## 仍为空时交给 run_gameplay_stepwise_chat.py 内 resolve_godot_bin（GODOT_BIN / 配置文件）
 
 $scriptPath = Join-Path $ProjectRoot "tools/game-test-runner/scripts/run_gameplay_stepwise_chat.py"
 $argsList = @(

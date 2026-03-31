@@ -137,6 +137,17 @@ $reconcileScript = Join-Path $ProjectRoot "tools/game-test-runner/core/resource_
 if (-not [string]::IsNullOrWhiteSpace($GodotBin)) {
     $env:GODOT_BIN = $GodotBin
 }
+elseif ([string]::IsNullOrWhiteSpace($env:GODOT_BIN)) {
+    $cfgGodot = Join-Path $ProjectRoot "tools/game-test-runner/config/godot_executable.json"
+    if (Test-Path -LiteralPath $cfgGodot) {
+        try {
+            $j = Get-Content -LiteralPath $cfgGodot -Raw -Encoding UTF8 | ConvertFrom-Json
+            $c = [string]$j.godot_executable
+            if ([string]::IsNullOrWhiteSpace($c)) { $c = [string]$j.godot_bin }
+            if (-not [string]::IsNullOrWhiteSpace($c)) { $env:GODOT_BIN = $c }
+        } catch {}
+    }
+}
 
 $summary = [ordered]@{
     started_at = (Get-Date).ToString("o")
@@ -160,7 +171,7 @@ try {
     elseif (-not [bool]$OnlyPreflight) {
         $godotForRun = [string]$env:GODOT_BIN
         if ([string]::IsNullOrWhiteSpace($godotForRun)) {
-            throw "GODOT_BIN is required (pass -GodotBin or set env GODOT_BIN)."
+            $godotForRun = ""
         }
         if (-not (Test-Path $stepwiseScript)) { throw "missing: $stepwiseScript" }
 

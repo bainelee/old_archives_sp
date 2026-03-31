@@ -759,7 +759,11 @@ def run_basic_data_validation(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run basic data validation resource reconcile flow.")
     parser.add_argument("--project-root", required=True, help="Project root path")
-    parser.add_argument("--godot-bin", required=True, help="Godot executable path")
+    parser.add_argument(
+        "--godot-bin",
+        default="",
+        help="Godot 可执行文件；可留空，从 GODOT_BIN 或 config/godot_executable.json 解析",
+    )
     parser.add_argument("--timeout-sec", type=int, default=300, help="Timeout per phase")
     parser.add_argument("--output-json", default="", help="Report output path")
     return parser
@@ -768,6 +772,17 @@ def _build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = _build_parser().parse_args()
     project_root = Path(args.project_root).resolve()
+    mcp_dir = Path(__file__).resolve().parents[1] / "mcp"
+    if str(mcp_dir) not in sys.path:
+        sys.path.insert(0, str(mcp_dir))
+    from server_common import resolve_godot_bin  # noqa: E402
+
+    godot_resolved, _meta = resolve_godot_bin(
+        requested=str(args.godot_bin or "").strip(),
+        strict=False,
+        allow_unresolved=False,
+        project_root=project_root,
+    )
     output_json = (
         Path(args.output_json).resolve()
         if str(args.output_json).strip()
@@ -775,7 +790,7 @@ def main() -> int:
     )
     report, code = run_basic_data_validation(
         project_root=project_root,
-        godot_bin=str(args.godot_bin),
+        godot_bin=str(godot_resolved),
         timeout_sec=int(args.timeout_sec),
         output_json=output_json,
     )

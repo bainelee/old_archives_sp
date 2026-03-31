@@ -53,8 +53,13 @@ signal calamity_updated(new_value: float)
 var _cognition_getter: Callable = func() -> int: return 0
 var _cognition_setter: Callable = func(_amt: int) -> void: pass
 
-## 庇护解析器：(researcher) -> {shelter_level: int, has_no_housing: bool}；为空时用 ErosionCore.current_erosion
+## 庇护解析器：(researcher) -> {shelter_level: int, has_no_housing: bool, has_no_housing_for_info: bool}
+## - has_no_housing：侵蚀/治愈口径（有工作且无住房）
+## - has_no_housing_for_info：信息日结口径（无住房即 true）
+## 为空时用 ErosionCore.current_erosion
 var _shelter_resolver: Callable = Callable()
+## 信息货币入账：(amount: int) -> void；由 GameMain 注册，日结研究员产出时调用
+var _info_grant: Callable = Callable()
 
 ## 研究员记录
 var _researchers: Array[Dictionary] = []
@@ -175,13 +180,17 @@ func get_calamity_max() -> int:
 	return CALAMITY_MAX
 
 
-## 获取研究员的庇护信息 {shelter_level, has_no_housing}
+## 获取研究员的庇护信息 {shelter_level, has_no_housing, has_no_housing_for_info}
 func _get_shelter_info(researcher: Dictionary) -> Dictionary:
 	if _shelter_resolver.is_valid():
 		var ret: Variant = _shelter_resolver.call(researcher)
 		if ret is Dictionary:
 			return ret
-	return {"shelter_level": _fallback_erosion(), "has_no_housing": false}
+	return {
+		"shelter_level": _fallback_erosion(),
+		"has_no_housing": false,
+		"has_no_housing_for_info": false,
+	}
 
 
 func _fallback_erosion() -> int:
@@ -214,7 +223,8 @@ func _on_time_updated() -> void:
 	if not GameTime:
 		return
 	var hours: float = GameTime.get_total_hours()
-	var day_floor: int = int(floor(hours / 24.0))
+	var hpd: float = _game_hours_per_day_float()
+	var day_floor: int = int(floor(hours / hpd))
 	var hour_floor: int = int(floor(hours))
 	# 每小时：认知消耗（设计 §1：1/人/小时）、灾厄值
 	if hour_floor > _last_game_hour_floor and _last_game_hour_floor >= 0:
@@ -261,6 +271,8 @@ func _process_hourly_cognition(hours_passed: int) -> void:
 
 
 func _run_daily_logic(day: int) -> void:
+	## 须在认知危机「每日 -1」之前结算信息产出（使用当日进入日逻辑时的危机层数与无住房状态）
+	_apply_daily_researcher_info_payout()
 	# 0. 认知危机恢复：当日未因认知不足添加危机的研究员，危机 -1
 	for r in _researchers:
 		var rid: int = int(r.get("id", -1))
@@ -374,6 +386,56 @@ func register_cognition_provider(getter: Callable, setter: Callable) -> void:
 	_cognition_setter = setter
 
 
+## 注册信息货币发放（研究员每日结算）；grant: (int amount) -> void
+func register_info_grant(grant: Callable) -> void:
+	_info_grant = grant
+
+
+func _game_hours_per_day_float() -> float:
+	if GameTime:
+		return float(GameTime.GAME_HOURS_PER_DAY)
+	return 24.0
+
+
+## 单名研究员下一游戏日理论信息产出（与即将执行或刚执行的日结公式一致）；被侵蚀为 0
+func compute_daily_info_for_researcher(researcher: Dictionary) -> int:
+	if researcher.get("is_eroded", false):
+		return 0
+	var gv: Node = _GameValuesRef.get_singleton()
+	if gv == null or not gv.has_method("get_researcher_info_daily_base"):
+		return 0
+	var base_amt: int = int(gv.get_researcher_info_daily_base())
+	var pen_h: int = int(gv.get_researcher_info_daily_penalty_no_housing())
+	var pen_c: int = int(gv.get_researcher_info_daily_penalty_cognition_crisis())
+	var minimum: int = int(gv.get_researcher_info_daily_minimum_if_not_eroded())
+	var info: Dictionary = _get_shelter_info(researcher)
+	var n: int = base_amt
+	var no_housing_for_info: bool = bool(info.get("has_no_housing_for_info", info.get("has_no_housing", false)))
+	if no_housing_for_info:
+		n -= pen_h
+	if int(researcher.get("cognition_crisis", 0)) >= 1:
+		n -= pen_c
+	return maxi(minimum, n)
+
+
+## 全体未侵蚀研究员的下一日理论信息产出之和（供 TopBar 信息详情「方案 A」展示）
+func get_researcher_daily_info_theoretical_total() -> int:
+	var sum: int = 0
+	for r in _researchers:
+		sum += compute_daily_info_for_researcher(r)
+	return sum
+
+
+func _apply_daily_researcher_info_payout() -> void:
+	if not _info_grant.is_valid():
+		return
+	var total: int = 0
+	for r in _researchers:
+		total += compute_daily_info_for_researcher(r)
+	if total > 0:
+		_info_grant.call(total)
+
+
 ## 从存档恢复
 func load_from_save_dict(d: Dictionary, personnel: Dictionary = {}) -> void:
 	_researchers.clear()
@@ -405,5 +467,6 @@ func load_from_save_dict(d: Dictionary, personnel: Dictionary = {}) -> void:
 func sync_last_tick() -> void:
 	if GameTime:
 		var h: float = GameTime.get_total_hours()
-		_last_game_day = int(floor(h / 24.0))
+		var hpd: float = _game_hours_per_day_float()
+		_last_game_day = int(floor(h / hpd))
 		_last_game_hour_floor = int(floor(h))
