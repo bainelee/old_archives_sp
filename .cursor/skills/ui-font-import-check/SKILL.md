@@ -14,6 +14,12 @@ description: Enforces UI font binding after UI/Figma import in this project. Use
 - 详情面板统一主题：`assets/ui/detail_panel_theme.tres`
 - 该主题默认字体：`assets/fonts/Sarasa-Mono-SC-Nerd.ttf`
 
+## 动态字体导入（MSDF，必须）
+
+- 项目内 **TTF/OTF/WOFF** 等动态字体（`font_data_dynamic`）须在对应 `*.import` 中启用 **`multichannel_signed_distance_field=true`**（Godot Import 面板「Multichannel Signed Distance Field」）。
+- 新增字体文件后：在编辑器中选中该字体 → Import 勾选 MSDF → 保存；或直接在 `.import` 的 `[params]` 写入上述键为 `true`（可保留默认 `msdf_pixel_range=8`、`msdf_size=48`，有粗描边时按 [官方文档](https://docs.godotengine.org/en/stable/classes/class_resourceimporterdynamicfont.html) 提高 `msdf_pixel_range`）。
+- **像素风字体**若观感异常再单独关闭 MSDF；默认与本项目现有 Sarasa 系列保持一致为 **开启**。
+
 ## 触发时机
 
 当出现以下任一情况时必须执行本技能检查：

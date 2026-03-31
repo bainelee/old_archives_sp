@@ -139,6 +139,7 @@ offset_bottom = canvas_top + height
    - 场景树存在 `theme = ExtResource(...)` 且指向项目主题（如 `assets/ui/detail_panel_theme.tres`）；
    - 特定文本控件显式 `theme_override_fonts/font` 指向项目字体文件。
    严禁仅依赖 Godot 默认字体；严禁通过脚本在 `_ready()` / 运行时强制改字体。
+6. **动态字体 MSDF**：凡引用或新加入项目的动态字体（`res://assets/fonts/*.ttf` 等），其 `*.import` 须 `multichannel_signed_distance_field=true`，与 `.cursor/skills/ui-font-import-check/SKILL.md` 一致；像素体特例可关闭。
 
 ## 参考文件
 

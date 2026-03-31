@@ -10,9 +10,11 @@ Godot 4.6 项目：场景编辑器 + 2D 基地建设游戏。
 - **Godot 调试控制台（文件日志）**：`project.godot` 已启用 `[debug]` → `file_logging`；`print` / `push_error` / `push_warning` 等写入 `user://logs/godot.log`。Windows：`%APPDATA%\Godot\app_userdata\Old Archives\logs\godot.log`（将 `%APPDATA%` 展开为当前用户路径）。Agent 调试时用 `Read` 读该绝对路径即可；日志很大时用终端 `Get-Content -Tail 200 '<路径>'`。可选：运行任务 **Godot: Editor (tee to .godot/terminal_godot.log)** 尝试把进程 stdout/stderr 追加到 `.godot/terminal_godot.log`（是否与编辑器 Output 面板完全一致因环境而异，以 `godot.log` 为准）。
 - **逐帧调试（替换而非刷屏）**：Autoload `DebugFramePrint`（`scripts/core/debug_frame_print.gd`）。`line("键", "文本")` 每帧末聚合；默认经信号 `debug_display_text_changed` 显示在 **`InteractiveUiRoot/UIMain/DebugInfoPanel`**（`game_main.tscn` 下）标题栏下方的 **DebugLogScroll**（高 160px）；另写入 `user://logs/debug_frame_overlay.txt`。可选左上角浮动层：`show_floating_overlay = true`。**默认不会**刷编辑器「输出」；需要时 `mirror_to_output = true`。`MARKER`=`##F>`，`capture_if_marked()`。开关：`enabled`、`emit_to_debug_panel`、`write_file`、`show_overlay_status`。**完整说明**：[docs/design/99-tools/03-debug-logging-and-frame-print.md](docs/design/99-tools/03-debug-logging-and-frame-print.md)。
 - **规范**：`.cursor/rules/`（按 globs 加载，编辑相关文件时自动匹配）
+  - **全局沟通**：不争辩；用户指出问题时先彻查事实与己方推理，禁止优先归咎用户误解；**由 AI 负责实现**的表述用「我」不用「你」——见 `.cursor/rules/communication-no-argue-trust-user.mdc`（`alwaysApply`）
   - Godot 通用：`godot-gdscript.mdc`（.gd）、`godot-scenes-performance.mdc`（.tscn/.gd）
   - **3D 场景编辑器**：正常方向 Z 朝外/X 朝右/Y 朝上；3d_actor root 须 (0,0,0)，偏移在引用场景中设置；ActorBox 黑色、RoomReferenceGrid 灰白，见 `.cursor/rules/3d-scene-editor.mdc`
   - **Figma 导入**：从 Figma 读取→下载→导入 Godot 时，按 `.cursor/rules/figma-import.mdc` 执行
+  - **UI 字体**：绑定检查见 `.cursor/skills/ui-font-import-check/SKILL.md`；动态字体导入须 **MSDF**（`multichannel_signed_distance_field=true`，见 [ResourceImporterDynamicFont](https://docs.godotengine.org/en/stable/classes/class_resourceimporterdynamicfont.html)）
   - **预制作 UI**：非游戏开始后生成的 UI 设计，不得将编辑器可见逻辑写在 `_ready()`；须支持编辑器中动态调整、效果立即可见；见 `.cursor/rules/ui-editor-live.mdc`
   - **数值同步**：用户说「调整数值」「我调整了数值」等时，按 `.cursor/subagents/game-values-sync.md` 全量同步 `datas/game_values.json`、`game_base.json`、`docs/design/*.md` 及脚本硬编码
   - **GameplayFlow 播报**：新建或修改 `flows/**/*.json` 时须同步 `tools/game-test-runner/mcp/chat_progress_templates.json`（`step_map`/`action_map`），见 `.cursor/rules/gameplay-flow-chat-templates.mdc`
