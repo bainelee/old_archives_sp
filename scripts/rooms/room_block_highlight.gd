@@ -8,6 +8,7 @@ extends Node3D
 const GRID_SIZE: float = 0.5
 const THICKNESS_OUT: float = 0.4
 const THICKNESS_IN: float = 0.2
+const PICK_SLAB_HEIGHT: float = 0.18
 
 @onready var _down: MeshInstance3D = $room_block_down
 @onready var _up: MeshInstance3D = $room_block_up
@@ -69,15 +70,14 @@ func _update_collision_shape() -> void:
 		return
 	var sz: Vector3 = Vector3(
 		GRID_SIZE * xR + THICKNESS_IN + THICKNESS_OUT * 2,
-		GRID_SIZE * yR + THICKNESS_IN + THICKNESS_OUT * 2,
+		PICK_SLAB_HEIGHT,
 		GRID_SIZE * zR + THICKNESS_IN / 2
 	)
 	var box: BoxShape3D = (_collision_shape.shape as BoxShape3D).duplicate() as BoxShape3D
 	if box:
 		box.size = sz
 		_collision_shape.shape = box
-	## BoxShape 以原点为中心，房间地板在 y=0、向上延伸；需将碰撞体中心移到房间几何中心
-	## 与 RoomOutBlock 一致：底边 y=0，顶边 y=sz.y，故中心 y=sz.y/2
+	## 命中层使用贴地薄层，避免前景房间高体积碰撞遮挡后景房间点击/悬停。
 	_collision_shape.position = Vector3(0, sz.y / 2.0, 0)
 
 

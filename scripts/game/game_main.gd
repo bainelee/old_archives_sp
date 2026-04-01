@@ -756,6 +756,18 @@ func _raycast_mouse_3d() -> Dictionary:
 	var origin: Vector3 = cam.project_ray_origin(mouse_pos)
 	var normal: Vector3 = cam.project_ray_normal(mouse_pos)
 	var length: float = 500.0
+	var floor_hit: Variant = _intersect_ray_with_floor(origin, normal)
+	if floor_hit is Vector3:
+		var floor_pos: Vector3 = floor_hit as Vector3
+		out["position"] = floor_pos
+		var floor_room_index: int = _get_room_index_at_floor_world_pos(floor_pos)
+		if floor_room_index >= 0:
+			var floor_room: ArchivesRoomInfo = _rooms[floor_room_index]
+			if floor_room.unlocked or _debug_hover_locked_rooms:
+				out["room_index"] = floor_room_index
+			else:
+				out["room_index"] = -1
+			return out
 	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
 	if not archives:
 		return out
@@ -768,14 +780,14 @@ func _raycast_mouse_3d() -> Dictionary:
 	query.collide_with_bodies = false # 只检测 Area，避免被墙体等碰撞体遮挡
 	var result: Dictionary = space.intersect_ray(query)
 	if result.is_empty():
-		## 无命中时用 Y=0 平面求交作为近似落点，便于调试
-		var dir: Vector3 = normal
-		if abs(dir.y) > 0.0001:
-			var t: float = -origin.y / dir.y
-			if t > 0:
-				out["position"] = origin + dir * t
+		## 无命中时优先回报地面交点；若仍不可得则给出射线末端近似点
+		if floor_hit is Vector3:
+			out["position"] = floor_hit as Vector3
 		else:
 			out["position"] = origin + normal * length
+		var nearest_idx_miss: int = _pick_nearest_room_index_by_screen_center(mouse_pos, 80.0)
+		if nearest_idx_miss >= 0:
+			out["room_index"] = nearest_idx_miss
 		return out
 	var hit_pos: Vector3 = result.get("position", origin + normal * length)
 	out["position"] = hit_pos
@@ -800,7 +812,70 @@ func _raycast_mouse_3d() -> Dictionary:
 			else:
 				out["room_index"] = i
 			break
+	if int(out.get("room_index", -1)) < 0:
+		var nearest_idx: int = _pick_nearest_room_index_by_screen_center(mouse_pos, 80.0)
+		if nearest_idx >= 0:
+			out["room_index"] = nearest_idx
 	return out
+
+
+func _intersect_ray_with_floor(origin: Vector3, direction: Vector3) -> Variant:
+	if abs(direction.y) <= 0.0001:
+		return null
+	var t: float = -origin.y / direction.y
+	if t <= 0.0:
+		return null
+	return origin + direction * t
+
+
+func _get_room_index_at_floor_world_pos(world_pos: Vector3) -> int:
+	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
+	if not archives:
+		return -1
+	const GRID_SIZE := 0.5
+	for i in _rooms.size():
+		var room: ArchivesRoomInfo = _rooms[i]
+		var rid: String = room.id if room.id else room.json_room_id
+		if rid.is_empty():
+			continue
+		var room_node: Node3D = _find_room_node_in_archives(archives, rid)
+		if not room_node:
+			continue
+		var room_info_3d: RoomInfo3D = room_node.get_node_or_null("RoomInfo") as RoomInfo3D
+		if room_info_3d == null:
+			continue
+		var v: Vector3 = room_info_3d.room_volume
+		if v.x <= 0.0 or v.z <= 0.0:
+			continue
+		## 地面 footprint 使用轻微容差，避免房间间相互吞并。
+		var half_x: float = (GRID_SIZE * v.x) * 0.5 + 0.05
+		var half_z: float = (GRID_SIZE * v.z) * 0.5 + 0.05
+		var local: Vector3 = room_node.to_local(world_pos)
+		if abs(local.x) <= half_x and abs(local.z) <= half_z:
+			return i
+	return -1
+
+
+func _pick_nearest_room_index_by_screen_center(mouse_pos: Vector2, max_distance_px: float) -> int:
+	if _camera3d == null:
+		return -1
+	var best_idx: int = -1
+	var best_dist: float = max_distance_px
+	for i in _rooms.size():
+		var room: ArchivesRoomInfo = _rooms[i]
+		if not room.unlocked and not _debug_hover_locked_rooms:
+			continue
+		var rid: String = room.id if room.id else room.json_room_id
+		if rid.is_empty() or rid.begins_with("room_pass_"):
+			continue
+		var center_screen: Vector2 = _room_center_to_screen_3d(i)
+		if center_screen == Vector2.ZERO:
+			continue
+		var d: float = mouse_pos.distance_to(center_screen)
+		if d <= best_dist:
+			best_dist = d
+			best_idx = i
+	return best_idx
 
 
 func _get_room_at_mouse_3d() -> int:

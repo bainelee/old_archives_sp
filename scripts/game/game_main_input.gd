@@ -108,6 +108,8 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 			var camera3d: Camera3D = game_main.get("_camera3d")
 			if camera3d:
 				rid = game_main.call("_get_room_at_mouse_3d")
+				if rid < 0:
+					rid = int(game_main.call("_pick_nearest_room_index_by_screen_center", mouse_pos, 420.0))
 			else:
 				var grid: Vector2i = game_main.call("_get_mouse_grid")
 				rid = game_main.call("_get_room_at_grid", grid.x, grid.y)
@@ -168,6 +170,8 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 			if not is_click_over_ui_buttons(game_main, mouse_pos):
 				if camera3d:
 					new_hover = game_main.call("_get_room_at_mouse_3d")
+					if new_hover < 0:
+						new_hover = int(game_main.call("_pick_nearest_room_index_by_screen_center", mouse_pos, 320.0))
 				else:
 					var grid: Vector2i = game_main.call("_get_mouse_grid")
 					new_hover = game_main.call("_get_room_at_grid", grid.x, grid.y)

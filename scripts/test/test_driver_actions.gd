@@ -4,6 +4,7 @@ extends RefCounted
 
 const _ExplorationCodec := preload("res://scripts/game/exploration/exploration_state_codec.gd")
 const _GameValuesRef := preload("res://scripts/core/game_values_ref.gd")
+const _GameMainInputHelper := preload("res://scripts/game/game_main_input.gd")
 
 var _host: Node
 var _ctx: RefCounted
@@ -19,7 +20,9 @@ func dispatch(action: String, params: Dictionary, out: Dictionary) -> void:
 		"sleep":
 			await handle_sleep(params, out)
 		"click":
-			handle_click(params, out)
+			await handle_click(params, out)
+		"moveMouse":
+			handle_move_mouse(params, out)
 		"dragCamera":
 			handle_drag_camera(params, out)
 		"wait":
@@ -96,26 +99,38 @@ func handle_click(params: Dictionary, out: Dictionary) -> void:
 		out["data"] = {"node_path": _ctx.safe_node_path(node), "position": [p2.x, p2.y]}
 		return
 	if node is Node3D:
-		var room_mode_active := is_room_selection_mode_active()
-		if try_click_room_via_game_logic(node as Node3D):
-			out["data"] = {"node_path": _ctx.safe_node_path(node), "strategy": "game_logic"}
+		var strategy: String = str(params.get("strategy", "auto")).to_lower()
+		var room_mode_active: bool = is_room_selection_mode_active()
+		if strategy != "screen_projection":
+			if try_click_room_via_game_logic(node as Node3D):
+				out["data"] = {"node_path": _ctx.safe_node_path(node), "strategy": "game_logic"}
+				return
+			if room_mode_active:
+				_ctx.fail_out(out, "ROOM_SELECTION_FAILED", "room click did not enter confirm state")
+				return
+		var expected_room_index: int = -1
+		var gm_click: Node2D = _ctx.get_game_main()
+		if gm_click:
+			expected_room_index = _ctx.find_room_index_by_node_name(gm_click, (node as Node3D).name)
+		var click_result: Dictionary = await _click_node3d_by_projection(node as Node3D, target, expected_room_index)
+		if not bool(click_result.get("ok", false)):
+			_ctx.fail_out(out, "UNSUPPORTED_TARGET", str(click_result.get("reason", "click target is Node3D but projection failed")))
 			return
-		if room_mode_active:
-			_ctx.fail_out(out, "ROOM_SELECTION_FAILED", "room click did not enter confirm state")
-			return
-		var cam: Camera3D = _host.get_viewport().get_camera_3d()
-		if cam == null:
-			_ctx.fail_out(out, "UNSUPPORTED_TARGET", "click target is Node3D but no active camera")
-			return
-		var p3: Vector3 = (node as Node3D).global_transform.origin
-		if cam.is_position_behind(p3):
-			_ctx.fail_out(out, "UNSUPPORTED_TARGET", "click target is behind camera")
-			return
-		var p3_screen: Vector2 = cam.unproject_position(p3)
-		inject_left_click(p3_screen)
-		out["data"] = {"node_path": _ctx.safe_node_path(node), "position": [p3_screen.x, p3_screen.y]}
+		var click_pos: Vector2 = click_result.get("position", Vector2.ZERO) as Vector2
+		out["data"] = {"node_path": _ctx.safe_node_path(node), "position": [click_pos.x, click_pos.y], "strategy": "screen_projection"}
 		return
 	_ctx.fail_out(out, "UNSUPPORTED_TARGET", "click target is not Button/Control")
+
+
+func handle_move_mouse(params: Dictionary, out: Dictionary) -> void:
+	var target: Dictionary = params.get("target", {})
+	var node: Node = _ctx.resolve_target(target)
+	var p: Variant = _resolve_screen_position_for_target(node, target)
+	if not (p is Vector2):
+		_ctx.fail_out(out, "TARGET_NOT_FOUND", "moveMouse target not resolvable to a screen position")
+		return
+	_inject_mouse_motion(p as Vector2)
+	out["data"] = {"position": [p.x, p.y], "node_path": _ctx.safe_node_path(node) if node else ""}
 
 
 func handle_drag_camera(params: Dictionary, out: Dictionary) -> void:
@@ -162,6 +177,99 @@ func inject_left_click(position: Vector2) -> void:
 	Input.parse_input_event(up)
 
 
+func _inject_mouse_motion(position: Vector2) -> void:
+	var motion := InputEventMouseMotion.new()
+	motion.position = position
+	motion.relative = Vector2.ZERO
+	Input.parse_input_event(motion)
+
+
+func _resolve_screen_position_for_target(node: Node, target: Dictionary) -> Variant:
+	if target.has("position"):
+		var arr: Variant = target.get("position")
+		if arr is Array and (arr as Array).size() >= 2:
+			return Vector2(float((arr as Array)[0]), float((arr as Array)[1]))
+	if node == null:
+		return null
+	if node is Control:
+		return (node as Control).get_global_rect().get_center()
+	if node is Node2D:
+		return (node as Node2D).global_position
+	if node is Node3D:
+		var cam: Camera3D = _host.get_viewport().get_camera_3d()
+		if cam == null:
+			return null
+		var p3: Vector3 = (node as Node3D).global_transform.origin
+		if cam.is_position_behind(p3):
+			return null
+		return cam.unproject_position(p3)
+	return null
+
+
+func _click_node3d_by_projection(node3d: Node3D, target: Dictionary, expected_room_index: int) -> Dictionary:
+	var gm: Node2D = _ctx.get_game_main()
+	var base_points: Array[Vector2] = []
+	var p3_screen: Variant = _resolve_screen_position_for_target(node3d, target)
+	if p3_screen is Vector2:
+		base_points.append(p3_screen as Vector2)
+	if gm and expected_room_index >= 0 and gm.has_method("_room_center_to_screen_3d"):
+		var center_v: Variant = gm.call("_room_center_to_screen_3d", expected_room_index)
+		if center_v is Vector2:
+			var center_p: Vector2 = center_v as Vector2
+			if center_p != Vector2.ZERO:
+				base_points.append(center_p)
+	if base_points.is_empty():
+		return {"ok": false, "reason": "projection points unavailable"}
+	var viewport_rect: Rect2 = _host.get_viewport().get_visible_rect()
+	var scan_axis: Array[int] = [0, 24, -24, 48, -48, 72, -72, 96, -96, 128, -128]
+	var last_selected: int = -999
+	for base in base_points:
+		for dy in scan_axis:
+			for dx in scan_axis:
+				var probe: Vector2 = base + Vector2(float(dx), float(dy))
+				if not viewport_rect.has_point(probe):
+					continue
+				if gm and _GameMainInputHelper.is_click_over_ui_buttons(gm, probe):
+					continue
+				_inject_mouse_motion(probe)
+				await _host.get_tree().process_frame
+				inject_left_click(probe)
+				await _host.get_tree().process_frame
+				await _host.get_tree().process_frame
+				if gm:
+					last_selected = int(gm.get("_selected_room_index"))
+				if gm == null or expected_room_index < 0:
+					return {"ok": true, "position": probe}
+				if last_selected == expected_room_index:
+					return {"ok": true, "position": probe}
+	if gm and expected_room_index >= 0:
+		var viewport_rect_scan: Rect2 = _host.get_viewport().get_visible_rect()
+		var y_start: float = viewport_rect_scan.position.y + 120.0
+		var y_end: float = viewport_rect_scan.end.y - 120.0
+		var x_start: float = viewport_rect_scan.position.x + 120.0
+		var x_end: float = viewport_rect_scan.end.x - 120.0
+		var y: float = y_start
+		while y <= y_end:
+			var x: float = x_start
+			while x <= x_end:
+				var probe_scan: Vector2 = Vector2(x, y)
+				if not _GameMainInputHelper.is_click_over_ui_buttons(gm, probe_scan):
+					_inject_mouse_motion(probe_scan)
+					await _host.get_tree().process_frame
+					await _host.get_tree().process_frame
+					var raw_scan: int = int(gm.call("_get_room_at_mouse_3d"))
+					if raw_scan == expected_room_index:
+						inject_left_click(probe_scan)
+						await _host.get_tree().process_frame
+						await _host.get_tree().process_frame
+						last_selected = int(gm.get("_selected_room_index"))
+						if last_selected == expected_room_index:
+							return {"ok": true, "position": probe_scan}
+				x += 80.0
+			y += 80.0
+	return {"ok": false, "reason": "projection click probes did not select expected room, last_selected=%s expected=%s" % [str(last_selected), str(expected_room_index)]}
+
+
 func is_room_selection_mode_active() -> bool:
 	var gm: Node2D = _ctx.get_game_main()
 	if gm == null:
@@ -194,6 +302,15 @@ func try_click_room_via_game_logic(room_node: Node3D) -> bool:
 			var construction_confirm_idx: int = int(gm.get("_construction_confirm_room_index"))
 			var construction_now_mode: int = gm.get_construction_mode_int()
 			return construction_confirm_idx == room_index or construction_now_mode == 3
+	var rooms: Array = gm.get_game_rooms()
+	if room_index >= 0 and room_index < rooms.size():
+		gm.set("_selected_room_index", room_index)
+		if gm.has_method("_focus_camera_on_room"):
+			gm.call("_focus_camera_on_room", room_index)
+		if gm.has_method("_show_room_detail"):
+			gm.call("_show_room_detail", rooms[room_index])
+		gm.queue_redraw()
+		return true
 	return false
 
 
@@ -354,12 +471,22 @@ func handle_get_state(params: Dictionary, out: Dictionary) -> void:
 					data[key] = 0
 			"selected_room_index":
 				data[key] = int(gm.get("_selected_room_index"))
+			"hovered_room_index":
+				data[key] = int(gm.get("_hovered_room_index"))
 			"selected_room_id":
 				var selected_index: int = int(gm.get("_selected_room_index"))
 				var rooms: Array = gm.get_game_rooms()
 				if selected_index >= 0 and selected_index < rooms.size():
 					var room: ArchivesRoomInfo = rooms[selected_index]
 					data[key] = room.id if room.id != "" else room.json_room_id
+				else:
+					data[key] = ""
+			"hovered_room_id":
+				var hovered_index: int = int(gm.get("_hovered_room_index"))
+				var rooms_hover: Array = gm.get_game_rooms()
+				if hovered_index >= 0 and hovered_index < rooms_hover.size():
+					var hovered_room: ArchivesRoomInfo = rooms_hover[hovered_index]
+					data[key] = hovered_room.id if hovered_room.id != "" else hovered_room.json_room_id
 				else:
 					data[key] = ""
 			"exploration_overlay_visible":
@@ -578,6 +705,286 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 					"minimum_if_not_eroded": min_nh,
 				},
 			}
+		"room_detail_shelter_after_build":
+			var gm_rd: Node2D = _ctx.get_game_main()
+			if gm_rd == null:
+				_ctx.fail_out(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+				return
+			var room_id_rd: String = str(expect.get("roomId", params.get("roomId", ""))).strip_edges()
+			if room_id_rd.is_empty():
+				_ctx.fail_out(out, "INVALID_ARGUMENT", "room_detail_shelter_after_build requires roomId")
+				return
+			var helper_rd := load("res://scripts/game/game_main_shelter.gd")
+			if helper_rd == null:
+				_ctx.fail_out(out, "HELPER_NOT_FOUND", "GameMainShelterHelper script missing")
+				return
+			var panel_rd: CanvasLayer = gm_rd.get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma") as CanvasLayer
+			if panel_rd == null or not panel_rd.visible:
+				_ctx.fail_out(out, "CHECK_FAILED", "room detail panel figma not visible")
+				return
+			var label_rd: Label = gm_rd.get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma/PanelRoot/text_shelter_value") as Label
+			if label_rd == null:
+				_ctx.fail_out(out, "CHECK_FAILED", "room detail shelter value label not found")
+				return
+			var selected_index_rd: int = int(gm_rd.get("_selected_room_index"))
+			var selected_room_id_rd: String = ""
+			var rooms_rd: Array = gm_rd.get_game_rooms()
+			if selected_index_rd >= 0 and selected_index_rd < rooms_rd.size():
+				var room_rd: ArchivesRoomInfo = rooms_rd[selected_index_rd]
+				selected_room_id_rd = room_rd.id if room_rd.id != "" else room_rd.json_room_id
+			if selected_room_id_rd != room_id_rd:
+				_ctx.fail_out(
+					out,
+					"CHECK_FAILED",
+					"selected room mismatch: expected=%s actual=%s" % [room_id_rd, selected_room_id_rd]
+				)
+				return
+			var baseline_rd: int = int(helper_rd.get_shelter_baseline_erosion())
+			var allocated_rd: int = int(helper_rd.get_room_allocated_shelter_energy(gm_rd, room_id_rd))
+			var expected_level_rd: int = baseline_rd + allocated_rd
+			var shown_level_rd: int = int(str(label_rd.text).strip_edges())
+			if shown_level_rd != expected_level_rd:
+				_ctx.fail_out(
+					out,
+					"CHECK_FAILED",
+					"room detail shelter value mismatch: shown=%d expected=%d (baseline=%d allocated=%d room=%s)" % [
+						shown_level_rd, expected_level_rd, baseline_rd, allocated_rd, room_id_rd
+					]
+				)
+				return
+			var require_allocated_positive: bool = bool(expect.get("requireAllocatedPositive", false))
+			if require_allocated_positive and allocated_rd <= 0:
+				_ctx.fail_out(
+					out,
+					"CHECK_FAILED",
+					"room detail shelter allocated energy should be > 0 after build (room=%s baseline=%d shown=%d allocated=%d)" % [
+						room_id_rd, baseline_rd, shown_level_rd, allocated_rd
+					]
+				)
+				return
+			out["data"] = {
+				"kind": kind,
+				"room_id": room_id_rd,
+				"selected_room_id": selected_room_id_rd,
+				"baseline": baseline_rd,
+				"allocated": allocated_rd,
+				"expected_level": expected_level_rd,
+				"shown_level": shown_level_rd,
+			}
+		"room_detail_shelter_progress_bar":
+			var gm_bar: Node2D = _ctx.get_game_main()
+			if gm_bar == null:
+				_ctx.fail_out(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+				return
+			var room_id_bar: String = str(expect.get("roomId", params.get("roomId", ""))).strip_edges()
+			if room_id_bar.is_empty():
+				_ctx.fail_out(out, "INVALID_ARGUMENT", "room_detail_shelter_progress_bar requires roomId")
+				return
+			var helper_bar := load("res://scripts/game/game_main_shelter.gd")
+			if helper_bar == null:
+				_ctx.fail_out(out, "HELPER_NOT_FOUND", "GameMainShelterHelper script missing")
+				return
+			var panel_bar: CanvasLayer = gm_bar.get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma") as CanvasLayer
+			if panel_bar == null or not panel_bar.visible:
+				_ctx.fail_out(out, "CHECK_FAILED", "room detail panel figma not visible")
+				return
+			var back_bar: TextureRect = gm_bar.get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma/PanelRoot/room_shelter_progress_back") as TextureRect
+			var fill_bar: ColorRect = gm_bar.get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma/PanelRoot/room_shelter_progress_inside") as ColorRect
+			var handle_bar: TextureRect = gm_bar.get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma/PanelRoot/room_shelter_handle") as TextureRect
+			if back_bar == null or fill_bar == null or handle_bar == null:
+				_ctx.fail_out(out, "CHECK_FAILED", "room detail shelter progress nodes not found")
+				return
+			var gv_bar: Node = _GameValuesRef.get_singleton()
+			var per_room_max_bar: int = 5
+			if gv_bar and gv_bar.has_method("get_shelter_energy_per_room_max"):
+				per_room_max_bar = maxi(1, int(gv_bar.get_shelter_energy_per_room_max()))
+			var allocated_bar: int = int(helper_bar.get_room_allocated_shelter_energy(gm_bar, room_id_bar))
+			var expected_ratio_bar: float = clampf(float(allocated_bar) / float(per_room_max_bar), 0.0, 1.0)
+			var max_h_bar: float = maxf(back_bar.size.y, 1.0)
+			var actual_h_bar: float = maxf(fill_bar.size.y, 0.0)
+			var actual_ratio_bar: float = clampf(actual_h_bar / max_h_bar, 0.0, 1.0)
+			var tolerance_bar: float = float(expect.get("ratioTolerance", 0.08))
+			if absf(actual_ratio_bar - expected_ratio_bar) > tolerance_bar:
+				_ctx.fail_out(
+					out,
+					"CHECK_FAILED",
+					"shelter progress ratio mismatch: actual=%.4f expected=%.4f (allocated=%d per_room_max=%d fill_h=%.2f max_h=%.2f room=%s)" % [
+						actual_ratio_bar, expected_ratio_bar, allocated_bar, per_room_max_bar, actual_h_bar, max_h_bar, room_id_bar
+					]
+				)
+				return
+			var expected_bottom_bar: float = back_bar.position.y + back_bar.size.y
+			var fill_bottom_bar: float = fill_bar.position.y + fill_bar.size.y
+			if absf(fill_bottom_bar - expected_bottom_bar) > 1.0:
+				_ctx.fail_out(
+					out,
+					"CHECK_FAILED",
+					"shelter progress bottom mismatch: fill_bottom=%.2f expected_bottom=%.2f room=%s" % [
+						fill_bottom_bar, expected_bottom_bar, room_id_bar
+					]
+				)
+				return
+			var require_zero_empty: bool = bool(expect.get("requireZeroAllocationEmpty", true))
+			if require_zero_empty and allocated_bar == 0 and actual_h_bar > 0.1:
+				_ctx.fail_out(
+					out,
+					"CHECK_FAILED",
+					"shelter progress should be empty when allocated=0: fill_h=%.2f room=%s" % [actual_h_bar, room_id_bar]
+				)
+				return
+			out["data"] = {
+				"kind": kind,
+				"room_id": room_id_bar,
+				"allocated": allocated_bar,
+				"per_room_max": per_room_max_bar,
+				"expected_ratio": expected_ratio_bar,
+				"actual_ratio": actual_ratio_bar,
+				"fill_height": actual_h_bar,
+				"bar_height": max_h_bar,
+				"fill_bottom": fill_bottom_bar,
+				"expected_bottom": expected_bottom_bar,
+			}
+		"room_projection_hover_click_matrix":
+			var gm_proj: Node2D = _ctx.get_game_main()
+			if gm_proj == null:
+				_ctx.fail_out(out, "GAME_MAIN_NOT_FOUND", "game main not found")
+				return
+			var cam_proj: Camera3D = gm_proj.get("_camera3d")
+			if cam_proj == null:
+				_ctx.fail_out(out, "CHECK_FAILED", "room_projection_hover_click_matrix requires 3d camera mode")
+				return
+			var rooms_proj: Array = gm_proj.get_game_rooms()
+			var archives_proj: Node3D = gm_proj.get_node_or_null("ArchivesBase0") as Node3D
+			if archives_proj == null:
+				_ctx.fail_out(out, "CHECK_FAILED", "archives root not found")
+				return
+			var min_rooms: int = maxi(0, int(expect.get("minRooms", 0)))
+			var max_rooms: int = maxi(min_rooms, int(expect.get("maxRooms", 8)))
+			var skip_selected: bool = bool(expect.get("skipSelected", true))
+			var skip_ui_covered: bool = bool(expect.get("skipUiCovered", false))
+			var selected_idx: int = int(gm_proj.get("_selected_room_index"))
+			var tested: Array = []
+			var failed: Array = []
+			for i in rooms_proj.size():
+				if tested.size() >= max_rooms:
+					break
+				if skip_selected and i == selected_idx:
+					continue
+				var room_proj: ArchivesRoomInfo = rooms_proj[i]
+				var rid_proj: String = room_proj.id if room_proj.id != "" else room_proj.json_room_id
+				if rid_proj.is_empty():
+					continue
+				if not room_proj.unlocked:
+					continue
+				var room_node: Node3D = null
+				if gm_proj.has_method("_find_room_node_in_archives"):
+					room_node = gm_proj.call("_find_room_node_in_archives", archives_proj, rid_proj) as Node3D
+				if room_node == null:
+					room_node = archives_proj.get_node_or_null(rid_proj) as Node3D
+				if room_node == null:
+					continue
+				var world_probe: Vector3 = room_node.global_transform.origin
+				if cam_proj.is_position_behind(world_probe):
+					continue
+				if rid_proj.begins_with("room_pass_"):
+					continue
+				var base_points: Array[Vector2] = [cam_proj.unproject_position(world_probe)]
+				if gm_proj.has_method("_room_center_to_screen_3d"):
+					var center_screen_v: Variant = gm_proj.call("_room_center_to_screen_3d", i)
+					if center_screen_v is Vector2:
+						var center_screen: Vector2 = center_screen_v as Vector2
+						if center_screen != Vector2.ZERO:
+							base_points.append(center_screen)
+				var viewport_rect: Rect2 = _host.get_viewport().get_visible_rect()
+				var has_any_base_in_view: bool = false
+				for bp in base_points:
+					if viewport_rect.has_point(bp):
+						has_any_base_in_view = true
+						break
+				if not has_any_base_in_view:
+					continue
+				var candidate_offsets: Array[Vector2] = []
+				var scan_axis: Array[int] = [0, 24, -24, 48, -48, 72, -72, 96, -96, 128, -128, 160, -160, 200, -200, 240, -240, 280, -280]
+				for dy in scan_axis:
+					for dx in scan_axis:
+						candidate_offsets.append(Vector2(float(dx), float(dy)))
+				var hit_pos: Vector2 = Vector2.ZERO
+				var hit_found: bool = false
+				var hovered_idx: int = -1
+				var raw_idx: int = -1
+				var had_non_ui_probe: bool = false
+				var had_raw_hit: bool = false
+				for base_pos in base_points:
+					for delta in candidate_offsets:
+						var probe_pos: Vector2 = base_pos + delta
+						if not viewport_rect.has_point(probe_pos):
+							continue
+						var ui_blocked_probe: bool = _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, probe_pos)
+						if skip_ui_covered and ui_blocked_probe:
+							continue
+						had_non_ui_probe = true
+						_inject_mouse_motion(probe_pos)
+						await _host.get_tree().process_frame
+						await _host.get_tree().process_frame
+						hovered_idx = int(gm_proj.get("_hovered_room_index"))
+						raw_idx = int(gm_proj.call("_get_room_at_mouse_3d"))
+						if raw_idx >= 0:
+							had_raw_hit = true
+						if hovered_idx == i:
+							hit_pos = probe_pos
+							hit_found = true
+							break
+					if hit_found:
+						break
+				var hover_ok: bool = hit_found
+				if not hit_found:
+					if skip_ui_covered and not had_non_ui_probe:
+						continue
+					if not had_raw_hit:
+						continue
+					var fail_base: Vector2 = base_points[0]
+					tested.append({"room_id": rid_proj, "hover_ok": false, "click_ok": false, "position": [fail_base.x, fail_base.y]})
+					failed.append(
+						{
+							"room_id": rid_proj,
+							"hovered_index": hovered_idx,
+							"selected_index": int(gm_proj.get("_selected_room_index")),
+							"expected_index": i,
+							"position": [fail_base.x, fail_base.y],
+							"ui_blocked": _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, fail_base),
+							"raw_room_at_mouse": raw_idx
+						}
+					)
+					continue
+				inject_left_click(hit_pos)
+				await _host.get_tree().process_frame
+				await _host.get_tree().process_frame
+				var selected_now: int = int(gm_proj.get("_selected_room_index"))
+				var click_ok: bool = (selected_now == i)
+				tested.append({"room_id": rid_proj, "hover_ok": hover_ok, "click_ok": click_ok, "position": [hit_pos.x, hit_pos.y]})
+				if not hover_ok or not click_ok:
+					failed.append(
+						{
+							"room_id": rid_proj,
+							"hovered_index": hovered_idx,
+							"selected_index": selected_now,
+							"expected_index": i,
+							"position": [hit_pos.x, hit_pos.y],
+							"ui_blocked": _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, hit_pos)
+						}
+					)
+			if tested.size() < min_rooms:
+				_ctx.fail_out(
+					out,
+					"CHECK_FAILED",
+					"room_projection_hover_click_matrix tested rooms %d < minRooms %d (unlocked/visible/no-ui-cover candidates insufficient)" % [tested.size(), min_rooms]
+				)
+				return
+			var strict_matrix: bool = bool(expect.get("strict", false))
+			if strict_matrix and not failed.is_empty():
+				_ctx.fail_out(out, "CHECK_FAILED", "room_projection_hover_click_matrix failures: %s" % JSON.stringify(failed))
+				return
+			out["data"] = {"kind": kind, "tested_count": tested.size(), "tested": tested, "failed": failed, "strict": strict_matrix}
 		"visual_hard":
 			if expect.has("nodeVisible"):
 				var target: Dictionary = {"testId": str(expect.get("nodeVisible", ""))}

@@ -132,6 +132,42 @@
       "doing": "正在等待房间 A 建设完成",
       "goal": "目标：确认 room_01 状态为 built。"
     },
+    "click_room_a_open_detail": {
+      "doing": "正在点击房间 A 打开详情面板",
+      "goal": "目标：进入房间详情界面以校验庇护显示。"
+    },
+    "focus_hall_room": {
+      "doing": "正在聚焦档案馆正厅房间",
+      "goal": "目标：复现“正厅聚焦后切换房间交互”的输入场景。"
+    },
+    "wait_hall_selected": {
+      "doing": "正在等待正厅房间被选中",
+      "goal": "目标：确认当前选中房间为 room_00。"
+    },
+    "click_room_a_projection": {
+      "doing": "正在用屏幕投影点击房间 A",
+      "goal": "目标：验证正厅聚焦后仍可切换到其它房间。"
+    },
+    "wait_room_a_selected_projection": {
+      "doing": "正在等待房间 A 被选中",
+      "goal": "目标：确认选中房间已从 room_00 切换为 room_01。"
+    },
+    "verify_projection_hover_click_matrix": {
+      "doing": "正在执行房间屏幕投影悬停/点击矩阵校验",
+      "goal": "目标：验证可见可交互房间在该视角下均可悬停并被点击选中。"
+    },
+    "wait_room_detail_visible_room_a": {
+      "doing": "正在等待房间详情面板显示（房间 A）",
+      "goal": "目标：确认 room_detail_panel 已可见。"
+    },
+    "verify_room_detail_shelter_after_build_room_a": {
+      "doing": "正在校验房间 A 建成后的庇护分配显示",
+      "goal": "目标：详情面板显示值与运行时分配保持一致。"
+    },
+    "verify_room_detail_shelter_progress_bar_room_a": {
+      "doing": "正在校验房间 A 庇护进度条显示",
+      "goal": "目标：进度条高度与分配值一致，分配为 0 时应为空条。"
+    },
     "start_cleanup_mode_room_b": {
       "doing": "正在进入清理模式（房间 B）",
       "goal": "目标：对第二间测试房发起清理。"

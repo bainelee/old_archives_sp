@@ -23,12 +23,9 @@ const TOPBAR_TEXT_LEFT: float = 32.0
 const TOPBAR_TEXT_GAP: float = 6.0
 const TOPBAR_TEXT_RIGHT_LIMIT: float = 522.0
 
-## 庇护条在 PanelRoot 下的全局坐标（直接子节点）
-const _SHELTER_FILL_LEFT := 20.0
-const _SHELTER_FILL_RIGHT := 50.0
-const _SHELTER_FILL_BOTTOM := 782.0
-const _SHELTER_FILL_MAX_H := 654.0
-const _SHELTER_HANDLE_HALF_H := 5.0
+## 庇护条在 back 纹理内的左右内边距（与设计稿一致，避免硬编码绝对坐标）
+const _SHELTER_FILL_SIDE_INSET := 2.0
+const _SHELTER_HANDLE_DEFAULT_H := 10.0
 
 @onready var _title_name: Label = $PanelRoot/group_room_detials_title/text_room_title_big
 @onready var _title_type: Label = $PanelRoot/group_room_detials_title/text_room_type
@@ -292,7 +289,7 @@ func _update_shelter_visual(_caller: String = "unknown") -> void:
 	var rid: String = ""
 	if _current_room:
 		rid = _current_room.id if _current_room.id else _current_room.json_room_id
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	
 	var level: int = 0
 	var per_room_max: int = 5
@@ -322,19 +319,26 @@ func _update_shelter_visual(_caller: String = "unknown") -> void:
 	
 	
 	_shelter_value.text = str(level)
+	var geom: Dictionary = _get_shelter_bar_geometry()
+	var fill_left: float = float(geom.get("left", 0.0))
+	var fill_w: float = float(geom.get("width", 0.0))
+	var fill_bottom: float = float(geom.get("bottom", 0.0))
+	var fill_max_h: float = maxf(1.0, float(geom.get("height", 1.0)))
 	var ratio: float = clampf(float(allocated_for_bar) / float(per_room_max), 0.0, 1.0)
-	var fill_h: float = _SHELTER_FILL_MAX_H * ratio
-	var fill_top: float = _SHELTER_FILL_BOTTOM - fill_h
-	var fill_w: float = _SHELTER_FILL_RIGHT - _SHELTER_FILL_LEFT
+	var fill_h: float = fill_max_h * ratio
+	var fill_top: float = fill_bottom - fill_h
 	
 	if _shelter_fill:
-		_shelter_fill.position = Vector2(_SHELTER_FILL_LEFT, fill_top)
-		_shelter_fill.size = Vector2(fill_w, maxf(fill_h, 0.5))
+		_shelter_fill.position = Vector2(fill_left, fill_top)
+		## 分配为 0 时应显示空条，避免残留 0.5px 的蓝色细线
+		_shelter_fill.size = Vector2(fill_w, maxf(fill_h, 0.0))
 	
 		_shelter_fill.queue_redraw()
 	if _shelter_handle:
-		_shelter_handle.position = Vector2(_SHELTER_FILL_LEFT, fill_top - _SHELTER_HANDLE_HALF_H)
-		_shelter_handle.size = Vector2(fill_w, _SHELTER_HANDLE_HALF_H * 2.0)
+		var handle_h: float = _get_shelter_handle_height()
+		var handle_half_h: float = handle_h * 0.5
+		_shelter_handle.position = Vector2(fill_left, fill_top - handle_half_h)
+		_shelter_handle.size = Vector2(fill_w, handle_h)
 		_shelter_handle.scale = Vector2.ONE
 		_shelter_handle.queue_redraw()
 	
@@ -382,11 +386,14 @@ func _update_drag_preview_from_mouse() -> void:
 	var rid: String = _current_room.id if _current_room.id else _current_room.json_room_id
 	if rid.is_empty():
 		return
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	if gm == null or not gm.has_method("get_room_manual_shelter_max_assignable"):
 		return
+	var geom: Dictionary = _get_shelter_bar_geometry()
+	var fill_bottom: float = float(geom.get("bottom", 0.0))
+	var fill_max_h: float = maxf(1.0, float(geom.get("height", 1.0)))
 	var local_mouse: Vector2 = _panel_root.get_local_mouse_position()
-	var ratio: float = clampf((_SHELTER_FILL_BOTTOM - local_mouse.y) / _SHELTER_FILL_MAX_H, 0.0, 1.0)
+	var ratio: float = clampf((fill_bottom - local_mouse.y) / fill_max_h, 0.0, 1.0)
 	var gv: Node = _GameValuesRef.get_singleton()
 	var per_room_max: int = 5
 	if gv and gv.has_method("get_shelter_energy_per_room_max"):
@@ -402,7 +409,7 @@ func _commit_shelter_drag() -> void:
 		_is_dragging_shelter = false
 		return
 	var rid: String = _current_room.id if _current_room.id else _current_room.json_room_id
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	if gm and gm.has_method("set_room_manual_shelter_target") and rid == _drag_room_id:
 		var result: Dictionary = gm.set_room_manual_shelter_target(rid, _drag_preview_energy)
 		_drag_preview_energy = int(result.get("applied", _drag_preview_energy))
@@ -451,7 +458,7 @@ func _compute_dynamic_hash(room: ArchivesRoomInfo) -> int:
 	var ui: Node = get_node_or_null("../UIMain")
 	if ui:
 		h = h * 31 + int(ui.get("will_amount") if ui.get("will_amount") != null else 0)
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	if gm and gm.has_method("is_room_forced_shutdown"):
 		h = h * 31 + (1 if gm.is_room_forced_shutdown(room) else 0)
 	return h
@@ -505,7 +512,7 @@ func _get_room_shelter_hash_parts() -> int:
 	var rid: String = _current_room.id if _current_room.id else _current_room.json_room_id
 	if rid.is_empty():
 		return 0
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	if not gm:
 		return 0
 	var level: int = ShelterHelper.get_room_shelter_level(gm, rid)
@@ -535,7 +542,7 @@ func _refresh_action_buttons(room: ArchivesRoomInfo) -> void:
 	var can_operate: bool = room.zone_type != 0
 	if _btn_destroy:
 		_btn_destroy.disabled = not can_operate
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	var is_shutdown: bool = gm != null and gm.has_method("is_room_forced_shutdown") and gm.is_room_forced_shutdown(room)
 	if _btn_shutdown:
 		_btn_shutdown.disabled = not can_operate
@@ -545,7 +552,7 @@ func _refresh_action_buttons(room: ArchivesRoomInfo) -> void:
 func _on_destroy_pressed() -> void:
 	if _current_room == null:
 		return
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	if gm and gm.has_method("request_demolish_room"):
 		gm.request_demolish_room(_current_room)
 		_refresh_action_buttons(_current_room)
@@ -554,7 +561,7 @@ func _on_destroy_pressed() -> void:
 func _on_shutdown_pressed() -> void:
 	if _current_room == null:
 		return
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	if gm and gm.has_method("toggle_room_forced_shutdown"):
 		gm.toggle_room_forced_shutdown(_current_room)
 		_refresh_action_buttons(_current_room)
@@ -582,7 +589,7 @@ func _build_room_skills(room: ArchivesRoomInfo) -> Array[Dictionary]:
 		return out
 	out.append({"id": "focus", "label": "聚焦房间", "enabled": true})
 	if room.zone_type == ZoneTypeScript.Type.CREATION:
-		var gm: Node2D = get_parent() as Node2D
+		var gm: Node2D = _get_game_main()
 		var is_shutdown: bool = gm != null and gm.has_method("is_room_forced_shutdown") and gm.is_room_forced_shutdown(room)
 		out.append({"id": "toggle_shutdown", "label": "恢复运作" if is_shutdown else "关停房间", "enabled": true})
 	return out
@@ -593,7 +600,7 @@ func _on_skill_button_pressed(index: int) -> void:
 		return
 	var skill: Dictionary = _active_skills[index]
 	var skill_id: String = str(skill.get("id", ""))
-	var gm: Node2D = get_parent() as Node2D
+	var gm: Node2D = _get_game_main()
 	match skill_id:
 		"focus":
 			if gm:
@@ -607,3 +614,38 @@ func _on_skill_button_pressed(index: int) -> void:
 				gm.toggle_room_forced_shutdown(_current_room)
 				_refresh_action_buttons(_current_room)
 				_apply_skill_buttons(_current_room)
+
+
+func _get_game_main() -> Node2D:
+	var node: Node = self
+	while node:
+		if node is Node2D and node.has_method("get_game_rooms"):
+			return node as Node2D
+		node = node.get_parent()
+	var scene: Node = get_tree().current_scene if get_tree() else null
+	if scene is Node2D and scene.has_method("get_game_rooms"):
+		return scene as Node2D
+	return null
+
+
+func _get_shelter_bar_geometry() -> Dictionary:
+	if _shelter_back:
+		var back_pos: Vector2 = _shelter_back.position
+		var back_size: Vector2 = _shelter_back.size
+		var left: float = back_pos.x + _SHELTER_FILL_SIDE_INSET
+		var width: float = maxf(1.0, back_size.x - _SHELTER_FILL_SIDE_INSET * 2.0)
+		var bottom: float = back_pos.y + back_size.y
+		var height: float = maxf(1.0, back_size.y)
+		return {"left": left, "width": width, "bottom": bottom, "height": height}
+	## 回退：极端情况下 back 未就绪时仍给出安全几何
+	return {"left": 20.0, "width": 30.0, "bottom": 782.0, "height": 654.0}
+
+
+func _get_shelter_handle_height() -> float:
+	if _shelter_handle and _shelter_handle.texture:
+		var tex_h: float = float(_shelter_handle.texture.get_size().y)
+		if tex_h > 0.0:
+			return tex_h
+	if _shelter_handle and _shelter_handle.size.y > 0.0:
+		return _shelter_handle.size.y
+	return _SHELTER_HANDLE_DEFAULT_H
