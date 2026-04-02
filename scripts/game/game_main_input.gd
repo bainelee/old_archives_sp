@@ -11,39 +11,77 @@ static func is_exploration_map_overlay_open(game_main: Node2D) -> bool:
 	return exploration_overlay != null and exploration_overlay.visible
 
 
-static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> bool:
+static func _ui_hit(ctrl: Control, mouse_pos: Vector2) -> bool:
+	return ctrl != null and ctrl.is_visible_in_tree() and ctrl.get_global_rect().has_point(mouse_pos)
+
+
+static func get_ui_block_detail(game_main: Node2D, mouse_pos: Vector2) -> Dictionary:
+	var out: Dictionary = {"blocked": false, "source": "", "node_path": ""}
 	var exploration_overlay: CanvasLayer = game_main.get("_exploration_map_overlay")
 	if exploration_overlay and exploration_overlay.visible:
 		var overlay_root: Control = exploration_overlay.get_node_or_null("OverlayRoot") as Control
-		if overlay_root and overlay_root.visible and overlay_root.get_global_rect().has_point(mouse_pos):
-			return true
+		if _ui_hit(overlay_root, mouse_pos):
+			out["blocked"] = true
+			out["source"] = "exploration_overlay_root"
+			out["node_path"] = str(overlay_root.get_path())
+			return out
 	var figma_panel_root: Control = game_main.get_node_or_null("InteractiveUiRoot/RoomDetailPanelFigma/PanelRoot") as Control
-	if figma_panel_root and figma_panel_root.visible and figma_panel_root.get_global_rect().has_point(mouse_pos):
-		return true
+	if _ui_hit(figma_panel_root, mouse_pos):
+		out["blocked"] = true
+		out["source"] = "room_detail_panel_figma"
+		out["node_path"] = str(figma_panel_root.get_path())
+		return out
 	var legacy_panel: Control = game_main.get_node_or_null("InteractiveUiRoot/RoomDetailPanel/Panel") as Control
-	if legacy_panel and legacy_panel.visible and legacy_panel.get_global_rect().has_point(mouse_pos):
-		return true
+	if _ui_hit(legacy_panel, mouse_pos):
+		out["blocked"] = true
+		out["source"] = "room_detail_panel_legacy"
+		out["node_path"] = str(legacy_panel.get_path())
+		return out
 	var top_bar: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/TopBar") as Control
-	if top_bar and top_bar.get_global_rect().has_point(mouse_pos):
-		return true
+	if _ui_hit(top_bar, mouse_pos):
+		out["blocked"] = true
+		out["source"] = "ui_top_bar"
+		out["node_path"] = str(top_bar.get_path())
+		return out
 	var researcher_panel: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/DebugInfoPanel/Margin/VBox/ResearcherListPanel") as Control
-	if researcher_panel and researcher_panel.visible and researcher_panel.get_global_rect().has_point(mouse_pos):
-		return true
+	if _ui_hit(researcher_panel, mouse_pos):
+		out["blocked"] = true
+		out["source"] = "researcher_panel"
+		out["node_path"] = str(researcher_panel.get_path())
+		return out
 	var bar: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/BottomRightBar") as Control
-	if bar and bar.get_global_rect().has_point(mouse_pos):
-		return true
+	if _ui_hit(bar, mouse_pos):
+		out["blocked"] = true
+		out["source"] = "bottom_right_bar"
+		out["node_path"] = str(bar.get_path())
+		return out
 	var calamity: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/BottomRightBar/Margin/Content/CalamityInline") as Control
-	if calamity and calamity.visible and calamity.get_global_rect().has_point(mouse_pos):
-		return true
+	if _ui_hit(calamity, mouse_pos):
+		out["blocked"] = true
+		out["source"] = "calamity_inline"
+		out["node_path"] = str(calamity.get_path())
+		return out
 	var debug_info: Control = game_main.get_node_or_null("InteractiveUiRoot/UIMain/DebugInfoPanel") as Control
-	if debug_info and debug_info.visible and debug_info.get_global_rect().has_point(mouse_pos):
-		return true
+	if _ui_hit(debug_info, mouse_pos):
+		out["blocked"] = true
+		out["source"] = "debug_info_panel"
+		out["node_path"] = str(debug_info.get_path())
+		return out
 	var overlay: Node = game_main.call("_get_cleanup_overlay")
 	if overlay:
 		var confirm_ctrl: Control = overlay.get_node_or_null("ConfirmContainer") as Control
-		if confirm_ctrl and confirm_ctrl.visible and confirm_ctrl.get_global_rect().has_point(mouse_pos):
-			return true
-	return false
+		if _ui_hit(confirm_ctrl, mouse_pos):
+			out["blocked"] = true
+			out["source"] = "cleanup_confirm_container"
+			out["node_path"] = str(confirm_ctrl.get_path())
+			return out
+	return out
+
+
+static func is_click_over_ui_buttons(game_main: Node2D, mouse_pos: Vector2) -> bool:
+	var detail: Dictionary = get_ui_block_detail(game_main, mouse_pos)
+	game_main.set("_debug_last_ui_block_detail", detail)
+	return bool(detail.get("blocked", false))
 
 
 static func process_input(game_main: Node2D, event: InputEvent) -> void:
@@ -75,12 +113,12 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 				return
 			game_main.set("_is_panning", mb.pressed)
 			if mb.pressed:
-				game_main.set("_pan_start", game_main.get_viewport().get_mouse_position())
+				game_main.set("_pan_start", mb.position)
 				game_main.call("_clear_room_selection")
 			game_main.get_viewport().set_input_as_handled()
 
 		elif mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed and not game_main.get("_is_panning"):
-			var mouse_pos: Vector2 = game_main.get_viewport().get_mouse_position()
+			var mouse_pos: Vector2 = mb.position
 			var cleanup_mode: int = game_main.get_cleanup_mode_int()
 			var construction_mode: int = game_main.get_construction_mode_int()
 			var in_cleanup: bool = (cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING)
@@ -107,9 +145,7 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 			var rid: int = -1
 			var camera3d: Camera3D = game_main.get("_camera3d")
 			if camera3d:
-				rid = game_main.call("_get_room_at_mouse_3d")
-				if rid < 0:
-					rid = int(game_main.call("_pick_nearest_room_index_by_screen_center", mouse_pos, 420.0))
+				rid = game_main.call("_get_room_at_mouse_3d_at", mouse_pos)
 			else:
 				var grid: Vector2i = game_main.call("_get_mouse_grid")
 				rid = game_main.call("_get_room_at_grid", grid.x, grid.y)
@@ -159,19 +195,18 @@ static func process_input(game_main: Node2D, event: InputEvent) -> void:
 			game_main.get_viewport().set_input_as_handled()
 
 	if event is InputEventMouseMotion:
+		var motion_event: InputEventMouseMotion = event as InputEventMouseMotion
 		if game_main.get("_is_panning") and not is_exploration_map_overlay_open(game_main) and (game_main.get("_camera3d") or game_main.get("_camera")):
-			var current_pos: Vector2 = game_main.get_viewport().get_mouse_position()
+			var current_pos: Vector2 = motion_event.position
 			GameMainCameraHelper.apply_pan(game_main, current_pos)
 			game_main.get_viewport().set_input_as_handled()
 		else:
 			var new_hover: int = -1
-			var mouse_pos: Vector2 = game_main.get_viewport().get_mouse_position()
+			var mouse_pos: Vector2 = motion_event.position
 			var camera3d: Camera3D = game_main.get("_camera3d")
 			if not is_click_over_ui_buttons(game_main, mouse_pos):
 				if camera3d:
-					new_hover = game_main.call("_get_room_at_mouse_3d")
-					if new_hover < 0:
-						new_hover = int(game_main.call("_pick_nearest_room_index_by_screen_center", mouse_pos, 320.0))
+					new_hover = game_main.call("_get_room_at_mouse_3d_at", mouse_pos)
 				else:
 					var grid: Vector2i = game_main.call("_get_mouse_grid")
 					new_hover = game_main.call("_get_room_at_grid", grid.x, grid.y)

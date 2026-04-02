@@ -10,6 +10,7 @@ const _GameValuesRef = preload("res://scripts/core/game_values_ref.gd")
 const _ResearcherLifecycle = preload("res://scripts/game/researcher_lifecycle.gd")
 const _ExplorationServiceScript = preload("res://scripts/game/exploration/exploration_service.gd")
 const _GameMainExplorationUiHelper = preload("res://scripts/game/game_main_exploration_ui.gd")
+const _GameMainInputHelper = preload("res://scripts/game/game_main_input.gd")
 const ZoneTypeScript = preload("res://scripts/core/zone_type.gd")
 const GRID_WIDTH := 80
 const GRID_HEIGHT := 60
@@ -50,6 +51,8 @@ var _room_info_labels: Dictionary = {}  ## room_id -> Label3D
 var _debug_show_ray_hit := false
 var _debug_ray_marker: MeshInstance3D = null
 var _debug_ray_hit_timer: float = 0.0
+var _debug_last_mouse_pick_3d: Dictionary = {}
+var _debug_last_ui_block_detail: Dictionary = {}
 
 ## 镜头聚焦缓动
 var _focus_room_index := -1
@@ -747,32 +750,47 @@ func get_researcher_detail(researcher_id: int) -> Dictionary:
 
 ## 返回 { room_index: int, position: Vector3 }，无命中时 room_index=-1、position 为射线与平面的近似落点
 func _raycast_mouse_3d() -> Dictionary:
+	return _raycast_mouse_3d_at(get_viewport().get_mouse_position())
+
+
+func _raycast_mouse_3d_at(mouse_pos: Vector2) -> Dictionary:
 	var out: Dictionary = {"room_index": -1, "position": Vector3.ZERO}
+	var debug_pick: Dictionary = {
+		"ray_hit": false,
+		"room_index": -1,
+		"room_id": "",
+		"collider_path": "",
+		"miss_reason": "",
+		"ui_blocked": false,
+		"ui_block_source": "",
+		"ui_block_path": ""
+	}
 	var cam: Camera3D = _camera3d
 	if not cam:
+		debug_pick["miss_reason"] = "no_camera3d"
+		_debug_last_mouse_pick_3d = debug_pick
 		return out
-	var vp: Viewport = get_viewport()
-	var mouse_pos: Vector2 = vp.get_mouse_position()
 	var origin: Vector3 = cam.project_ray_origin(mouse_pos)
 	var normal: Vector3 = cam.project_ray_normal(mouse_pos)
+	debug_pick["mouse_pos"] = [mouse_pos.x, mouse_pos.y]
+	debug_pick["ray_origin"] = [origin.x, origin.y, origin.z]
+	debug_pick["ray_normal"] = [normal.x, normal.y, normal.z]
 	var length: float = 500.0
-	var floor_hit: Variant = _intersect_ray_with_floor(origin, normal)
-	if floor_hit is Vector3:
-		var floor_pos: Vector3 = floor_hit as Vector3
-		out["position"] = floor_pos
-		var floor_room_index: int = _get_room_index_at_floor_world_pos(floor_pos)
-		if floor_room_index >= 0:
-			var floor_room: ArchivesRoomInfo = _rooms[floor_room_index]
-			if floor_room.unlocked or _debug_hover_locked_rooms:
-				out["room_index"] = floor_room_index
-			else:
-				out["room_index"] = -1
-			return out
+	debug_pick["ray_length"] = length
+	var ui_detail: Dictionary = _GameMainInputHelper.get_ui_block_detail(self, mouse_pos)
+	debug_pick["ui_blocked"] = bool(ui_detail.get("blocked", false))
+	debug_pick["ui_block_source"] = str(ui_detail.get("source", ""))
+	debug_pick["ui_block_path"] = str(ui_detail.get("node_path", ""))
+	_debug_last_ui_block_detail = ui_detail
 	var archives: Node3D = get_node_or_null("ArchivesBase0") as Node3D
 	if not archives:
+		debug_pick["miss_reason"] = "archives_missing"
+		_debug_last_mouse_pick_3d = debug_pick
 		return out
 	var space: PhysicsDirectSpaceState3D = archives.get_world_3d().direct_space_state
 	if not space:
+		debug_pick["miss_reason"] = "space_state_missing"
+		_debug_last_mouse_pick_3d = debug_pick
 		return out
 	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(origin, origin + normal * length)
 	query.collision_mask = 1
@@ -780,28 +798,35 @@ func _raycast_mouse_3d() -> Dictionary:
 	query.collide_with_bodies = false # 只检测 Area，避免被墙体等碰撞体遮挡
 	var result: Dictionary = space.intersect_ray(query)
 	if result.is_empty():
-		## 无命中时优先回报地面交点；若仍不可得则给出射线末端近似点
-		if floor_hit is Vector3:
-			out["position"] = floor_hit as Vector3
-		else:
-			out["position"] = origin + normal * length
-		var nearest_idx_miss: int = _pick_nearest_room_index_by_screen_center(mouse_pos, 80.0)
-		if nearest_idx_miss >= 0:
-			out["room_index"] = nearest_idx_miss
+		out["position"] = origin + normal * length
+		debug_pick["hit_position"] = [out["position"].x, out["position"].y, out["position"].z]
+		debug_pick["miss_reason"] = "no_area_hit"
+		_debug_last_mouse_pick_3d = debug_pick
 		return out
 	var hit_pos: Vector3 = result.get("position", origin + normal * length)
 	out["position"] = hit_pos
+	debug_pick["ray_hit"] = true
+	debug_pick["hit_position"] = [hit_pos.x, hit_pos.y, hit_pos.z]
 	var collider: Object = result.get("collider")
 	if not collider:
+		debug_pick["miss_reason"] = "hit_without_collider"
+		_debug_last_mouse_pick_3d = debug_pick
 		return out
 	var area: Area3D = collider as Area3D
 	if not area:
+		debug_pick["miss_reason"] = "collider_not_area3d"
+		debug_pick["collider_path"] = str((collider as Node).get_path()) if collider is Node else "<non-node>"
+		_debug_last_mouse_pick_3d = debug_pick
 		return out
+	debug_pick["collider_path"] = str(area.get_path())
 	var hl: Node = area.get_parent()
 	var room_node: Node3D = hl.get_parent() as Node3D if hl else null
 	if not room_node:
+		debug_pick["miss_reason"] = "area_parent_room_missing"
+		_debug_last_mouse_pick_3d = debug_pick
 		return out
 	var room_id: String = room_node.name
+	debug_pick["room_id"] = room_id
 	for i in _rooms.size():
 		var room: ArchivesRoomInfo = _rooms[i]
 		var rid: String = room.id if room.id else room.json_room_id
@@ -809,13 +834,15 @@ func _raycast_mouse_3d() -> Dictionary:
 			## 未解锁房间视为不可悬停（设计：04-room-unlock-adjacency）；Debug 开关开启时可悬停
 			if not room.unlocked and not _debug_hover_locked_rooms:
 				out["room_index"] = -1
+				debug_pick["miss_reason"] = "locked_room"
 			else:
 				out["room_index"] = i
+				debug_pick["room_index"] = i
+				debug_pick["miss_reason"] = ""
 			break
-	if int(out.get("room_index", -1)) < 0:
-		var nearest_idx: int = _pick_nearest_room_index_by_screen_center(mouse_pos, 80.0)
-		if nearest_idx >= 0:
-			out["room_index"] = nearest_idx
+	if int(out.get("room_index", -1)) < 0 and str(debug_pick.get("miss_reason", "")) == "":
+		debug_pick["miss_reason"] = "hit_unresolved_room"
+	_debug_last_mouse_pick_3d = debug_pick
 	return out
 
 
@@ -883,11 +910,23 @@ func _get_room_at_mouse_3d() -> int:
 	return int(r.get("room_index", -1))
 
 
+func _get_room_at_mouse_3d_at(mouse_pos: Vector2) -> int:
+	var r: Dictionary = _raycast_mouse_3d_at(mouse_pos)
+	return int(r.get("room_index", -1))
+
+
+func get_debug_last_mouse_pick_3d() -> Dictionary:
+	return _debug_last_mouse_pick_3d.duplicate(true)
+
+
 func _update_room_highlights() -> void:
 	for rid in _room_highlights:
 		var hl: Node = _room_highlights[rid]
 		if hl:
-			hl.visible = false
+			if hl.has_method("set_highlight_visible"):
+				hl.call("set_highlight_visible", false)
+			else:
+				hl.visible = false
 	var in_cleanup_selecting: bool = (_cleanup_mode == _GameModeEnums.CleanupMode.SELECTING or _cleanup_mode == _GameModeEnums.CleanupMode.CONFIRMING)
 	var in_construction_selecting: bool = (_construction_mode == _GameModeEnums.ConstructionMode.SELECTING_TARGET or _construction_mode == _GameModeEnums.ConstructionMode.CONFIRMING)
 	var room_index: int = _hovered_room_index
@@ -896,7 +935,10 @@ func _update_room_highlights() -> void:
 		var rid: String = room.id if room.id else room.json_room_id
 		var hl: Node = _room_highlights.get(rid) as Node
 		if hl:
-			hl.visible = true
+			if hl.has_method("set_highlight_visible"):
+				hl.call("set_highlight_visible", true)
+			else:
+				hl.visible = true
 	_update_room_overlays()
 	_update_room_info_labels()
 	_update_debug_info()  # 无论是否悬停都更新，悬空时显示 "悬停: -"

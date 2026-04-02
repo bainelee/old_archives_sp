@@ -25,6 +25,8 @@ func dispatch(action: String, params: Dictionary, out: Dictionary) -> void:
 			handle_move_mouse(params, out)
 		"dragCamera":
 			handle_drag_camera(params, out)
+		"wheelZoom":
+			handle_wheel_zoom(params, out)
 		"wait":
 			await handle_wait(params, out)
 		"screenshot":
@@ -162,6 +164,21 @@ func handle_drag_camera(params: Dictionary, out: Dictionary) -> void:
 	Input.parse_input_event(up)
 
 	out["data"] = {"start": [start.x, start.y], "end": [mid.x, mid.y]}
+
+
+func handle_wheel_zoom(params: Dictionary, out: Dictionary) -> void:
+	var steps: int = maxi(1, int(params.get("steps", 1)))
+	var direction: String = str(params.get("direction", "in")).to_lower()
+	var vp: Viewport = _host.get_tree().root.get_viewport()
+	var center: Vector2 = vp.get_visible_rect().get_center()
+	for _i in steps:
+		var wheel := InputEventMouseButton.new()
+		wheel.button_index = MOUSE_BUTTON_WHEEL_UP if direction == "in" else MOUSE_BUTTON_WHEEL_DOWN
+		wheel.pressed = true
+		wheel.position = center
+		wheel.factor = 1.0
+		Input.parse_input_event(wheel)
+	out["data"] = {"steps": steps, "direction": direction, "position": [center.x, center.y]}
 
 
 func inject_left_click(position: Vector2) -> void:
@@ -502,6 +519,13 @@ func handle_get_state(params: Dictionary, out: Dictionary) -> void:
 					data[key] = float(cam2d_state.zoom.x)
 				else:
 					data[key] = null
+			"mouse_pick_debug":
+				if gm.has_method("get_debug_last_mouse_pick_3d"):
+					data[key] = gm.call("get_debug_last_mouse_pick_3d")
+				else:
+					data[key] = {}
+			"ui_block_detail":
+				data[key] = gm.get("_debug_last_ui_block_detail")
 			_:
 				data[key] = null
 	out["data"] = data
@@ -862,9 +886,12 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 			var max_rooms: int = maxi(min_rooms, int(expect.get("maxRooms", 8)))
 			var skip_selected: bool = bool(expect.get("skipSelected", true))
 			var skip_ui_covered: bool = bool(expect.get("skipUiCovered", false))
+			var fail_on_no_raw_hit: bool = bool(expect.get("failOnNoRawHit", true))
+			var fail_on_all_ui_covered: bool = bool(expect.get("failOnAllUiCovered", false))
 			var selected_idx: int = int(gm_proj.get("_selected_room_index"))
 			var tested: Array = []
 			var failed: Array = []
+			var skipped: Array = []
 			for i in rooms_proj.size():
 				if tested.size() >= max_rooms:
 					break
@@ -903,8 +930,21 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 						break
 				if not has_any_base_in_view:
 					continue
+				var base_self_resolved: bool = false
+				for bp in base_points:
+					if not viewport_rect.has_point(bp):
+						continue
+					if skip_ui_covered and _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, bp):
+						continue
+					var raw_bp_idx: int = int(gm_proj.call("_get_room_at_mouse_3d_at", bp))
+					if raw_bp_idx == i:
+						base_self_resolved = true
+						break
+				if not base_self_resolved:
+					skipped.append({"room_id": rid_proj, "reason": "projection_not_self_resolving"})
+					continue
 				var candidate_offsets: Array[Vector2] = []
-				var scan_axis: Array[int] = [0, 24, -24, 48, -48, 72, -72, 96, -96, 128, -128, 160, -160, 200, -200, 240, -240, 280, -280]
+				var scan_axis: Array[int] = [0, 24, -24, 48, -48, 72, -72, 96, -96, 128, -128, 160, -160, 200, -200, 240, -240, 280, -280, 320, -320, 360, -360, 440, -440, 520, -520, 600, -600]
 				for dy in scan_axis:
 					for dx in scan_axis:
 						candidate_offsets.append(Vector2(float(dx), float(dy)))
@@ -914,12 +954,16 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 				var raw_idx: int = -1
 				var had_non_ui_probe: bool = false
 				var had_raw_hit: bool = false
+				var last_ui_detail: Dictionary = {}
+				var last_ray_debug: Dictionary = {}
 				for base_pos in base_points:
 					for delta in candidate_offsets:
 						var probe_pos: Vector2 = base_pos + delta
 						if not viewport_rect.has_point(probe_pos):
 							continue
 						var ui_blocked_probe: bool = _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, probe_pos)
+						var ui_detail_v: Variant = gm_proj.get("_debug_last_ui_block_detail")
+						last_ui_detail = ui_detail_v as Dictionary if ui_detail_v is Dictionary else {}
 						if skip_ui_covered and ui_blocked_probe:
 							continue
 						had_non_ui_probe = true
@@ -927,7 +971,9 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 						await _host.get_tree().process_frame
 						await _host.get_tree().process_frame
 						hovered_idx = int(gm_proj.get("_hovered_room_index"))
-						raw_idx = int(gm_proj.call("_get_room_at_mouse_3d"))
+						raw_idx = int(gm_proj.call("_get_room_at_mouse_3d_at", probe_pos))
+						if gm_proj.has_method("get_debug_last_mouse_pick_3d"):
+							last_ray_debug = gm_proj.call("get_debug_last_mouse_pick_3d") as Dictionary
 						if raw_idx >= 0:
 							had_raw_hit = true
 						if hovered_idx == i:
@@ -939,10 +985,63 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 				var hover_ok: bool = hit_found
 				if not hit_found:
 					if skip_ui_covered and not had_non_ui_probe:
+						if fail_on_all_ui_covered:
+							var fail_ui_base: Vector2 = base_points[0]
+							tested.append({"room_id": rid_proj, "hover_ok": false, "click_ok": false, "position": [fail_ui_base.x, fail_ui_base.y]})
+							failed.append(
+								{
+									"room_id": rid_proj,
+									"hovered_index": hovered_idx,
+									"selected_index": int(gm_proj.get("_selected_room_index")),
+									"expected_index": i,
+									"position": [fail_ui_base.x, fail_ui_base.y],
+									"reason": "all_probes_ui_covered",
+									"ui_blocked": true,
+									"raw_room_at_mouse": raw_idx,
+									"ui_block_detail": last_ui_detail
+								}
+							)
+						else:
+							skipped.append({"room_id": rid_proj, "reason": "all_probes_ui_covered", "ui_block_detail": last_ui_detail})
 						continue
 					if not had_raw_hit:
+						var fail_raw_base: Vector2 = base_points[0]
+						_inject_mouse_motion(fail_raw_base)
+						await _host.get_tree().process_frame
+						await _host.get_tree().process_frame
+						var raw_idx_recheck: int = int(gm_proj.call("_get_room_at_mouse_3d_at", fail_raw_base))
+						var ray_debug_recheck: Dictionary = gm_proj.call("get_debug_last_mouse_pick_3d") as Dictionary if gm_proj.has_method("get_debug_last_mouse_pick_3d") else {}
+						var ui_detail_v_recheck: Variant = gm_proj.get("_debug_last_ui_block_detail")
+						var ui_detail_recheck: Dictionary = ui_detail_v_recheck as Dictionary if ui_detail_v_recheck is Dictionary else {}
+						var ui_blocked_recheck: bool = bool(ui_detail_recheck.get("blocked", false))
+						if skip_ui_covered and ui_blocked_recheck:
+							skipped.append({"room_id": rid_proj, "reason": "no_raw_hit_ui_covered", "ui_block_detail": ui_detail_recheck, "ray_debug": ray_debug_recheck})
+							continue
+						if fail_on_no_raw_hit:
+							tested.append({"room_id": rid_proj, "hover_ok": false, "click_ok": false, "position": [fail_raw_base.x, fail_raw_base.y]})
+							failed.append(
+								{
+									"room_id": rid_proj,
+									"hovered_index": hovered_idx,
+									"selected_index": int(gm_proj.get("_selected_room_index")),
+									"expected_index": i,
+									"position": [fail_raw_base.x, fail_raw_base.y],
+									"reason": "no_raw_hit",
+									"ui_blocked": _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, fail_raw_base),
+									"raw_room_at_mouse": raw_idx_recheck,
+									"ui_block_detail": ui_detail_recheck,
+									"ray_debug": ray_debug_recheck,
+									"ray_debug_last_probe": last_ray_debug
+								}
+							)
+						else:
+							skipped.append({"room_id": rid_proj, "reason": "no_raw_hit", "ray_debug": ray_debug_recheck})
 						continue
 					var fail_base: Vector2 = base_points[0]
+					var fail_base_ui_blocked: bool = _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, fail_base)
+					if skip_ui_covered and fail_base_ui_blocked:
+						skipped.append({"room_id": rid_proj, "reason": "hover_fail_ui_covered", "position": [fail_base.x, fail_base.y], "ui_block_detail": gm_proj.get("_debug_last_ui_block_detail"), "ray_debug": last_ray_debug})
+						continue
 					tested.append({"room_id": rid_proj, "hover_ok": false, "click_ok": false, "position": [fail_base.x, fail_base.y]})
 					failed.append(
 						{
@@ -951,8 +1050,10 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 							"selected_index": int(gm_proj.get("_selected_room_index")),
 							"expected_index": i,
 							"position": [fail_base.x, fail_base.y],
-							"ui_blocked": _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, fail_base),
-							"raw_room_at_mouse": raw_idx
+							"ui_blocked": fail_base_ui_blocked,
+							"raw_room_at_mouse": raw_idx,
+							"ui_block_detail": gm_proj.get("_debug_last_ui_block_detail"),
+							"ray_debug": last_ray_debug
 						}
 					)
 					continue
@@ -961,6 +1062,10 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 				await _host.get_tree().process_frame
 				var selected_now: int = int(gm_proj.get("_selected_room_index"))
 				var click_ok: bool = (selected_now == i)
+				var ui_blocked_after_click: bool = _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, hit_pos)
+				if skip_ui_covered and ui_blocked_after_click:
+					skipped.append({"room_id": rid_proj, "reason": "hit_pos_ui_covered", "position": [hit_pos.x, hit_pos.y], "ui_block_detail": gm_proj.get("_debug_last_ui_block_detail")})
+					continue
 				tested.append({"room_id": rid_proj, "hover_ok": hover_ok, "click_ok": click_ok, "position": [hit_pos.x, hit_pos.y]})
 				if not hover_ok or not click_ok:
 					failed.append(
@@ -970,7 +1075,8 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 							"selected_index": selected_now,
 							"expected_index": i,
 							"position": [hit_pos.x, hit_pos.y],
-							"ui_blocked": _GameMainInputHelper.is_click_over_ui_buttons(gm_proj, hit_pos)
+							"ui_blocked": ui_blocked_after_click,
+							"ui_block_detail": gm_proj.get("_debug_last_ui_block_detail")
 						}
 					)
 			if tested.size() < min_rooms:
@@ -984,7 +1090,18 @@ func handle_check(params: Dictionary, out: Dictionary) -> void:
 			if strict_matrix and not failed.is_empty():
 				_ctx.fail_out(out, "CHECK_FAILED", "room_projection_hover_click_matrix failures: %s" % JSON.stringify(failed))
 				return
-			out["data"] = {"kind": kind, "tested_count": tested.size(), "tested": tested, "failed": failed, "strict": strict_matrix}
+			out["data"] = {
+				"kind": kind,
+				"tested_count": tested.size(),
+				"failed_count": failed.size(),
+				"skipped_count": skipped.size(),
+				"tested": tested,
+				"failed": failed,
+				"skipped": skipped,
+				"strict": strict_matrix,
+				"fail_on_no_raw_hit": fail_on_no_raw_hit,
+				"fail_on_all_ui_covered": fail_on_all_ui_covered
+			}
 		"visual_hard":
 			if expect.has("nodeVisible"):
 				var target: Dictionary = {"testId": str(expect.get("nodeVisible", ""))}

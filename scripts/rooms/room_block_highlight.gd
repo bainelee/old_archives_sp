@@ -8,7 +8,8 @@ extends Node3D
 const GRID_SIZE: float = 0.5
 const THICKNESS_OUT: float = 0.4
 const THICKNESS_IN: float = 0.2
-const PICK_SLAB_HEIGHT: float = 0.18
+const PICK_MIN_HEIGHT: float = 0.8
+const PICK_FOOTPRINT_MARGIN: float = 0.12
 
 @onready var _down: MeshInstance3D = $room_block_down
 @onready var _up: MeshInstance3D = $room_block_up
@@ -18,9 +19,10 @@ const PICK_SLAB_HEIGHT: float = 0.18
 
 
 func _ready() -> void:
-	visible = false
+	visible = true
 	_update_blocks()
 	_update_collision_shape()
+	set_highlight_visible(false)
 
 
 func _update_blocks() -> void:
@@ -68,10 +70,11 @@ func _update_collision_shape() -> void:
 	var zR: float = v.z
 	if xR <= 0 or yR <= 0 or zR <= 0:
 		return
+	var pick_height: float = maxf(PICK_MIN_HEIGHT, GRID_SIZE * yR + THICKNESS_IN + THICKNESS_OUT * 2)
 	var sz: Vector3 = Vector3(
-		GRID_SIZE * xR + THICKNESS_IN + THICKNESS_OUT * 2,
-		PICK_SLAB_HEIGHT,
-		GRID_SIZE * zR + THICKNESS_IN / 2
+		GRID_SIZE * xR + PICK_FOOTPRINT_MARGIN * 2.0,
+		pick_height,
+		GRID_SIZE * zR + PICK_FOOTPRINT_MARGIN * 2.0
 	)
 	var box: BoxShape3D = (_collision_shape.shape as BoxShape3D).duplicate() as BoxShape3D
 	if box:
@@ -85,3 +88,14 @@ func _set_box(mi: MeshInstance3D, size: Vector3, pos: Vector3) -> void:
 	if mi == null:
 		return
 	mi.transform = Transform3D(Basis.from_scale(size), pos)
+
+
+func set_highlight_visible(show_highlight: bool) -> void:
+	if _down:
+		_down.visible = show_highlight
+	if _up:
+		_up.visible = show_highlight
+	if _left:
+		_left.visible = show_highlight
+	if _right:
+		_right.visible = show_highlight
