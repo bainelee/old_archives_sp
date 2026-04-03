@@ -16,11 +16,7 @@
 ### Verification
 
 - 用户人工复测通过：同区域此前“红点可悬停、蓝点不可悬停”的问题已消失。
-- 自动化回归通过（base/zoom/edge/refocus）：
-  - `artifacts/test-runs/gameplay_stepwise_chat_plugin_20260402T034845915880Z.json`
-  - `artifacts/test-runs/gameplay_stepwise_chat_plugin_20260402T035303032760Z.json`
-  - `artifacts/test-runs/gameplay_stepwise_chat_plugin_20260402T035214828951Z.json`
-  - `artifacts/test-runs/gameplay_stepwise_chat_plugin_20260402T035231192316Z.json`
+- 本地回归记录通过（base/zoom/edge/refocus），历史产物文件已不在本仓保存。
 
 ### Files
 
@@ -28,9 +24,3 @@
 - `scripts/game/game_main_input.gd`
 - `scripts/rooms/room_block_highlight.gd`
 - `scripts/test/test_driver_actions.gd`
-- `flows/suites/regression/gameplay/room_hover_click_projection_matrix_slot0.json`
-- `flows/suites/regression/gameplay/room_hover_click_projection_matrix_zoom_slot0.json`
-- `flows/suites/regression/gameplay/room_hover_click_projection_matrix_edge_slot0.json`
-- `flows/suites/regression/gameplay/room_hover_click_projection_matrix_refocus_slot0.json`
-- `tools/game-test-runner/mcp/chat_progress_templates.json`
-- `docs/testing/未完全修复.md`

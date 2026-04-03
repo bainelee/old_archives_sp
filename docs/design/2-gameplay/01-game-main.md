@@ -29,7 +29,7 @@
 - **主路径**：`RoomDetailPanelFigma`（`room_detail_panel_figma.tscn`），与当前视觉规范一致。
 - **回退**：`RoomDetailPanel`（`room_detail_panel.tscn`），在场景中缺少 Figma 节点或部分自动化仍依赖旧节点名时使用。
 - **代码**：`game_main.gd` 中 `_show_room_detail` / `_hide_room_detail` 先取 Figma，再取 legacy。
-- **演进**：待 GameplayFlow / 测试不再依赖 legacy 节点后，可从 `game_main.tscn` 移除 `RoomDetailPanel` 并删除回退分支。
+- **演进**：待测试流程不再依赖 legacy 节点后，可从 `game_main.tscn` 移除 `RoomDetailPanel` 并删除回退分支。
 
 ---
 

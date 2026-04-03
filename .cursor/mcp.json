@@ -1,1 +1,24 @@
-{"mcpServers":{"memorix":{"command":"memorix","args":["serve"]},"Figma Desktop":{"url":"http://127.0.0.1:3845/mcp","headers":{}},"Framelink MCP for Figma":{"command":"powershell","args":["-NoProfile","-ExecutionPolicy","Bypass","-File",".cursor/scripts/run-framelink-mcp.ps1"]}}}
+{
+  "mcpServers": {
+    "memorix": {
+      "command": "memorix",
+      "args": [
+        "serve"
+      ]
+    },
+    "Figma Desktop": {
+      "url": "http://127.0.0.1:3845/mcp",
+      "headers": {}
+    },
+    "Framelink MCP for Figma": {
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".cursor/scripts/run-framelink-mcp.ps1"
+      ]
+    }
+  }
+}

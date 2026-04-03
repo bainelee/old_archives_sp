@@ -16,7 +16,7 @@
 | C1 | **已关闭** | `project.godot` Autoload 已为 `LocaleManager → GameValues → GameTime → …` |
 | C2 | **已关闭** | `game_main.gd` 已声明 `var _shelter_helper` |
 | C3 | **已关闭** | `game_main_cleanup.gd` 入口已检查 `_construction_mode` |
-| C4 | **待断言关单** | `data_providers.gd` 已区分 `lacking` / `dried_up`；建议用 GameplayFlow 或单测固定口径 |
+| C4 | **待断言关单** | `data_providers.gd` 已区分 `lacking` / `dried_up`；建议用单测固定口径 |
 | C5 | **已关闭** | 已无 `debug-ada89e.log` / agent log 写盘 |
 | C6 | **已关闭** | `ui_main.gd` 使用 `_detail_panel_dirty` 等条件刷新 |
 | C7 | **已关闭** | `room_detail_panel.gd` 使用 `dynamic_hash`，仅变化时刷新动态区 |

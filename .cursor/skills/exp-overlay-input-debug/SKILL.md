@@ -5,7 +5,7 @@ description: 快速定位和修复 Godot UI 覆盖层输入穿透与「暂停后
 
 # EXP Overlay Input Debug
 
-> 说明：本技能用于“覆盖层输入穿透”问题本身，不等价于 GF-EXP 分支编排流程。若用户说“执行GF-EXP流程”，应改用 `gf-exp-workflow`。
+> 说明：本技能用于“覆盖层输入穿透”问题本身，不包含任何外部化测试流程编排能力。
 
 ## 目标
 

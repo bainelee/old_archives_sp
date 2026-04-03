@@ -45,14 +45,11 @@ old-archives-sp/
 │   ├── exploration_config.json
 │   ├── exploration_investigations.json
 │   └── schemas/
-├── flows/                           # GameplayFlow 定义（回归/片段/规则）
 ├── tools/
-│   ├── game-test-runner/            # 自动化测试与 MCP 脚本入口
 │   └── scripts/                     # 数据同步/校验脚本（如 room_info layout）
-├── docs/                            # 设计、测试、设置文档
+├── docs/                            # 设计与设置文档
 ├── translations/                    # 翻译源与编译文件
-├── addons/                          # 插件（room_items_grid_snap/snappy/test_orchestrator）
-├── artifacts/                       # 自动化测试产物目录（默认不提交）
+├── addons/                          # 插件（room_items_grid_snap/snappy）
 └── assets/                          # 美术与字体资源
 ```
 
@@ -73,33 +70,11 @@ old-archives-sp/
 | `SaveManager` | 存档读写（`user://saves/`） |
 | `DataProviders` | 数据提供器聚合 |
 | `DebugFramePrint` | 逐帧调试信息聚合与面板输出 |
-| `TestDriver` | 自动化测试动作与状态查询入口 |
+| `TestDriver` | 调试动作与状态查询入口 |
 
-## 自动化测试与回归入口
+## 自动化验证说明
 
-推荐先阅读：[`docs/testing/README.md`](docs/testing/README.md)
-
-常用命令（仓库根目录执行）：
-
-```powershell
-# 最快环境预检
-powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/install/run-preflight.ps1"
-
-# 快速门禁（preflight + contract）
-powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_acceptance_ci.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -Fast
-
-# GameplayFlow 基础回归（基础测试两房 + 基础数据）
-powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_gameplay_regression.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "<GodotExePath>"
-
-# 探索两地区存读档（stepwise shell 播报）
-powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_exploration_two_regions_stepwise.ps1" -ProjectRoot "D:/GODOT_Test/old-archives-sp" -GodotBin "<GodotExePath>"
-```
-
-说明：
-
-- 核心 MCP CLI 入口：`tools/game-test-runner/mcp/server.py`
-- GameplayFlow 逐步播报遵循三阶段：`started -> result -> verify`
-- 需要逐步播报时，应优先使用 stepwise 脚本；不要把 `flow_runner.py` 作为人工/Agent 主入口
+本仓当前不包含自动化流程工具链，相关能力由项目外部独立管理。
 
 ## 存档与调试日志
 
@@ -111,7 +86,6 @@ powershell -ExecutionPolicy Bypass -File "tools/game-test-runner/scripts/run_exp
 ## 相关文档
 
 - [项目概览](docs/design/00-project-overview.md)
-- [测试快速入口](docs/testing/README.md)
 - [术语对照](docs/settings/00-project-keywords.md)
 - [数据文件说明](datas/README.md)
 - [设计文档目录](docs/design/)
